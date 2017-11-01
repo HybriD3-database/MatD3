@@ -1,0 +1,10 @@
+{% extends "materialstest/header.html" %}
+
+{% block content %}
+    <h5>Compounds name: {{object.compound_name}}</h5>
+  {% for a_pos in object.atomicpositions_set.all%}
+    <h5>{{a_pos.author}}</h5>
+    <h5>{{a_pos.contributor}}</h5>
+    <h5>{{a_pos.method}}</h5>
+  {% endfor %}
+{% endblock %}

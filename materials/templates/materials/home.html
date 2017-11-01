@@ -1,0 +1,7 @@
+{% extends "materialstest/header.html" %}
+
+{% block content %}
+  {% for material in object_list %}
+    <h5><a href="/materials/{{material.id}}">{{material.compound_name}}</a></h5>
+  {% endfor %}
+{% endblock %}
