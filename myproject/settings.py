@@ -32,7 +32,6 @@ ALLOWED_HOSTS = ['vwb3-web-02.egr.duke.edu']
 
 INSTALLED_APPS = [
     'materialstest',
-    'blog',
     'materials',
     'django.contrib.admin',
     'django.contrib.auth',

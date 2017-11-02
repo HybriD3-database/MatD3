@@ -35,10 +35,9 @@ class Contributor(models.Model):
 class System(models.Model):
     """Contains meta data for investigated system. """
     # use fhi file format.
-
     compound_name = models.CharField(max_length=100) # Name of the system: Alanine/ Alanine+Ca2+/ GLycine+Ba2+ etc.
     #urlname = models.CharField(max_length=100) # Name which appearl in url
-    group = models.CharField(max_length=4) # Short name used in database, ala/gly/argH/ etc.
+    group = models.CharField(max_length=10) # Short name used in database, ala/gly/argH/ etc.
     tags = models.CharField(max_length=100) # General tags for the sytem
     organic = models.CharField(max_length=30)
     inorganic = models.CharField(max_length=10)
@@ -50,23 +49,97 @@ class System(models.Model):
     desc = models.TextField(max_length=100) # Description of the system if provided
 
     """Parameters I need for this.
+    What are the parameters we need for AtomicPositions, do we need crystal phase? Are there
     Atomic Positions - included
     Band Gaps
     Band Structure
+    Excition emission
     """
 
     def __unicode__(self):
         return self.compound_name
+
+class Phase(models.Model):
+    phase = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.phase
+
+class Temperature(models.Model):
+    temperature = models.CharField(max_length=10)
+
+    def __unicode__(self):
+        return self.temperature
+
+class ExcitonEmission(models.Model):
+    # might link to atomic measurements
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    temperature = models.ForeignKey(Temperature, max_length=4)
+    exciton_emission = models.CharField(max_length=10)
+    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT, null=True)
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True)
+    method = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.exciton_emission
+
+class BandGap(models.Model):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    temperature = models.ForeignKey(Temperature, max_length=4)
+    band_gap = models.CharField(max_length=10)
+    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT, null=True)
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True)
+    method = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.band_gap
+
+class BandStructure(models.Model):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    temperature = models.ForeignKey(Temperature, max_length=4)
+    band_structure = models.CharField(max_length=100)
+    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT, null=True)
+    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True)
+    method = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.band_structure
+"""
+To be added
+"""
+# class AngleVariance(models.model):
+#     temperature = models.CharField(max_length=10)
+#
+#     def __unicode__(self):
+#         return self.
+#
+# class QuadraticElongation(models.model):
+#     temperature = models.CharField(max_length=10)
+#
+#     def __unicode__(self):
+#         return self.temperature
 
 class AtomicPositions(models.Model):
     # Link two different kinds of lists, one for calculated, another for x-ray diffracted
     contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT)
     author = models.ForeignKey(Author, on_delete=models.PROTECT)
     system = models.ForeignKey(System, on_delete=models.PROTECT) #protect from deletion
-    method = models.CharField(max_length=20) # PBE+vdW for example. [Computational technique, experimental techniques etc.]
-    # code = models.CharField(max_length=30)  # Which code was used to generatre the results
-    codeversion = models.CharField(max_length=10) # Code version used to generate the results [only applies to computational data]
-    # controlin = models.CharField(max_length=100)  # control i
+    method = models.CharField(max_length=20) # PBE+vdW for example. [Be specific]
+    temperature = models.ForeignKey(Temperature, on_delete=models.PROTECT)
+    phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
+    a = models.CharField(max_length=10)
+    b = models.CharField(max_length=10)
+    c = models.CharField(max_length=10)
+    alpha = models.CharField(max_length=10)
+    beta = models.CharField(max_length=10)
+    gamma = models.CharField(max_length=10)
+    """
+    Atomic Pos Measurement
+    """
+    # angle_variance = models.ManyToManyField(AngleVariance)
+    code = models.CharField(max_length=30)
+    codeversion = models.CharField(max_length=10) # Do we need this?
+
     # hierarcy_file = models.CharField(max_length=100) # Energy hierarchy file generated
 
     def __unicode__(self):
