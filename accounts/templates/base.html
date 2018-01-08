@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block head %}
+    <meta charset="utf-8">
+    <title>Hybrid3 materials database</title>
+    {% endblock %}
+  </head>
+  <body>
+    {% block navbar%}
+      <div class="container">
+      </div>
+    {% endblock %}
+    <div class="container">
+      {% block body %}
+        <h1>Base</h1>
+      {% endblock %}
+    </div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+  crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+  crossorigin="anonymous"></script>
+  {% block script %}
+  {% endblock %}
+</html>

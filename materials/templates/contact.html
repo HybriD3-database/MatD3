@@ -1,0 +1,12 @@
+{% extends 'materials/materials_nav.html' %}
+
+{% block body %}
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-body">
+    {% for c in content %}
+      <p>{{c}}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

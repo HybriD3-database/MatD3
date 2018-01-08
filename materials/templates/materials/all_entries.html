@@ -1,0 +1,38 @@
+{% extends 'materials/materials_nav.html' %}
+
+{% block body %}
+
+{% load staticfiles %}
+<!-- variables needed: compound_name,  object -->
+<link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <b>Material</b>
+      <h3>{{compound_name}}</h3>
+    </div>
+    <div class="panel-body">
+      <h4>All {% block heading %}Entry{% endblock %} data</h4>
+      {% if object %}
+      {% for entry in object %}
+      <div class="col-md-6">
+        <h4>Entry #{{ forloop.counter }}</h4>
+        <p class="details">{% block entry_type %}Entry Type units{% endblock %}</p>
+        <!-- Phase: {{entry.phase}} <br> -->
+        Temperature: {{entry.temperature}} K <br>
+        Method: {{entry.method}} <br>
+        Source: {{entry.publication.author}} <br>
+        {% if entry.publication.doi_isbn %}
+        Publication: {{entry.publication.doi_isbn}} <br>
+        {% endif %}
+        {% block dl_link %}
+        {% endblock %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <h3>No data available</h3>
+        {% endif %}
+      </div>
+  </div>
+</div>
+</div>
+{% endblock %}

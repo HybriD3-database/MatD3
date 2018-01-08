@@ -1,0 +1,25 @@
+{% extends 'materials/add_entry_template.html' %}
+
+{% block heading %}
+<h4>Add Atomic Positions</h4>
+{% endblock %}
+
+{% block form %}
+<form id="add-a-pos" method="post" action="{% url 'materials:add_a_pos' %}" enctype='multipart/form-data'>
+    {% csrf_token %}
+    <div id="publication-search-result">
+      Search by publication title, journal name, or full name of author.
+    </div> 
+    <div id="system-search-result">
+      Search by compound name or formula.
+    </div>
+    {{ a_pos_form.as_p }}
+    <button type="submit" class="btn btn-default">Submit new atomic positions</button>
+</form>
+{% endblock %}
+
+{% block ajaxscript %}
+<script type="text/javascript">
+  ajax_submit($('#add-a-pos'), $('#feedback'));
+</script>
+{% endblock %}

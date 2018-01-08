@@ -1,0 +1,27 @@
+<script type="text/javascript">
+function ajax_submit(form, feedback) {
+  form.on('submit', function(event){
+    event.preventDefault();
+    console.log("first function triggered");
+    var data = new FormData(form.get(0));
+    console.log(data);
+    $.ajax({
+      url: form.attr('action'),
+      type: form.attr('method'),
+      data: data,
+      cache: false,
+      processData: false,
+      contentType: false,
+      success: function(data) {
+        feedback.html(data);
+      },
+      error: function(error) {
+        feedback.html("Something went wrong, please <a href=" + window.location.href + ">refresh</a> the page and try again.");
+      },
+    })
+    console.log(form.serialize());
+    // clear all fields, currently disabled to discourage spamming
+    // $('input').val('');
+  });
+}
+</script>

@@ -1,0 +1,25 @@
+{% extends 'materials/add_entry_template.html' %}
+
+{% block heading %}
+<h4>Add Exciton Emission</h4>
+{% endblock %}
+
+{% block form %}
+<form id="add-exciton-emission" method="post" action="{% url 'materials:add_exciton_emission' %}">
+    {% csrf_token %}
+    <div id="publication-search-result">
+      Search by publication title, journal name, or full name of author.
+    </div>
+    <div id="system-search-result">
+      Search by compound name or formula.
+    </div>
+    {{ exciton_emission_form.as_p }}
+    <button type="submit" class="btn btn-default">Submit new exciton emission</button>
+</form>
+{% endblock %}
+
+{% block ajaxscript %}
+<script type="text/javascript">
+  ajax_submit($('#add-exciton-emission'), $('#feedback'));
+</script>
+{% endblock %}

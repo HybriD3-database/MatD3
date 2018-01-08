@@ -1,0 +1,25 @@
+{% extends 'materials/main_template.html' %}
+
+{% block heading %}
+<h4>Add Author</h4>
+{% endblock %}
+
+{% block mainbody %}
+<form id="add-author" method="post" action="/materials/add-author">
+    {% csrf_token %}
+    {{ input_form.as_p }}
+    <button type="submit" class="btn btn-default">Add new author</button>
+</form>
+    {{ text }}
+<div id="results">
+</div>
+{% endblock %}
+
+{% block script %}
+{% include 'materials/ajax_form_submit.html' %}
+<script type="text/javascript">
+  var form = $('#add-author');
+  var feedback = $('#results');
+  ajax_submit(form, feedback)
+</script>
+{% endblock %}

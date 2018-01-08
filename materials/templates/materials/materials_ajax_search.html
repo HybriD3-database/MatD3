@@ -1,0 +1,22 @@
+{% extends 'materials/main_template.html' %}
+
+{% block heading %}
+<h4>AJAX Search for Materials</h4>
+{% endblock %}
+
+{% block mainbody %}
+<form id="search-form" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="search">Search term: </label>
+      <input class="form-control" type="text" id="search" name="search" />
+    </div>
+</form>
+<ul id="search-results">
+</ul>
+{% endblock %}
+
+{% block script %}
+{% load static %}
+<script type="text/javascript" src="{% static 'materials/js/search_ajax.js'%}"></script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'materials/materials_nav.html' %}
+
+{% block body %}
+
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
+
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">
+    <b>Material</b>
+    <h3>{{object.compound_name}}</h3>
+  </div>
+  <div class="panel-body">
+    {% with object.atomicpositions_set.all|first as entry %}
+      <div class="col-md-8">
+        <h4>Molecular Model</h4>
+        {% if entry.fhi_file %}
+        <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
+        <!-- <script src="{% static 'jsmol/js2/core/package.js' %}"></script> -->
+        <script>
+          Jmol.getApplet("jmolApplet0", {
+          // script:"load {% static 'materials/input.in' %}",
+          script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}.in",
+          j2sPath: "{% static 'jsmol/j2s' %}",
+          height: 400,
+          width: 600,
+          })
+        </script>
+        {% else %}
+        <h3>Atomic Positions file unavailable</h3>
+        {% endif %}
+      </div>
+      <div class="col-md-4">
+        <h4>Atomic Positions</h4>
+        {% if entry %}
+          <div class="col-md-6 details-a-pos">
+            a: {{entry.a}} <br>
+            b: {{entry.b}} <br>
+            c: {{entry.c}} <br>
+          </div>
+          <div class="col-md-6 details-a-pos">
+            &alpha;: {{entry.alpha}} <br>
+            &beta;: {{entry.beta}} <br>
+            &gamma;: {{entry.gamma}} <br>
+          </div>
+          <div>
+            Phase: {{entry.phase}} <br>
+            Temperature: {{entry.temperature}} K <br>
+            Method: {{entry.method}} <br>
+            Source: {{entry.publication.author}} <br>
+            {% if entry.publication.doi_isbn %}
+            Publication: {{entry.publication.doi_isbn}} <br>
+            {% endif %}
+            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">Download Atomic Positions</a>
+            {% else %}
+            <h3>No data available</h3>
+            {% endif %}
+            {% if object.atomicpositions_set.all|length > 1 %}
+            <br>
+            <a href="{% url "materials:all_a_pos" id=object.id %}">See all entries</a>
+            {% endif %}
+          </div>
+      </div>
+    {% endwith %}
+</div>
+    <table class="table">
+      <tr>
+        <td>
+          <h4>Exciton Emission Peak</h4>
+          {% with entry=object.excitonemission_set.all|first %}
+            {% if entry %}
+            <p class="details">{{entry.exciton_emission}} nm</p>
+            <!-- Phase: {{entry.phase}} <br> -->
+            Temperature: {{entry.temperature}} K <br>
+            Method: {{entry.method}} <br>
+            Source: {{entry.publication.author}} <br>
+            {% if entry.publication.doi_isbn %}
+            Publication: {{entry.publication.doi_isbn}} <br>
+            {% endif %}
+            <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">Download Exciton Emission Peak</a>
+            {% else %}
+            <h3>No data available</h3>
+            {% endif %}
+            {% if object.excitonemission_set.all|length > 1 %}
+            <br>
+            <a href="{% url "materials:all_entries" id=object.id type="exciton_emission"%}">See all entries</a>
+            {% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          <h4>Band Gap</h4>
+          {% with entry=object.bandgap_set.all|first %}
+            {% if entry %}
+            <p class="details">{{entry.band_gap}} eV</p>
+            <!-- Phase: {{entry.phase}} <br> -->
+            Temperature: {{entry.temperature}} K <br>
+            Method: {{entry.method}} <br>
+            Source: {{entry.publication.author}} <br>
+            {% if entry.publication.doi_isbn %}
+            Publication: {{entry.publication.doi_isbn}} <br>
+            {% endif %}
+            <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">Download Band Gap</a>
+            {% else %}
+            <h3>No data available</h3>
+            {% endif %}
+            {% if object.bandgap_set.all|length > 1 %}
+            <br>
+            <a href="{% url "materials:all_entries" id=object.id type="band_gap"%}">See all entries</a>
+            {% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          <h4>Band Structure</h4>
+          {% with entry=object.bandstructure_set.all|first %}
+            {% if entry %}
+            <p class="details">{{entry.band_structure}}</p>
+            <!-- Phase: {{entry.phase}} <br> -->
+            Temperature: {{entry.temperature}} K <br>
+            Method: {{entry.method}} <br>
+            Source: {{entry.publication.author}} <br>
+            {% if entry.publication.doi_isbn %}
+            Publication: {{entry.publication.doi_isbn}} <br>
+            {% endif %}
+            <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">Download Band Structure</a>
+            {% else %}
+            <h3>No data available</h3>
+            {% endif %}
+            {% if object.bandstructure_set.all|length > 1 %}
+            <br>
+            <a href="{% url "materials:all_entries" id=object.id type="band_structure"%}">See all entries</a>
+            {% endif %}
+          {% endwith %}
+        </td>
+      </tr>
+    </table>
+    </div>
+</div>
+
+{% endblock %}

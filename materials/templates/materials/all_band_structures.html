@@ -1,0 +1,9 @@
+{% extends 'materials/all_entries.html' %}
+
+{% block heading %}Band Structures{% endblock %}
+
+{% block entry_type %}{{entry.band_structure}}{% endblock %}
+
+{% block dl_link %}
+  <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">Download Band Structure</a>
+{% endblock %}

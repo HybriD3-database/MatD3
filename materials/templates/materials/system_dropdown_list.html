@@ -1,0 +1,12 @@
+{% if search_result.count > 0 %}
+<div class="form-group">
+  <label for="system">Select system name: </label>
+  <select id="system" name="system" class="form-control" required>
+  {% for system in search_result %}
+   <option value={{system.pk}}>{{system.compound_name}}, {{system.formula}} </option>
+  {% endfor %}
+</div>
+{% else %}
+  No results found. Please retry with a new search term or
+  <a target="_blank" href="{% url 'materials:add_system' %}">click here to add an system</a>.
+{% endif %}

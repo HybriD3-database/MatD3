@@ -1,0 +1,7 @@
+{% if systems.count > 0 %}
+  {% for system in systems %}
+    <li class="list-group-item"><h5><a href="/materials/{{system.id}}">{{system.compound_name}}</a></h5></li>
+  {% endfor %}
+{% else %}
+  No results found. Please retry with a new search term
+{% endif %}

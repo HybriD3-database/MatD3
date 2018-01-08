@@ -1,0 +1,52 @@
+.navbar-default {
+  background-color: #b56357;
+  border: 0px solid #b56357;
+  border-radius: 0px;
+}
+
+/* b5635y, b4dbc0, eae3ea, a7b3a5 */
+
+/* d9d9d9, 4484ce, f9cf00, f19f4d */
+
+/* #026670, #9fedd7, #fef9c7, #fce181, #edeae5 */
+
+/* f78888, f3d250, ececec, 90ccf4, 5da2d5 */
+
+/* 77c9d4, 57bc90, 015249, a5a5af */
+
+.navbar-default .navbar-nav > li > a {
+   color: #001100; /*Change active text color here*/
+}
+
+.navbar-default .navbar-brand {
+  color: #001100;
+}
+
+.panel-default {
+  border: 0px solid #ececec;
+  border-radius: 0px;
+}
+
+.panel-default > .panel-heading {
+  background-color: #57bc90;
+  border-radius: 0px;
+}
+
+.panel-default > .panel-body {
+  background-color: #ececec;
+  border: 0px solid #f19f4d;
+}
+
+.table {
+  background-color: #eae3ea;
+}
+
+.table > tbody > tr > td {
+  padding: 30px ;
+}
+
+body {
+  background-color: #d9d9d9;
+  color: #001100;
+  font-family: Trebuchet, Futura, Avenir, Frutiger, "Akzidenz-Grotesk", "News Gothic", Helvetica, sans-serif;
+}

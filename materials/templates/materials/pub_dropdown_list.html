@@ -1,0 +1,12 @@
+{% if search_result.count > 0 %}
+<div class="form-group">
+  <label for="publication">Select publication name: </label>
+  <select id="publication" name="publication" class="form-control" required>
+  {% for pub in search_result %}
+   <option value={{pub.pk}}>{{pub.title|truncatechars:20}}, {{pub.author}} {{pub.year}}, {{pub.journal}} </option>
+  {% endfor %}
+</div>
+{% else %}
+  No results found. Please retry with a new search term or
+  <a target="_blank" href="{% url 'materials:add_publication' %}">click here to add an publication</a>.
+{% endif %}

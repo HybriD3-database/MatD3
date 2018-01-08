@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+<nav class="navbar navbar-default" id="navbar">
+<div class="container-fluid">
+<!-- Brand and toggle get grouped for better mobile display -->
+<div class="navbar-header">
+<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="navbar-brand" href="#">Hybrid3 database</a>
+</div>
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="navbar-collapse">
+<ul class="nav navbar-nav">
+<li><a href="{% url 'index'%}">Home</a></li>
+<li><a href="{% url 'contact'%}">Contact</a></li>
+<li><a href="{% url 'materials:materials_home'%}">Materials</a></li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+{% if user.is_authenticated %}
+<li><a href="{% url 'materials:add_a_pos'%}">Add Atomic Positions</a></li>
+<li><a href="{% url 'materials:add_exciton_emission'%}">Add Exciton Emission</a></li>
+<li><a href="{% url 'materials:add_band_gap'%}">Add Band Gap</a></li>
+<li><a href="{% url 'materials:add_band_structure'%}">Add Band Structure</a></li>
+{% else %}
+{% endif %}
+<li><a href="{% url 'accounts:home'%}">Accounts</a></li>
+</ul>
+</div><!-- /.navbar-collapse -->
+</div><!-- /.container-fluid -->
+</nav>
+{% endblock %}

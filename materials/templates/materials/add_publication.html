@@ -1,0 +1,34 @@
+{% extends 'materials/main_template.html' %}
+
+{% block heading %}
+<h4>Add Publication</h4>
+{% endblock %}
+
+{% block mainbody %}
+<form id="search-author" method="post" action="{% url 'materials:search_author' %}">
+    {% csrf_token %}
+    {{ search_form.as_p }}
+      <button type="submit" class="btn btn-default">Search for author</button>
+</form>
+<form id="add-publication" method="post" action="{% url 'materials:add_publication' %}">
+  {% csrf_token %}
+  <p>
+  <div id="search-result">
+      Search using the first name, last name, and/or institution of the author.
+  </div>
+  </p>
+  {{ pub_form.as_p }}
+  <button type="submit" class="btn btn-default">Submit new publication</button>
+</form>
+{{text}}
+<div id="feedback">
+</div>
+{% endblock %}
+
+{% block script %}
+{% include 'materials/ajax_form_submit.html' %}
+<script type="text/javascript">
+  ajax_submit($('#search-author'), $('#search-result'));
+  ajax_submit($('#add-publication'), $('#feedback'));
+</script>
+{% endblock %}

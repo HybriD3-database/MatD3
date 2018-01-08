@@ -1,0 +1,50 @@
+{% extends 'materials/materials_nav.html' %}
+
+{% block body %}
+
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
+
+  <div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">
+      <b>Material</b>
+      <h3>{{compound_name}}</h3>
+    </div>
+    <div class="panel-body">
+    {% if object %}
+    {% for entry in object %}
+      <div class="col-md-6">
+        <h4>Atomic Positions #{{ forloop.counter }}</h4>
+          <div class="col-md-6 details-a-pos">
+            a: {{entry.a}} <br>
+            b: {{entry.b}} <br>
+            c: {{entry.c}} <br>
+          </div>
+          <div class="col-md-6 details-a-pos">
+            &alpha;: {{entry.alpha}} <br>
+            &beta;: {{entry.beta}} <br>
+            &gamma;: {{entry.gamma}} <br>
+          </div>
+          <div>
+            Phase: {{entry.phase}} <br>
+            Temperature: {{entry.temperature}} K <br>
+            Method: {{entry.method}} <br>
+            Source: {{entry.publication.author}} <br>
+            {% if entry.publication.doi_isbn %}
+            Publication: {{entry.publication.doi_isbn}} <br>
+            {% endif %}
+            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">Download Atomic Positions</a>
+          </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <h3>No data available</h3>
+      {% endif %}
+  </div>
+      </div>
+  </div>
+
+
+
+{% endblock %}

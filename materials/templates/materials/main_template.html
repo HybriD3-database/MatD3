@@ -1,0 +1,17 @@
+{% extends 'materials/materials_nav.html' %}
+
+{% block body %}
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">
+    {% block heading %}
+    <h4>Heading here</h4>
+    {% endblock %}
+  </div>
+  <div class="panel-body">
+    {% block mainbody %}
+    Mainbody here
+    {% endblock %}
+  </div>
+</div>
+{% endblock %}

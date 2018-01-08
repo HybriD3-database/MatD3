@@ -1,169 +1,138 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
 from django.db import models
 from os.path import basename
 
+UserProfile = "accounts.UserProfile"
 # Create your models here.
+class Post(models.Model):
+    post = models.CharField(max_length=500)
 
 class Author(models.Model):
-    """Contain data of authors """
-    article_title = models.CharField(max_length=300) #what's a good title?
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    pub_title = models.CharField(max_length=100) #what's a good title?
-    pub_vol = models.CharField(max_length=100) #should I use Integer or char?
-    pub_pages_start = models.CharField(max_length=10)
-    pub_pages_end = models.CharField(max_length=10)
-    pub_year = models.CharField(max_length=4) #OR models.DateField() #what's a good title?
-    doi_isbn = models.CharField(max_length=30)
+    """Contain data of authors"""
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    institution = models.CharField(max_length=100, blank=True)
 
     def __unicode__(self):
-        return self.first_name+" "+self.last_name
+        return self.first_name + " " + self.last_name + " " + self.institution
 
-class Contributor(models.Model):
-    """Contain data of contributor """
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    email = models.EmailField()
-    date = models.DateField()
+class Publication(models.Model):
+    author = models.ForeignKey(Author, on_delete=models.PROTECT)
+    title = models.CharField(max_length=100) #what's a good title?
+    journal = models.CharField(max_length=100, blank=True)
+    vol = models.CharField(max_length=100) #should I use Integer or char?
+    pages_start = models.CharField(max_length=10)
+    pages_end = models.CharField(max_length=10)
+    year = models.CharField(max_length=4) #OR models.DateField() #what's a good title?
+    doi_isbn = models.CharField(max_length=30, blank=True)
 
     def __unicode__(self):
-        return self.first_name+" "+self.last_name
+        return self.title
+
+# class not needed
+# class Contributor(models.Model):
+#     """Contain data of contributor """
+#     first_name = models.CharField(max_length=30)
+#     last_name = models.CharField(max_length=30)
+#     email = models.EmailField()
+#
+#     def __unicode__(self):
+#         return self.first_name+" "+self.last_name
+
+class Tag(models.Model):
+    tag = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.tag
 
     # Add Contributor class
 class System(models.Model):
     """Contains meta data for investigated system. """
     # use fhi file format.
-    compound_name = models.CharField(max_length=100) # Name of the system: Alanine/ Alanine+Ca2+/ GLycine+Ba2+ etc.
-    #urlname = models.CharField(max_length=100) # Name which appearl in url
-    group = models.CharField(max_length=10) # Short name used in database, ala/gly/argH/ etc.
-    tags = models.CharField(max_length=100) # General tags for the sytem
+    compound_name = models.CharField(max_length=100)
+    group = models.CharField(max_length=30)
+    formula = models.CharField(max_length=100)
     organic = models.CharField(max_length=30)
-    inorganic = models.CharField(max_length=10)
-    # authors = models.ManyToManyField(Author)  # There is no need thos anymore
-    formula = models.CharField(max_length=100) # Simple chemical formula of the system
-    # charge = models.FloatField() # Do we have charge?
-    # citation = models.CharField(max_length=200) # Possible citation/ citations where system was published
-    last_update = models.DateField() # when system was last time updated
-    desc = models.TextField(max_length=100) # Description of the system if provided
-
-    """Parameters I need for this.
-    What are the parameters we need for AtomicPositions, do we need crystal phase? Are there
-    Atomic Positions - included
-    Band Gaps
-    Band Structure
-    Excition emission
-    """
+    inorganic = models.CharField(max_length=30)
+    last_update = models.DateField(default=datetime.now)
+    description = models.TextField(max_length=100, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __unicode__(self):
         return self.compound_name
 
 class Phase(models.Model):
-    phase = models.CharField(max_length=20)
+    phase = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.phase
 
-class Temperature(models.Model):
-    temperature = models.CharField(max_length=10)
+class IDInfo(models.Model):
+    publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    contributor = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
+    temperature = models.CharField(max_length=20, blank=True)
+    phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
+    method = models.CharField(max_length=100)
+    specific_method = models.CharField(max_length=100)
+    comments = models.CharField(max_length=1000, blank=True)
 
-    def __unicode__(self):
-        return self.temperature
-
-class ExcitonEmission(models.Model):
-    # might link to atomic measurements
+class ExcitonEmission(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    temperature = models.ForeignKey(Temperature, max_length=4)
     exciton_emission = models.CharField(max_length=10)
-    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT, null=True)
-    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True)
-    method = models.CharField(max_length=20)
 
     def __unicode__(self):
         return self.exciton_emission
 
-class BandGap(models.Model):
+class BandGap(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    temperature = models.ForeignKey(Temperature, max_length=4)
     band_gap = models.CharField(max_length=10)
-    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT, null=True)
-    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True)
-    method = models.CharField(max_length=20)
 
     def __unicode__(self):
         return self.band_gap
 
-class BandStructure(models.Model):
+class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    temperature = models.ForeignKey(Temperature, max_length=4)
     band_structure = models.CharField(max_length=100)
-    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT, null=True)
-    author = models.ForeignKey(Author, on_delete=models.PROTECT, null=True)
-    method = models.CharField(max_length=20)
 
     def __unicode__(self):
         return self.band_structure
-"""
-To be added
-"""
-# class AngleVariance(models.model):
-#     temperature = models.CharField(max_length=10)
-#
-#     def __unicode__(self):
-#         return self.
-#
-# class QuadraticElongation(models.model):
-#     temperature = models.CharField(max_length=10)
-#
-#     def __unicode__(self):
-#         return self.temperature
 
-class AtomicPositions(models.Model):
-    # Link two different kinds of lists, one for calculated, another for x-ray diffracted
-    contributor = models.ForeignKey(Contributor, on_delete=models.PROTECT)
-    author = models.ForeignKey(Author, on_delete=models.PROTECT)
-    system = models.ForeignKey(System, on_delete=models.PROTECT) #protect from deletion
-    method = models.CharField(max_length=20) # PBE+vdW for example. [Be specific]
-    temperature = models.ForeignKey(Temperature, on_delete=models.PROTECT)
-    phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
+class BondAngle(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    hmh_angle = models.CharField(max_length=100, blank=True)
+    mhm_angle = models.CharField(max_length=100, blank=True)
+
+    def __unicode__(self):
+        return self.hmh_angle + " " + self.mhm_angle
+
+class BondLength(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    hmh_length = models.CharField(max_length=100, blank=True)
+    mhm_length = models.CharField(max_length=100, blank=True)
+
+    def __unicode__(self):
+        return self.hmh_length + " " + self.mhm_length
+
+import os
+def file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s_%s.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    return os.path.join('uploads', filename)
+
+class AtomicPositions(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    fhi_file = models.FileField(upload_to=file_name, blank=True)
     a = models.CharField(max_length=10)
     b = models.CharField(max_length=10)
     c = models.CharField(max_length=10)
     alpha = models.CharField(max_length=10)
     beta = models.CharField(max_length=10)
     gamma = models.CharField(max_length=10)
-    """
-    Atomic Pos Measurement
-    """
-    # angle_variance = models.ManyToManyField(AngleVariance)
-    code = models.CharField(max_length=30)
-    codeversion = models.CharField(max_length=10) # Do we need this?
-
-    # hierarcy_file = models.CharField(max_length=100) # Energy hierarchy file generated
+    volume = models.CharField(max_length=10, blank=True)
+    Z = models.CharField(max_length=10, blank=True)
 
     def __unicode__(self):
-        return self.method #to be updated when there's a better method
-
-    # class Meta:
-    #       unique_together = ("aminoacid", "capping","ion")
-
-# class Conformer(models.Model):
-#     """Contain one conformer for given system"""
-#     filename = models.CharField(max_length=100,unique=True) # Filename/ location of file
-#     energy = models.FloatField() # Total energy obtained for this conformation
-#     system = models.ForeignKey(System) # To which sytem this conformer belongs to
-#     last_update = models.DateField() # When this was last time updated
-#
-#     def __unicode__(self):
-#         return self.system.name +" : "+ basename(self.filename)
-#
-#
-# class Extrafile(models.Model):
-#     """Contain extra output file and description for given system """
-#     system = models.ForeignKey(System) # Which system this file belongs to
-#     desc = models.CharField(max_length=200) # Short description of file
-#     filename = models.CharField(max_length=100) # location of file
-#
-#     def __unicode__(self):
-#         return self.system.name + " " + basename(self.filename)
+        return self.phase.phase + " " + self.system.formula
