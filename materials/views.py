@@ -139,12 +139,8 @@ class SearchFormView(generic.TemplateView):
     template_name = 'materials/materials_home.html'
 
     def get(self, request):
-        form = SearchForm()
-        systems = System.objects.all()
 
-        args = {'form': form, 'systems': systems}
-
-        return render(request, self.template_name, args)
+        return render(request, self.template_name)
 
     def post(self, request):
         template_name = 'materials/materials_search_results.html'
@@ -152,10 +148,9 @@ class SearchFormView(generic.TemplateView):
         search_text = ""
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
-            print "search text", search_text
         systems = System.objects.filter(compound_name__icontains=search_text)
 
-        args = {'form': form, 'systems': systems}
+        args = {'systems': systems}
 
         return render(request, template_name, args)
 

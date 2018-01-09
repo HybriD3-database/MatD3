@@ -7,7 +7,22 @@
 {% block mainbody %}
 <form id="search-system" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <div class="form-group">
+      <label for="search_text">Search term: </label>
+      <div class="input-group">
+        <div class="input-group-btn">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">Action <span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li>Compound Name</li>
+            <li>Inorganic Component</li>
+            <li>Organic Component</li>
+            <li>Tags</li>
+          </ul>
+        </div>
+        <input id="search_text" class="form-control" type="text" name="search_text" required/>
+      </div>
+    </div>
     <button type="submit" class="btn btn-default">Submit</button>
 </form>
 <br>
