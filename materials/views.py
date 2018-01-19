@@ -17,6 +17,7 @@ from accounts.models import UserProfile
 from myproject.settings.prod import MEDIA_ROOT, MEDIA_URL
 import csv
 import os
+from .rangeparser import parserange
 from django.http import HttpResponse
 
 dictionary = {
@@ -135,22 +136,67 @@ def materials(request):
 
     return render(request, 'materials/materials_ajax_search.html', args)
 
+def search_result(search_term, search_text):
+    search_results = {
+        'formula': System.objects.filter(formula__icontains=search_text),
+        'organic': System.objects.filter(organic__icontains=search_text),
+        'inorganic': System.objects.filter(inorganic__icontains=search_text),
+        # 'exciton_emission': System.objects.filter(excitonemission__exciton_emission__icontains=search_text)
+    }
+    return search_results[search_term]
+
+# materials search form
 class SearchFormView(generic.TemplateView):
     template_name = 'materials/materials_home.html'
+    search_terms = [
+        ['formula','Chemical Formula'],
+        ['organic', 'Organic Component'],
+        ['inorganic', 'Inorganic Component'],
+        ['exciton_emission', 'Exciton Emission']
+    ]
 
     def get(self, request):
-
-        return render(request, self.template_name)
+        return render(request, self.template_name, {'search_terms': self.search_terms})
 
     def post(self, request):
         template_name = 'materials/materials_search_results.html'
         form = SearchForm(request.POST)
         search_text = ""
+        # default search_term
+        search_term = "formula"
         if form.is_valid():
+            print form.cleaned_data
             search_text = form.cleaned_data['search_text']
-        systems = System.objects.filter(compound_name__icontains=search_text)
+            search_term = request.POST.get('search_term')
+            if search_term == 'exciton_emission':
+                searchrange = parserange(search_text)
+                if len(searchrange) > 0:
+                    if searchrange[0] == "bidirectional":
+                        if searchrange[3] == ">=":
+                            systems = System.objects.filter(excitonemission__exciton_emission__gte=searchrange[1])
+                        elif searchrange[3] == ">":
+                            systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
+                        if searchrange[4] == "<=":
+                            systems = systems.filter(excitonemission__exciton_emission__lte=searchrange[2])
+                        elif searchrange[4] == "<":
+                            systems = systems.filter(excitonemission__exciton_emission__lt=searchrange[2])
+                    elif searchrange[0] == "unidirectional":
+                        if searchrange[2] == ">=":
+                            systems = System.objects.filter(excitonemission__exciton_emission__gte=searchrange[1])
+                        elif searchrange[2] == ">":
+                            systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
+                        elif searchrange[2] == "<=":
+                            systems = System.objects.filter(excitonemission__exciton_emission__lte=searchrange[2])
+                        elif searchrange[2] == "<":
+                            systems = System.objects.filter(excitonemission__exciton_emission__lt=searchrange[2])
+        # systems = System.objects.filter(compound_name__icontains=search_text)
+            else:
+                systems = search_result(search_term, search_text)
 
-        args = {'systems': systems}
+        args = {
+            'systems': systems,
+            'search_terms': self.search_terms
+        }
 
         return render(request, template_name, args)
 

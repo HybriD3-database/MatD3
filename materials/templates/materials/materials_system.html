@@ -67,6 +67,7 @@
     <table class="table">
       <tr>
         <td>
+          {% include './test.html' %}
           <h4>Exciton Emission Peak</h4>
           {% with entry=object.excitonemission_set.all|first %}
             {% if entry %}

@@ -11,14 +11,20 @@
       <label for="search_text">Search term: </label>
       <div class="input-group">
         <div class="input-group-btn">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+          <!-- <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
           aria-haspopup="true" aria-expanded="false">Action <span class="caret"></span></button>
           <ul class="dropdown-menu">
             <li>Compound Name</li>
             <li>Inorganic Component</li>
             <li>Organic Component</li>
             <li>Tags</li>
-          </ul>
+          </ul> -->
+          <select id="search_term" name="search_term" class="selectpicker">
+            {% for search_term in search_terms %}
+            print search_term
+            <option value="{{search_term.0}}">{{search_term.1}}</option>
+            {% endfor %}
+          </select>
         </div>
         <input id="search_text" class="form-control" type="text" name="search_text" required/>
       </div>

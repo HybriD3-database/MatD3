@@ -5,6 +5,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
     rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
     crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block head %}
@@ -13,7 +14,7 @@
     {% endblock %}
   </head>
   <body>
-    {% block navbar%}
+    {% block navbar %}
       <div class="container">
       </div>
     {% endblock %}
@@ -27,6 +28,8 @@
   crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
   crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js">
+  </script>
   {% block script %}
   {% endblock %}
 </html>
