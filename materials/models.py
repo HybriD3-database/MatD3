@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 from django.db import models
 from os.path import basename
+import os
 
 UserProfile = "accounts.UserProfile"
 # Create your models here.
@@ -32,15 +33,15 @@ class Publication(models.Model):
     def __unicode__(self):
         return self.title
 
-# class not needed
-# class Contributor(models.Model):
-#     """Contain data of contributor """
-#     first_name = models.CharField(max_length=30)
-#     last_name = models.CharField(max_length=30)
-#     email = models.EmailField()
-#
-#     def __unicode__(self):
-#         return self.first_name+" "+self.last_name
+def file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s_%s_apos.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    return os.path.join('uploads', filename)
+
+def pl_file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    return os.path.join('uploads', filename)
 
 class Tag(models.Model):
     tag = models.CharField(max_length=50)
@@ -81,10 +82,11 @@ class IDInfo(models.Model):
 
 class ExcitonEmission(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    exciton_emission = models.CharField(max_length=10)
+    pl_file = models.FileField(upload_to=pl_file_name, blank=True)
+    exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
 
     def __unicode__(self):
-        return self.exciton_emission
+        return str(self.exciton_emission)
 
 class BandGap(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -115,12 +117,6 @@ class BondLength(IDInfo):
 
     def __unicode__(self):
         return self.hmh_length + " " + self.mhm_length
-
-import os
-def file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = "%s_%s_%s.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
-    return os.path.join('uploads', filename)
 
 class AtomicPositions(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)

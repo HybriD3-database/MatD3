@@ -1,7 +1,21 @@
 {% if systems.count > 0 %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Compound Name</th>
+        <th>Exciton Emission</th>
+      </tr>
+
   {% for system in systems %}
-    <li class="list-group-item"><h5><a href="/materials/{{system.id}}">{{system.compound_name}}</a></h5></li>
+  <tr>
+    <td>{{forloop.counter}}</td>
+    <td><a href="/materials/{{system.id}}">{{system.compound_name}}</a></td>
+    <td>{{system.excitonemission_set.all|first}}</td>
+  </tr>
   {% endfor %}
+</thead>
+</table>
 {% else %}
   No results found. Please retry with a new search term
 {% endif %}

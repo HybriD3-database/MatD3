@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block form %}
-<form id="add-exciton-emission" method="post" action="{% url 'materials:add_exciton_emission' %}">
+<form id="add-exciton-emission" method="post" action="{% url 'materials:add_exciton_emission' %}" enctype='multipart/form-data'>
     {% csrf_token %}
     <div id="publication-search-result">
       Search by publication title, journal name, or full name of author.

@@ -1,8 +1,7 @@
 {% extends 'materials/materials_nav.html' %}
-
 {% block body %}
 
-{% load staticfiles %}
+{% load static %}
 <link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
 
 <div class="panel panel-default">
@@ -67,9 +66,14 @@
     <table class="table">
       <tr>
         <td>
-          {% include './test.html' %}
-          <h4>Exciton Emission Peak</h4>
           {% with entry=object.excitonemission_set.all|first %}
+          <h4>Photoluminescence Graph</h4>
+          {% if entry.pl_file %}
+            <div id="pl-graph"></div>
+          {% else %}
+          <h3>Photoluminescence file unavailable</h3>
+          {% endif %}
+          <h4>Exciton Emission Peak</h4>
             {% if entry %}
             <p class="details">{{entry.exciton_emission}} nm</p>
             <!-- Phase: {{entry.phase}} <br> -->
@@ -138,4 +142,14 @@
     </div>
 </div>
 
+{% endblock %}
+{% block script %}
+{% with entry=object.excitonemission_set.all|first %}
+<script type="text/javascript">
+$(document).ready(function() {
+  // console.log("Shane's nephew");
+  $('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html")
+});
+</script>
+{% endwith %}
 {% endblock %}

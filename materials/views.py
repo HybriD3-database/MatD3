@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+from django.conf.urls.static import static
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
-
 
 from materials.forms import *
 
@@ -18,7 +18,7 @@ from myproject.settings.prod import MEDIA_ROOT, MEDIA_URL
 import csv
 import os
 from .rangeparser import parserange
-from django.http import HttpResponse
+from .plotting.pl_plotting import plotpl
 
 dictionary = {
 "exciton_emission": ExcitonEmission,
@@ -186,9 +186,9 @@ class SearchFormView(generic.TemplateView):
                         elif searchrange[2] == ">":
                             systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
                         elif searchrange[2] == "<=":
-                            systems = System.objects.filter(excitonemission__exciton_emission__lte=searchrange[2])
+                            systems = System.objects.filter(excitonemission__exciton_emission__lte=searchrange[1])
                         elif searchrange[2] == "<":
-                            systems = System.objects.filter(excitonemission__exciton_emission__lt=searchrange[2])
+                            systems = System.objects.filter(excitonemission__exciton_emission__lt=searchrange[1])
         # systems = System.objects.filter(compound_name__icontains=search_text)
             else:
                 systems = search_result(search_term, search_text)
@@ -476,12 +476,13 @@ class AddExcitonEmissionView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddExcitonEmission(request.POST)
+        form = AddExcitonEmission(request.POST, request.FILES)
         if form.is_valid():
             print "form is valid"
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
+            # print "file: ", request.FILES.get('pl_file')
             print "system pk is: " + sys_pk
             text = ""
             if pub_pk > 0 and sys_pk > 0:
@@ -493,6 +494,10 @@ class AddExcitonEmissionView(generic.TemplateView):
                     # print apos_form.contributor
                     text += "UserProfile obtained. Form successfully saved"
                     new_form.save()
+                    pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
+                    # print pl_file_loc
+                    plotpl(pl_file_loc)
+                    # add function to set the exciton emission peak to what is reflected in the graph
                 else:
                     text = "Failed to submit, please login and try again."
         else:
