@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     image = models.ImageField(upload_to='profile_image', blank=True)
     duke = UserProfileManager
 
-    def __unicode__(self):
+    def __str__(self):
         return self.user.username
 
 def create_profile(sender, **kwargs):

@@ -222,11 +222,11 @@ class AddAPosView(generic.TemplateView):
             sys_pk = request.POST.get('system')
             print("system pk is: " + sys_pk)
             text = ""
-            if pub_pk > 0 and sys_pk > 0:
+            if int(pub_pk) > 0 and int(sys_pk) > 0:
                 apos_form.publication = Publication.objects.get(pk=pub_pk)
                 apos_form.system = System.objects.get(pk=sys_pk)
                 text += "Publication and System obtained, "
-                if request.user.is_authenticated():
+                if request.user.is_authenticated:
                     apos_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
                     text += "UserProfile obtained. Form successfully saved"
@@ -485,11 +485,11 @@ class AddExcitonEmissionView(generic.TemplateView):
             # print "file: ", request.FILES.get('pl_file')
             print("system pk is: " + sys_pk)
             text = ""
-            if pub_pk > 0 and sys_pk > 0:
+            if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
                 text += "Publication and System obtained, "
-                if request.user.is_authenticated():
+                if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
                     text += "UserProfile obtained. Form successfully saved"
@@ -528,11 +528,11 @@ class AddBandGapView(generic.TemplateView):
             sys_pk = request.POST.get('system')
             print("system pk is: " + sys_pk)
             text = ""
-            if pub_pk > 0 and sys_pk > 0:
+            if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
                 text += "Publication and System obtained, "
-                if request.user.is_authenticated():
+                if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
                     text += "UserProfile obtained. Form successfully saved"
@@ -567,11 +567,11 @@ class AddBandStructureView(generic.TemplateView):
             sys_pk = request.POST.get('system')
             print("system pk is: " + sys_pk)
             text = ""
-            if pub_pk > 0 and sys_pk > 0:
+            if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
                 text += "Publication and System obtained, "
-                if request.user.is_authenticated():
+                if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
                     text += "UserProfile obtained. Form successfully saved"

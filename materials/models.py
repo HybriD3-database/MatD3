@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 from datetime import datetime
 from django.db import models
 from os.path import basename
@@ -17,7 +15,7 @@ class Author(models.Model):
     last_name = models.CharField(max_length=50)
     institution = models.CharField(max_length=100, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.first_name + " " + self.last_name + " " + self.institution
 
 class Publication(models.Model):
@@ -30,7 +28,7 @@ class Publication(models.Model):
     year = models.CharField(max_length=4) #OR models.DateField() #what's a good title?
     doi_isbn = models.CharField(max_length=30, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 def file_name(instance, filename):
@@ -46,7 +44,7 @@ def pl_file_name(instance, filename):
 class Tag(models.Model):
     tag = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.tag
 
     # Add Contributor class
@@ -62,13 +60,13 @@ class System(models.Model):
     description = models.TextField(max_length=100, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.compound_name
 
 class Phase(models.Model):
     phase = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.phase
 
 class IDInfo(models.Model):
@@ -85,21 +83,21 @@ class ExcitonEmission(IDInfo):
     pl_file = models.FileField(upload_to=pl_file_name, blank=True)
     exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.exciton_emission)
 
 class BandGap(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     band_gap = models.CharField(max_length=10)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.band_gap
 
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     band_structure = models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.band_structure
 
 class BondAngle(IDInfo):
@@ -107,7 +105,7 @@ class BondAngle(IDInfo):
     hmh_angle = models.CharField(max_length=100, blank=True)
     mhm_angle = models.CharField(max_length=100, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.hmh_angle + " " + self.mhm_angle
 
 class BondLength(IDInfo):
@@ -115,7 +113,7 @@ class BondLength(IDInfo):
     hmh_length = models.CharField(max_length=100, blank=True)
     mhm_length = models.CharField(max_length=100, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.hmh_length + " " + self.mhm_length
 
 class AtomicPositions(IDInfo):
@@ -130,5 +128,5 @@ class AtomicPositions(IDInfo):
     volume = models.CharField(max_length=10, blank=True)
     Z = models.CharField(max_length=10, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.phase.phase + " " + self.system.formula
