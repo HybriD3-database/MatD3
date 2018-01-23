@@ -16,11 +16,11 @@ with open('band1001.out', 'r') as file:
         # print energy_arr
         if num_bands == -1:
             num_bands = len(energy_arr)
-            all_values = [[] for _ in xrange(num_bands)]
+            all_values = [[] for _ in range(num_bands)]
             # print all_values
         for index, energy in enumerate(energy_arr):
             all_values[index].append(energy)
-print all_values
+print(all_values)
 for band in all_values:
     plt.plot(band)
 plt.axis([1, len(all_values[0]), -2, 5])

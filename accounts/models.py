@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -11,7 +11,7 @@ class UserProfileManager(models.Manager):
         return super(UserProfileManager, self).get_queryset().filter(institution='Duke University')
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
     description = models.CharField(max_length=100, default='')
     institution = models.CharField(max_length=100, default='')
     website = models.URLField(default='')

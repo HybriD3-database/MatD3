@@ -9,6 +9,8 @@ from django.contrib.auth.views import (
     password_reset_complete
 )
 
+app_name="accounts"
+
 urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^login/$', login, {'template_name': 'accounts/login.html'}, name='login'),

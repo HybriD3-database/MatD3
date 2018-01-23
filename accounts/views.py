@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.shortcuts import render, redirect
 from accounts.forms import (
@@ -45,14 +45,14 @@ def register(request):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': account_activation_token.make_token(user),
             })
-            print "message created"
+            print("message created")
             mail_subject = 'Activate your Hybrid3 database account.'
             from_email = 'Hybrid3 materials database <hybrid3project@duke.edu>'
             to_email = form.cleaned_data.get('email')
-            print "user email gotten"
+            print("user email gotten")
             email = EmailMessage(mail_subject, message, from_email, to=[to_email])
             email.send()
-            print "email sent"
+            print("email sent")
             text = 'Please confirm your email address to complete the registration'
         else:
             text = 'Registration failed. Please correct the errors and try again.'
@@ -99,7 +99,7 @@ def edit_profile(request):
     if request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=user)
         user_profile_form = EditProfileForm(request.POST, request.FILES, instance=user_profile)
-        print request.FILES
+        print(request.FILES)
         if user_form.is_valid() and user_profile_form.is_valid():
             user_form.save()
             user_profile_form.save()

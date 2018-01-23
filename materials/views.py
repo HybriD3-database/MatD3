@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 from django.conf.urls.static import static
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
@@ -165,7 +165,7 @@ class SearchFormView(generic.TemplateView):
         # default search_term
         search_term = "formula"
         if form.is_valid():
-            print form.cleaned_data
+            print(form.cleaned_data)
             search_text = form.cleaned_data['search_text']
             search_term = request.POST.get('search_term')
             if search_term == 'exciton_emission':
@@ -214,13 +214,13 @@ class AddAPosView(generic.TemplateView):
 
     def post(self, request):
         form = AddAtomicPositions(request.POST, request.FILES)
-        print request.FILES
+        print(request.FILES)
         if form.is_valid():
-            print "form is valid"
+            print("form is valid")
             apos_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print "system pk is: " + sys_pk
+            print("system pk is: " + sys_pk)
             text = ""
             if pub_pk > 0 and sys_pk > 0:
                 apos_form.publication = Publication.objects.get(pk=pub_pk)
@@ -418,7 +418,7 @@ class AddSystemView(generic.TemplateView):
                     Q(compound_name__iexact=compound_name) | Q(formula__iexact=formula)
                 )
             )
-            print q_set_len
+            print(q_set_len)
             if q_set_len == 0:
                 form.save()
                 text = "System successfully added!"
@@ -478,12 +478,12 @@ class AddExcitonEmissionView(generic.TemplateView):
     def post(self, request):
         form = AddExcitonEmission(request.POST, request.FILES)
         if form.is_valid():
-            print "form is valid"
+            print("form is valid")
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             # print "file: ", request.FILES.get('pl_file')
-            print "system pk is: " + sys_pk
+            print("system pk is: " + sys_pk)
             text = ""
             if pub_pk > 0 and sys_pk > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
@@ -522,11 +522,11 @@ class AddBandGapView(generic.TemplateView):
     def post(self, request):
         form = AddBandGap(request.POST)
         if form.is_valid():
-            print "form is valid"
+            print("form is valid")
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print "system pk is: " + sys_pk
+            print("system pk is: " + sys_pk)
             text = ""
             if pub_pk > 0 and sys_pk > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
@@ -561,11 +561,11 @@ class AddBandStructureView(generic.TemplateView):
     def post(self, request):
         form = AddBandStructure(request.POST)
         if form.is_valid():
-            print "form is valid"
+            print("form is valid")
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print "system pk is: " + sys_pk
+            print("system pk is: " + sys_pk)
             text = ""
             if pub_pk > 0 and sys_pk > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)

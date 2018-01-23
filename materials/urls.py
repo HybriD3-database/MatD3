@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.conf.urls import url
 from .views import *
 
+app_name="materials"
 # Create your tests here.
 urlpatterns = [
         # url(r'^$', HomeView.as_view(), name='materials_home'),
