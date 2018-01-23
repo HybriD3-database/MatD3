@@ -1,0 +1,12 @@
+cycler==0.10.0
+Django==2.0.1
+Jinja2==2.10
+MarkupSafe==1.0
+matplotlib==2.1.2
+mpld3==0.3
+numpy==1.14.0
+Pillow==5.0.0
+pyparsing==2.2.0
+python-dateutil==2.6.1
+pytz==2017.3
+six==1.11.0
