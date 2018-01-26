@@ -15,17 +15,7 @@
       <div class="col-md-8">
         <h4>Molecular Model</h4>
         {% if entry.fhi_file %}
-        <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
-        <!-- <script src="{% static 'jsmol/js2/core/package.js' %}"></script> -->
-        <script>
-          Jmol.getApplet("jmolApplet0", {
-          // script:"load {% static 'materials/input.in' %}",
-          script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}.in",
-          j2sPath: "{% static 'jsmol/j2s' %}",
-          height: 400,
-          width: 600,
-          })
-        </script>
+          <div id="jmol"></div>
         {% else %}
         <h3>Atomic Positions file unavailable</h3>
         {% endif %}
@@ -93,12 +83,12 @@
             {% endif %}
           {% endwith %}
         </td>
-        <td>
+        <!-- <td>
           <h4>Band Gap</h4>
           {% with entry=object.bandgap_set.all|first %}
             {% if entry %}
             <p class="details">{{entry.band_gap}} eV</p>
-            <!-- Phase: {{entry.phase}} <br> -->
+            Phase: {{entry.phase}} <br>
             Temperature: {{entry.temperature}} K <br>
             Method: {{entry.method}} <br>
             Source: {{entry.publication.author}} <br>
@@ -114,13 +104,16 @@
             <a href="{% url "materials:all_entries" id=object.id type="band_gap"%}">See all entries</a>
             {% endif %}
           {% endwith %}
-        </td>
+        </td> -->
         <td>
           <h4>Band Structure</h4>
           {% with entry=object.bandstructure_set.all|first %}
             {% if entry %}
-            <p class="details">{{entry.band_structure}}</p>
-            <!-- Phase: {{entry.phase}} <br> -->
+            {% if entry.folder_location %}
+              <div id="bs-graph"></div>
+              {% else %}
+              <h3>Band Structure file unavailable</h3>
+              {% endif %}
             Temperature: {{entry.temperature}} K <br>
             Method: {{entry.method}} <br>
             Source: {{entry.publication.author}} <br>
@@ -144,11 +137,33 @@
 
 {% endblock %}
 {% block script %}
+<!-- could potentially change to server served -->
 {% with entry=object.excitonemission_set.all|first %}
 <script type="text/javascript">
 $(document).ready(function() {
-  // console.log("Shane's nephew");
   $('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html")
+});
+</script>
+{% endwith %}
+{% with entry=object.bandstructure_set.all|first %}
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#bs-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs.html")
+});
+</script>
+{% endwith %}
+{% with entry=object.atomicpositions_set.all|first %}
+<script src="{% static 'jsmol/JSmol.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+  $('#jmol').html(
+    Jmol.getAppletHtml("jmolApplet0", {
+    script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}.in",
+    j2sPath: "{% static 'jsmol/j2s' %}",
+    height: 400,
+    width: 600,
+    })
+  )
 });
 </script>
 {% endwith %}

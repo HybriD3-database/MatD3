@@ -94,7 +94,6 @@ class AddBandStructure(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AddBandStructure, self).__init__(*args, **kwargs)
-        # self.fields['band_structure_files'].widget.attrs['class'] = "btn btn-default"
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
