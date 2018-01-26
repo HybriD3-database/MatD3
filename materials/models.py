@@ -95,10 +95,11 @@ class BandGap(IDInfo):
 
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    band_structure = models.CharField(max_length=100)
+    folder_location = models.CharField(max_length=500, blank=True)
+    # band_structure = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.band_structure
+        return self.folder_location
 
 class BondAngle(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)

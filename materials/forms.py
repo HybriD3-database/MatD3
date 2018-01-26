@@ -86,13 +86,15 @@ class AddBandGap(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
 class AddBandStructure(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'band_structure')
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments')
+    band_structure_files = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
     class Meta:
         model = BandStructure
-        exclude = ('contributor', 'publication', 'system')
+        exclude = ('contributor', 'publication', 'system', 'folder_location')
 
     def __init__(self, *args, **kwargs):
         super(AddBandStructure, self).__init__(*args, **kwargs)
+        # self.fields['band_structure_files'].widget.attrs['class'] = "btn btn-default"
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 

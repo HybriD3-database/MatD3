@@ -19,6 +19,7 @@ import csv
 import os
 from .rangeparser import parserange
 from .plotting.pl_plotting import plotpl
+from .plotting.bs_plotting import plotbs
 
 dictionary = {
 "exciton_emission": ExcitonEmission,
@@ -520,7 +521,7 @@ class AddBandGapView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddBandGap(request.POST)
+        form = AddBandGap(request.POST, request.FILES)
         if form.is_valid():
             print("form is valid")
             new_form = form.save(commit=False)
@@ -559,22 +560,39 @@ class AddBandStructureView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddBandStructure(request.POST)
+        form = AddBandStructure(request.POST, request.FILES)
         if form.is_valid():
-            print("form is valid")
+            print("Form is valid")
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print("system pk is: " + sys_pk)
+            # print("system pk is: " + sys_pk)
             text = ""
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
-                text += "Publication and System obtained, "
+                text += "Settings ready. "
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
-                    text += "UserProfile obtained. Form successfully saved"
+                    bs_folder_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_bs" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
+                    new_form.folder_location = bs_folder_loc
+                    try:
+                        os.mkdir(bs_folder_loc)
+                    except:
+                        pass
+                    files = request.FILES.getlist("band_structure_files")
+                    for f in files:
+                        filename = f.name
+                        print("filename is: {}", (f.name))
+                        full_filename = os.path.join(bs_folder_loc, filename)
+                        print("file writen to: {}", (full_filename))
+                        with open(full_filename, 'wb+') as write_bs:
+                            for chunk in f.chunks():
+                                write_bs.write(chunk)
+                    text += "Band structure files uploaded. "
+                    plotbs(bs_folder_loc)
+                    text += "Band structure plotted. "
                     new_form.save()
                 else:
                     text = "Failed to submit, please login and try again."
