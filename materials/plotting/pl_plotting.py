@@ -90,4 +90,5 @@ def plotpl(filename):
     save_name = "{}.html".format(filename.split(".")[0])
     mpld3.save_html(fig, save_name)
     plt.close()
+    return exciton_peak
     # mpld3.fig_to_html(plt_figure)

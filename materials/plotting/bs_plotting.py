@@ -16,15 +16,49 @@
 #
 #  output band 0.0 0.0 0.0 0.5 0.0 0.0 100 Gamma <End_point_name>
 #
-
-from pylab import *
-from numpy.linalg import *
-from numpy import dot,cross,pi
-from scipy.interpolate import spline
+import matplotlib
+matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import mpld3
 import os,sys
+
+from pylab import *
+from matplotlib import rcParams
+from mpld3 import plugins
+from numpy.linalg import *
+from numpy import dot,cross,pi
+from scipy.interpolate import spline
+
+rcParams.update({'figure.autolayout': True})
+
+css = """
+.mpld3-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.mpld3-tooltip .tooltiptext {
+    width: 150px;
+    height: 40px;
+    background-color: #ececec;
+    font-size: 11px;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 5px;
+}
+
+.mpld3-tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #ececec transparent transparent transparent;
+}
+"""
 
 ###########
 # OPTIONS #
@@ -40,6 +74,12 @@ def plotbs(location):
                                     # For zero or negative values, the script will use its default value, the maximum
                                     # value for the DOS in the energy window read in
     ########################
+
+    # new settings added by xd24
+    width, height = (5, 4)
+    tooltipwidth, tooltipheight = (150, 40)
+    x_label, y_label = ('Lattice Positions', 'Energy/eV')
+    title = "Band Structure"
 
     print("Plotting bands for FHI-aims!")
     print("============================")
@@ -187,10 +227,13 @@ def plotbs(location):
         ax_bands.set_ylabel("E [eV]")
         PLOT_DOS_REVERSED = True
     elif PLOT_BANDS:
-        width, height = (5, 4)
+
         fig = plt.figure(figsize=(width,height))
         ax_bands = fig.add_subplot(111)
-        ax_bands.grid(True, alpha=0.7)
+        ax_bands.set_xlabel(x_label)
+        ax_bands.set_ylabel(y_label)
+        ax_bands.set_title(title, size=20)
+        ax_bands.grid(linestyle=":")
         # ax_bands = subplot(1,1,1)
     elif PLOT_DOS:
         ax_dos = subplot(1,1,1)
@@ -202,8 +245,8 @@ def plotbs(location):
     if PLOT_BANDS:
         print("Plotting %i band segments..."%len(band_segments))
 
-        if output_x_axis:
-            ax_bands.axhline(0,color=(1.,0.,0.),linestyle=":")
+        # if output_x_axis:
+        #     ax_bands.axhline(0,color=(1.,0.,0.),linestyle=":")
 
         prev_end = band_segments[0][0]
         distance = band_totlength/30.0 # distance between line segments that do not coincide
@@ -252,12 +295,12 @@ def plotbs(location):
                     band_energies = asarray(new_band_energies).transpose() # recombine the bands back into the original data format
                     xvals = xvals_smooth # and use the interpolated x axis
                 for b in range(band_energies.shape[1]):
-                    ax_bands.plot(xvals,band_energies[:,b],color=' br'[spin])
+                    points = ax_bands.plot(xvals,band_energies[:,b],color=' br'[spin])
 
         tickx = []
         tickl = []
         for xpos,l in labels:
-            ax_bands.axvline(xpos,color='k',linestyle=":")
+            # ax_bands.axvline(xpos,color='k',linestyle=":")
             tickx += [ xpos ]
             if len(l)>1:
                 l = "$\\"+l+"$"
@@ -424,6 +467,23 @@ def plotbs(location):
         if event.key == "q": sys.exit(0)
     connect('key_press_event', on_q_exit)
     # show()
+
+    # Experimental work on the tooltip
+    # labels = []
+    # print("xvals & band_energies")
+    # print(xvals)
+    # print(band_energies)
+    # for i,j in zip(xvals,band_energies[:,b]):
+    #     label = '<div class="tooltiptext">'
+    #     label += '{2}: {1} <br> {3}: {0}'.format(i, j, y_label, x_label)
+    #     label += '</div>'
+    #     labels.append(label)
+    #
+    # print("points[0]")
+    # print(points[0])
+    # tooltip = plugins.PointHTMLTooltip(points[0], labels, hoffset=-tooltipwidth/2, voffset=-tooltipheight, css=css)
+    #
+    # plugins.connect(fig, tooltip)
 
     # save_name = "{}.html".format(filename.split(".")[0])
     save_name = "{}.html".format(get_path(folder_name))

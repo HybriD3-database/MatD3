@@ -35,7 +35,7 @@
           </div>
           <div>
             Phase: {{entry.phase}} <br>
-            Temperature: {{entry.temperature}} K <br>
+            Temperature: {{entry.temperature}}K <br>
             Method: {{entry.method}} <br>
             Source: {{entry.publication.author}} <br>
             {% if entry.publication.doi_isbn %}
@@ -63,24 +63,22 @@
           {% else %}
           <h3>Photoluminescence file unavailable</h3>
           {% endif %}
-          <h4>Exciton Emission Peak</h4>
-            {% if entry %}
-            <p class="details">{{entry.exciton_emission}} nm</p>
-            <!-- Phase: {{entry.phase}} <br> -->
-            Temperature: {{entry.temperature}} K <br>
-            Method: {{entry.method}} <br>
-            Source: {{entry.publication.author}} <br>
-            {% if entry.publication.doi_isbn %}
-            Publication: {{entry.publication.doi_isbn}} <br>
-            {% endif %}
-            <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">Download Exciton Emission Peak</a>
-            {% else %}
-            <h3>No data available</h3>
-            {% endif %}
-            {% if object.excitonemission_set.all|length > 1 %}
-            <br>
-            <a href="{% url "materials:all_entries" id=object.id type="exciton_emission"%}">See all entries</a>
-            {% endif %}
+          {% if entry %}
+          Exciton Emission Peak: {{entry.exciton_emission}}nm <br>
+          Temperature: {{entry.temperature}}K <br>
+          Method: {{entry.method}} <br>
+          Source: {{entry.publication.author}} <br>
+          {% if entry.publication.doi_isbn %}
+          Publication: {{entry.publication.doi_isbn}} <br>
+          {% endif %}
+          <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">Download Exciton Emission Peak</a>
+          {% else %}
+          <h3>No data available</h3>
+          {% endif %}
+          {% if object.excitonemission_set.all|length > 1 %}
+          <br>
+          <a href="{% url "materials:all_entries" id=object.id type="exciton_emission"%}">See all entries</a>
+          {% endif %}
           {% endwith %}
         </td>
         <!-- <td>
@@ -89,7 +87,7 @@
             {% if entry %}
             <p class="details">{{entry.band_gap}} eV</p>
             Phase: {{entry.phase}} <br>
-            Temperature: {{entry.temperature}} K <br>
+            Temperature: {{entry.temperature}}K <br>
             Method: {{entry.method}} <br>
             Source: {{entry.publication.author}} <br>
             {% if entry.publication.doi_isbn %}
@@ -106,29 +104,31 @@
           {% endwith %}
         </td> -->
         <td>
-          <h4>Band Structure</h4>
-          {% with entry=object.bandstructure_set.all|first %}
-            {% if entry %}
-            {% if entry.folder_location %}
-              <div id="bs-graph"></div>
-              {% else %}
-              <h3>Band Structure file unavailable</h3>
+          <div class="text-justify">
+            <h4>Band Structure</h4>
+            {% with entry=object.bandstructure_set.all|first %}
+              {% if entry %}
+              {% if entry.folder_location %}
+                <div id="bs-graph"></div>
+                {% else %}
+                <h3>Band Structure file unavailable</h3>
+                {% endif %}
+              Temperature: {{entry.temperature}}K <br>
+              Method: {{entry.method}} <br>
+              Source: {{entry.publication.author}} <br>
+              {% if entry.publication.doi_isbn %}
+              Publication: {{entry.publication.doi_isbn}} <br>
               {% endif %}
-            Temperature: {{entry.temperature}} K <br>
-            Method: {{entry.method}} <br>
-            Source: {{entry.publication.author}} <br>
-            {% if entry.publication.doi_isbn %}
-            Publication: {{entry.publication.doi_isbn}} <br>
-            {% endif %}
-            <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">Download Band Structure</a>
-            {% else %}
-            <h3>No data available</h3>
-            {% endif %}
-            {% if object.bandstructure_set.all|length > 1 %}
-            <br>
-            <a href="{% url "materials:all_entries" id=object.id type="band_structure"%}">See all entries</a>
-            {% endif %}
-          {% endwith %}
+              <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">Download Band Structure <br> (includes geometry.in & control.in files)</a>
+              {% else %}
+              <h3>No data available</h3>
+              {% endif %}
+              {% if object.bandstructure_set.all|length > 1 %}
+              <br>
+              <a href="{% url "materials:all_entries" id=object.id type="band_structure"%}">See all entries</a>
+              {% endif %}
+            {% endwith %}
+          </div>
         </td>
       </tr>
     </table>
@@ -140,16 +140,12 @@
 <!-- could potentially change to server served -->
 {% with entry=object.excitonemission_set.all|first %}
 <script type="text/javascript">
-$(document).ready(function() {
-  $('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html")
-});
+$('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html");
 </script>
 {% endwith %}
 {% with entry=object.bandstructure_set.all|first %}
 <script type="text/javascript">
-$(document).ready(function() {
-  $('#bs-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs.html")
-});
+$('#bs-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs.html");
 </script>
 {% endwith %}
 {% with entry=object.atomicpositions_set.all|first %}

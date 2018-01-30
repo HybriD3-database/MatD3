@@ -11,7 +11,7 @@
 <span class="icon-bar"></span>
 <span class="icon-bar"></span>
 </button>
-<a class="navbar-brand" href="#">Hybrid3 database</a>
+<a class="navbar-brand" href="#">Hybrid&#xb3; database</a>
 </div>
 
 <!-- Collect the nav links, forms, and other content for toggling -->
@@ -25,7 +25,6 @@
 {% if user.is_authenticated %}
 <li><a href="{% url 'materials:add_a_pos'%}">Add Atomic Positions</a></li>
 <li><a href="{% url 'materials:add_exciton_emission'%}">Add Exciton Emission</a></li>
-<li><a href="{% url 'materials:add_band_gap'%}">Add Band Gap</a></li>
 <li><a href="{% url 'materials:add_band_structure'%}">Add Band Structure</a></li>
 {% else %}
 {% endif %}

@@ -8,12 +8,14 @@
 <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
     {% csrf_token %}
     <div id="publication-search-result">
-      Search by publication title, journal name, or full name of author.
     </div>
     <div id="system-search-result">
-      Search by compound name or formula.
     </div>
     {{ band_structure_form.as_p }}
+    <p class="alert alert-info">
+      Please refer to the FHI-aims manual for file specifications:
+      <a class="alert-link" href="https://aimsclub.fhi-berlin.mpg.de/data/download/fhi-aims.171221.tgz">Download FHI-aims manual</a>
+    </p>
     <button type="submit" class="btn btn-default">Submit new band structure</button>
 </form>
 {% endblock %}

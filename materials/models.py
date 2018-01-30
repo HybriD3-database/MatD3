@@ -69,19 +69,31 @@ class Phase(models.Model):
     def __str__(self):
         return self.phase
 
+class Method(models.Model):
+    method = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.method
+
+class SpecificMethod(models.Model):
+    specific_method = models.CharField(max_length=500)
+
+    def __str__(self):
+        return self.specific_method
+
 class IDInfo(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
     contributor = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
     temperature = models.CharField(max_length=20, blank=True)
     phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
-    method = models.CharField(max_length=100)
-    specific_method = models.CharField(max_length=100)
+    method = models.ForeignKey(Method, on_delete=models.PROTECT, null=True)
+    specific_method = models.ForeignKey(SpecificMethod, on_delete=models.PROTECT, null=True)
     comments = models.CharField(max_length=1000, blank=True)
 
 class ExcitonEmission(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    pl_file = models.FileField(upload_to=pl_file_name, blank=True)
     exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
+    pl_file = models.FileField(upload_to=pl_file_name, blank=True)
 
     def __str__(self):
         return str(self.exciton_emission)
@@ -118,7 +130,6 @@ class BondLength(IDInfo):
 
 class AtomicPositions(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    fhi_file = models.FileField(upload_to=file_name, blank=True)
     a = models.CharField(max_length=10)
     b = models.CharField(max_length=10)
     c = models.CharField(max_length=10)
@@ -127,6 +138,7 @@ class AtomicPositions(IDInfo):
     gamma = models.CharField(max_length=10)
     volume = models.CharField(max_length=10, blank=True)
     Z = models.CharField(max_length=10, blank=True)
+    fhi_file = models.FileField(upload_to=file_name, blank=True)
 
     def __str__(self):
         return self.phase.phase + " " + self.system.formula

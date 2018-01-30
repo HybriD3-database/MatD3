@@ -466,7 +466,6 @@ class AddTemperature(generic.TemplateView):
 
 class AddExcitonEmissionView(generic.TemplateView):
     template_name = 'materials/add_exciton_emission.html'
-
     def get(self, request):
         search_form = SearchForm()
         exciton_emission_form = AddExcitonEmission()
@@ -489,15 +488,24 @@ class AddExcitonEmissionView(generic.TemplateView):
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
-                text += "Publication and System obtained, "
+                # text += "Publication and System obtained, "
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
-                    text += "UserProfile obtained. Form successfully saved"
-                    new_form.save()
+                    text += "Form successfully saved"
+                    ee_model = new_form.save()
+                    print(ee_model)
                     pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
                     # print pl_file_loc
-                    plotpl(pl_file_loc)
+
+                    # Testing feature: automatically populate exciton_emission field with ee peak obtained from graph
+                    # if pl_file_loc:
+                    #     exciton_emission_peak = plotpl(pl_file_loc)
+                    #     print("Model pk")
+                    #     print(ee_model.pk)
+                    #     ee_object = ExcitonEmission.objects.get(pk=ee_model.pk)
+                    #     ee_object.exciton_emission = exciton_emission_peak
+                    #     ee_object.save()
                     # add function to set the exciton emission peak to what is reflected in the graph
                 else:
                     text = "Failed to submit, please login and try again."

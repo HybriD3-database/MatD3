@@ -63,7 +63,9 @@ class AddExcitonEmission(forms.ModelForm):
         model = ExcitonEmission
         exclude = ('contributor', 'publication', 'system')
         labels = {
-            "exciton_emission": "Exciton Emission (eV)"
+            "pl_file": "Photoluminescence file",
+            "exciton_emission": "Exciton Emission (eV)",
+            "phase": "Crystal system"
         }
 
     def __init__(self, *args, **kwargs):
@@ -77,7 +79,8 @@ class AddBandGap(forms.ModelForm):
         model = BandGap
         exclude = ('contributor', 'publication', 'system')
         labels = {
-            "band_gap": "Band Gap (eV)"
+            "band_gap": "Band Gap (eV)",
+            "phase": "Crystal system"
         }
 
     def __init__(self, *args, **kwargs):
@@ -88,9 +91,14 @@ class AddBandGap(forms.ModelForm):
 class AddBandStructure(forms.ModelForm):
     all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments')
     band_structure_files = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    control_in_file = forms.FileField(label="\"control.in\" file")
+    geometry_in_file = forms.FileField(label="\"geometry.in\" file")
     class Meta:
         model = BandStructure
         exclude = ('contributor', 'publication', 'system', 'folder_location')
+        labels = {
+            "phase": "Crystal system"
+        }
 
     def __init__(self, *args, **kwargs):
         super(AddBandStructure, self).__init__(*args, **kwargs)
@@ -102,6 +110,10 @@ class AddAtomicPositions(forms.ModelForm):
     class Meta:
         model = AtomicPositions
         exclude = ('contributor', 'publication', 'system')
+        labels = {
+            "fhi_file": "\"geometry.in\" file",
+            "phase": "Crystal system"
+        }
 
     def __init__(self, *args, **kwargs):
         super(AddAtomicPositions, self).__init__(*args, **kwargs)
