@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from django.conf.urls.static import static
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
@@ -15,11 +14,14 @@ from accounts.models import UserProfile
 
 # Create your views here.
 from myproject.settings.prod import MEDIA_ROOT, MEDIA_URL
-import csv
-import os
 from .rangeparser import parserange
 from .plotting.pl_plotting import plotpl
 from .plotting.bs_plotting import plotbs
+
+import csv
+import os
+import zipfile
+from io import BytesIO
 
 dictionary = {
 "exciton_emission": ExcitonEmission,
@@ -76,32 +78,142 @@ def data_dl(request, type, id):
                 lines = f.read().splitlines()
                 for line in lines:
                     response.write(line + "\n")
-            # file_ext = "in"
         else:
             response.write("#-Atomic Positions input file not available-")
         # return redirect(MEDIA_URL + 'uploads/%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic))
+        response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
     elif type == "exciton_emission":
         p_obj = System.objects.get(excitonemission=obj)
-        write_headers()
-        response.write("\n#Exciton Emission Peak: ")
-        response.write(obj.excitonemission)
-    elif type == "band_gap":
-        p_obj = System.objects.get(bandgap=obj)
-        write_headers()
-        response.write("\n#Band Gap: ")
-        response.write(obj.bandgap)
+        file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic, p_obj.inorganic)
+        # response = HttpResponse(content_type='text/csv')
+        # response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.csv' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+        # writer = csv.writer(response)
+        # with open(filename, 'r') as csvfile:
+        #     plots =  csv.reader(csvfile, delimiter=',')
+        #     for row in plots:
+        #         response.write(row)
+        dir_in_str = os.path.join(MEDIA_ROOT, 'uploads')
+        # directory = os.fsencode(dir_in_str)
+        meta_filename = file_name_prefix + '.txt'
+        meta_filepath = os.path.join(dir_in_str, meta_filename)
+        if not os.path.exists(meta_filepath):
+            with open(meta_filepath, "w") as meta_file:
+                meta_file.write("#Hybrid3 Materials Database\n")
+                meta_file.write("\n#System: ")
+                meta_file.write(p_obj.compound_name)
+                meta_file.write("\n#Temperature: ")
+                meta_file.write(obj.temperature)
+                meta_file.write("\n#Phase: ")
+                meta_file.write(str(obj.phase.phase))
+                meta_file.write("\n#Author: ")
+                meta_file.write(str(obj.publication.author))
+                meta_file.write("\n#Journal: ")
+                meta_file.write(str(obj.publication.journal))
+                meta_file.write("\n#Source: ")
+                meta_file.write(str(obj.publication.doi_isbn))
+                meta_file.write("\n#Exciton Emission Peak: ")
+                meta_file.write(str(obj.excitonemission))
+        pl_file_csv = os.path.join(dir_in_str, file_name_prefix + ".csv")
+        filenames = []
+        filenames.append(meta_filepath)
+        filenames.append(pl_file_csv)
+        # print("Filenames")
+        print(filenames)
+
+        zip_dir = file_name_prefix
+        zip_filename = "%s.zip" % zip_dir
+        # change response type and content deposition type
+        string = BytesIO()
+
+        zf = zipfile.ZipFile(string, "w")
+
+        for fpath in filenames:
+            # Calculate path for file in zip
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+
+            # Add file, at correct path
+            print("Fpath")
+            print(fpath)
+            print("Zip Path")
+            print(zip_path)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(), content_type = "application/x-zip-compressed")
+        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+    # elif type == "band_gap":
+    #     p_obj = System.objects.get(bandgap=obj)
+    #     write_headers()
+    #     response.write("\n#Band Gap: ")
+    #     response.write(obj.bandgap)
+    #     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+
     elif type == "band_structure":
         p_obj = System.objects.get(bandstructure=obj)
-        write_headers()
-        response.write("\n#Band Structure: ")
-        response.write(obj.bandstructure)
+        # write_headers()
+        dir_in_str = obj.folder_location
+        compound_name = dir_in_str.split("/")[-1]
+        print(dir_in_str)
+        directory = os.fsencode(dir_in_str)
+        meta_filename = '%s_%s_%s_%s.txt' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+        meta_filepath = os.path.join(dir_in_str, meta_filename)
+        if not os.path.exists(meta_filepath):
+            with open(meta_filepath, "w") as meta_file:
+                meta_file.write("#Hybrid3 Materials Database\n")
+                meta_file.write("\n#System: ")
+                meta_file.write(p_obj.compound_name)
+                meta_file.write("\n#Temperature: ")
+                meta_file.write(obj.temperature)
+                meta_file.write("\n#Phase: ")
+                meta_file.write(str(obj.phase.phase))
+                meta_file.write("\n#Author: ")
+                meta_file.write(str(obj.publication.author))
+                meta_file.write("\n#Journal: ")
+                meta_file.write(str(obj.publication.journal))
+                meta_file.write("\n#Source: ")
+                meta_file.write(str(obj.publication.doi_isbn))
 
+        filenames = []
+        for f in os.listdir(dir_in_str):
+            filename = os.fsdecode(f)
+            if filename.endswith(".in") or filename.endswith(".out") or filename.endswith(".txt"):
+                full_filename = os.path.join(dir_in_str, filename)
+                filenames.append(full_filename)
+                # response.write("\n")
+                # response.write(full_filename)
+        print("Filenames")
+        print(filenames)
+
+        zip_dir = compound_name
+        zip_filename = "%s.zip" % zip_dir
+        # change response type and content deposition type
+        string = BytesIO()
+
+        zf = zipfile.ZipFile(string, "w")
+
+        for fpath in filenames:
+            # Calculate path for file in zip
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+
+            # Add file, at correct path
+            print("Fpath")
+            print(fpath)
+            print("Zip Path")
+            print(zip_path)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(), content_type = "application/x-zip-compressed")
+        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
     # with open(MEDIA_ROOT + '/uploads/%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic)) as f:
     #     lines = f.read().splitlines()
     #     for line in lines:
     #         response.write(line + "\n")
     # might need to work on a more efficient method
-    response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
     return response
 
 # The following two defines views for each specific entry type
@@ -589,8 +701,12 @@ class AddBandStructureView(generic.TemplateView):
                         os.mkdir(bs_folder_loc)
                     except:
                         pass
-                    files = request.FILES.getlist("band_structure_files")
-                    for f in files:
+                    band_files = request.FILES.getlist("band_structure_files")
+                    control_file = request.FILES.get("control_in_file")
+                    geometry_file = request.FILES.get("geometry_in_file")
+                    band_files.append(control_file)
+                    band_files.append(geometry_file)
+                    for f in band_files:
                         filename = f.name
                         print("filename is: {}", (f.name))
                         full_filename = os.path.join(bs_folder_loc, filename)
@@ -598,6 +714,14 @@ class AddBandStructureView(generic.TemplateView):
                         with open(full_filename, 'wb+') as write_bs:
                             for chunk in f.chunks():
                                 write_bs.write(chunk)
+                    # control_filename = os.path.join(bs_folder_loc, control_file.name)
+                    # geometry_filename = os.path.join(bs_folder_loc, geometry_file.name)
+                    # with open(control_filename, 'wb+') as write:
+                    #     for chunk in control_file.chunks():
+                    #         write.write(chunk)
+                    # with open(geometry_filename, 'wb+') as write:
+                    #     for chunk in geometry_file.chunks():
+                    #         write.write(chunk)
                     text += "Band structure files uploaded. "
                     plotbs(bs_folder_loc)
                     text += "Band structure plotted. "

@@ -34,20 +34,32 @@
             &gamma;: {{entry.gamma}} <br>
           </div>
           <div>
-            Phase: {{entry.phase}} <br>
+            Crystal system: {{entry.phase}} <br>
+            {% if entry.temperature %}
             Temperature: {{entry.temperature}}K <br>
+            {% endif %}
             Method: {{entry.method}} <br>
             Source: {{entry.publication.author}} <br>
             {% if entry.publication.doi_isbn %}
             Publication: {{entry.publication.doi_isbn}} <br>
             {% endif %}
-            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">Download Atomic Positions</a>
+            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+            <button type="button" class="btn btn-primary"/>
+            <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+            Atomic Positions
+            </button>
+            </a>
             {% else %}
             <h3>No data available</h3>
             {% endif %}
             {% if object.atomicpositions_set.all|length > 1 %}
             <br>
-            <a href="{% url "materials:all_a_pos" id=object.id %}">See all entries</a>
+            <a href="{% url "materials:all_a_pos" id=object.id %}">
+            <button type="button" class="btn btn-info">
+            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+            See all entries
+            </button>
+            </a>
             {% endif %}
           </div>
       </div>
@@ -65,19 +77,32 @@
           {% endif %}
           {% if entry %}
           Exciton Emission Peak: {{entry.exciton_emission}}nm <br>
+          {% if entry.temperature %}
           Temperature: {{entry.temperature}}K <br>
+          {% endif %}
+          Crystal system: {{entry.phase}} <br>
           Method: {{entry.method}} <br>
           Source: {{entry.publication.author}} <br>
           {% if entry.publication.doi_isbn %}
           Publication: {{entry.publication.doi_isbn}} <br>
           {% endif %}
-          <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">Download Exciton Emission Peak</a>
+          <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
+          <button type="button" class="btn btn-primary"/>
+          <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+          Exciton Emission Peak
+          </button>
+          </a>
           {% else %}
           <h3>No data available</h3>
           {% endif %}
           {% if object.excitonemission_set.all|length > 1 %}
           <br>
-          <a href="{% url "materials:all_entries" id=object.id type="exciton_emission"%}">See all entries</a>
+          <a href="{% url "materials:all_entries" id=object.id type="exciton_emission"% }">
+          <button type="button" class="btn btn-info">
+          <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+          See all entries
+          </button>
+          </a>
           {% endif %}
           {% endwith %}
         </td>
@@ -107,25 +132,38 @@
           <div class="text-justify">
             <h4>Band Structure</h4>
             {% with entry=object.bandstructure_set.all|first %}
-              {% if entry %}
               {% if entry.folder_location %}
-                <div id="bs-graph"></div>
-                {% else %}
-                <h3>Band Structure file unavailable</h3>
-                {% endif %}
+              <div id="bs-graph"></div>
+              {% else %}
+              <h3>Band Structure file unavailable</h3>
+              {% endif %}
+              {% if entry %}
+              {% if entry.temperature %}
               Temperature: {{entry.temperature}}K <br>
+              {% endif %}
+              Crystal system: {{entry.phase}} <br>
               Method: {{entry.method}} <br>
               Source: {{entry.publication.author}} <br>
               {% if entry.publication.doi_isbn %}
               Publication: {{entry.publication.doi_isbn}} <br>
               {% endif %}
-              <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">Download Band Structure <br> (includes geometry.in & control.in files)</a>
+              <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
+              <button type="button" class="btn btn-primary">
+              <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+              Band Structure <br> (w/ geometry.in & control.in)
+              </button>
+              </a>
               {% else %}
               <h3>No data available</h3>
               {% endif %}
               {% if object.bandstructure_set.all|length > 1 %}
               <br>
-              <a href="{% url "materials:all_entries" id=object.id type="band_structure"%}">See all entries</a>
+              <a href="{% url "materials:all_entries" id=object.id type="band_structure"%}">
+              <button type="button" class="btn btn-info">
+              <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+              See all entries
+              </button>
+              </a>
               {% endif %}
             {% endwith %}
           </div>
