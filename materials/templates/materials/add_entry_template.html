@@ -31,6 +31,7 @@
   ajax_submit($('#search-publication'), $('#publication-search-result'));
   ajax_submit($('#search-system'), $('#system-search-result'));
   </script>
+  {% include 'materials/ajax_alert_form_submit.html' %}
   {% block ajaxscript %}
   {% endblock %}
 {% endblock %}

@@ -21,7 +21,6 @@
           </ul> -->
           <select id="search_term" name="search_term" class="selectpicker">
             {% for search_term in search_terms %}
-            print search_term
             <option value="{{search_term.0}}">{{search_term.1}}</option>
             {% endfor %}
           </select>
@@ -32,7 +31,6 @@
         </div>
       </div>
     </div>
-
 </form>
 <br>
 <ul id="results" class="list-group">

@@ -1,19 +1,47 @@
 {% if systems.count > 0 %}
   <table class="table">
     <thead>
+      {% if search_term == "exciton_emission" %}
       <tr>
-        <th>#</th>
+        <!-- <th>System PK</th>
+        <th>AP PK</th>
+        <th>EE PK</th>
+        <th>BS PK</th> -->
         <th>Compound Name</th>
         <th>Exciton Emission</th>
+        <th>Download</th>
       </tr>
-
-  {% for system in systems %}
-  <tr>
-    <td>{{forloop.counter}}</td>
-    <td><a href="/materials/{{system.id}}">{{system.compound_name}}</a></td>
-    <td>{{system.excitonemission_set.all|first}}</td>
+      {% for ee in systems %}
+      <tr>
+    {% with ee.system.pk as sys_pk %}
+    {% with ee.system.atomicpositions_set.all.0.pk as apos_pk %}
+    {% with ee.system.bandstructure_set.all.0.pk as bs_pk %}
+    <!-- <td>{{sys_pk}}</td>
+    <td>{{apos_pk}}</td>
+    <td>{{ee.pk}}</td>
+    <td>{{bs_pk}}</td> -->
+    <td><a href="/materials/{{ee.system.pk}}_{{apos_pk}}_{{ee.pk}}_{{bs_pk}}">{{ee.system}}</a></td>
+    <td>{{ee.exciton_emission}}</td>
+    <td>
+    <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.id %}">
+    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+    Exciton Emission Peak
+    </a></td>
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
   </tr>
   {% endfor %}
+  {% else %}
+  <tr>
+    <th>Compound Name</th>
+  </tr>
+  {% for system in systems %}
+  <tr>
+    <td><a href="/materials/{{system.pk}}">{{system}}</a></td>
+  </tr>
+  {% endfor %}
+  {% endif %}
 </thead>
 </table>
 {% else %}

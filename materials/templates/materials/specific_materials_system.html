@@ -8,10 +8,10 @@
   <!-- Default panel contents -->
   <div class="panel-heading">
     <b>Material</b>
-    <h3>{{object.compound_name}}</h3>
+    <h3>{{system.compound_name}}</h3>
   </div>
   <div class="panel-body">
-    {% with object.atomicpositions_set.all|first as entry %}
+    {% with atomic_positions as entry %}
       <div class="col-md-8">
         <h4>Molecular Model</h4>
         {% if entry.fhi_file %}
@@ -52,8 +52,8 @@
             {% else %}
             <h3>No data available</h3>
             {% endif %}
-            {% if object.atomicpositions_set.all|length > 1 %}
-            <a href="{% url "materials:all_a_pos" id=object.id %}">
+            {% if system.atomicpositions_set.all|length > 1 %}
+            <a href="{% url "materials:all_a_pos" id=system.id %}">
             <button type="button" class="btn btn-info">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
             See all entries
@@ -67,7 +67,7 @@
     <table class="table">
       <tr>
         <td>
-          {% with entry=object.excitonemission_set.all|first %}
+          {% with entry=exciton_emission %}
           <h4>Photoluminescence Graph</h4>
           {% if entry.pl_file %}
             <div id="pl-graph"></div>
@@ -94,8 +94,8 @@
           {% else %}
           <h3>No data available</h3>
           {% endif %}
-          {% if object.excitonemission_set.all|length > 1 %}
-          <a href="{% url "materials:all_entries" id=object.id type="exciton_emission"% }">
+          {% if system.excitonemission_set.all|length > 1 %}
+          <a href="{% url "materials:all_entries" id=system.id type="exciton_emission"% }">
           <button type="button" class="btn btn-info">
           <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
           See all entries
@@ -106,7 +106,7 @@
         </td>
         <!-- <td>
           <h4>Band Gap</h4>
-          {% with entry=object.bandgap_set.all|first %}
+          {% with entry=system.bandgap_set.all|first %}
             {% if entry %}
             <p class="details">{{entry.band_gap}} eV</p>
             Phase: {{entry.phase}} <br>
@@ -120,16 +120,16 @@
             {% else %}
             <h3>No data available</h3>
             {% endif %}
-            {% if object.bandgap_set.all|length > 1 %}
+            {% if system.bandgap_set.all|length > 1 %}
             <br>
-            <a href="{% url "materials:all_entries" id=object.id type="band_gap"%}">See all entries</a>
+            <a href="{% url "materials:all_entries" id=system.id type="band_gap"%}">See all entries</a>
             {% endif %}
           {% endwith %}
         </td> -->
         <td>
           <div class="text-justify">
             <h4>Band Structure</h4>
-            {% with entry=object.bandstructure_set.all|first %}
+            {% with entry=band_structure %}
               {% if entry.folder_location %}
               <div id="bs-graph"></div>
               {% else %}
@@ -154,8 +154,8 @@
               {% else %}
               <h3>No data available</h3>
               {% endif %}
-              {% if object.bandstructure_set.all|length > 1 %}
-              <a href="{% url "materials:all_entries" id=object.id type="band_structure"%}">
+              {% if system.bandstructure_set.all|length > 1 %}
+              <a href="{% url "materials:all_entries" id=system.id type="band_structure"%}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
               See all entries
@@ -173,23 +173,23 @@
 {% endblock %}
 {% block script %}
 <!-- could potentially change to server served -->
-{% with entry=object.excitonemission_set.all|first %}
+{% with entry=exciton_emission %}
 <script type="text/javascript">
-$('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html");
+$('#pl-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_pl.html");
 </script>
 {% endwith %}
-{% with entry=object.bandstructure_set.all|first %}
+{% with entry=band_structure %}
 <script type="text/javascript">
-$('#bs-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_bs.html");
+$('#bs-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs.html");
 </script>
 {% endwith %}
-{% with entry=object.atomicpositions_set.all|first %}
+{% with entry=atomic_positions %}
 <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
 <script>
 $(document).ready(function() {
   $('#jmol').html(
     Jmol.getAppletHtml("jmolApplet0", {
-    script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}.in",
+    script: "load /media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}.in",
     j2sPath: "{% static 'jsmol/j2s' %}",
     height: 400,
     width: 600,

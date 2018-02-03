@@ -28,8 +28,9 @@
 
 {% block script %}
 {% include 'materials/ajax_form_submit.html' %}
+{% include 'materials/ajax_alert_form_submit.html' %}
 <script type="text/javascript">
   ajax_submit($('#search-author'), $('#search-result'));
-  ajax_submit($('#add-publication'), $('#feedback'));
+  alert_submit($('#add-publication'), $('#feedback'));
 </script>
 {% endblock %}

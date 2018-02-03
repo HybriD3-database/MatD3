@@ -140,11 +140,13 @@ LOGIN_EXEMPT_URLS = (
     r'^account/reset-password/$',
     r'^account/reset-password/done$',
     r'^account/reset-password/confirm(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-    r'^account/reset-password/complete/$'
+    r'^account/reset-password/complete/$',
 )
 
 AUTH_EXEMPT_URLS = (
     r'^$',
+    r'^media/',
+    r'^static/',
     r'^contact/$',
     r'^materials/$',
     r'^materials/(?P<pk>\d+)$',

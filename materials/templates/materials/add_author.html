@@ -16,10 +16,10 @@
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_form_submit.html' %}
+{% include 'materials/ajax_alert_form_submit.html' %}
 <script type="text/javascript">
   var form = $('#add-author');
   var feedback = $('#results');
-  ajax_submit(form, feedback)
+  alert_submit(form, feedback)
 </script>
 {% endblock %}

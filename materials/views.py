@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.static import static
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseRedirect
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
@@ -313,6 +312,60 @@ class SearchFormView(generic.TemplateView):
 
         return render(request, template_name, args)
 
+class TestSearchFormView(generic.TemplateView):
+    template_name = 'materials/materials_home.html'
+    search_terms = [
+        ['formula','Chemical Formula'],
+        ['organic', 'Organic Component'],
+        ['inorganic', 'Inorganic Component'],
+        ['exciton_emission', 'Exciton Emission']
+    ]
+
+    def get(self, request):
+        return render(request, self.template_name, {'search_terms': self.search_terms})
+
+    def post(self, request):
+        template_name = 'materials/materials_search_results.html'
+        form = SearchForm(request.POST)
+        search_text = ""
+        # default search_term
+        search_term = "formula"
+        if form.is_valid():
+            print(form.cleaned_data)
+            search_text = form.cleaned_data['search_text']
+            search_term = request.POST.get('search_term')
+            if search_term == 'exciton_emission':
+                searchrange = parserange(search_text)
+                if len(searchrange) > 0:
+                    if searchrange[0] == "bidirectional":
+                        if searchrange[3] == ">=":
+                            systems = ExcitonEmission.objects.filter(exciton_emission__gte=searchrange[1]).order_by('-exciton_emission')
+                        elif searchrange[3] == ">":
+                            systems = ExcitonEmission.objects.filter(exciton_emission__gt=searchrange[1]).order_by('-exciton_emission')
+                        if searchrange[4] == "<=":
+                            systems = systems.filter(exciton_emission__lte=searchrange[2]).order_by('-exciton_emission')
+                        elif searchrange[4] == "<":
+                            systems = systems.filter(exciton_emission__lt=searchrange[2]).order_by('-exciton_emission')
+                    elif searchrange[0] == "unidirectional":
+                        if searchrange[2] == ">=":
+                            systems = ExcitonEmission.objects.filter(exciton_emission__gte=searchrange[1]).order_by('-exciton_emission')
+                        elif searchrange[2] == ">":
+                            systems = ExcitonEmission.objects.filter(exciton_emission__gt=searchrange[1]).order_by('-exciton_emission')
+                        elif searchrange[2] == "<=":
+                            systems = ExcitonEmission.objects.filter(exciton_emission__lte=searchrange[1]).order_by('-exciton_emission')
+                        elif searchrange[2] == "<":
+                            systems = ExcitonEmission.objects.filter(exciton_emission__lt=searchrange[1]).order_by('-exciton_emission')
+        # systems = System.objects.filter(compound_name__icontains=search_text)
+            else:
+                systems = search_result(search_term, search_text)
+
+        args = {
+            'systems': systems,
+            'search_term': search_term
+        }
+
+        return render(request, template_name, args)
+
 class AddAPosView(generic.TemplateView):
     template_name = 'materials/add_a_pos.html'
 
@@ -334,24 +387,26 @@ class AddAPosView(generic.TemplateView):
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             print("system pk is: " + sys_pk)
-            text = ""
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 apos_form.publication = Publication.objects.get(pk=pub_pk)
                 apos_form.system = System.objects.get(pk=sys_pk)
-                text += "Publication and System obtained, "
+                # text += "Publication and System obtained, "
                 if request.user.is_authenticated:
                     apos_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
-                    text += "UserProfile obtained. Form successfully saved"
+                    text = "Save success!"
+                    feedback = "success"
                     apos_form.save()
                 else:
                     text = "Failed to submit, please login and try again."
+                    feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
 
-        args = {'form': form, 'text': text}
+        args = {'feedback': feedback, 'text': text}
 
-        return HttpResponse(text)
+        return JsonResponse(args)
 
 class AddPubView(generic.TemplateView):
     template_name = 'materials/add_publication.html'
@@ -378,27 +433,32 @@ class AddPubView(generic.TemplateView):
             doi_isbn = pub_form.cleaned_data["doi_isbn"]
             pk = request.POST.get('author')
             # check if author is found
-            if pk > 0:
+            if int(pk) > 0:
                 # check if doi_isbn is unique/valid, except when field is empty
                 if len(doi_isbn) == 0 or len(Publication.objects.filter(doi_isbn=doi_isbn)) == 0:
                     form.author = Author.objects.get(pk=pk)
                     form.save()
-                    text = "Success!"
+                    text = "Save success!"
+                    feedback = "success"
                 else:
                     text = "Failed to submit, publication is already in database."
+                    feedback = "failure"
             else:
                 text = "Failed to submit, author not found, please try again."
+                feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
         args = {
-                'search_form': search_form,
-                'pub_form': pub_form,
+                # 'search_form': search_form,
+                # 'pub_form': pub_form,
+                'feedback': feedback,
                 'text': text,
-                'initial_state': True,
+                # 'initial_state': True,
                 }
         # return render(request, self.template_name, args)
         # ajax version below
-        return HttpResponse(text)
+        return JsonResponse(args)
 
 
 class SearchPubView(generic.TemplateView):
@@ -472,16 +532,20 @@ class AddAuthorView(generic.TemplateView):
             if q_set_len == 0:
                 input_form.save()
                 text = "Author successfully added!"
+                feedback = "success"
             else:
                 text = "Failed to submit, author is already in database."
+                feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
         args = {
-                'input_form': input_form,
+                # 'input_form': input_form,
+                'feedback': feedback,
                 'text': text
                 }
 
-        return HttpResponse(text);
+        return JsonResponse(args);
 
 class AddTag(generic.TemplateView):
     template_name = 'materials/form.html'
@@ -535,12 +599,17 @@ class AddSystemView(generic.TemplateView):
             if q_set_len == 0:
                 form.save()
                 text = "System successfully added!"
+                feedback = "success"
             else:
                 text = "Failed to submit, system is already in database."
+                feedback = "failure"
         else:
-            return render(request, self.template_name, {'form': form})
+            # return render(request, self.template_name, {'form': form})
+            text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
 
-        return HttpResponse(text);
+        args = {'feedback': feedback, 'text': text}
+        return JsonResponse(args);
 
 class AddPhase(generic.TemplateView):
     template_name = 'materials/form.html'
@@ -596,7 +665,6 @@ class AddExcitonEmissionView(generic.TemplateView):
             sys_pk = request.POST.get('system')
             # print "file: ", request.FILES.get('pl_file')
             print("system pk is: " + sys_pk)
-            text = ""
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
@@ -604,12 +672,12 @@ class AddExcitonEmissionView(generic.TemplateView):
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
-                    text += "Form successfully saved"
+                    text = "Save success!"
+                    feedback = "success"
                     ee_model = new_form.save()
                     print(ee_model)
                     pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
                     # print pl_file_loc
-
                     # Testing feature: automatically populate exciton_emission field with ee peak obtained from graph
                     # if pl_file_loc:
                     #     exciton_emission_peak = plotpl(pl_file_loc)
@@ -621,12 +689,14 @@ class AddExcitonEmissionView(generic.TemplateView):
                     # add function to set the exciton emission peak to what is reflected in the graph
                 else:
                     text = "Failed to submit, please login and try again."
+                    feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
 
-        args = {'form': form, 'text': text}
-
-        return HttpResponse(text)
+        args = {'feedback': feedback, 'text': text}
+        print(args)
+        return JsonResponse(args)
 
 class AddBandGapView(generic.TemplateView):
     template_name = 'materials/add_band_gap.html'
@@ -648,24 +718,27 @@ class AddBandGapView(generic.TemplateView):
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             print("system pk is: " + sys_pk)
-            text = ""
+            # text = ""
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
-                text += "Publication and System obtained, "
+                # text += "Publication and System obtained, "
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
-                    text += "UserProfile obtained. Form successfully saved"
+                    text = "Save success!"
+                    feedback = "success"
                     new_form.save()
                 else:
                     text = "Failed to submit, please login and try again."
+                    feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
 
-        args = {'form': form, 'text': text}
+        args = {'feedback': feedback, 'text': text}
 
-        return HttpResponse(text)
+        return JsonResponse(args)
 
 class AddBandStructureView(generic.TemplateView):
     template_name = 'materials/add_band_structure.html'
@@ -687,11 +760,11 @@ class AddBandStructureView(generic.TemplateView):
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             # print("system pk is: " + sys_pk)
-            text = ""
+            # text = ""
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
-                text += "Settings ready. "
+                # text += "Settings ready. "
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
@@ -722,18 +795,21 @@ class AddBandStructureView(generic.TemplateView):
                     # with open(geometry_filename, 'wb+') as write:
                     #     for chunk in geometry_file.chunks():
                     #         write.write(chunk)
-                    text += "Band structure files uploaded. "
+                    # text += "Band structure files uploaded. "
                     plotbs(bs_folder_loc)
-                    text += "Band structure plotted. "
+                    text = "Band structure plotted. Save success!"
+                    feedback = "success"
                     new_form.save()
                 else:
                     text = "Failed to submit, please login and try again."
+                    feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
 
-        args = {'form': form, 'text': text}
+        args = {'feedback': feedback, 'text': text}
 
-        return HttpResponse(text)
+        return JsonResponse(args)
 
 class AddBondLength(generic.TemplateView):
     template_name = 'materials/form.html'
@@ -752,11 +828,28 @@ class AddBondLength(generic.TemplateView):
 
         return render(request, self.template_name, args)
 
-class HomeView(generic.ListView):
-    template_name = 'materials/materials_home.html'
-    queryset = System.objects.all().order_by('id')
-    context_object_name = 'systems_list'
+# class HomeView(generic.ListView):
+#     template_name = 'materials/materials_home.html'
+#     queryset = System.objects.all().order_by('id')
+#     context_object_name = 'systems_list'
 
 class SystemView(generic.DetailView):
     template_name = 'materials/materials_system.html'
     model = System
+
+class SpecificSystemView(generic.TemplateView):
+    template_name = 'materials/specific_materials_system.html'
+
+    def get(self, request, pk, pk_aa, pk_ee, pk_bs):
+        system = System.objects.get(pk=pk)
+        atomic_positions = system.atomicpositions_set.get(pk=pk_aa)
+        exciton_emission = system.excitonemission_set.get(pk=pk_ee)
+        band_structure = system.bandstructure_set.get(pk=pk_bs)
+        args = {
+            'system': system,
+            'atomic_positions': atomic_positions,
+            'exciton_emission': exciton_emission,
+            'band_structure': band_structure
+        }
+        print(args)
+        return render(request, self.template_name, args)

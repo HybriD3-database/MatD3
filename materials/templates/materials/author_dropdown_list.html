@@ -7,6 +7,8 @@
   {% endfor %}
 </div>
 {% else %}
-  No results found. Please retry with a new search term or
-  <a target="_blank" href="{% url 'materials:add_author' %}">click here to add an author</a>.
+  <div class="alert alert-warning" role="alert">
+    No results found. Please retry with a new search term or
+    <a class="alert-link" target="_blank" href="{% url 'materials:add_author' %}">click here to add an author</a>.
+  </div>
 {% endif %}
