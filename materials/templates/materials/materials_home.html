@@ -40,6 +40,10 @@
 {% block script %}
 {% include 'materials/ajax_form_submit.html' %}
 <script type="text/javascript">
+  $('#search_term').change(function() {
+      if(this.value == "exciton_emission")
+      $('#search_text').attr("placeholder", "Search by range using > | >= | < | <= or a combination");
+    });
  ajax_submit($('#search-system'), $('#results'));
 </script>
 {% endblock %}

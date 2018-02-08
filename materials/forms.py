@@ -1,3 +1,5 @@
+# -*- coding: utf-8-*-
+
 from django import forms
 from materials.models import *
 
@@ -26,6 +28,11 @@ class AddPublication(forms.ModelForm):
     class Meta:
         model = Publication
         exclude = ('author',)
+        labels = {
+            "journal": "Journal or Publisher",
+            "vol": "Volume",
+            "doi_isbn": "doi or ISBN"
+        }
         # fields = ('author', 'title', 'journal', 'vol', 'pages_start', 'pages_end', 'year', 'doi_isbn',)
 
     def __init__(self, *args, **kwargs):
@@ -64,7 +71,7 @@ class AddExcitonEmission(forms.ModelForm):
         exclude = ('contributor', 'publication', 'system')
         labels = {
             "pl_file": "Photoluminescence file",
-            "exciton_emission": "Exciton Emission (eV)",
+            "exciton_emission": "Exciton Emission Peak (nm)",
             "phase": "Crystal system"
         }
 
@@ -112,7 +119,13 @@ class AddAtomicPositions(forms.ModelForm):
         exclude = ('contributor', 'publication', 'system')
         labels = {
             "fhi_file": "\"geometry.in\" file",
-            "phase": "Crystal system"
+            "phase": "Crystal system",
+            "a": "a",
+            "b": "b",
+            "c": "c",
+            "alpha": "α",
+            "beta": "β",
+            "gamma": "γ"
         }
 
     def __init__(self, *args, **kwargs):

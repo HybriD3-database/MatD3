@@ -2,12 +2,14 @@
 
 {% block body %}
 <div class="jumbotron">
-  <h1 class="display-2">Welcome,
-    {% if user.is_authenticated %}
-     {{user.first_name}}
-    {% endif %}
-  </h1>
+  {% if user.is_authenticated %}
+  <h1 class="display-2">Welcome, {{user.first_name}}</h1>
   <p class="lead">to the Hybrid&sup3; materials database</p>
+  {% else %}
+  <h2>Welcome to the </h2>
+  <h1 class="display-2">Hybrid&sup3; materials database</h1>
+  {% endif %}
+
   <hr>
   <p>
   Feel free to explore the many features we have here.

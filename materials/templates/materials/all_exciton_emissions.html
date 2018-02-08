@@ -1,9 +1,14 @@
 {% extends 'materials/all_entries.html' %}
 
-{% block heading %}Excition Emission{% endblock %}
+{% block heading %}Exciton Emission{% endblock %}
 
 {% block entry_type %}{{entry.exciton_emission}} nm{% endblock %}
 
 {% block dl_link %}
-  <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">Download Exciton Emission Peak</a>
+  <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
+  <button type="button" class="btn btn-primary"/>
+  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+    Exciton Emission Data
+  </button>
+  </a>
 {% endblock %}

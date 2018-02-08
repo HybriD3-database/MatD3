@@ -34,7 +34,12 @@
             {% if entry.publication.doi_isbn %}
             Publication: {{entry.publication.doi_isbn}} <br>
             {% endif %}
-            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">Download Atomic Positions</a>
+            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+            <button type="button" class="btn btn-primary"/>
+            <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+            Atomic Positions
+            </button>
+            </a>
           </div>
       </div>
       {% endfor %}

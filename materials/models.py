@@ -5,6 +5,17 @@ from os.path import basename
 import os
 
 UserProfile = "accounts.UserProfile"
+
+def file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s_%s_apos.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    return os.path.join('uploads', filename)
+
+def pl_file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    return os.path.join('uploads', filename)
+
 # Create your models here.
 class Post(models.Model):
     post = models.CharField(max_length=500)
@@ -16,7 +27,7 @@ class Author(models.Model):
     institution = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.first_name + " " + self.last_name + " " + self.institution
+        return self.first_name + " " + self.last_name + ", " + self.institution
 
 class Publication(models.Model):
     author = models.ForeignKey(Author, on_delete=models.PROTECT)
@@ -30,16 +41,6 @@ class Publication(models.Model):
 
     def __str__(self):
         return self.title
-
-def file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_apos.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
-    return os.path.join('uploads', filename)
-
-def pl_file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
-    return os.path.join('uploads', filename)
 
 class Tag(models.Model):
     tag = models.CharField(max_length=50)
@@ -61,7 +62,7 @@ class System(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return self.compound_name
+        return self.formula
 
 class Phase(models.Model):
     phase = models.CharField(max_length=50)

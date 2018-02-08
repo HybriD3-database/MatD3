@@ -31,7 +31,7 @@ dictionary = {
 # Download a specific entry type
 def data_dl(request, type, id):
     # Create the HttpResponse object with the text/plain header.
-    response = HttpResponse(content_type='text/plain')
+    response = HttpResponse(content_type='text/fhi-aims')
     dictionary['atomic_positions'] = AtomicPositions
     obj = dictionary[type].objects.get(id=id)
     # need to find a way to change type of file based on the property being described
@@ -71,7 +71,7 @@ def data_dl(request, type, id):
         response.write("\n#&gamma;: ")
         response.write(obj.gamma)
         response.write("\n\n")
-        fileloc = MEDIA_ROOT + '/uploads/%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic)
+        fileloc = MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' % (obj.phase, p_obj.organic, p_obj.inorganic)
         if(os.path.isfile(fileloc)):
             with open(fileloc) as f:
                 lines = f.read().splitlines()
@@ -469,16 +469,20 @@ class SearchPubView(generic.TemplateView):
         search_text = ""
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
-        author_search = Author.objects.filter(
+            print(search_text)
+            author_search = Author.objects.filter(
             Q(first_name__icontains=search_text) | Q(last_name__icontains=search_text) | Q(institution__icontains=search_text)
             )
-        if len(author_search) > 0:
-            author = author_search[0]
-        else:
-            author = None
-        search_result = Publication.objects.filter(
-            Q(title__icontains=search_text) | Q(journal__icontains=search_text) | Q(author=author)
-            )
+            print (author_search)
+            if len(author_search) > 0:
+                author = author_search.all()[:1]
+                print(author)
+            else:
+                author = None
+            print(author)
+            search_result = Publication.objects.filter(
+                Q(title__icontains=search_text) | Q(journal__icontains=search_text) | Q(author=author)
+                )
         return render(request, self.template_name, {'search_result': search_result})
 
 # This is for add publication page
@@ -492,7 +496,7 @@ class SearchAuthorView(generic.TemplateView):
         search_text = ""
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
-        search_result = Author.objects.filter(
+            search_result = Author.objects.filter(
             Q(first_name__icontains=search_text) | Q(last_name__icontains=search_text) | Q(institution__icontains=search_text)
             )
             # add last_name filter
@@ -609,6 +613,7 @@ class AddSystemView(generic.TemplateView):
             feedback = "failure"
 
         args = {'feedback': feedback, 'text': text}
+        print(args)
         return JsonResponse(args);
 
 class AddPhase(generic.TemplateView):
@@ -679,10 +684,10 @@ class AddExcitonEmissionView(generic.TemplateView):
                     pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
                     # print pl_file_loc
                     # Testing feature: automatically populate exciton_emission field with ee peak obtained from graph
-                    # if pl_file_loc:
-                    #     exciton_emission_peak = plotpl(pl_file_loc)
-                    #     print("Model pk")
-                    #     print(ee_model.pk)
+                    if pl_file_loc:
+                        exciton_emission_peak = plotpl(pl_file_loc)
+                        print("Model pk")
+                        # print(ee_model.pk)
                     #     ee_object = ExcitonEmission.objects.get(pk=ee_model.pk)
                     #     ee_object.exciton_emission = exciton_emission_peak
                     #     ee_object.save()

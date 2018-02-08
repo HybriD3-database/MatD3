@@ -95,7 +95,7 @@
           <h3>No data available</h3>
           {% endif %}
           {% if system.excitonemission_set.all|length > 1 %}
-          <a href="{% url "materials:all_entries" id=system.id type="exciton_emission"% }">
+          <a href="{% url "materials:all_entries" id=system.id type="exciton_emission" %}">
           <button type="button" class="btn btn-info">
           <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
           See all entries
@@ -155,7 +155,7 @@
               <h3>No data available</h3>
               {% endif %}
               {% if system.bandstructure_set.all|length > 1 %}
-              <a href="{% url "materials:all_entries" id=system.id type="band_structure"%}">
+              <a href="{% url "materials:all_entries" id=system.id type="band_structure" %}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
               See all entries

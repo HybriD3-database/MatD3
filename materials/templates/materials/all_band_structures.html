@@ -5,5 +5,10 @@
 {% block entry_type %}{{entry.band_structure}}{% endblock %}
 
 {% block dl_link %}
-  <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">Download Band Structure</a>
+  <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
+  <button type="button" class="btn btn-primary"/>
+  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+    Band Structure
+  </button>
+  </a>
 {% endblock %}

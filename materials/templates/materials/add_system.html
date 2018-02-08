@@ -15,8 +15,8 @@
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_form_submit.html' %}
+{% include 'materials/ajax_alert_form_submit.html' %}
 <script type="text/javascript">
-  ajax_submit($('#add-system'), $('#results'));
+  alert_submit($('#add-system'), $('#results'));
 </script>
 {% endblock %}
