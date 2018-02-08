@@ -159,9 +159,10 @@ AUTH_EXEMPT_URLS = (
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # email settings
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.office365.com'
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = ''
-# EMAIL_HOST_PASSWORD = EMAIL_PASSWORD
-# EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get("HYBRID3_EMAIL_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("HYBRID3_EMAIL_PASSWORD", "")
+DEFAULT_FROM_EMAIL = 'Hybrid3 materials database <hybrid3project@duke.edu>'
+EMAIL_USE_TLS = True

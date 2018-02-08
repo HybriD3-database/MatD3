@@ -9,16 +9,19 @@ EditUserForm,
 ChangePasswordForm
 )
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode, int_to_base36, base36_to_int
 from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+
 from .tokens import account_activation_token
 from .models import UserProfile
-from django.core.mail import EmailMessage
+from myproject.settings.prod import DEFAULT_FROM_EMAIL
+
 
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
@@ -40,27 +43,39 @@ def register(request):
             user.save()
             current_site = get_current_site(request)
             message = render_to_string('accounts/activation_email.html', {
-                'user':user,
-                'domain':current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'user': user,
+                'domain': current_site.domain,
+                'uid': int_to_base36(user.pk),
                 'token': account_activation_token.make_token(user),
             })
             print("message created")
-            mail_subject = 'Activate your Hybrid3 database account.'
-            from_email = 'Hybrid3 materials database <hybrid3project@duke.edu>'
+            mail_subject = 'Activate your Hybrid3 materials database account.'
+            from_email = DEFAULT_FROM_EMAIL
             to_email = form.cleaned_data.get('email')
             print("user email gotten")
             email = EmailMessage(mail_subject, message, from_email, to=[to_email])
             email.send()
             print("email sent")
-            text = 'Please confirm your email address to complete the registration'
+            text = 'Please confirm your email address to complete the registration.'
+            feedback = "success"
         else:
-            text = 'Registration failed. Please correct the errors and try again.'
+            text = 'Registration failed. Please correct the error(s) and try again.'
+            feedback = "error"
+        error_list = ""
+        if form.errors:
+            for field in form:
+                for error in field.errors:
+                    error_list += error
+                    error_list += "<br>"
+
+        # errors = str(form.errors)
+        print(error_list)
         args = {
-        'form': form,
+        'errors': error_list,
+        'feedback': feedback,
         'text': text
         }
-        return render(request, 'accounts/reg_form.html', args)
+        return JsonResponse(args)
     else:
         form = RegistrationForm()
 
@@ -70,7 +85,7 @@ def register(request):
 def activate(request, uidb64, token):
     template = 'accounts/activate.html'
     try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
+        uid = force_text(base36_to_int(uidb64))
         user = User.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None

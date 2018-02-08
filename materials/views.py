@@ -12,7 +12,7 @@ from .models import System, AtomicPositions, ExcitonEmission, BandGap, BandStruc
 from accounts.models import UserProfile
 
 # Create your views here.
-from myproject.settings.prod import MEDIA_ROOT, MEDIA_URL
+from myproject.settings.base import MEDIA_ROOT, MEDIA_URL
 from .rangeparser import parserange
 from .plotting.pl_plotting import plotpl
 from .plotting.bs_plotting import plotbs
