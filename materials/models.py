@@ -22,8 +22,8 @@ class Post(models.Model):
 
 class Author(models.Model):
     """Contain data of authors"""
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     institution = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
@@ -31,19 +31,19 @@ class Author(models.Model):
 
 class Publication(models.Model):
     author = models.ForeignKey(Author, on_delete=models.PROTECT)
-    title = models.CharField(max_length=100) #what's a good title?
-    journal = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=1000) #what's a good title?
+    journal = models.CharField(max_length=500, blank=True)
     vol = models.CharField(max_length=100) #should I use Integer or char?
     pages_start = models.CharField(max_length=10)
     pages_end = models.CharField(max_length=10)
     year = models.CharField(max_length=4) #OR models.DateField() #what's a good title?
-    doi_isbn = models.CharField(max_length=30, blank=True)
+    doi_isbn = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return self.title
 
 class Tag(models.Model):
-    tag = models.CharField(max_length=50)
+    tag = models.CharField(max_length=100)
 
     def __str__(self):
         return self.tag
@@ -52,13 +52,13 @@ class Tag(models.Model):
 class System(models.Model):
     """Contains meta data for investigated system. """
     # use fhi file format.
-    compound_name = models.CharField(max_length=100)
-    group = models.CharField(max_length=30)
-    formula = models.CharField(max_length=100)
-    organic = models.CharField(max_length=30)
-    inorganic = models.CharField(max_length=30)
+    compound_name = models.CharField(max_length=1000)
+    group = models.CharField(max_length=100)
+    formula = models.CharField(max_length=200)
+    organic = models.CharField(max_length=100)
+    inorganic = models.CharField(max_length=100)
     last_update = models.DateField(default=datetime.now)
-    description = models.TextField(max_length=100, blank=True)
+    description = models.TextField(max_length=1000, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
@@ -131,14 +131,14 @@ class BondLength(IDInfo):
 
 class AtomicPositions(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    a = models.CharField(max_length=10)
-    b = models.CharField(max_length=10)
-    c = models.CharField(max_length=10)
-    alpha = models.CharField(max_length=10)
-    beta = models.CharField(max_length=10)
-    gamma = models.CharField(max_length=10)
-    volume = models.CharField(max_length=10, blank=True)
-    Z = models.CharField(max_length=10, blank=True)
+    a = models.CharField(max_length=50)
+    b = models.CharField(max_length=50)
+    c = models.CharField(max_length=50)
+    alpha = models.CharField(max_length=50)
+    beta = models.CharField(max_length=50)
+    gamma = models.CharField(max_length=50)
+    volume = models.CharField(max_length=50, blank=True)
+    Z = models.CharField(max_length=50, blank=True)
     fhi_file = models.FileField(upload_to=file_name, blank=True)
 
     def __str__(self):

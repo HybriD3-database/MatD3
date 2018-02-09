@@ -51,10 +51,16 @@ class AddPhase(forms.ModelForm):
         fields = '__all__'
 
 class AddSystem(forms.ModelForm):
-    all_fields = ('compound_name', 'group', 'formula', 'organic', 'inorganic', 'description', 'tags')
+    all_fields = ('compound_name', 'formula', 'group', 'organic', 'inorganic', 'description', 'tags')
     class Meta:
         model = System
         exclude = ('last_update',)
+        labels = {
+            "formula": "Chemical formula",
+            "group": "Common formula",
+            "organic": "Organic component",
+            "inorganic": "Inorganic component",
+        }
         widgets = {
             "description": forms.Textarea(attrs={'rows': 4}),
         }

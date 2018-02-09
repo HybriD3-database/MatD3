@@ -24,7 +24,7 @@
 <ul class="nav navbar-nav navbar-right">
 {% if user.is_authenticated %}
 <li><a href="{% url 'materials:add_a_pos'%}">Add Atomic Positions</a></li>
-<li><a href="{% url 'materials:add_exciton_emission'%}">Add Exciton Emission</a></li>
+<li><a href="{% url 'materials:add_exciton_emission'%}">Add Photoluminescence</a></li>
 <li><a href="{% url 'materials:add_band_structure'%}">Add Band Structure</a></li>
 {% else %}
 {% endif %}

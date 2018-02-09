@@ -44,16 +44,17 @@
               {% if entry.publication.doi_isbn %}
               Publication: {{entry.publication.doi_isbn}} <br>
               {% endif %}
-              <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
-              <button type="button" class="btn btn-primary"/>
-              <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-              Atomic Positions
-              </button>
-              </a>
             </div>
+            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+            <button type="button" class="btn btn-primary"/>
+            <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+            Atomic Positions
+            </button>
+            </a>
             {% else %}
               <h3>No data available</h3>
             {% endif %}
+            
             {% if object.atomicpositions_set.all|length > 1 %}
               <a href="{% url "materials:all_a_pos" id=object.id %}">
               <button type="button" class="btn btn-info">
