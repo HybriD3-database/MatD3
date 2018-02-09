@@ -49,10 +49,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'myproject.middleware.LoginRequiredMiddleware'
+    'mainproject.middleware.LoginRequiredMiddleware'
 ]
 
-ROOT_URLCONF = 'myproject.urls'
+ROOT_URLCONF = 'mainproject.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'myproject.wsgi.application'
+WSGI_APPLICATION = 'mainproject.wsgi.application'
 
 
 # Database

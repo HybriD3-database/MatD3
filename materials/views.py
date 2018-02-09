@@ -12,7 +12,7 @@ from .models import System, AtomicPositions, ExcitonEmission, BandGap, BandStruc
 from accounts.models import UserProfile
 
 # Create your views here.
-from myproject.settings.base import MEDIA_ROOT, MEDIA_URL
+from mainproject.settings.base import MEDIA_ROOT, MEDIA_URL
 from .rangeparser import parserange
 from .plotting.pl_plotting import plotpl
 from .plotting.bs_plotting import plotbs
@@ -231,22 +231,22 @@ def all_entries(request, id, type):
     return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'data_type': type})
 
 #The following two views make up a WIP ajax search
-def search_entries(request):
-    if request.method == 'POST':
-        search_text = request.POST['search_text']
-    else:
-        search_text = ''
-
-    systems = System.objects.filter(compound_name__icontains=search_text)
-
-    return render(request, 'materials/materials_search_results.html', {'systems': systems})
-
-def materials(request):
-    args = {}
-    # args.update(csrf(request))
-    args['materials'] = System.objects.all()
-
-    return render(request, 'materials/materials_ajax_search.html', args)
+# def search_entries(request):
+#     if request.method == 'POST':
+#         search_text = request.POST['search_text']
+#     else:
+#         search_text = ''
+#
+#     systems = System.objects.filter(compound_name__icontains=search_text)
+#
+#     return render(request, 'materials/materials_search_results.html', {'systems': systems})
+#
+# def materials(request):
+#     args = {}
+#     args.update(csrf(request))
+#     args['materials'] = System.objects.all()
+#
+#     return render(request, 'materials/materials_ajax_search.html', args)
 
 def search_result(search_term, search_text):
     search_results = {
@@ -258,62 +258,62 @@ def search_result(search_term, search_text):
     return search_results[search_term]
 
 # materials search form
+# class SearchFormView(generic.TemplateView):
+#     template_name = 'materials/materials_search.html'
+#     search_terms = [
+#         ['formula','Chemical Formula'],
+#         ['organic', 'Organic Component'],
+#         ['inorganic', 'Inorganic Component'],
+#         ['exciton_emission', 'Exciton Emission']
+#     ]
+#
+#     def get(self, request):
+#         return render(request, self.template_name, {'search_terms': self.search_terms})
+#
+#     def post(self, request):
+#         template_name = 'materials/materials_search_results.html'
+#         form = SearchForm(request.POST)
+#         search_text = ""
+#         # default search_term
+#         search_term = "formula"
+#         if form.is_valid():
+#             print(form.cleaned_data)
+#             search_text = form.cleaned_data['search_text']
+#             search_term = request.POST.get('search_term')
+#             if search_term == 'exciton_emission':
+#                 searchrange = parserange(search_text)
+#                 if len(searchrange) > 0:
+#                     if searchrange[0] == "bidirectional":
+#                         if searchrange[3] == ">=":
+#                             systems = System.objects.filter(excitonemission__exciton_emission__gte=searchrange[1])
+#                         elif searchrange[3] == ">":
+#                             systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
+#                         if searchrange[4] == "<=":
+#                             systems = systems.filter(excitonemission__exciton_emission__lte=searchrange[2])
+#                         elif searchrange[4] == "<":
+#                             systems = systems.filter(excitonemission__exciton_emission__lt=searchrange[2])
+#                     elif searchrange[0] == "unidirectional":
+#                         if searchrange[2] == ">=":
+#                             systems = System.objects.filter(excitonemission__exciton_emission__gte=searchrange[1])
+#                         elif searchrange[2] == ">":
+#                             systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
+#                         elif searchrange[2] == "<=":
+#                             systems = System.objects.filter(excitonemission__exciton_emission__lte=searchrange[1])
+#                         elif searchrange[2] == "<":
+#                             systems = System.objects.filter(excitonemission__exciton_emission__lt=searchrange[1])
+#         # systems = System.objects.filter(compound_name__icontains=search_text)
+#             else:
+#                 systems = search_result(search_term, search_text)
+#
+#         args = {
+#             'systems': systems,
+#             'search_terms': self.search_terms
+#         }
+#
+#         return render(request, template_name, args)
+
 class SearchFormView(generic.TemplateView):
-    template_name = 'materials/materials_home.html'
-    search_terms = [
-        ['formula','Chemical Formula'],
-        ['organic', 'Organic Component'],
-        ['inorganic', 'Inorganic Component'],
-        ['exciton_emission', 'Exciton Emission']
-    ]
-
-    def get(self, request):
-        return render(request, self.template_name, {'search_terms': self.search_terms})
-
-    def post(self, request):
-        template_name = 'materials/materials_search_results.html'
-        form = SearchForm(request.POST)
-        search_text = ""
-        # default search_term
-        search_term = "formula"
-        if form.is_valid():
-            print(form.cleaned_data)
-            search_text = form.cleaned_data['search_text']
-            search_term = request.POST.get('search_term')
-            if search_term == 'exciton_emission':
-                searchrange = parserange(search_text)
-                if len(searchrange) > 0:
-                    if searchrange[0] == "bidirectional":
-                        if searchrange[3] == ">=":
-                            systems = System.objects.filter(excitonemission__exciton_emission__gte=searchrange[1])
-                        elif searchrange[3] == ">":
-                            systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
-                        if searchrange[4] == "<=":
-                            systems = systems.filter(excitonemission__exciton_emission__lte=searchrange[2])
-                        elif searchrange[4] == "<":
-                            systems = systems.filter(excitonemission__exciton_emission__lt=searchrange[2])
-                    elif searchrange[0] == "unidirectional":
-                        if searchrange[2] == ">=":
-                            systems = System.objects.filter(excitonemission__exciton_emission__gte=searchrange[1])
-                        elif searchrange[2] == ">":
-                            systems = System.objects.filter(excitonemission__exciton_emission__gt=searchrange[1])
-                        elif searchrange[2] == "<=":
-                            systems = System.objects.filter(excitonemission__exciton_emission__lte=searchrange[1])
-                        elif searchrange[2] == "<":
-                            systems = System.objects.filter(excitonemission__exciton_emission__lt=searchrange[1])
-        # systems = System.objects.filter(compound_name__icontains=search_text)
-            else:
-                systems = search_result(search_term, search_text)
-
-        args = {
-            'systems': systems,
-            'search_terms': self.search_terms
-        }
-
-        return render(request, template_name, args)
-
-class TestSearchFormView(generic.TemplateView):
-    template_name = 'materials/materials_home.html'
+    template_name = 'materials/materials_search.html'
     search_terms = [
         ['formula','Chemical Formula'],
         ['organic', 'Organic Component'],
@@ -462,7 +462,7 @@ class AddPubView(generic.TemplateView):
 
 
 class SearchPubView(generic.TemplateView):
-    template_name = 'materials/pub_dropdown_list.html'
+    template_name = 'materials/dropdown_list_pub.html'
     from itertools import chain
     def post(self, request):
         search_form = SearchForm(request.POST)
@@ -488,7 +488,7 @@ class SearchPubView(generic.TemplateView):
 # This is for add publication page
 class SearchAuthorView(generic.TemplateView):
     # template_name = 'materials/add_publication.html'
-    template_name = 'materials/author_dropdown_list.html'
+    template_name = 'materials/dropdown_list_author.html'
 
     def post(self, request):
         search_form = SearchForm(request.POST)
@@ -569,7 +569,7 @@ class AddTag(generic.TemplateView):
         return render(request, self.template_name, args)
 
 class SearchSystemView(generic.TemplateView):
-    template_name = 'materials/system_dropdown_list.html'
+    template_name = 'materials/dropdown_list_system.html'
 
     def post(self, request):
         form = SearchForm(request.POST)
@@ -834,7 +834,7 @@ class AddBondLength(generic.TemplateView):
         return render(request, self.template_name, args)
 
 # class HomeView(generic.ListView):
-#     template_name = 'materials/materials_home.html'
+#     template_name = 'materials/materials_search.html'
 #     queryset = System.objects.all().order_by('id')
 #     context_object_name = 'systems_list'
 
@@ -843,7 +843,7 @@ class SystemView(generic.DetailView):
     model = System
 
 class SpecificSystemView(generic.TemplateView):
-    template_name = 'materials/specific_materials_system.html'
+    template_name = 'materials/materials_system_specific.html'
 
     def get(self, request, pk, pk_aa, pk_ee, pk_bs):
         system = System.objects.get(pk=pk)

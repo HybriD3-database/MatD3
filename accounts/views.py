@@ -20,7 +20,7 @@ from django.core.mail import EmailMessage
 
 from .tokens import account_activation_token
 from .models import UserProfile
-from myproject.settings.prod import DEFAULT_FROM_EMAIL
+from mainproject.settings.prod import DEFAULT_FROM_EMAIL
 
 
 from django.contrib.auth.models import User

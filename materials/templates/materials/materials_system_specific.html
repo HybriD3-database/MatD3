@@ -1,4 +1,4 @@
-{% extends 'materials/materials_nav.html' %}
+{% extends 'materials/materials_base.html' %}
 {% block body %}
 
 {% load static %}
@@ -189,7 +189,7 @@ $('#bs-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.
 $(document).ready(function() {
   $('#jmol').html(
     Jmol.getAppletHtml("jmolApplet0", {
-    script: "load /media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}.in",
+    script: "load /media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_apos.in",
     j2sPath: "{% static 'jsmol/j2s' %}",
     height: 400,
     width: 600,

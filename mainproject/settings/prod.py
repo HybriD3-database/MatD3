@@ -1,4 +1,4 @@
-from myproject.settings.base import *
+from mainproject.settings.base import *
 
 # insert custom settings here
 DEBUG = True
@@ -17,6 +17,6 @@ DATABASES = {
 }
 
 try:
-    from myproject.settings.local import *
+    from mainproject.settings.local import *
 except:
     pass

@@ -7,10 +7,10 @@ from .views import *
 app_name="materials"
 # Create your tests here.
 urlpatterns = [
-        # url(r'^$', HomeView.as_view(), name='materials_home'),
-        url(r'^all$', materials, name='materials'),
-        url(r'^ajax-search$', search_entries, name='ajax_search'),
-        url(r'^$', TestSearchFormView.as_view(), name='materials_home'),
+        url(r'^$', SearchFormView.as_view(), name='materials_home'),
+        # url(r'^all$', materials, name='materials'),
+        # url(r'^ajax-search$', search_entries, name='ajax_search'),
+        # url(r'^$', TestSearchFormView.as_view(), name='materials_home'),
         url(r'^(?P<pk>\d+)$', SystemView.as_view(), name='materials_system'),
         url(r'^(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_ee>\d+)_(?P<pk_bs>\d+)$', SpecificSystemView.as_view(), name='specific_materials_system'),
         url(r'^(?P<id>\d+)/all-a-pos$', all_a_pos, name='all_a_pos'),
