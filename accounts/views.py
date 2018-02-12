@@ -41,22 +41,27 @@ def register(request):
             user.is_active = False
             form.save()
             user.save()
-            current_site = get_current_site(request)
-            message = render_to_string('accounts/activation_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': int_to_base36(user.pk),
-                'token': account_activation_token.make_token(user),
-            })
-            print("message created")
-            mail_subject = 'Activate your Hybrid3 materials database account.'
-            from_email = DEFAULT_FROM_EMAIL
-            to_email = form.cleaned_data.get('email')
-            print("user email gotten")
-            email = EmailMessage(mail_subject, message, from_email, to=[to_email])
-            email.send()
-            print("email sent")
-            text = 'Please confirm your email address to complete the registration.'
+
+            #Uncomment to allow for automatic email confirmation
+
+            # current_site = get_current_site(request)
+            # message = render_to_string('accounts/activation_email.html', {
+            #     'user': user,
+            #     'domain': current_site.domain,
+            #     'uid': int_to_base36(user.pk),
+            #     'token': account_activation_token.make_token(user),
+            # })
+            # print("message created")
+            # mail_subject = 'Activate your Hybrid3 materials database account.'
+            # from_email = DEFAULT_FROM_EMAIL
+            # to_email = form.cleaned_data.get('email')
+            # print("user email gotten")
+            # email = EmailMessage(mail_subject, message, from_email, to=[to_email])
+            # email.send()
+            # print("email sent")
+            # text = 'Please confirm your email address to complete the registration.'
+
+            text = 'Please wait for our staff to activate your account.'
             feedback = "success"
         else:
             text = 'Registration failed. Please correct the error(s) and try again.'
