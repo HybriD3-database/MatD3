@@ -334,6 +334,7 @@ class SearchFormView(generic.TemplateView):
             print(form.cleaned_data)
             search_text = form.cleaned_data['search_text']
             search_term = request.POST.get('search_term')
+            systems_info = []
             if search_term == 'exciton_emission':
                 searchrange = parserange(search_text)
                 if len(searchrange) > 0:
@@ -355,13 +356,30 @@ class SearchFormView(generic.TemplateView):
                             systems = ExcitonEmission.objects.filter(exciton_emission__lte=searchrange[1]).order_by('-exciton_emission')
                         elif searchrange[2] == "<":
                             systems = ExcitonEmission.objects.filter(exciton_emission__lt=searchrange[1]).order_by('-exciton_emission')
+                    for ee in systems:
+                        system_info = {}
+                        system_info["system"] = ee.system.compound_name
+                        system_info["ee"] = str(ee.exciton_emission)
+                        system_info["sys_pk"] = ee.system.pk
+                        system_info["ee_pk"] = ee.pk
+                        if ee.system.atomicpositions_set.count() > 0:
+                            system_info["apos_pk"] = ee.system.atomicpositions_set.first().pk
+                        else:
+                            system_info["apos_pk"] = 0
+                        if ee.system.bandstructure_set.count() > 0:
+                            system_info["bs_pk"] = ee.system.bandstructure_set.first().pk
+                        else:
+                            system_info["bs_pk"] = 0
+                        systems_info.append(system_info)
+                    print(systems_info)
         # systems = System.objects.filter(compound_name__icontains=search_text)
             else:
                 systems = search_result(search_term, search_text)
 
         args = {
             'systems': systems,
-            'search_term': search_term
+            'search_term': search_term,
+            'systems_info': systems_info
         }
 
         return render(request, template_name, args)
@@ -847,9 +865,15 @@ class SpecificSystemView(generic.TemplateView):
 
     def get(self, request, pk, pk_aa, pk_ee, pk_bs):
         system = System.objects.get(pk=pk)
-        atomic_positions = system.atomicpositions_set.get(pk=pk_aa)
         exciton_emission = system.excitonemission_set.get(pk=pk_ee)
-        band_structure = system.bandstructure_set.get(pk=pk_bs)
+        if system.atomicpositions_set.count() > 0:
+            atomic_positions = system.atomicpositions_set.get(pk=pk_aa)
+        else:
+            atomic_positions = None
+        if system.bandstructure_set.count() > 0:
+            band_structure = system.bandstructure_set.get(pk=pk_bs)
+        else:
+            band_structure = None
         args = {
             'system': system,
             'atomic_positions': atomic_positions,

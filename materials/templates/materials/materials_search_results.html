@@ -11,27 +11,22 @@
         <th>Exciton Emission</th>
         <th>Download</th>
       </tr>
-      {% for ee in systems %}
+      {% for ee in systems_info %}
       <tr>
-    {% with ee.system.pk as sys_pk %}
-    {% with ee.system.atomicpositions_set.all.0.pk as apos_pk %}
-    {% with ee.system.bandstructure_set.all.0.pk as bs_pk %}
-    <!-- <td>{{sys_pk}}</td>
-    <td>{{apos_pk}}</td>
-    <td>{{ee.pk}}</td>
-    <td>{{bs_pk}}</td> -->
-    <td><a href="/materials/{{ee.system.pk}}_{{apos_pk}}_{{ee.pk}}_{{bs_pk}}">{{ee.system}}</a></td>
-    <td>{{ee.exciton_emission}}</td>
-    <td>
-    <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.id %}">
-    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-    Exciton Emission Peak
-    </a></td>
-    {% endwith %}
-    {% endwith %}
-    {% endwith %}
-  </tr>
-  {% endfor %}
+
+      <!-- <td>{{sys_pk}}</td>
+      <td>{{apos_pk}}</td>
+      <td>{{ee.pk}}</td>
+      <td>{{bs_pk}}</td> -->
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.system}}</a></td>
+      <td>{{ee.ee}}</td>
+      <td>
+      <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.ee_pk %}">
+      <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+      Exciton Emission Peak
+      </a></td>
+      </tr>
+      {% endfor %}
   {% else %}
   <tr>
     <th>Chemical Formula</th>

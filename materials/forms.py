@@ -76,7 +76,7 @@ class AddExcitonEmission(forms.ModelForm):
         model = ExcitonEmission
         exclude = ('contributor', 'publication', 'system')
         labels = {
-            "pl_file": "Photoluminescence file",
+            "pl_file": "PL file",
             "exciton_emission": "Exciton Emission Peak (nm)",
             "phase": "Crystal system"
         }

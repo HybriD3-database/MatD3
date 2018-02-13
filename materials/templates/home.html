@@ -4,16 +4,26 @@
 <div class="jumbotron">
   {% if user.is_authenticated %}
   <h1 class="display-2">Welcome, {{user.first_name}}</h1>
-  <p class="lead">to the Hybrid&sup3; materials database</p>
+  <p class="lead">to the HybriD&sup3; materials database</p>
   {% else %}
   <h2>Welcome to the </h2>
-  <h1 class="display-2">Hybrid&sup3; materials database</h1>
+  <h1 class="display-2">HybriD&sup3; materials database</h1>
   {% endif %}
-
   <hr>
-  <p>
-  Feel free to explore the many features we have here.
-  </p>
+  <div class="justify-text">
+    <p>
+      The HybriD&sup3; materials database will provide a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
+    </p>
+    <p>
+      At this point, the database is in its infancy.
+    </p>
+    <p>
+      The data will be available under an open access license; we also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.
+    </p>
+    <p>
+      Please contact us if you wish to add specific materials to the database - the database is intended to be accessible by the community and we would be delighted to hear from you.
+    </p>
+  </div>
   <p class="lead">
     <a class="btn btn-primary btn-large" href="{% url 'contact' %}">Learn more</a>
   </p>

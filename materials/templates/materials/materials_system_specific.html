@@ -43,6 +43,7 @@
             {% if entry.publication.doi_isbn %}
             Publication: {{entry.publication.doi_isbn}} <br>
             {% endif %}
+          </div>
             <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
             <button type="button" class="btn btn-primary"/>
             <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
@@ -60,19 +61,19 @@
             </button>
             </a>
             {% endif %}
-          </div>
       </div>
     {% endwith %}
 </div>
+<div class="panel-body">
     <table class="table">
       <tr>
         <td>
           {% with entry=exciton_emission %}
-          <h4>Photoluminescence Graph</h4>
+          <h4>PL Graph</h4>
           {% if entry.pl_file %}
             <div id="pl-graph"></div>
           {% else %}
-          <h3>Photoluminescence file unavailable</h3>
+          <h3>PL file unavailable</h3>
           {% endif %}
           {% if entry %}
           Exciton Emission Peak: {{entry.exciton_emission}}nm <br>
@@ -127,7 +128,6 @@
           {% endwith %}
         </td> -->
         <td>
-          <div class="text-justify">
             <h4>Band Structure</h4>
             {% with entry=band_structure %}
               {% if entry.folder_location %}
@@ -163,7 +163,6 @@
               </a>
               {% endif %}
             {% endwith %}
-          </div>
         </td>
       </tr>
     </table>

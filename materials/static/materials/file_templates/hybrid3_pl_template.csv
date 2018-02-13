@@ -1,4 +1,4 @@
-Wavelength/nm,Exciton Emission,#Sample Photoluminescence csv file; the first row is ignored; use as many row as required
+Wavelength/nm,Exciton Emission,#Sample PL csv file; the first row is ignored; use as many row as required
 350.294,0.89321,
 354.806,0.89322,
 359.411,0.89269,

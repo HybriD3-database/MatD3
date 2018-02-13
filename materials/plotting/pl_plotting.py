@@ -43,7 +43,7 @@ def plotpl(filename):
     width, height = (5, 4)
     tooltipwidth, tooltipheight = (150, 40)
     x_label, y_label = ('Wavelength/nm', 'Exciton Emission')
-    title = "Photoluminescence"
+    title = "PL"
     x = []
     y = []
 

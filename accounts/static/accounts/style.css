@@ -45,6 +45,10 @@
   padding: 30px ;
 }
 
+.justify-text {
+  text-align: justify;
+}
+
 body {
   background-color: #d9d9d9;
   color: #001100;
