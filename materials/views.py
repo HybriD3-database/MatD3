@@ -595,7 +595,9 @@ class SearchSystemView(generic.TemplateView):
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
 
-        search_result = System.objects.filter(compound_name__icontains=search_text)
+        search_result = System.objects.filter(
+            Q(compound_name__icontains=search_text) | Q(group__icontains=search_text) | Q(formula__icontains=search_text)
+        )
         # ajax version
         return render(request, self.template_name, {'search_result': search_result})
 
