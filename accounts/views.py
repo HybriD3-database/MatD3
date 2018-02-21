@@ -52,7 +52,7 @@ def register(request):
             #     'token': account_activation_token.make_token(user),
             # })
             # print("message created")
-            # mail_subject = 'Activate your Hybrid3 materials database account.'
+            # mail_subject = 'Activate your HybriD&#xb3; materials database account.'
             # from_email = DEFAULT_FROM_EMAIL
             # to_email = form.cleaned_data.get('email')
             # print("user email gotten")

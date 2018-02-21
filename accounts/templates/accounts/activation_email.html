@@ -1,7 +1,7 @@
 {% autoescape off %}
 Hi {{ user.first_name }},
 
-Please click on the link below to confirm your registration on the Hybrid3 materials database,
+Please click on the link below to confirm your registration on the HybriD&#xb3; materials database,
 
 http://{{ domain }}{% url 'accounts:activate' uidb64=uid token=token %}
 {% endautoescape %}

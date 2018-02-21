@@ -166,5 +166,5 @@ EMAIL_PORT = 587
 # EMAIL_HOST_PASSWORD = os.environ.get("HYBRID3_EMAIL_PASSWORD", "")
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
-DEFAULT_FROM_EMAIL = 'Hybrid3 materials database <hybrid3project@duke.edu>'
+DEFAULT_FROM_EMAIL = 'HybriD3 materials database <hybrid3project@duke.edu>'
 EMAIL_USE_TLS = True

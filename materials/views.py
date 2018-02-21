@@ -38,7 +38,7 @@ def data_dl(request, type, id):
     # file_ext = "txt"
 
     def write_headers():
-        response.write("#Hybrid3 Materials Database\n\n")
+        response.write("#HybriD³ Materials Database\n\n")
         response.write("#System: ")
         response.write(p_obj.compound_name)
         response.write("\n#Temperature: ")
@@ -97,7 +97,7 @@ def data_dl(request, type, id):
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         if not os.path.exists(meta_filepath):
             with open(meta_filepath, "w") as meta_file:
-                meta_file.write("#Hybrid3 Materials Database\n")
+                meta_file.write("#HybriD³ Materials Database\n")
                 meta_file.write("\n#System: ")
                 meta_file.write(p_obj.compound_name)
                 meta_file.write("\n#Temperature: ")
@@ -160,7 +160,7 @@ def data_dl(request, type, id):
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         if not os.path.exists(meta_filepath):
             with open(meta_filepath, "w") as meta_file:
-                meta_file.write("#Hybrid3 Materials Database\n")
+                meta_file.write("#HybriD³ Materials Database\n")
                 meta_file.write("\n#System: ")
                 meta_file.write(p_obj.compound_name)
                 meta_file.write("\n#Temperature: ")
@@ -250,7 +250,7 @@ def all_entries(request, id, type):
 
 def search_result(search_term, search_text):
     search_results = {
-        'formula': System.objects.filter(formula__icontains=search_text),
+        'formula': System.objects.filter(Q(formula__icontains=search_text) | Q(group__icontains=search_text) | Q(compound_name__icontains=search_text)),
         'organic': System.objects.filter(organic__icontains=search_text),
         'inorganic': System.objects.filter(inorganic__icontains=search_text),
         # 'exciton_emission': System.objects.filter(excitonemission__exciton_emission__icontains=search_text)
@@ -312,10 +312,12 @@ def search_result(search_term, search_text):
 #
 #         return render(request, template_name, args)
 
+
+# search for system page
 class SearchFormView(generic.TemplateView):
     template_name = 'materials/materials_search.html'
     search_terms = [
-        ['formula','Chemical Formula'],
+        ['formula','Formula'],
         ['organic', 'Organic Component'],
         ['inorganic', 'Inorganic Component'],
         ['exciton_emission', 'Exciton Emission']
@@ -358,7 +360,9 @@ class SearchFormView(generic.TemplateView):
                             systems = ExcitonEmission.objects.filter(exciton_emission__lt=searchrange[1]).order_by('-exciton_emission')
                     for ee in systems:
                         system_info = {}
-                        system_info["system"] = ee.system.compound_name
+                        system_info["compound_name"] = ee.system.compound_name
+                        system_info["common_formula"] = ee.system.group
+                        system_info["chemical_formula"] = ee.system.formula
                         system_info["ee"] = str(ee.exciton_emission)
                         system_info["sys_pk"] = ee.system.pk
                         system_info["ee_pk"] = ee.pk

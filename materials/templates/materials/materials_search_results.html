@@ -3,22 +3,17 @@
     <thead>
       {% if search_term == "exciton_emission" %}
       <tr>
-        <!-- <th>System PK</th>
-        <th>AP PK</th>
-        <th>EE PK</th>
-        <th>BS PK</th> -->
+        <th>Compound Name</th>
+        <th>Common Formula</th>
         <th>Chemical Formula</th>
         <th>Exciton Emission</th>
         <th>Download</th>
       </tr>
       {% for ee in systems_info %}
       <tr>
-
-      <!-- <td>{{sys_pk}}</td>
-      <td>{{apos_pk}}</td>
-      <td>{{ee.pk}}</td>
-      <td>{{bs_pk}}</td> -->
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.system}}</a></td>
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.compound_name}}</a></td>
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.common_formula}}</a></td>
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
       <td>{{ee.ee}}</td>
       <td>
       <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.ee_pk %}">
@@ -29,12 +24,16 @@
       {% endfor %}
   {% else %}
   <tr>
+    <th>Compound Name</th>
+    <th>Common Formula</th>
     <th>Chemical Formula</th>
     <th>Organic Component</th>
     <th>Inorganic Component</th>
   </tr>
   {% for system in systems %}
   <tr>
+    <td><a href="/materials/{{system.pk}}">{{system.compound_name}}</a></td>
+    <td><a href="/materials/{{system.pk}}">{{system.group}}</a></td>
     <td><a href="/materials/{{system.pk}}">{{system.formula}}</a></td>
     <td>{{system.organic}}</td>
     <td>{{system.inorganic}}</td>
