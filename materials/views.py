@@ -538,6 +538,7 @@ class AddAuthorView(generic.TemplateView):
         # search_form = SearchForm()
         input_form = AddAuthor()
         # pub_form = AddPublication()
+        print(input_form)
         return render(request, self.template_name, {
         'input_form': input_form,
         })
@@ -573,22 +574,39 @@ class AddAuthorView(generic.TemplateView):
 
         return JsonResponse(args);
 
-class AddTag(generic.TemplateView):
-    template_name = 'materials/form.html'
+class AddTagView(generic.TemplateView):
+    template_name = 'materials/add_tag.html'
 
     def get(self, request):
-        form = AddTag()
-        return render(request, self.template_name, {'form': form})
+        input_form = AddTag()
+        return render(request, self.template_name, {
+        'input_form': input_form,
+        })
 
     def post(self, request):
-        form = AddTag(request.POST)
-        if form.is_valid():
-            form.save()
-            text = form.cleaned_data['email']
+        search_form = SearchForm()
+        input_form = AddTag(request.POST)
+        if input_form.is_valid():
+            tag = input_form.cleaned_data["tag"].lower()
+            q_set_len = len(
+                Tag.objects.filter(tag__iexact=tag)
+                )
+            if q_set_len == 0:
+                input_form.save()
+                text = "Tag successfully added!"
+                feedback = "success"
+            else:
+                text = "Failed to submit, tag is already in database."
+                feedback = "failure"
+        else:
+            text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
+        args = {
+                'feedback': feedback,
+                'text': text
+                }
 
-        args = {'form': form, 'text': text}
-
-        return render(request, self.template_name, args)
+        return JsonResponse(args);
 
 class SearchSystemView(generic.TemplateView):
     template_name = 'materials/dropdown_list_system.html'

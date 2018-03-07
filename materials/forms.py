@@ -21,6 +21,16 @@ class AddAuthor(forms.ModelForm):
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
+class AddTag(forms.ModelForm):
+    all_fields = ('tag',)
+    class Meta:
+        model = Tag
+        fields = ('tag',)
+
+    def __init__(self, *args, **kwargs):
+        super(AddTag, self).__init__(*args, **kwargs)
+        for fieldname in self.all_fields:
+            self.fields[fieldname].widget.attrs['class'] = "form-control"
 # class SearchAuthor(forms.Form):
 #     search_text = forms.CharField(label='Search author', max_length=100)
 class AddPublication(forms.ModelForm):
@@ -39,11 +49,6 @@ class AddPublication(forms.ModelForm):
         super(AddPublication, self).__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = "form-control"
-
-class AddTag(forms.ModelForm):
-    class Meta:
-        model = Tag
-        fields = ('tag',)
 
 class AddPhase(forms.ModelForm):
     class Meta:

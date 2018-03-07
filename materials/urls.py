@@ -25,5 +25,6 @@ urlpatterns = [
         url(r'^add-exciton-emission$', AddExcitonEmissionView.as_view(), name='add_exciton_emission'),
         url(r'^add-band-gap$', AddBandGapView.as_view(), name='add_band_gap'),
         url(r'^add-band-structure$', AddBandStructureView.as_view(), name='add_band_structure'),
+        url(r'^add-tag$', AddTagView.as_view(), name='add_tag'),
         url(r'^data-dl/(?P<type>.*)/(?P<id>\d+)$', data_dl, name='data_dl')
                 ]

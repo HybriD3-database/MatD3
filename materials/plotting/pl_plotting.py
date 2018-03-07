@@ -8,6 +8,7 @@ import mpld3
 import numpy as np
 from mpld3 import plugins
 from matplotlib import rcParams
+from scipy.interpolate import interp1d
 rcParams.update({'figure.autolayout': True})
 
 css = """
@@ -42,8 +43,8 @@ def plotpl(filename):
     # filename = sys.argv[1]
     width, height = (5, 4)
     tooltipwidth, tooltipheight = (150, 40)
-    x_label, y_label = ('Wavelength/nm', 'Exciton Emission')
-    title = "PL"
+    x_label, y_label = ('Wavelength/nm', 'Intensity/arb. units')
+    title = "Photoluminescence"
     x = []
     y = []
 
@@ -58,22 +59,74 @@ def plotpl(filename):
             x.append(float(row[0]))
             y.append(float(row[1]))
             # print row
-    peak_intensity = y.index(max(y))
-    exciton_peak = x[peak_intensity]
+
+
+    minX, maxX = (min(x), max(x))
+    # normalize y to 0 & 1
+    # [(yVal-minY)/(maxY-minY) for yVal in y]
+    y = np.array(y)
+    maxY = y.max()
+
+    peak_index = np.argmax(y)
+    print("Peak index is: ", peak_index)
+
+
+    # scale 1
+    # minY = y[peak_index:].min()
+    # print("minY is: ", minY)
+    #
+    # y = (y-minY)/(maxY-minY)
+
+    # scale 2
+    # minY = y.min()
+    # rightY = y[peak_index:].min()
+    # print("minY is: ", minY)
+    #
+    # scaleFactorY = (rightY-minY)/(maxY-minY) + 1
+    # # set maxY-rightY = 1
+    # # set
+    # y = (y-minY)*scaleFactorY/(maxY-minY)
+
+    # scale 3
+    minY = y.min()
+    print("minY is: ", minY)
+
+    y = np.around((y-minY)/(maxY-minY), decimals=3)
+
+    min_index = np.argmin(y)
+    print(min_index)
+    # reassign normalized max and min
+    maxY, minY = (1.0, 0.0)
+    # peak_intensity = y.index(maxY)
+    # exciton_peak = x[peak_intensity]
     # print "max is at", exciton_peak, "nm"
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(title, size=20)
-    minX, maxX = (min(x), max(x))
-    minY, maxY = (min(y), max(y))
-    deltaX = minX/10
-    deltaY = minY/10
+
+    deltaX = maxX/10
+    deltaY = maxY/10
+    minXlim = int((minX-deltaX)/50)*50
+    maxXlim = int((maxX+deltaX)/50+1)*50
     ax.set_xticks(np.linspace(int((minX-deltaX)/50)*50, int((maxX+deltaX)/50+1)*50, 11))
-    ax.set_yticks(np.linspace(int((minY)*100)/float(100), 1, 10))
-    ax.set_xlim(int((minX-deltaX)/50)*50,int((maxX+deltaX)/50+1)*50)
-    ax.set_ylim(int(minY*100)/float(100),1)
-    points = ax.plot(x,y, '-', color='b', lw=2, alpha=.7)
-    points = ax.plot(x,y, 'o', color='b', ms=8, alpha=.7)
+    ax.set_yticks(np.linspace(int((minY)*100)/float(100), 1, 11))
+    ax.set_xlim(minXlim, maxXlim)
+    ax.set_ylim(float(minY-deltaY),float(maxY+deltaY))
+
+    # start cubic spline
+    f = interp1d(x, y, kind='cubic')
+    x_new = np.linspace(minX, maxX, num=800, endpoint=True)
+    # points = ax.plot(x,y, '-', color='b', lw=2, alpha=.7)
+    points = ax.plot(x_new, f(x_new), '-', color='b', lw=2, alpha=.7)
+    points = ax.plot(x, y, 'o', color='b', ms=7, alpha=.7)
+
+    # add two horizontal lines touching min and max
+    # print(x[peak_index])
+    # print(maxXlim)
+    # print(x[min_index])
+    # Xlim = maxXlim - minXlim
+    # ax.axhline(y=1, xmin=(x[peak_index]-minXlim)/Xlim, ls='--', color='r')
+    # ax.axhline(y=0, xmin=(x[min_index]-minXlim)/Xlim, ls='--', color='r')
 
     # print points[0]
     labels = []
@@ -88,7 +141,8 @@ def plotpl(filename):
     plugins.connect(fig, tooltip)
 
     save_name = "{}.html".format(filename.split(".")[0])
+    # filename = "{}.png".format(filename.split(".")[0])
+    # plt.savefig(filename, dpi = 300, bbox_inches='tight')
     mpld3.save_html(fig, save_name)
     plt.close()
-    return exciton_peak
     # mpld3.fig_to_html(plt_figure)

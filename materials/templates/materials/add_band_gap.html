@@ -14,6 +14,10 @@
       Search by compound name or formula.
     </div>
     {{ band_gap_form.as_p }}
+    <p class="alert alert-info">
+      Please refer to the HybriD³ Band Structure description for file specifications:
+      <a class="alert-link" href="{% static 'materials/file_templates/band_structure_description.pdf'%}">Download Band Structure description</a>
+    </p>
     <button type="submit" class="btn btn-default">Submit new band gap</button>
 </form>
 {% endblock %}
