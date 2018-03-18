@@ -15,7 +15,7 @@ from accounts.models import UserProfile
 from mainproject.settings.base import MEDIA_ROOT, MEDIA_URL
 from .rangeparser import parserange
 from .plotting.pl_plotting import plotpl
-from .plotting.bs_plotting import plotbs
+# from .plotting.bs_plotting import plotbs
 
 import csv
 import os
@@ -834,17 +834,12 @@ class AddBandStructureView(generic.TemplateView):
                         with open(full_filename, 'wb+') as write_bs:
                             for chunk in f.chunks():
                                 write_bs.write(chunk)
-                    # control_filename = os.path.join(bs_folder_loc, control_file.name)
-                    # geometry_filename = os.path.join(bs_folder_loc, geometry_file.name)
-                    # with open(control_filename, 'wb+') as write:
-                    #     for chunk in control_file.chunks():
-                    #         write.write(chunk)
-                    # with open(geometry_filename, 'wb+') as write:
-                    #     for chunk in geometry_file.chunks():
-                    #         write.write(chunk)
-                    # text += "Band structure files uploaded. "
-                    plotbs(bs_folder_loc)
-                    text = "Band structure plotted. Save success!"
+                    # have a script that goes through the band gaps and spits out some states
+                    # set plotstate field to False, save
+                    # once done, tell user that upload is successful
+                    # after this thing, call another function that plots the BS. Once done, update the plotted state to done
+                    # plotbs(bs_folder_loc)
+                    text = "Save success!"
                     feedback = "success"
                     new_form.save()
                 else:

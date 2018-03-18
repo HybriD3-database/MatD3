@@ -1,7 +1,7 @@
 # -*- coding: utf-8-*-
-
 from django import forms
 from materials.models import *
+from django.db.models.signals import post_save
 
 class SearchForm(forms.Form):
     search_text = forms.CharField(label='Search term', max_length=100)

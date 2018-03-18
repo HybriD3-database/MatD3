@@ -1,27 +1,12 @@
 #!/usr/bin/env python
-#
-#  Script to plot band structure and DOS calculated with FHI-aims. Requires the control.in/geometry.in as well as the output
-#  of the calculation to be in the same directory ...
-#
-#  The script is written for python version 2.7 and would require syntax adaptations to run with later python versions.
+from os import listdir, remove, rename, getcwd
+from os.path import isfile, join
+import os,sys
 
-#  Converted to python 3.6 by xd24
-
-#  To achieve labelling of the special points along the band structure plot, add two arguments to the "output band"
-#  command in the control.in, using the following syntax:
-#
-#  output band <start> <end> <npoints> <starting_point_name> <ending_point_name>
-#
-#  Example: to plot a band with 100 points from Gamma to half way along one of the reciprocal lattice vectors, write (in control.in)
-#
-#  output band 0.0 0.0 0.0 0.5 0.0 0.0 100 Gamma <End_point_name>
-#
 import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
-import mpld3
-import os,sys
 
 from pylab import *
 from matplotlib import rcParams
@@ -32,41 +17,123 @@ from scipy.interpolate import spline
 
 rcParams.update({'figure.autolayout': True})
 
-css = """
-.mpld3-tooltip {
-    position: relative;
-    display: inline-block;
-}
+# change these settings as required
+LINES_ABOVE = 50
+LINES_BELOW = 49
+# set energies here
+MIN_ENERGY = -7.5
+MAX_ENERGY = 7.5
 
-.mpld3-tooltip .tooltiptext {
-    width: 150px;
-    height: 40px;
-    background-color: #ececec;
-    font-size: 11px;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 5px;
-}
+def count(input_band, num_bands):
+    number = 0
+    lines = 0
+    with open(input_band, 'r') as fin:
+        for line in fin.readlines():
+            length = len(line)
+            items = line.split()
+            number += len(items)
+            lines += 1
+    return ((number-4*21)*num_bands, number/(2*lines)-2)
 
-.mpld3-tooltip .tooltiptext::after {
-    content: " ";
-    position: absolute;
-    top: 100%; /* At the bottom of the tooltip */
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #ececec transparent transparent transparent;
-}
-"""
+def get_all_energies(location):
+    bandfiles = ["".join([location,"/",f]) for f in listdir(location)
+                 if (f.startswith('band10') and f.endswith('.out'))]
+    bandfiles.sort()
+    # print(bandfiles)
+    val_energies = []
+    con_energies = []
+    for band in bandfiles:
+        val_energy, con_energy = get_energies(band)
+        val_energies.append(val_energy)
+        con_energies.append(con_energy)
+    print("Min valence energies & max conduction energies:", max(val_energies), min(con_energies))
+    return (max(val_energies), min(con_energies))
 
-###########
-# OPTIONS #
-###########
-def plotbs(location):
-    print_resolution = 250          # The DPI used for printing out images
-    default_line_width = 1          # Change the line width of plotted bands and k-vectors, 1 is default
-    font_size = 12                  # Change the font size.  12 is the default.
+def get_energies(input_band):
+    with open(input_band, 'r') as fin:
+        lines = fin.readlines()
+        val_energies = []
+        con_energies = []
+        for line in lines:
+            items = line.split()
+            # print(items)
+            length = len(items)
+            i = 4 #get the first electron state
+            val_index = con_index = 0
+            while(i < length-1):
+                if(float(items[i]) < float(1)):
+                    val_index = i-1
+                    break
+                i += 2
+            # print(items[val_index])
+            val_energies.append(float(items[val_index]))
+            con_energies.append(float(items[val_index+2]))
+            # print(val_energies, con_energies)
+    return(max(val_energies), min(con_energies))
+
+def get_indices(input_band, min_en, max_en):
+    with open(input_band, 'r') as fin:
+        line = fin.readline()
+    items = line.split()
+    length = len(items)
+    i = 4 #get the first electron state
+    low_index = min_index = hi_index = 0
+    # print("Low energy:", min_en)
+    # print("High energy:", max_en)
+    while(i < length-1):
+        if(float(items[i+1]) > float(min_en)):
+            low_index = i
+            break
+        i += 2
+    while(i < length-1):
+        if(float(items[i]) < float(1)):
+            min_index = i-2
+            break
+        i += 2
+    while(i < length-1):
+        if(float(items[i+1]) > float(max_en)):
+            hi_index = i
+            break
+        i += 2
+    band_gap = float(items[min_index+3]) - float(items[min_index+1])
+    offset = 0 - float(items[min_index+1])
+    # print ("low index, hi index = ", min_index, hi_index)
+    # print ("min index, min e occ, min energy = ", min_index, items[min_index], items[min_index+1])
+    # print ("val index, val e occ, val energy = ", min_index+2, items[min_index+2], items[min_index+3])
+    # print ("low index, low e occ, low energy = ", low_index, items[low_index], items[low_index+1])
+    # print ("hi index, hi e occ, hi energy = ", hi_index, items[hi_index], items[hi_index+1])
+    # print ("band gap = ", band_gap)
+    new_list = items[low_index:hi_index]
+    low_energy = float(items[low_index+1]) + offset
+    hi_energy = float(items[hi_index+1]) + offset
+    return (low_index, hi_index, band_gap, offset, low_energy, hi_energy)
+
+def resize_standardize(input_band, start_index, end_index, offset):
+    output_file = "_tr.".join(input_band.split("."))
+    fout = open(output_file, 'a')
+    with open(input_band, 'r') as fin:
+        lines = fin.readlines()
+        for line in lines:
+            length = len(line)
+            items = line.split()
+            i = start_index #get the first electron state
+            end = end_index + 1
+            fout.write(" ".join(items[0:4]) + " ")
+            while(i < end):
+                std_energy = float(items[i+1])+offset
+                fout.write(items[i] + " ")
+                fout.write(str(std_energy) + " ")
+                i += 2
+            fout.write("\n")
+    fout.close()
+    backup_name = "_bak.".join(input_band.split("."))
+    rename(input_band, backup_name)
+    rename(output_file, input_band)
+
+def plotbs(location, lower, upper, band_gap):
+    print_resolution = 500          # The DPI used for printing out images
+    default_line_width = 0.5        # Change the line width of plotted bands and k-vectors, 1 is default
+    font_size = 8                   # Change the font size.  12 is the default.
     should_spline = True            # Turn on spline interpolation for band structures NOT VERY WELL TESTED!
     output_x_axis = True            # Whether to output the x-axis (e.g. the e=0 line) or not
     spline_factor = 10              # If spline interpolation turned on, the sampling factor (1 is the original grid)
@@ -76,6 +143,7 @@ def plotbs(location):
     ########################
 
     # new settings added by xd24
+    ylim_lower, ylim_upper = (lower, upper)
     width, height = (5, 4)
     tooltipwidth, tooltipheight = (150, 40)
     x_label, y_label = ('Lattice Positions', 'Energy/eV')
@@ -94,16 +162,8 @@ def plotbs(location):
     CUSTOM_YLIM = False
     FERMI_OFFSET = False
     energy_offset = 0.0
-    # if len(sys.argv) >= 3:
-    #     CUSTOM_YLIM = True
-    #     ylim_lower = float(sys.argv[1])
-    #     ylim_upper = float(sys.argv[2])
-    # if len(sys.argv) >= 4:
-    #     FERMI_OFFSET = True
-    #     energy_offset = float(sys.argv[3])
 
     folder_loc = location
-    # folder_loc = os.getcwd()
     # if len(sys.argv) >= 2:
     #     folder_loc = sys.argv[1]
 
@@ -111,7 +171,7 @@ def plotbs(location):
     folder_name = folder_loc.split("/")[-1]
     print("folder_name: ", folder_name)
     def get_path(filename):
-        print("filename: ", filename)
+        # print("filename: ", filename)
         return os.path.join(folder_loc, filename)
 
     for line in open(get_path("geometry.in")):
@@ -210,12 +270,9 @@ def plotbs(location):
             if len(words) != 2:
                 raise Exception("control.in: Syntax error in line '"+line+"'")
             species += [ words[1] ]
-
     # Added by Xiaochen Du
-    #
 
     #######################
-
     if PLOT_SOC:
         max_spin_channel = 1
 
@@ -226,8 +283,8 @@ def plotbs(location):
         setp(ax_dos.get_yticklabels(),visible=False)
         ax_bands.set_ylabel("E [eV]")
         PLOT_DOS_REVERSED = True
-    elif PLOT_BANDS:
 
+    elif PLOT_BANDS:
         fig = plt.figure(figsize=(width,height))
         ax_bands = fig.add_subplot(111)
         ax_bands.set_xlabel(x_label)
@@ -448,7 +505,7 @@ def plotbs(location):
         if CUSTOM_YLIM:
             ax_bands.set_ylim(ylim_lower,ylim_upper)
         else:
-            ax_bands.set_ylim(-20,20) # just some random default -- definitely better than the full range including core bands
+            ax_bands.set_ylim(ylim_lower,ylim_upper) # just some random default -- definitely better than the full range including core bands
 
     #######################
 
@@ -466,26 +523,60 @@ def plotbs(location):
     def on_q_exit(event):
         if event.key == "q": sys.exit(0)
     connect('key_press_event', on_q_exit)
-    # show()
 
-    # Experimental work on the tooltip
-    # labels = []
-    # print("xvals & band_energies")
-    # print(xvals)
-    # print(band_energies)
-    # for i,j in zip(xvals,band_energies[:,b]):
-    #     label = '<div class="tooltiptext">'
-    #     label += '{2}: {1} <br> {3}: {0}'.format(i, j, y_label, x_label)
-    #     label += '</div>'
-    #     labels.append(label)
-    #
-    # print("points[0]")
-    # print(points[0])
-    # tooltip = plugins.PointHTMLTooltip(points[0], labels, hoffset=-tooltipwidth/2, voffset=-tooltipheight, css=css)
-    #
-    # plugins.connect(fig, tooltip)
+    save_name = "{}_{}.png".format(get_path(folder_name), "full")
+    plt.savefig(save_name)
+    ax_bands.set_ylim([-1.5,band_gap+1.5])
+    save_name = "{}_{}.png".format(get_path(folder_name), "min")
+    plt.savefig(save_name)
 
-    # save_name = "{}.html".format(filename.split(".")[0])
-    save_name = "{}.html".format(get_path(folder_name))
-    mpld3.save_html(fig, save_name)
-    print("Mpld3 file produced.")
+def prep_and_plot(location):
+    # location = sys.argv[1]
+    print("File location is:", location)
+    vbe, cbe = get_all_energies(location)
+    offset = -vbe
+
+    offset_max = MAX_ENERGY - offset
+    offset_min = MIN_ENERGY - offset
+
+    # truncate files
+    bandfiles = ["".join([location,"/",f]) for f in listdir(location)
+                 if (f.startswith('band10') and f.endswith('.out'))]
+    bandfiles.sort()
+    # print(bandfiles)
+    print()
+    print("Total number of points & lines:", count(bandfiles[0], len(bandfiles)))
+
+    low_index, hi_index, band_gap, offset, low_energy, hi_energy = get_indices(bandfiles[0], offset_min, offset_max)
+
+    for f in bandfiles:
+        resize_standardize(f, low_index, hi_index, offset)
+
+    # plot BS
+    plotbs(location, MIN_ENERGY, MAX_ENERGY, band_gap)
+
+    # remove BS plotting files
+    bandfiles = ["".join([location,"/",f]) for f in listdir(location)
+                 if (f.startswith('band10') and f.endswith('.out'))]
+    bakfiles = [f for f in bandfiles
+                 if f.endswith('_bak.out')]
+    truncfiles = [f for f in bandfiles
+                 if (f not in bakfiles)]
+    bandfiles.sort()
+    bakfiles.sort()
+    truncfiles.sort()
+    # print(bandfiles)
+    # print(bakfiles)
+    # print(truncfiles)
+    # print()
+    for f in truncfiles:
+        remove(f)
+    short_names = [f.split("/")[-1] for f in bakfiles]
+    new_names = [".".join([f.split("_")[0],"out"]) for f in short_names]
+    # print(short_names)
+    # print(new_names)
+    i = 0
+    while (i<len(bakfiles)):
+        rename(bakfiles[i], "/".join([location, new_names[i]]))
+        i += 1
+    print()
