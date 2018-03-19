@@ -114,11 +114,11 @@ def plotpl(filename):
     ax.set_ylim(float(minY-deltaY),float(maxY+deltaY))
 
     # start cubic spline
-    f = interp1d(x, y, kind='cubic')
-    x_new = np.linspace(minX, maxX, num=800, endpoint=True)
-    # points = ax.plot(x,y, '-', color='b', lw=2, alpha=.7)
-    points = ax.plot(x_new, f(x_new), '-', color='b', lw=2, alpha=.7)
-    points = ax.plot(x, y, 'o', color='b', ms=7, alpha=.7)
+    # f = interp1d(x, y, kind='cubic')
+    # x_new = np.linspace(minX, maxX, num=800, endpoint=True)
+    points = ax.plot(x,y, '-', color='b', lw=2, alpha=.7)
+    # points = ax.plot(x_new, f(x_new), '-', color='b', lw=2, alpha=.7)
+    points = ax.plot(x,y, 'o', color='b', ms=7, alpha=.7)
 
     # add two horizontal lines touching min and max
     # print(x[peak_index])

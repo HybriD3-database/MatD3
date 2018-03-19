@@ -179,7 +179,8 @@ $('#pl-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.
 {% endwith %}
 {% with entry=band_structure %}
 <script type="text/javascript">
-$('#bs-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs.html");
+var imglink = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs_full.png';
+$('#bs-graph').html("<img src=" + imglink + " width='500'/>");
 </script>
 {% endwith %}
 {% with entry=atomic_positions %}
