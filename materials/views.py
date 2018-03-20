@@ -14,7 +14,7 @@ from accounts.models import UserProfile
 # Create your views here.
 from mainproject.settings.base import MEDIA_ROOT, MEDIA_URL
 from .rangeparser import parserange
-from .plotting.pl_plotting import plotpl
+# from .plotting.pl_plotting import plotpl
 # from .plotting.bs_plotting import plotbs
 
 import csv
@@ -726,9 +726,9 @@ class AddExcitonEmissionView(generic.TemplateView):
                     pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
                     # print pl_file_loc
                     # Testing feature: automatically populate exciton_emission field with ee peak obtained from graph
-                    if pl_file_loc:
-                        exciton_emission_peak = plotpl(pl_file_loc)
-                        print("Model pk")
+                    # if pl_file_loc:
+                    #     exciton_emission_peak = plotpl(pl_file_loc)
+                    #     print("Model pk")
                         # print(ee_model.pk)
                     #     ee_object = ExcitonEmission.objects.get(pk=ee_model.pk)
                     #     ee_object.exciton_emission = exciton_emission_peak
