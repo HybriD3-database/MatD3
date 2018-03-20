@@ -9,6 +9,8 @@ cycler==0.10.0
 decorator==4.2.1
 Django==2.0.1
 django-background-tasks==1.1.13
+django-celery-beat==1.1.1
+django-celery-results==1.0.1
 django-compat==1.0.15
 entrypoints==0.2.3
 html5lib==1.0.1
