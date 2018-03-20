@@ -159,7 +159,7 @@ def del_bs(sender, instance, **kwargs):
 def del_pl(sender, instance, **kwargs):
     file_loc = MEDIA_ROOT + "/uploads/" + str(instance.pl_file).split("/")[1]
     print(file_loc)
-    if os.path.isfile(folder_loc):
+    if os.path.isfile(file_loc):
         os.remove(file_loc)
     else:
         pass
@@ -167,7 +167,7 @@ def del_pl(sender, instance, **kwargs):
 def del_apos(sender, instance, **kwargs):
     file_loc = MEDIA_ROOT + "/uploads/" + str(instance.fhi_file).split("/")[1]
     print(file_loc)
-    if os.path.isfile(folder_loc):
+    if os.path.isfile(file_loc):
         os.remove(file_loc)
     else:
         pass
