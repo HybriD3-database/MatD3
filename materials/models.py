@@ -157,20 +157,22 @@ def del_bs(sender, instance, **kwargs):
         pass
 
 def del_pl(sender, instance, **kwargs):
-    file_loc = MEDIA_ROOT + "/uploads/" + str(instance.pl_file).split("/")[1]
-    print(file_loc)
-    if os.path.isfile(file_loc):
-        os.remove(file_loc)
-    else:
-        pass
+    if(instance.pl_file):
+        file_loc = MEDIA_ROOT + "/uploads/" + str(instance.pl_file).split("/")[1]
+        print(file_loc)
+        if os.path.isfile(file_loc):
+            os.remove(file_loc)
+        else:
+            pass
 
 def del_apos(sender, instance, **kwargs):
-    file_loc = MEDIA_ROOT + "/uploads/" + str(instance.fhi_file).split("/")[1]
-    print(file_loc)
-    if os.path.isfile(file_loc):
-        os.remove(file_loc)
-    else:
-        pass
+    if(instance.fhi_file):
+        file_loc = MEDIA_ROOT + "/uploads/" + str(instance.fhi_file).split("/")[1]
+        print(file_loc)
+        if os.path.isfile(file_loc):
+            os.remove(file_loc)
+        else:
+            pass
 
 signals.post_delete.connect(del_bs, sender=BandStructure)
 signals.post_delete.connect(del_pl, sender=ExcitonEmission)
