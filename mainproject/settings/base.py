@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'materials',
     'accounts',
-    'background_task',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -169,22 +168,3 @@ EMAIL_HOST_USER = 'XXXXXXX'
 EMAIL_HOST_PASSWORD = 'XXXXXXX'
 DEFAULT_FROM_EMAIL = 'HybriD3 materials database <hybrid3project@duke.edu>'
 EMAIL_USE_TLS = True
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}

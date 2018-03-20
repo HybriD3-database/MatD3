@@ -5,9 +5,6 @@ from os.path import basename
 import os
 import shutil
 from django.db.models import signals
-from .plotting.bs_plotting import prep_and_plot
-from background_task import background
-from .tasks import bs_plot
 from mainproject.settings.base import MEDIA_ROOT
 
 UserProfile = "accounts.UserProfile"
@@ -151,16 +148,6 @@ class AtomicPositions(IDInfo):
 
     def __str__(self):
         return self.phase.phase + " " + self.system.formula
-
-def plot_bs(sender, instance, created, **kwargs):
-    if created:
-        print("Created")
-        print(instance.folder_location)
-        bs_plot(instance.folder_location)
-    else:
-        print("Changed")
-
-signals.post_save.connect(plot_bs, sender=BandStructure)
 
 def del_bs(sender, instance, **kwargs):
     folder_loc = instance.folder_location
