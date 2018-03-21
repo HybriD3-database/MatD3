@@ -237,7 +237,7 @@ def plotbs(location, lower, upper, band_gap):
             PLOT_SOC = True
             max_spin_channel = 1
 
-        if nline.startswith("output band "):
+        if nline.startswith("output band"):
             if len(words) < 9 or len(words) > 11:
                 raise Exception("control.in: Syntax error in line '"+line+"'")
             PLOT_BANDS = True
