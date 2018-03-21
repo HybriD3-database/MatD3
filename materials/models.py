@@ -87,6 +87,8 @@ class SpecificMethod(models.Model):
 
 class IDInfo(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    source = models.CharField(default="TBD", max_length=500)
+    data_extraction_method = models.CharField(default="TBD", max_length=500)
     contributor = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
     temperature = models.CharField(max_length=20, blank=True)
     phase = models.ForeignKey(Phase, on_delete=models.PROTECT)

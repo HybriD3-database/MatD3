@@ -76,10 +76,10 @@ class AddSystem(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
 class AddExcitonEmission(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'exciton_emission')
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'exciton_emission', 'source', 'data_extraction_method')
     class Meta:
         model = ExcitonEmission
-        exclude = ('contributor', 'publication', 'system')
+        exclude = ('contributor', 'publication', 'system', 'plotted')
         labels = {
             "pl_file": "PL file",
             "exciton_emission": "Exciton Emission Peak (nm)",
@@ -92,10 +92,10 @@ class AddExcitonEmission(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
 class AddBandGap(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'band_gap')
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'band_gap', 'source', 'data_extraction_method')
     class Meta:
         model = BandGap
-        exclude = ('contributor', 'publication', 'system')
+        exclude = ('contributor', 'publication', 'system', 'plotted')
         labels = {
             "band_gap": "Band Gap (eV)",
             "phase": "Crystal system"
@@ -107,13 +107,13 @@ class AddBandGap(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
 class AddBandStructure(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments')
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'source', 'data_extraction_method')
     band_structure_files = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
     control_in_file = forms.FileField(label="\"control.in\" file")
     geometry_in_file = forms.FileField(label="\"geometry.in\" file")
     class Meta:
         model = BandStructure
-        exclude = ('contributor', 'publication', 'system', 'folder_location')
+        exclude = ('contributor', 'publication', 'system', 'folder_location', 'plotted')
         labels = {
             "phase": "Crystal system"
         }
@@ -124,7 +124,7 @@ class AddBandStructure(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
 class AddAtomicPositions(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'fhi_file', 'a', 'b', 'c', 'alpha', 'beta', 'gamma', 'volume', 'Z')
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'fhi_file', 'a', 'b', 'c', 'alpha', 'beta', 'gamma', 'volume', 'Z', 'source', 'data_extraction_method')
     class Meta:
         model = AtomicPositions
         exclude = ('contributor', 'publication', 'system')

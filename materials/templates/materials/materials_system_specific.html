@@ -39,10 +39,11 @@
             Temperature: {{entry.temperature}}K <br>
             {% endif %}
             Method: {{entry.method}} <br>
-            Source: {{entry.publication.author}} <br>
             {% if entry.publication.doi_isbn %}
             Publication: {{entry.publication.doi_isbn}} <br>
             {% endif %}
+            Source: {{entry.source}} <br>
+            Data extraction: {{entry.data_extraction_method}} <br>
           </div>
             <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
             <button type="button" class="btn btn-primary"/>
@@ -82,10 +83,11 @@
           {% endif %}
           Crystal system: {{entry.phase}} <br>
           Method: {{entry.method}} <br>
-          Source: {{entry.publication.author}} <br>
           {% if entry.publication.doi_isbn %}
           Publication: {{entry.publication.doi_isbn}} <br>
           {% endif %}
+          Source: {{entry.source}} <br>
+          Data extraction: {{entry.data_extraction_method}} <br>
           <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
           <button type="button" class="btn btn-primary"/>
           <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
@@ -141,10 +143,11 @@
               {% endif %}
               Crystal system: {{entry.phase}} <br>
               Method: {{entry.method}} <br>
-              Source: {{entry.publication.author}} <br>
               {% if entry.publication.doi_isbn %}
               Publication: {{entry.publication.doi_isbn}} <br>
               {% endif %}
+              Source: {{entry.source}} <br>
+              Data extraction: {{entry.data_extraction_method}} <br>
               <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
               <button type="button" class="btn btn-primary">
               <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
