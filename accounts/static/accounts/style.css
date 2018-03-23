@@ -23,8 +23,7 @@
 }
 
 .panel-default {
-  border: 0px solid #ececec;
-  border-radius: 0px;
+  border: solid #ececec;
 }
 
 .panel-default > .panel-heading {
@@ -52,5 +51,5 @@
 body {
   background-color: #d9d9d9;
   color: #001100;
-  font-family: Trebuchet, Futura, Avenir, Frutiger, "Akzidenz-Grotesk", "News Gothic", Helvetica, sans-serif;
+  font-family: Futura, Avenir, Helvetica, sans-serif;
 }

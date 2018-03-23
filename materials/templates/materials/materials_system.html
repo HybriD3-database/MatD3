@@ -13,105 +13,115 @@
     <div class="panel-body">
         {% with object.atomicpositions_set.all|first as entry %}
           <div class="col-md-8">
-          <h4>Molecular Model</h4>
-        {% if entry.fhi_file %}
-          <div id="jmol"></div>
-        {% else %}
-          <h3>Atomic Positions file unavailable</h3>
-        {% endif %}
+            <div class="panel panel-primary">
+              <div class="panel-heading"><h4>Molecular Model</h4></div>
+              <div class="panel-body">
+                {% if entry.fhi_file %}
+                  <div id="jmol"></div>
+                {% else %}
+                  <h3>Atomic Positions file unavailable</h3>
+                {% endif %}
+              </div>
+            </div>
           </div>
 
           <div class="col-md-4">
-          <h4>Atomic Positions</h4>
-          {% if entry %}
-            <div class="col-md-6 details-a-pos">
-              a: {{entry.a}} <br>
-              b: {{entry.b}} <br>
-              c: {{entry.c}} <br>
+            <div class="panel panel-info">
+              <div class="panel-heading"><h4>Atomic Positions</h4></div>
+              <div class="panel-body">
+                {% if entry %}
+                  <div class="col-md-6 details-a-pos">
+                    a: {{entry.a}} <br>
+                    b: {{entry.b}} <br>
+                    c: {{entry.c}} <br>
+                  </div>
+                  <div class="col-md-6 details-a-pos">
+                    &alpha;: {{entry.alpha}} <br>
+                    &beta;: {{entry.beta}} <br>
+                    &gamma;: {{entry.gamma}} <br>
+                  </div>
+                  <div>
+                    Crystal system: {{entry.phase}} <br>
+                    {% if entry.temperature %}
+                    Temperature: {{entry.temperature}}K <br>
+                    {% endif %}
+                    Method: {{entry.method}} <br>
+                    {% if entry.publication.doi_isbn %}
+                    Publication: {{entry.publication.doi_isbn}} <br>
+                    {% endif %}
+                    Source: {{entry.source}} <br>
+                    Data extraction: {{entry.data_extraction_method}} <br>
+                  </div>
+                  <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+                  <button type="button" class="btn btn-primary"/>
+                  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                  Atomic Positions
+                  </button>
+                  </a>
+                  {% else %}
+                    <h3>No data available</h3>
+                  {% endif %}
+
+                  {% if object.atomicpositions_set.all|length > 1 %}
+                    <a href="{% url "materials:all_a_pos" id=object.id %}">
+                    <button type="button" class="btn btn-info">
+                    <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                    See all entries
+                    </button>
+                    </a>
+                  {% endif %}
+              </div>
             </div>
-            <div class="col-md-6 details-a-pos">
-              &alpha;: {{entry.alpha}} <br>
-              &beta;: {{entry.beta}} <br>
-              &gamma;: {{entry.gamma}} <br>
-            </div>
-            <div>
-              Crystal system: {{entry.phase}} <br>
+          </div>
+    {% endwith %}
+  </div>
+  <div class="panel-body">
+      <div class="col-md-6">
+        {% with entry=object.excitonemission_set.all|first %}
+        <div class="panel panel-info">
+          <div class="panel-heading"><h4>PL Graph</h4></div>
+          <div class="panel-body">
+            {% if entry.plotted %}
+              <div id="pl-graph"></div>
+            {% elif entry.pl_file %}
+            <h3>PL graph is being plotted</h3>
+            {% else %}
+            <h3>PL file unavailable</h3>
+            {% endif %}
+            {% if entry %}
+              Exciton Emission Peak: {{entry.exciton_emission}}nm <br>
               {% if entry.temperature %}
-              Temperature: {{entry.temperature}}K <br>
+                Temperature: {{entry.temperature}}K <br>
               {% endif %}
+              Crystal system: {{entry.phase}} <br>
               Method: {{entry.method}} <br>
               {% if entry.publication.doi_isbn %}
-              Publication: {{entry.publication.doi_isbn}} <br>
+                Publication: {{entry.publication.doi_isbn}} <br>
               {% endif %}
               Source: {{entry.source}} <br>
               Data extraction: {{entry.data_extraction_method}} <br>
-            </div>
-            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
-            <button type="button" class="btn btn-primary"/>
-            <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-            Atomic Positions
-            </button>
-            </a>
+              <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
+              <button type="button" class="btn btn-primary"/>
+              <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+              Exciton Emission Peak
+              </button>
+              </a>
             {% else %}
               <h3>No data available</h3>
             {% endif %}
 
-            {% if object.atomicpositions_set.all|length > 1 %}
-              <a href="{% url "materials:all_a_pos" id=object.id %}">
+            {% if object.excitonemission_set.all|length > 1 %}
+              <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
               See all entries
               </button>
               </a>
             {% endif %}
+            {% endwith %}
           </div>
-    {% endwith %}
-  </div>
-  <div class="panel-body">
-    <table class="table">
-      <tr>
-        <td>
-          {% with entry=object.excitonemission_set.all|first %}
-          <h4>PL Graph</h4>
-
-          {% if entry.pl_file %}
-            <div id="pl-graph"></div>
-          {% else %}
-          <h3>PL file unavailable</h3>
-          {% endif %}
-
-          {% if entry %}
-            Exciton Emission Peak: {{entry.exciton_emission}}nm <br>
-            {% if entry.temperature %}
-              Temperature: {{entry.temperature}}K <br>
-            {% endif %}
-            Crystal system: {{entry.phase}} <br>
-            Method: {{entry.method}} <br>
-            {% if entry.publication.doi_isbn %}
-              Publication: {{entry.publication.doi_isbn}} <br>
-            {% endif %}
-            Source: {{entry.source}} <br>
-            Data extraction: {{entry.data_extraction_method}} <br>
-            <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
-            <button type="button" class="btn btn-primary"/>
-            <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-            Exciton Emission Peak
-            </button>
-            </a>
-          {% else %}
-            <h3>No data available</h3>
-          {% endif %}
-
-          {% if object.excitonemission_set.all|length > 1 %}
-            <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
-            <button type="button" class="btn btn-info">
-            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-            See all entries
-            </button>
-            </a>
-          {% endif %}
-          {% endwith %}
-        </td>
+        </div>
+      </div>
         <!-- <td>
           <h4>Band Gap</h4>
           {% with entry=object.bandgap_set.all|first %}
@@ -134,11 +144,17 @@
             {% endif %}
           {% endwith %}
         </td> -->
-        <td>
-            <h4>Band Structure</h4>
-            {% with entry=object.bandstructure_set.all|first %}
-              {% if entry.folder_location %}
+        <div class="col-md-6">
+
+
+          {% with entry=object.bandstructure_set.all|first %}
+          <div class="panel panel-info">
+            <div class="panel-heading"><h4>Band Structure</h4></div>
+            <div class="panel-body">
+              {% if entry.plotted %}
               <div id="bs-graph"></div>
+              {% elif entry.folder_location %}
+              <h3>Band Structure is being plotted</h3>
               {% else %}
               <h3>Band Structure file unavailable</h3>
               {% endif %}
@@ -173,9 +189,10 @@
                 </a>
               {% endif %}
             {% endwith %}
-        </td>
-      </tr>
-    </table>
+            </div>
+          </div>
+
+    </div>
     </div>
 </div>
 

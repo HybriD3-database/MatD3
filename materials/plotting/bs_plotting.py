@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as font_manager
 
 from pylab import *
 from matplotlib import rcParams
@@ -16,7 +17,13 @@ from numpy import dot,cross,pi
 from scipy.interpolate import spline
 
 rcParams.update({'figure.autolayout': True})
+rcParams['xtick.labelsize'] = 8
+rcParams['ytick.labelsize'] = 8
+rcParams['savefig.dpi'] = 500
+rcParams['font.size'] = 10
 
+path = "/".join([os.path.dirname(os.path.abspath(__file__)), "futura.ttf"])
+font_prop = font_manager.FontProperties(fname=path)
 # change these settings as required
 LINES_ABOVE = 50
 LINES_BELOW = 49
@@ -133,7 +140,7 @@ def resize_standardize(input_band, start_index, end_index, offset):
 def plotbs(location, lower, upper, band_gap):
     print_resolution = 500          # The DPI used for printing out images
     default_line_width = 0.5        # Change the line width of plotted bands and k-vectors, 1 is default
-    font_size = 8                   # Change the font size.  12 is the default.
+    font_size = 10                 # Change the font size.  12 is the default.
     should_spline = True            # Turn on spline interpolation for band structures NOT VERY WELL TESTED!
     output_x_axis = True            # Whether to output the x-axis (e.g. the e=0 line) or not
     spline_factor = 10              # If spline interpolation turned on, the sampling factor (1 is the original grid)
@@ -283,13 +290,15 @@ def plotbs(location, lower, upper, band_gap):
         setp(ax_dos.get_yticklabels(),visible=False)
         ax_bands.set_ylabel("E [eV]")
         PLOT_DOS_REVERSED = True
-
     elif PLOT_BANDS:
         fig = plt.figure(figsize=(width,height))
+        fig.patch.set_facecolor('none')
+        fig.patch.set_alpha(0.0)
         ax_bands = fig.add_subplot(111)
-        ax_bands.set_xlabel(x_label)
-        ax_bands.set_ylabel(y_label)
-        ax_bands.set_title(title, size=20)
+        ax_bands.patch.set_facecolor('white')
+        ax_bands.set_xlabel(x_label, fontproperties=font_prop)
+        ax_bands.set_ylabel(y_label, fontproperties=font_prop)
+        ax_bands.set_title(title, fontproperties=font_prop, size=15)
         ax_bands.grid(linestyle=":")
         # ax_bands = subplot(1,1,1)
     elif PLOT_DOS:
@@ -509,9 +518,6 @@ def plotbs(location, lower, upper, band_gap):
 
     #######################
 
-    matplotlib.rcParams['savefig.dpi'] =  print_resolution
-    matplotlib.rcParams['font.size'] = font_size
-
     print()
     print("The resolution for saving figures is set to ", matplotlib.rcParams['savefig.dpi'], " dpi.")
 
@@ -525,10 +531,10 @@ def plotbs(location, lower, upper, band_gap):
     connect('key_press_event', on_q_exit)
 
     save_name = "{}_{}.png".format(get_path(folder_name), "full")
-    plt.savefig(save_name)
+    plt.savefig(save_name, facecolor=fig.get_facecolor(), edgecolor='none')
     ax_bands.set_ylim([-1.5,band_gap+1.5])
     save_name = "{}_{}.png".format(get_path(folder_name), "min")
-    plt.savefig(save_name)
+    plt.savefig(save_name, facecolor=fig.get_facecolor(), edgecolor='none')
 
 def prep_and_plot(location):
     # location = sys.argv[1]

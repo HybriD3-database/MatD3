@@ -153,6 +153,7 @@ AUTH_EXEMPT_URLS = (
     r'^materials/(?P<pk>\d+)$',
     r'^materials/(?P<id>\d+)/all-a-pos$',
     r'^materials/(?P<id>\d+)/(?P<type>.*)$',
+    r'^materials/(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_ee>\d+)_(?P<pk_bs>\d+)$',
     r'^materials/data-dl/(?P<type>.*)/(?P<id>\d+)$',
 )
 

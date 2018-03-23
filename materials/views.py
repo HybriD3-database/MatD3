@@ -250,9 +250,9 @@ def all_entries(request, id, type):
 
 def search_result(search_term, search_text):
     search_results = {
-        'formula': System.objects.filter(Q(formula__icontains=search_text) | Q(group__icontains=search_text) | Q(compound_name__icontains=search_text)),
-        'organic': System.objects.filter(organic__icontains=search_text),
-        'inorganic': System.objects.filter(inorganic__icontains=search_text),
+        'formula': System.objects.filter(Q(formula__icontains=search_text) | Q(group__icontains=search_text) | Q(compound_name__icontains=search_text)).order_by('formula'),
+        'organic': System.objects.filter(organic__icontains=search_text).order_by('organic'),
+        'inorganic': System.objects.filter(inorganic__icontains=search_text).order_by('inorganic'),
         # 'exciton_emission': System.objects.filter(excitonemission__exciton_emission__icontains=search_text)
     }
     return search_results[search_term]

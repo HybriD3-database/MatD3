@@ -10,7 +10,9 @@ from mpld3 import plugins
 from matplotlib import rcParams
 from scipy.interpolate import interp1d
 rcParams.update({'figure.autolayout': True})
-
+rcParams['xtick.labelsize']=10
+rcParams['ytick.labelsize']=10
+rcParams['font.size']=14
 css = """
 .mpld3-tooltip {
     position: relative;
