@@ -1,0 +1,24 @@
+{% extends 'materials/add_entry_template.html' %}
+
+{% block heading %}
+<h4>Add Synthesis Method</h4>
+{% endblock %}
+
+{% block form %}
+<form id="add-synthesis" method="post" action="{% url 'materials:add_synthesis' %}" enctype='multipart/form-data'>
+    {% csrf_token %}
+    <div id="publication-search-result">
+      Search by publication title, journal name, or full name of author.
+    </div>
+    <div id="system-search-result">
+      Search by compound name or formula.
+    </div>
+    {{ synthesis_form.as_p }}
+    <button type="submit" class="btn btn-default">Submit new synthesis</button>
+</form>
+{% endblock %}
+{% block ajaxscript %}
+<script type="text/javascript">
+  alert_submit($('#add-synthesis'), $('#feedback'));
+</script>
+{% endblock %}

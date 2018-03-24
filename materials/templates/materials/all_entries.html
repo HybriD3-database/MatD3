@@ -5,6 +5,7 @@
 {% load staticfiles %}
 <!-- variables needed: compound_name,  object -->
 <link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
+
   <div class="panel panel-default">
     <div class="panel-heading">
       <b>Material</b>
@@ -15,7 +16,11 @@
       {% if object %}
       {% for entry in object %}
       <div class="col-md-6">
+        <div class="panel panel-info">
+          <div class="panel-heading">
         <h4>Entry #{{ forloop.counter }}</h4>
+      </div>
+      <div class="panel-body">
         <p class="details">{% block entry_type %}Entry Type units{% endblock %}</p>
         <!-- Phase: {{entry.phase}} <br> -->
         Temperature: {{entry.temperature}} K <br>
@@ -24,8 +29,12 @@
         {% if entry.publication.doi_isbn %}
         Publication: {{entry.publication.doi_isbn}} <br>
         {% endif %}
+        Source: {{entry.source}} <br>
+        Data extraction: {{entry.data_extraction_method}} <br>
         {% block dl_link %}
         {% endblock %}
+        </div>
+      </div>
         </div>
         {% endfor %}
         {% else %}
@@ -33,6 +42,4 @@
         {% endif %}
       </div>
   </div>
-</div>
-</div>
 {% endblock %}

@@ -24,6 +24,7 @@
 <ul class="nav navbar-nav navbar-right">
 {% if user.is_authenticated %}
 <li><a href="{% url 'materials:add_a_pos'%}">Add Atomic Positions</a></li>
+<li><a href="{% url 'materials:add_synthesis'%}">Add Synthesis Method</a></li>
 <li><a href="{% url 'materials:add_exciton_emission'%}">Add PL data</a></li>
 <li><a href="{% url 'materials:add_band_structure'%}">Add Band Structure</a></li>
 <li><a href="{% url 'accounts:home'%}">Accounts</a></li>

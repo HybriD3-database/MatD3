@@ -91,18 +91,19 @@ class AddExcitonEmission(forms.ModelForm):
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 
-class AddBandGap(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'band_gap', 'source', 'data_extraction_method')
+class AddSynthesisMethod(forms.ModelForm):
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'synthesis_method', 'source', 'data_extraction_method')
     class Meta:
-        model = BandGap
-        exclude = ('contributor', 'publication', 'system', 'plotted')
+        model = SynthesisMethod
+        exclude = ('contributor', 'publication', 'system')
         labels = {
-            "band_gap": "Band Gap (eV)",
+            "syn_file": "Synthesis Method (optional)",
+            "synthesis_method": "Instructions",
             "phase": "Crystal system"
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddBandGap, self).__init__(*args, **kwargs)
+        super(AddSynthesisMethod, self).__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = "form-control"
 

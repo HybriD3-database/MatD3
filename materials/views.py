@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from materials.forms import *
 
-from .models import System, AtomicPositions, ExcitonEmission, BandGap, BandStructure
+from materials.models import *
 from accounts.models import UserProfile
 
 # Create your views here.
@@ -24,7 +24,7 @@ from io import BytesIO
 
 dictionary = {
 "exciton_emission": ExcitonEmission,
-"band_gap": BandGap,
+"synthesis": SynthesisMethod,
 "band_structure": BandStructure
 }
 
@@ -81,6 +81,7 @@ def data_dl(request, type, id):
             response.write("#-Atomic Positions input file not available-")
         # return redirect(MEDIA_URL + 'uploads/%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic))
         response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+
     elif type == "exciton_emission":
         p_obj = System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic, p_obj.inorganic)
@@ -95,27 +96,28 @@ def data_dl(request, type, id):
         # directory = os.fsencode(dir_in_str)
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
-        if not os.path.exists(meta_filepath):
-            with open(meta_filepath, "w") as meta_file:
-                meta_file.write("#HybriD³ Materials Database\n")
-                meta_file.write("\n#System: ")
-                meta_file.write(p_obj.compound_name)
-                meta_file.write("\n#Temperature: ")
-                meta_file.write(obj.temperature)
-                meta_file.write("\n#Phase: ")
-                meta_file.write(str(obj.phase.phase))
-                meta_file.write("\n#Author: ")
-                meta_file.write(str(obj.publication.author))
-                meta_file.write("\n#Journal: ")
-                meta_file.write(str(obj.publication.journal))
-                meta_file.write("\n#Source: ")
-                meta_file.write(str(obj.publication.doi_isbn))
-                meta_file.write("\n#Exciton Emission Peak: ")
-                meta_file.write(str(obj.excitonemission))
+        with open(meta_filepath, "w") as meta_file:
+            meta_file.write("#HybriD³ Materials Database\n")
+            meta_file.write("\n#System: ")
+            meta_file.write(p_obj.compound_name)
+            meta_file.write("\n#Temperature: ")
+            meta_file.write(obj.temperature)
+            meta_file.write("\n#Phase: ")
+            meta_file.write(str(obj.phase.phase))
+            meta_file.write("\n#Author: ")
+            meta_file.write(str(obj.publication.author))
+            meta_file.write("\n#Journal: ")
+            meta_file.write(str(obj.publication.journal))
+            meta_file.write("\n#Source: ")
+            meta_file.write(str(obj.publication.doi_isbn))
+            meta_file.write("\n#Exciton Emission Peak: ")
+            meta_file.write(str(obj.excitonemission))
         pl_file_csv = os.path.join(dir_in_str, file_name_prefix + ".csv")
+        pl_file_html = os.path.join(dir_in_str, file_name_prefix + ".html")
         filenames = []
         filenames.append(meta_filepath)
         filenames.append(pl_file_csv)
+        filenames.append(pl_file_html)
         # print("Filenames")
         print(filenames)
 
@@ -142,39 +144,98 @@ def data_dl(request, type, id):
         # Grab ZIP file from in-memory, make response with correct MIME-type
         response = HttpResponse(string.getvalue(), content_type = "application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
-    # elif type == "band_gap":
-    #     p_obj = System.objects.get(bandgap=obj)
-    #     write_headers()
-    #     response.write("\n#Band Gap: ")
-    #     response.write(obj.bandgap)
-    #     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+
+    elif type == "synthesis":
+        p_obj = System.objects.get(synthesismethod=obj)
+        file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic, p_obj.inorganic)
+        # response = HttpResponse(content_type='text/csv')
+        # response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.csv' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+        # writer = csv.writer(response)
+        # with open(filename, 'r') as csvfile:
+        #     plots =  csv.reader(csvfile, delimiter=',')
+        #     for row in plots:
+        #         response.write(row)
+        dir_in_str = os.path.join(MEDIA_ROOT, 'uploads')
+        # directory = os.fsencode(dir_in_str)
+        meta_filename = file_name_prefix + '.txt'
+        meta_filepath = os.path.join(dir_in_str, meta_filename)
+        with open(meta_filepath, "w") as meta_file:
+            meta_file.write("#HybriD³ Materials Database\n")
+            meta_file.write("\n#System: ")
+            meta_file.write(p_obj.compound_name)
+            meta_file.write("\n#Temperature: ")
+            meta_file.write(obj.temperature)
+            meta_file.write("\n#Phase: ")
+            meta_file.write(str(obj.phase.phase))
+            meta_file.write("\n#Author: ")
+            meta_file.write(str(obj.publication.author))
+            meta_file.write("\n#Journal: ")
+            meta_file.write(str(obj.publication.journal))
+            meta_file.write("\n#Source: ")
+            meta_file.write(str(obj.publication.doi_isbn))
+            meta_file.write("\n#Synthesis Method: ")
+            meta_file.write(obj.synthesismethod.synthesis_method)
+        print("syn method", obj.synthesismethod.synthesis_method)
+        upload_file_txt = os.path.join(dir_in_str, file_name_prefix + ".txt")
+        filenames = []
+        filenames.append(meta_filepath)
+        filenames.append(upload_file_txt)
+        # print("Filenames")
+        print(filenames)
+
+        zip_dir = file_name_prefix
+        zip_filename = "%s.zip" % zip_dir
+        # change response type and content deposition type
+        string = BytesIO()
+
+        zf = zipfile.ZipFile(string, "w")
+
+        for fpath in filenames:
+            # Calculate path for file in zip
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+
+            # Add file, at correct path
+            print("Fpath")
+            print(fpath)
+            print("Zip Path")
+            print(zip_path)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(), content_type = "application/x-zip-compressed")
+        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
 
     elif type == "band_structure":
         p_obj = System.objects.get(bandstructure=obj)
+        file_name_prefix = '%s_%s_%s_bs' % (obj.phase, p_obj.organic, p_obj.inorganic)
         # write_headers()
         dir_in_str = obj.folder_location
         compound_name = dir_in_str.split("/")[-1]
         print(dir_in_str)
         directory = os.fsencode(dir_in_str)
-        meta_filename = '%s_%s_%s_%s.txt' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+        meta_filename =  file_name_prefix + ".txt"
         meta_filepath = os.path.join(dir_in_str, meta_filename)
-        if not os.path.exists(meta_filepath):
-            with open(meta_filepath, "w") as meta_file:
-                meta_file.write("#HybriD³ Materials Database\n")
-                meta_file.write("\n#System: ")
-                meta_file.write(p_obj.compound_name)
-                meta_file.write("\n#Temperature: ")
-                meta_file.write(obj.temperature)
-                meta_file.write("\n#Phase: ")
-                meta_file.write(str(obj.phase.phase))
-                meta_file.write("\n#Author: ")
-                meta_file.write(str(obj.publication.author))
-                meta_file.write("\n#Journal: ")
-                meta_file.write(str(obj.publication.journal))
-                meta_file.write("\n#Source: ")
-                meta_file.write(str(obj.publication.doi_isbn))
-
+        with open(meta_filepath, "w") as meta_file:
+            meta_file.write("#HybriD³ Materials Database\n")
+            meta_file.write("\n#System: ")
+            meta_file.write(p_obj.compound_name)
+            meta_file.write("\n#Temperature: ")
+            meta_file.write(obj.temperature)
+            meta_file.write("\n#Phase: ")
+            meta_file.write(str(obj.phase.phase))
+            meta_file.write("\n#Author: ")
+            meta_file.write(str(obj.publication.author))
+            meta_file.write("\n#Journal: ")
+            meta_file.write(str(obj.publication.journal))
+            meta_file.write("\n#Source: ")
+            meta_file.write(str(obj.publication.doi_isbn))
+        bs_full = os.path.join(dir_in_str, file_name_prefix + "_full.png")
+        bs_mini = os.path.join(dir_in_str, file_name_prefix + "_min.png")
         filenames = []
+        filenames.append(bs_full)
+        filenames.append(bs_mini)
         for f in os.listdir(dir_in_str):
             filename = os.fsdecode(f)
             if filename.endswith(".in") or filename.endswith(".out") or filename.endswith(".txt"):
@@ -366,6 +427,10 @@ class SearchFormView(generic.TemplateView):
                         system_info["ee"] = str(ee.exciton_emission)
                         system_info["sys_pk"] = ee.system.pk
                         system_info["ee_pk"] = ee.pk
+                        if ee.system.synthesismethod_set.count() > 0:
+                            system_info["syn_pk"] = ee.system.synthesismethod_set.first().pk
+                        else:
+                            system_info["syn_pk"] = 0
                         if ee.system.atomicpositions_set.count() > 0:
                             system_info["apos_pk"] = ee.system.atomicpositions_set.first().pk
                         else:
@@ -723,7 +788,7 @@ class AddExcitonEmissionView(generic.TemplateView):
                     feedback = "success"
                     ee_model = new_form.save()
                     print(ee_model)
-                    pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
+                    # pl_file_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_pl.csv" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
                     # print pl_file_loc
                     # Testing feature: automatically populate exciton_emission field with ee peak obtained from graph
                     # if pl_file_loc:
@@ -745,20 +810,20 @@ class AddExcitonEmissionView(generic.TemplateView):
         print(args)
         return JsonResponse(args)
 
-class AddBandGapView(generic.TemplateView):
-    template_name = 'materials/add_band_gap.html'
+class AddSynthesisMethodView(generic.TemplateView):
+    template_name = 'materials/add_synthesis.html'
 
     def get(self, request):
         search_form = SearchForm()
-        band_gap_form = AddBandGap()
+        synthesis_form = AddSynthesisMethod()
         return render(request, self.template_name, {
         'search_form': search_form,
-        'band_gap_form': band_gap_form,
+        'synthesis_form': synthesis_form,
         'initial_state': True,
         })
 
     def post(self, request):
-        form = AddBandGap(request.POST, request.FILES)
+        form = AddSynthesisMethod(request.POST, request.FILES)
         if form.is_valid():
             print("form is valid")
             new_form = form.save(commit=False)
@@ -882,9 +947,13 @@ class SystemView(generic.DetailView):
 class SpecificSystemView(generic.TemplateView):
     template_name = 'materials/materials_system_specific.html'
 
-    def get(self, request, pk, pk_aa, pk_ee, pk_bs):
+    def get(self, request, pk, pk_aa, pk_syn, pk_ee, pk_bs):
         system = System.objects.get(pk=pk)
         exciton_emission = system.excitonemission_set.get(pk=pk_ee)
+        if system.synthesismethod_set.count() > 0:
+            synthesis = system.synthesismethod_set.get(pk=pk_syn)
+        else:
+            synthesis = None
         if system.atomicpositions_set.count() > 0:
             atomic_positions = system.atomicpositions_set.get(pk=pk_aa)
         else:
@@ -896,6 +965,7 @@ class SpecificSystemView(generic.TemplateView):
         args = {
             'system': system,
             'atomic_positions': atomic_positions,
+            'synthesis': synthesis,
             'exciton_emission': exciton_emission,
             'band_structure': band_structure
         }

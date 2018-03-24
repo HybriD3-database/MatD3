@@ -11,9 +11,9 @@
       </tr>
       {% for ee in systems_info %}
       <tr>
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.compound_name}}</a></td>
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.common_formula}}</a></td>
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.compound_name}}</a></td>
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.common_formula}}</a></td>
+      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
       <td>{{ee.ee}}</td>
       <td>
       <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.ee_pk %}">

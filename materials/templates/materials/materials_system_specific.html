@@ -72,10 +72,44 @@
                 </a>
                 {% endif %}
           </div>
-        </div
+        </div>
+        <div class="panel panel-info">
+          <div class="panel-heading"><h4>Synthesis Method</h4></div>
+          <div class="panel-body">
+            {% with entry=synthesis %}
+              {% if entry %}
+              <p class="details">{{entry.synthesis_method|truncatechars:50}}</p>
+              Phase: {{entry.phase}} <br>
+              Temperature: {{entry.temperature}}K <br>
+              Method: {{entry.method}} <br>
+              {% if entry.publication.doi_isbn %}
+              Publication: {{entry.publication.doi_isbn}} <br>
+              {% endif %}
+              Source: {{entry.source}} <br>
+              Data extraction: {{entry.data_extraction_method}} <br>
+              <a href="{% url "materials:data_dl" type="synthesis" id=entry.id %}">
+              <button type="button" class="btn btn-primary"/>
+              <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+              Synthesis Method
+              </button>
+              </a>
+              {% else %}
+              <h3>No data available</h3>
+              {% endif %}
+              {% if object.bandgap_set.all|length > 1 %}
+              <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
+              <button type="button" class="btn btn-info">
+              <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+              See all entries
+              </button>
+              </a>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
       </div>
     {% endwith %}
-</div>
+  </div>
 <div class="panel-body">
     <div class="col-md-6">
           <div class="panel panel-info">
@@ -124,28 +158,7 @@
             </div>
           </div>
         </div>
-        <!-- <td>
-          <h4>Band Gap</h4>
-          {% with entry=system.bandgap_set.all|first %}
-            {% if entry %}
-            <p class="details">{{entry.band_gap}} eV</p>
-            Phase: {{entry.phase}} <br>
-            Temperature: {{entry.temperature}}K <br>
-            Method: {{entry.method}} <br>
-            Source: {{entry.publication.author}} <br>
-            {% if entry.publication.doi_isbn %}
-            Publication: {{entry.publication.doi_isbn}} <br>
-            {% endif %}
-            <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">Download Band Gap</a>
-            {% else %}
-            <h3>No data available</h3>
-            {% endif %}
-            {% if system.bandgap_set.all|length > 1 %}
-            <br>
-            <a href="{% url "materials:all_entries" id=system.id type="band_gap"%}">See all entries</a>
-            {% endif %}
-          {% endwith %}
-        </td> -->
+
         <div class="col-md-6">
           <div class="panel panel-info">
             <div class="panel-heading">
@@ -154,7 +167,18 @@
             <div class="panel-body">
               {% with entry=band_structure %}
                 {% if entry.plotted %}
-                <div id="bs-graph"></div>
+                <ul class="nav nav-tabs">
+                  <li class="active"><a data-toggle="tab" href="#home">Full size</a></li>
+                  <li><a data-toggle="tab" href="#mini">Zoomed</a></li>
+                </ul>
+                <div class="tab-content">
+                  <div id="home" class="tab-pane fade in active">
+                    <div id="bs-graph-full"></div>
+                  </div>
+                  <div id="mini" class="tab-pane fade">
+                    <div id="bs-graph-mini"></div>
+                  </div>
+                </div>
                 {% elif entry.folder_location %}
                 <h3>Band Structure is being plotted</h3>
                 {% else %}
@@ -206,8 +230,10 @@ $('#pl-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.
 {% endwith %}
 {% with entry=band_structure %}
 <script type="text/javascript">
-var imglink = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs_full.png';
-$('#bs-graph').html("<img src=" + imglink + " width='500'/>");
+var imglinkfull = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs_full.png';
+var imglinkmini = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs_min.png';
+$('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
+$('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
 </script>
 {% endwith %}
 {% with entry=atomic_positions %}

@@ -1,9 +1,0 @@
-{% extends 'materials/all_entries.html' %}
-
-{% block heading %}Band Gap{% endblock %}
-
-{% block entry_type %}{{entry.band_gap}} eV{% endblock %}
-
-{% block dl_link %}{{
-  <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">Download Band Gap</a>
-}}{% endblock %}

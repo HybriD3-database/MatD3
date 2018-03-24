@@ -1,0 +1,14 @@
+{% extends 'materials/all_entries.html' %}
+
+
+    {% block heading %}Synthesis Methods{% endblock %}
+
+    {% block entry_type %}{{entry.synthesismethod.synthesis_method}}{% endblock %}
+    {% block dl_link %}
+      <a href="{% url "materials:data_dl" type="synthesis" id=entry.id %}">
+        <button type="button" class="btn btn-primary"/>
+        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+          Synthesis Method
+        </button>
+      </a>
+    {% endblock %}

@@ -19,6 +19,11 @@ def pl_file_name(instance, filename):
     filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
     return os.path.join('uploads', filename)
 
+def syn_file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s_%s_syn.txt" % (instance.phase, instance.system.organic, instance.system.inorganic)
+    return os.path.join('uploads', filename)
+
 # Create your models here.
 class Post(models.Model):
     post = models.CharField(max_length=500)
@@ -105,12 +110,13 @@ class ExcitonEmission(IDInfo):
     def __str__(self):
         return str(self.exciton_emission)
 
-class BandGap(IDInfo):
+class SynthesisMethod(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    band_gap = models.CharField(max_length=10)
+    synthesis_method = models.TextField()
+    syn_file = models.FileField(upload_to=syn_file_name, blank=True)
 
     def __str__(self):
-        return self.band_gap
+        return self.system.formula + "_synthesis"
 
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
