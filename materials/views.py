@@ -38,7 +38,7 @@ def data_dl(request, type, id):
     # file_ext = "txt"
 
     def write_headers():
-        response.write("#HybriD³ Materials Database\n\n")
+        response.write("#HybriD3 Materials Database\n\n")
         response.write("#System: ")
         response.write(p_obj.compound_name)
         response.write("\n#Temperature: ")
@@ -97,7 +97,7 @@ def data_dl(request, type, id):
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         with open(meta_filepath, "w") as meta_file:
-            meta_file.write("#HybriD³ Materials Database\n")
+            meta_file.write("#HybriD3 Materials Database\n")
             meta_file.write("\n#System: ")
             meta_file.write(p_obj.compound_name)
             meta_file.write("\n#Temperature: ")
@@ -160,7 +160,7 @@ def data_dl(request, type, id):
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         with open(meta_filepath, "w") as meta_file:
-            meta_file.write("#HybriD³ Materials Database\n")
+            meta_file.write("#HybriD3 Materials Database\n")
             meta_file.write("\n#System: ")
             meta_file.write(p_obj.compound_name)
             meta_file.write("\n#Temperature: ")
@@ -218,7 +218,7 @@ def data_dl(request, type, id):
         meta_filename =  file_name_prefix + ".txt"
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         with open(meta_filepath, "w") as meta_file:
-            meta_file.write("#HybriD³ Materials Database\n")
+            meta_file.write("#HybriD3 Materials Database\n")
             meta_file.write("\n#System: ")
             meta_file.write(p_obj.compound_name)
             meta_file.write("\n#Temperature: ")
