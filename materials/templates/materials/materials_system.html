@@ -187,17 +187,18 @@
                 {% endif %}
                 Crystal system: {{entry.phase}} <br>
                 Method: {{entry.method}} <br>
-                {% if entry.publication.doi_isbn %}
-                Publication: {{entry.publication.doi_isbn}} <br>
-                {% endif %}
                 Source: {{entry.source}} <br>
                 Data extraction: {{entry.data_extraction_method}} <br>
                 <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
                 <button type="button" class="btn btn-primary">
                 <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-                Band Structure
+                  Band Structure
                 </button>
                 </a>
+                <button type="button" class="btn btn-info" data-toggle="popover" title="Reference information"
+                data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
+                  Reference
+                </button>
               {% else %}
                 <h3>No data available</h3>
               {% endif %}
@@ -218,6 +219,10 @@
 
 {% endblock %}
 {% block script %}
+<script type="text/javascript">
+var citation = "{{entry.publication.doi_isbn}}";
+$('[data-toggle="popover"]').popover({placement: "top"});
+</script>
 <!-- could potentially change to server served -->
 {% with entry=object.excitonemission_set.all|first %}
 <script type="text/javascript">
@@ -240,10 +245,9 @@ $(document).ready(function() {
     Jmol.getAppletHtml("jmolApplet0", {
     script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_apos.in",
     j2sPath: "{% static 'jsmol/j2s' %}",
-    height: 400,
-    width: 600,
-    })
-  )
+    height: 450,
+    width: 500,
+  }));
 });
 </script>
 {% endwith %}
