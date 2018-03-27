@@ -96,7 +96,7 @@ def data_dl(request, type, id):
         # directory = os.fsencode(dir_in_str)
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, "w") as meta_file:
+        with open(meta_filepath, encoding="utf-8", mode="w+") as meta_file:
             meta_file.write(str("#HybriD³ Materials Database\n"))
             meta_file.write(str("\n#System: "))
             meta_file.write(str(p_obj.compound_name))
