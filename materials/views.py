@@ -73,7 +73,7 @@ def data_dl(request, type, id):
         response.write("\n\n")
         fileloc = MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' % (obj.phase, p_obj.organic, p_obj.inorganic)
         if(os.path.isfile(fileloc)):
-            with open(fileloc) as f:
+            with open(fileloc, encoding="utf-8", mode="r+") as f:
                 lines = f.read().splitlines()
                 for line in lines:
                     response.write(line + "\n")
@@ -88,7 +88,7 @@ def data_dl(request, type, id):
         # response = HttpResponse(content_type='text/csv')
         # response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.csv' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
         # writer = csv.writer(response)
-        # with open(filename, 'r') as csvfile:
+        # with open(filename, encoding="utf-8", mode="r+") as csvfile:
         #     plots =  csv.reader(csvfile, delimiter=',')
         #     for row in plots:
         #         response.write(row)
@@ -151,61 +151,62 @@ def data_dl(request, type, id):
         # response = HttpResponse(content_type='text/csv')
         # response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.csv' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
         # writer = csv.writer(response)
-        # with open(filename, 'r') as csvfile:
+        # with open(filename, encoding="utf-8", mode="w+") as csvfile:
         #     plots =  csv.reader(csvfile, delimiter=',')
         #     for row in plots:
         #         response.write(row)
-        dir_in_str = os.path.join(MEDIA_ROOT, 'uploads')
+        # dir_in_str = os.path.join(MEDIA_ROOT, 'uploads')
         # directory = os.fsencode(dir_in_str)
         meta_filename = file_name_prefix + '.txt'
-        meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, "w") as meta_file:
-            meta_file.write(str("#HybriD³ Materials Database\n"))
-            meta_file.write(str("\n#System: "))
-            meta_file.write(str(p_obj.compound_name))
-            meta_file.write(str("\n#Temperature: "))
-            meta_file.write(str(obj.temperature))
-            meta_file.write(str("\n#Phase: "))
-            meta_file.write(str(obj.phase.phase))
-            meta_file.write(str("\n#Author: "))
-            meta_file.write(str(obj.publication.author))
-            meta_file.write(str("\n#Journal: "))
-            meta_file.write(str(obj.publication.journal))
-            meta_file.write(str("\n#Source: "))
-            meta_file.write(str(obj.publication.doi_isbn))
-            meta_file.write(str("\n#Synthesis Method: "))
-            meta_file.write(str(obj.synthesismethod.synthesis_method))
+        # meta_filepath = os.path.join(dir_in_str, meta_filename)
+        response = HttpResponse(content_type='text/plain')
+        # with open(meta_filepath, encoding="utf-8", mode="w+") as meta_file:
+        response.write(str("#HybriD³ Materials Database\n"))
+        response.write(str("\n#System: "))
+        response.write(str(p_obj.compound_name))
+        response.write(str("\n#Temperature: "))
+        response.write(str(obj.temperature))
+        response.write(str("\n#Phase: "))
+        response.write(str(obj.phase.phase))
+        response.write(str("\n#Author: "))
+        response.write(str(obj.publication.author))
+        response.write(str("\n#Journal: "))
+        response.write(str(obj.publication.journal))
+        response.write(str("\n#Source: "))
+        response.write(str(obj.publication.doi_isbn))
+        response.write(str("\n#Synthesis Method: "))
+        response.write(str(obj.synthesismethod.synthesis_method))
         print("syn method", obj.synthesismethod.synthesis_method)
-        upload_file_txt = os.path.join(dir_in_str, file_name_prefix + ".txt")
-        filenames = []
-        filenames.append(meta_filepath)
-        filenames.append(upload_file_txt)
-        # print("Filenames")
-        print(filenames)
+        # upload_file_txt = os.path.join(dir_in_str, file_name_prefix + ".txt")
+        # filenames = []
+        # filenames.append(meta_filepath)
+        # filenames.append(upload_file_txt)
+        # # print("Filenames")
+        # print(filenames)
 
-        zip_dir = file_name_prefix
-        zip_filename = "%s.zip" % zip_dir
-        # change response type and content deposition type
-        string = BytesIO()
-
-        zf = zipfile.ZipFile(string, "w")
-
-        for fpath in filenames:
-            # Calculate path for file in zip
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-
-            # Add file, at correct path
-            print("Fpath")
-            print(fpath)
-            print("Zip Path")
-            print(zip_path)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
+        # zip_dir = file_name_prefix
+        # zip_filename = "%s.zip" % zip_dir
+        # # change response type and content deposition type
+        # string = BytesIO()
+        #
+        # zf = zipfile.ZipFile(string, "w")
+        #
+        # for fpath in filenames:
+        #     # Calculate path for file in zip
+        #     fdir, fname = os.path.split(fpath)
+        #     zip_path = os.path.join(zip_dir, fname)
+        #
+        #     # Add file, at correct path
+        #     print("Fpath")
+        #     print(fpath)
+        #     print("Zip Path")
+        #     print(zip_path)
+        #     zf.write(fpath, zip_path)
+        # # Must close zip for all contents to be written
+        # zf.close()
         # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(), content_type = "application/x-zip-compressed")
-        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        response.encoding = "utf-8"
+        response['Content-Disposition'] = 'attachment; filename=%s' % (meta_filename)
 
     elif type == "band_structure":
         p_obj = System.objects.get(bandstructure=obj)
@@ -217,7 +218,7 @@ def data_dl(request, type, id):
         directory = os.fsencode(dir_in_str)
         meta_filename =  file_name_prefix + ".txt"
         meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, "w") as meta_file:
+        with open(meta_filepath, encoding="utf-8", mode="w+") as meta_file:
             meta_file.write("#HybriD3 Materials Database\n")
             meta_file.write("\n#System: ")
             meta_file.write(p_obj.compound_name)
