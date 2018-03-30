@@ -12,14 +12,6 @@
     border: 0px solid #337ab7;
 }
 
-.navbar-default .navbar-toggle:hover,:active {
-    background-color: inherit;
-}
-
-.navbar-default .navbar-toggle:hover {
-    background-color: inherit;
-}
-
 .navbar-default .navbar-toggle .icon-bar {
     background-color: #fefefe;
 }
@@ -83,6 +75,15 @@ border: 1px solid #ddd;
   border: 0px solid #5bc0de;
 }
 
+.panel-default > .panel-heading {
+  background-color: #E3F2FD;
+}
+
+.panel-default > .panel-body {
+  background-color: #ececec;
+  border: 0px solid #f19f4d;
+}
+
 .panel-primary {
   background-image: none;
   border: 0px solid #5bc0de;
@@ -98,14 +99,6 @@ border: 1px solid #ddd;
   border: 0px solid #5bc0de;
 }
 
-.panel-default > .panel-heading {
-  background-color: #E3F2FD;
-}
-
-.panel-default > .panel-body {
-  background-color: #ececec;
-  border: 0px solid #f19f4d;
-}
 
 /* .table {
   background-color: #eae3ea;
