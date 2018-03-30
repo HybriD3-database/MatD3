@@ -1,12 +1,32 @@
 .navbar-default {
-  background-color: #b56357;
-  border: 0px solid #b56357;
+  background-color: #337ab7;
+  border: 0px solid #337ab7;
   border-radius: 0px;
+}
+
+.navbar-default .navbar-toggle {
+    border: 0px solid #337ab7;
+}
+
+.navbar-default .navbar-collapse, .navbar-default .navbar-form {
+    border: 0px solid #337ab7;
+}
+
+.navbar-default .navbar-toggle:hover,:active {
+    background-color: inherit;
+}
+
+.navbar-default .navbar-toggle:hover {
+    background-color: inherit;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+    background-color: #fefefe;
 }
 
 .nav-tabs {
 border-bottom: 0px;
-border-top: 1px solid #ddd;
+border-top: 1px solid #E8EAF6;
 }
 
 .nav-tabs > li {
@@ -52,20 +72,34 @@ border: 1px solid #ddd;
 /* 77c9d4, 57bc90, 015249, a5a5af */
 
 .navbar-default .navbar-nav > li > a {
-   color: #001100; /*Change active text color here*/
+   color: #fefefe; /*Change active text color here*/
 }
 
 .navbar-default .navbar-brand {
-  color: #001100;
+  color: #fefefe;
 }
 
 .panel-default {
-  border: 0px solid #ececec;
+  border: 0px solid #5bc0de;
+}
+
+.panel-primary {
+  background-image: none;
+  border: 0px solid #5bc0de;
+}
+
+.panel-info {
+  background-image: none;
+  border: 0px solid #5bc0de;
+}
+
+.panel-info > .panel-heading {
+  background-image: none;
+  border: 0px solid #5bc0de;
 }
 
 .panel-default > .panel-heading {
-  background-color: #57bc90;
-  border-radius: 0px;
+  background-color: #E3F2FD;
 }
 
 .panel-default > .panel-body {
