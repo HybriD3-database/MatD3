@@ -122,6 +122,7 @@ class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     folder_location = models.CharField(max_length=500, blank=True)
     plotted = models.BooleanField(default=False)
+    visible = models.BooleanField(default=False)
 
     def __str__(self):
         return self.folder_location
