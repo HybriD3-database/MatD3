@@ -166,11 +166,7 @@
             </div>
             <div class="panel-body">
               {% with entry=band_structure %}
-                {% if entry.plotted %}
-                <ul class="nav nav-tabs">
-                  <li class="active"><a data-toggle="tab" href="#home">Full size</a></li>
-                  <li><a data-toggle="tab" href="#mini">Zoomed</a></li>
-                </ul>
+                {% if entry.plotted and entry.visible %}
                 <div class="tab-content">
                   <div id="home" class="tab-pane fade in active">
                     <div id="bs-graph-full"></div>
@@ -179,12 +175,17 @@
                     <div id="bs-graph-mini"></div>
                   </div>
                 </div>
-                {% elif entry.folder_location %}
+                <ul class="nav nav-tabs">
+                  <li class="active"><a data-toggle="tab" href="#home">Full size</a></li>
+                  <li><a data-toggle="tab" href="#mini">Zoomed</a></li>
+                </ul>
+                {% elif entry.folder_location and entry.visible %}
                 <h3>Band Structure is being plotted</h3>
                 {% else %}
                 <h3>Band Structure file unavailable</h3>
                 {% endif %}
-                {% if entry %}
+
+                {% if entry.visible %}
                 {% if entry.temperature %}
                 Temperature: {{entry.temperature}}K <br>
                 {% endif %}
@@ -204,7 +205,7 @@
                 {% else %}
                 <h3>No data available</h3>
                 {% endif %}
-                {% if system.bandstructure_set.all|length > 1 %}
+                {% if system.bandstructure_set.all|length > 1 and entry.visible %}
                 <a href="{% url "materials:all_entries" id=system.id type="band_structure" %}">
                 <button type="button" class="btn btn-info">
                 <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
