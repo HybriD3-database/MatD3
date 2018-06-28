@@ -58,7 +58,7 @@
                   Atomic Positions
                   </button>
                   </a>
-                  <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information"
+                  <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information" data-trigger="focus" html="true"
                   data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
                   <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                     Reference
@@ -97,7 +97,7 @@
                     Synthesis Method
                     </button>
                     </a>
-                    <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information"
+                    <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information" data-trigger="focus"
                     data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
                     <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                       Reference
@@ -150,7 +150,7 @@
               Exciton Emission Peak
               </button>
               </a>
-              <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information"
+              <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information"
               data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
               <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                 Reference
@@ -209,7 +209,7 @@
                   Band Structure
                 </button>
                 </a>
-                <button type="button" class="btn btn-info" data-toggle="popover" title="Reference information"
+                <button type="button" class="btn btn-info" data-toggle="popover" data-trigger="focus" title="Reference information"
                 data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
                 <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                   Reference
@@ -236,7 +236,7 @@
 {% block script %}
 <script type="text/javascript">
 var citation = "{{entry.publication.doi_isbn}}";
-$('[data-toggle="popover"]').popover({placement: "top"});
+$('[data-toggle="popover"]').popover({placement: "top", html:true});
 </script>
 <!-- could potentially change to server served -->
 {% with entry=object.excitonemission_set.all|first %}
