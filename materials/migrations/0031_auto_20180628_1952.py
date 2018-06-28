@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='publication',
             name='num_authors',
-            field=models.PositiveSmallIntegerField(default=-1),
+            field=models.PositiveSmallIntegerField(default=1),
             preserve_default=False,
         ),
     ]
