@@ -41,16 +41,21 @@
                     &gamma;: {{entry.gamma}} <br>
                   </div>
                   <div>
-                    Crystal system: {{entry.phase}} <br>
+                    <strong>Crystal system:</strong> {{entry.phase}} <br>
                     {% if entry.temperature %}
-                    Temperature: {{entry.temperature}}K <br>
+                    <strong>Temperature:</strong> {{entry.temperature}}K <br>
                     {% endif %}
-                    Method: {{entry.method}} <br>
+                    <strong>Method:</strong> {{entry.method}} <br>
                     {% if entry.publication.doi_isbn %}
-                    Publication: {{entry.publication.doi_isbn}} <br>
+                    <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
                     {% endif %}
-                    Source: {{entry.source}} <br>
-                    Data extraction: {{entry.data_extraction_method}} <br>
+                    <strong>Source:</strong> {{entry.source}} <br>
+                    <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                    {% if entry.comments %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Comments:</strong> {{entry.comments}}
+                      </div>
+                    {% endif %}
                   </div>
                   <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
                   <button type="button" class="btn btn-primary"/>
@@ -63,18 +68,17 @@
                   <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                     Reference
                   </button>
-                  {% else %}
-                    <h3>No data available</h3>
-                  {% endif %}
 
-                  {% if object.atomicpositions_set.all|length > 1 %}
-                    <a href="{% url "materials:all_a_pos" id=object.id %}">
-                    <button type="button" class="btn btn-info">
-                    <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-                    See all entries
-                    </button>
-                    </a>
-                  {% endif %}
+
+                  <a href="{% url "materials:all_a_pos" id=object.id %}">
+                  <button type="button" class="btn btn-info">
+                  <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                  See all entries ({{object.atomicpositions_set.all|length}})
+                  </button>
+                  </a>
+                {% else %}
+                  <h3>No data available</h3>
+                {% endif %}
               </div>
             </div>
               <div class="panel panel-info">
@@ -82,15 +86,39 @@
                 <div class="panel-body">
                   {% with entry=object.synthesismethod_set.all|first %}
                     {% if entry %}
-                    <p class="details">{{entry.synthesis_method|truncatechars:50}}</p>
-                    Phase: {{entry.phase}} <br>
-                    Temperature: {{entry.temperature}}K <br>
-                    Method: {{entry.method}} <br>
-                    {% if entry.publication.doi_isbn %}
-                    Publication: {{entry.publication.doi_isbn}} <br>
+                    {% if entry.synthesis_method %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Method:</strong> {{entry.synthesis_method}}</div>
                     {% endif %}
-                    Source: {{entry.source}} <br>
-                    Data extraction: {{entry.data_extraction_method}} <br>
+                    {% if entry.starting_materials %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Starting Materials:</strong> {{entry.starting_materials}}
+                      </div>
+                    {% endif %}
+                    {% if entry.remarks %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Remarks:</strong> {{entry.remarks}}
+                      </div>
+                    {% endif %}
+                    {% if entry.product %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Product:</strong> {{entry.product}}
+                      </div>
+                    {% endif %}
+                    <!--<p class="details">{{entry.synthesis_method|truncatechars:50}}</p>-->
+                    <strong>Phase:</strong> {{entry.phase}} <br>
+                    <strong>Temperature:</strong> {{entry.temperature}}K <br>
+                    <strong>Method:</strong> {{entry.method}} <br>
+                    {% if entry.publication.doi_isbn %}
+                    <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+                    {% endif %}
+                    <strong>Source:</strong> {{entry.source}} <br>
+                    <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                    {% if entry.comments %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Comments:</strong> {{entry.comments}}
+                      </div>
+                    {% endif %}
                     <a href="{% url "materials:data_dl" type="synthesis" id=entry.id %}">
                     <button type="button" class="btn btn-primary"/>
                     <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
@@ -102,16 +130,16 @@
                     <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                       Reference
                     </button>
-                    {% else %}
-                    <h3>No data available</h3>
-                    {% endif %}
-                    {% if object.synthesismethod_set.all|length > 1 %}
+
+
                     <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
                     <button type="button" class="btn btn-info">
                     <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-                    See all entries
+                    See all entries ({{object.synthesismethod_set.all|length}})
                     </button>
                     </a>
+                    {% else %}
+                      <h3>No data available</h3>
                     {% endif %}
                   {% endwith %}
                 </div>
@@ -133,17 +161,22 @@
             <h3>PL file unavailable</h3>
             {% endif %}
             {% if entry %}
-              Exciton Emission Peak: {{entry.exciton_emission}}nm <br>
+              <strong>Exciton Emission Peak:</strong> {{entry.exciton_emission}}nm <br>
               {% if entry.temperature %}
-                Temperature: {{entry.temperature}}K <br>
+                <strong>Temperature:</strong> {{entry.temperature}}K <br>
               {% endif %}
-              Crystal system: {{entry.phase}} <br>
-              Method: {{entry.method}} <br>
+              <strong>Crystal system:</strong> {{entry.phase}} <br>
+              <strong>Method:</strong> {{entry.method}} <br>
               {% if entry.publication.doi_isbn %}
-                Publication: {{entry.publication.doi_isbn}} <br>
+                <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
               {% endif %}
-              Source: {{entry.source}} <br>
-              Data extraction: {{entry.data_extraction_method}} <br>
+              <strong>Source:</strong> {{entry.source}} <br>
+              <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+              {% if entry.comments %}
+                <div style="margin-left: 20px; text-indent: -20px;">
+                  <strong>Comments:</strong> {{entry.comments}}
+                </div>
+              {% endif %}
               <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
               <button type="button" class="btn btn-primary"/>
               <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
@@ -155,17 +188,16 @@
               <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                 Reference
               </button>
-            {% else %}
-              <h3>No data available</h3>
-            {% endif %}
+            
 
-            {% if object.excitonemission_set.all|length > 1 %}
               <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-              See all entries
+              See all entries ({{object.excitonemission_set.all|length}})
               </button>
               </a>
+            {% else %}
+              <h3>No data available</h3>
             {% endif %}
             {% endwith %}
           </div>
@@ -190,40 +222,63 @@
                 <li class="active"><a data-toggle="tab" href="#home">Full size</a></li>
                 <li><a data-toggle="tab" href="#mini">Zoomed</a></li>
               </ul>
-              {% elif entry.folder_location and entry.visible %}
-              <h3>Band Structure is being plotted</h3>
+              {% elif entry.folder_location|length > 0 and entry.visible %}
+              <h3>Band Structure is not plotted</h3>
               {% else %}
               <h3>Band Structure file unavailable</h3>
               {% endif %}
               {% if entry.visible %}
+                <p class="details">Band gap:
+                  <span style="font-weight: normal;">
+                    {% if entry.band_gap|length > 0 %}
+                    {{entry.band_gap}} eV
+                    {% else %}N/A
+                    {% endif %}
+                  </span>
+                </p>
                 {% if entry.temperature %}
-                Temperature: {{entry.temperature}}K <br>
+                <strong>Temperature:</strong> {{entry.temperature}}K <br>
                 {% endif %}
-                Crystal system: {{entry.phase}} <br>
-                Method: {{entry.method}} <br>
-                Source: {{entry.source}} <br>
-                Data extraction: {{entry.data_extraction_method}} <br>
-                <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
-                <button type="button" class="btn btn-primary">
-                <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-                  Band Structure
-                </button>
-                </a>
+                <strong>Crystal system:</strong> {{entry.phase}} <br>
+                <strong>Method:</strong> {{entry.method}} <br>
+                <strong>Source:</strong> {{entry.source}} <br>
+                <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                {% if entry.comments %}
+                  <div style="margin-left: 20px; text-indent: -20px;">
+                    <strong>Comments:</strong> {{entry.comments}}
+                  </div>
+                {% endif %}
+                {% if entry.folder_location and entry.plotted %}
+                  <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
+                  <button type="button" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    Band Structure
+                  </button>
+                  </a>
+                {% endif %}
+                {% if entry.band_gap != '' %}
+                  <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">
+                  <button type="button" class="btn btn-primary"/>
+                  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    Band Gap
+                  </button>
+                  </a>
+                {% endif %}
                 <button type="button" class="btn btn-info" data-toggle="popover" data-trigger="focus" title="Reference information"
                 data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
                 <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                   Reference
                 </button>
-              {% else %}
-                <h3>No data available</h3>
-              {% endif %}
-              {% if object.bandstructure_set.all|length > 1 and entry.visible %}
+
+
                 <a href="{% url "materials:all_entries" id=object.id type="band_structure" %}">
                 <button type="button" class="btn btn-info">
                 <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-                See all entries
+                See all entries ({{object.bandstructure_set.all|length}})
                 </button>
                 </a>
+              {% else %}
+                <h3>No data available</h3>
               {% endif %}
             {% endwith %}
             </div>
