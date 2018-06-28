@@ -71,6 +71,28 @@ class System(models.Model):
 
     def __str__(self):
         return self.formula
+        
+    def listAlternateNames(self):
+        return self.group.replace(',', ' ').split()
+    
+    # This type of function can be used to display numbers as subscripts in
+    # chemical formulas. Simply create functions of this type for each field
+    # that would need subscripts, then call it from the template e.g. 
+    # {{system.compoundNameFormat|safe}}. The |safe allows the string to be
+    # rendered as html, but has potential security issues if someone were to 
+    # enter html into a form field (such as compound_name). This also has the
+    # problem of turning every number into a subscript, even ones that are part 
+    # of an abbreviation (e.g. AE4TPbI4).
+    '''
+    def compoundNameFormat(self):
+        formattedString = ''
+        for c in self.compound_name:
+            if c.isdigit():
+                formattedString += '<sub>' + c + '</sub>'
+            else:
+                formattedString += c
+        return formattedString
+    '''
 
 class Phase(models.Model):
     phase = models.CharField(max_length=50)
@@ -112,7 +134,10 @@ class ExcitonEmission(IDInfo):
 
 class SynthesisMethod(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    synthesis_method = models.TextField()
+    synthesis_method = models.TextField(max_length=1000, blank=True)
+    starting_materials = models.TextField(max_length=1000, blank=True)
+    remarks = models.TextField(max_length=1000, blank=True)
+    product = models.TextField(max_length=1000, blank=True)
     syn_file = models.FileField(upload_to=syn_file_name, blank=True)
 
     def __str__(self):
@@ -120,6 +145,7 @@ class SynthesisMethod(IDInfo):
 
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
+    band_gap = models.CharField(max_length = 10, blank=True)
     folder_location = models.CharField(max_length=500, blank=True)
     plotted = models.BooleanField(default=False)
     visible = models.BooleanField(default=False)
