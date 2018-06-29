@@ -282,15 +282,15 @@ def all_a_pos(request, id):
     template_name = 'materials/all_a_pos.html'
     obj = System.objects.get(id=id)
     compound_name = System.objects.get(id=id).compound_name
-    obj = obj.atomicpositions_set.all()
-    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'key': id})
+    obj = obj.atomicpositions_set.all
+    return render(request, template_name, {'object': obj, 'compound_name': compound_name})
 
 def all_entries(request, id, type):
     template_name = 'materials/all_%ss.html' % type
     obj = System.objects.get(id=id)
     compound_name = System.objects.get(id=id).compound_name
     obj = dictionary[type].objects.filter(system__id=id)
-    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'data_type': type, 'key': id})
+    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'data_type': type})
 
 #The following two views make up a WIP ajax search
 # def search_entries(request):
