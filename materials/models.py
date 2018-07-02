@@ -6,6 +6,7 @@ import os
 import shutil
 from django.db.models import signals
 from mainproject.settings.base import MEDIA_ROOT
+import string
 
 UserProfile = "accounts.UserProfile"
 
@@ -28,17 +29,8 @@ def syn_file_name(instance, filename):
 class Post(models.Model):
     post = models.CharField(max_length=500)
 
-class Author(models.Model):
-    """Contain data of authors"""
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    institution = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return self.first_name + " " + self.last_name + ", " + self.institution
-
 class Publication(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.PROTECT)
+    num_authors = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=1000) #what's a good title?
     journal = models.CharField(max_length=500, blank=True)
     vol = models.CharField(max_length=100) #should I use Integer or char?
@@ -49,6 +41,19 @@ class Publication(models.Model):
 
     def __str__(self):
         return self.title
+
+class Author(models.Model):
+    """Contain data of authors"""
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    institution = models.CharField(max_length=100, blank=True)
+    publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.first_name + " " + self.last_name # + ", " + self.institution
+    
+    def splitFirstName(self):
+        return self.first_name.split()
 
 class Tag(models.Model):
     tag = models.CharField(max_length=100)
@@ -61,17 +66,17 @@ class System(models.Model):
     """Contains meta data for investigated system. """
     # use fhi file format.
     compound_name = models.CharField(max_length=1000)
-    group = models.CharField(max_length=100)
     formula = models.CharField(max_length=200)
+    group = models.CharField(max_length=100) # aka Alternate names
     organic = models.CharField(max_length=100)
     inorganic = models.CharField(max_length=100)
     last_update = models.DateField(default=datetime.now)
     description = models.TextField(max_length=1000, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
-
+    
     def __str__(self):
         return self.formula
-        
+
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
     
