@@ -30,7 +30,7 @@ class Post(models.Model):
     post = models.CharField(max_length=500)
 
 class Publication(models.Model):
-    num_authors = models.PositiveSmallIntegerField()
+    author_count = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=1000) #what's a good title?
     journal = models.CharField(max_length=500, blank=True)
     vol = models.CharField(max_length=100) #should I use Integer or char?
@@ -47,7 +47,7 @@ class Author(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     institution = models.CharField(max_length=100, blank=True)
-    publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    publication = models.ManyToManyField(Publication)
 
     def __str__(self):
         return self.first_name + " " + self.last_name # + ", " + self.institution
