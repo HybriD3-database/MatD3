@@ -979,3 +979,41 @@ class SpecificSystemView(generic.TemplateView):
         }
         print(args)
         return render(request, self.template_name, args)
+
+class SystemUpdateView(generic.UpdateView):
+    model = System
+    template_name = 'materials/system_update_form.html'
+    form_class = AddSystem
+    success_url = '/materials/{id}'
+
+class AtomicPositionsUpdateView(generic.UpdateView):
+    model = AtomicPositions
+    template_name = 'materials/update_a_pos.html'
+    form_class = AddAtomicPositions
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/all-a-pos' % str(pk)
+
+class SynthesisMethodUpdateView(generic.UpdateView):
+    model = SynthesisMethod
+    template_name = 'materials/update_synthesis.html'
+    form_class = AddSynthesisMethod
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/synthesis' % str(pk)
+
+class ExcitonEmissionUpdateView(generic.UpdateView):
+    model = ExcitonEmission
+    template_name = 'materials/update_exciton_emission.html'
+    form_class = AddExcitonEmission
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/exciton_emission' % str(pk)
+
+class BandStructureUpdateView(generic.UpdateView):
+    model = BandStructure
+    template_name = 'materials/update_band_structure.html'
+    form_class = AddBandStructure
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/band_structure' % str(pk)
