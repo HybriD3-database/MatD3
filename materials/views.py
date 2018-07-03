@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
+from django.forms import formset_factory
 
 from materials.forms import *
 
@@ -21,6 +22,8 @@ import csv
 import os
 import zipfile
 from io import BytesIO
+from functools import reduce
+import operator
 
 dictionary = {
 "exciton_emission": ExcitonEmission,
@@ -29,24 +32,32 @@ dictionary = {
 }
 
 # Download a specific entry type
-def data_dl(request, type, id):
+def data_dl(request, type, id, bandgap=False):
     # Create the HttpResponse object with the text/plain header.
     response = HttpResponse(content_type='text/fhi-aims')
     dictionary['atomic_positions'] = AtomicPositions
+    if type == 'band_gap':
+        type = 'band_structure'
+        bandgap = True
     obj = dictionary[type].objects.get(id=id)
     # need to find a way to change type of file based on the property being described
     # file_ext = "txt"
 
     def write_headers():
-        response.write(str("#HybriD³ Materials Database\n"))
+        if not bandgap:
+            response.write(str("#HybriD³ Materials Database\n"))
         response.write(str("\n#System: "))
         response.write(str(p_obj.compound_name))
         response.write(str("\n#Temperature: "))
         response.write(str(obj.temperature))
         response.write(str("\n#Phase: "))
         response.write(str(obj.phase.phase))
-        response.write(str("\n#Author: "))
-        response.write(str(obj.publication.author))
+        response.write(str("\n#Authors: "))
+        for author in obj.publication.author_set.all():
+            response.write('\n    ')
+            response.write(author.first_name + ' ')
+            response.write(author.last_name)
+            response.write(', ' + author.institution)
         response.write(str("\n#Journal: "))
         response.write(str(obj.publication.journal))
         response.write(str("\n#Source: "))
@@ -64,11 +75,11 @@ def data_dl(request, type, id):
         response.write(obj.b)
         response.write("\n#c: ")
         response.write(obj.c)
-        response.write("\n#&alpha;: ")
+        response.write("\nalpha: ")
         response.write(obj.alpha)
-        response.write("\n#&beta;: ")
+        response.write("\nbeta: ")
         response.write(obj.beta)
-        response.write("\n#&gamma;: ")
+        response.write("\ngamma: ")
         response.write(obj.gamma)
         response.write("\n\n")
         fileloc = MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' % (obj.phase, p_obj.organic, p_obj.inorganic)
@@ -104,8 +115,12 @@ def data_dl(request, type, id):
             meta_file.write(str(obj.temperature))
             meta_file.write(str("\n#Phase: "))
             meta_file.write(str(obj.phase.phase))
-            meta_file.write(str("\n#Author: "))
-            meta_file.write(str(obj.publication.author))
+            meta_file.write(str("\n#Authors: "))
+            for author in obj.publication.author_set.all():
+                meta_file.write('\n    ')
+                meta_file.write(author.first_name + ' ')
+                meta_file.write(author.last_name)
+                meta_file.write(', ' + author.institution)
             meta_file.write(str("\n#Journal: "))
             meta_file.write(str(obj.publication.journal))
             meta_file.write(str("\n#Source: "))
@@ -168,15 +183,29 @@ def data_dl(request, type, id):
         response.write(str(obj.temperature))
         response.write(str("\n#Phase: "))
         response.write(str(obj.phase.phase))
-        response.write(str("\n#Author: "))
-        response.write(str(obj.publication.author))
+        response.write(str("\n#Authors: "))
+        for author in obj.publication.author_set.all():
+            response.write('\n    ')
+            response.write(author.first_name + ' ')
+            response.write(author.last_name)
+            response.write(', ' + author.institution)
         response.write(str("\n#Journal: "))
         response.write(str(obj.publication.journal))
         response.write(str("\n#Source: "))
         response.write(str(obj.publication.doi_isbn))
-        response.write(str("\n#Synthesis Method: "))
-        response.write(str(obj.synthesismethod.synthesis_method))
-        print("syn method", obj.synthesismethod.synthesis_method)
+        if obj.synthesis_method:
+            response.write(str("\n#Synthesis Method: "))
+            response.write(str(obj.synthesis_method))
+        print("syn method", obj.synthesis_method)
+        if obj.starting_materials:
+            response.write(str("\n#Starting Materials: "))
+            response.write(str(obj.starting_materials))
+        if obj.remarks:
+            response.write(str("\n#Remarks: "))
+            response.write(str(obj.remarks))
+        if obj.product:
+            response.write(str("\n#Product: "))
+            response.write(str(obj.product))
         # upload_file_txt = os.path.join(dir_in_str, file_name_prefix + ".txt")
         # filenames = []
         # filenames.append(meta_filepath)
@@ -207,7 +236,24 @@ def data_dl(request, type, id):
         # Grab ZIP file from in-memory, make response with correct MIME-type
         response.encoding = "utf-8"
         response['Content-Disposition'] = 'attachment; filename=%s' % (meta_filename)
-
+    
+    elif type == "band_structure" and bandgap == True:
+        p_obj = System.objects.get(bandstructure=obj)
+        filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic, p_obj.inorganic)
+        
+        response.write(str("#HybriD³ Materials Database\n\n"))
+        response.write("****************\n")
+        response.write("Band gap: ")
+        if obj.band_gap != '':
+            response.write(obj.band_gap + ' eV')
+        else:
+            response.write("N/A")
+        response.write("\n****************\n")
+        write_headers()
+        
+        response.encoding = 'utf-8'
+        response['Content-Disposition'] = 'attachment; filename=%s' % (filename)
+    
     elif type == "band_structure":
         p_obj = System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_bs' % (obj.phase, p_obj.organic, p_obj.inorganic)
@@ -226,8 +272,12 @@ def data_dl(request, type, id):
             meta_file.write(obj.temperature)
             meta_file.write("\n#Phase: ")
             meta_file.write(str(obj.phase.phase))
-            meta_file.write("\n#Author: ")
-            meta_file.write(str(obj.publication.author))
+            meta_file.write(str("\n#Authors: "))
+            for author in obj.publication.author_set.all():
+                meta_file.write('\n    ')
+                meta_file.write(author.first_name + ' ')
+                meta_file.write(author.last_name)
+                meta_file.write(', ' + author.institution)
             meta_file.write("\n#Journal: ")
             meta_file.write(str(obj.publication.journal))
             meta_file.write("\n#Source: ")
@@ -316,6 +366,22 @@ def all_entries(request, id, type):
 #     args['materials'] = System.objects.all()
 #
 #     return render(request, 'materials/materials_ajax_search.html', args)
+
+def getAuthorSearchResult(search_text):
+    keyWords = search_text.split()
+    print(keyWords)
+    results = System.objects.filter(
+                                     reduce(operator.or_, (Q(atomicpositions__publication__author__last_name__icontains=x) for x in keyWords)) |
+                                     reduce(operator.or_, (Q(synthesismethod__publication__author__last_name__icontains=x) for x in keyWords)) |
+                                     reduce(operator.or_, (Q(excitonemission__publication__author__last_name__icontains=x) for x in keyWords)) |
+                                     reduce(operator.or_, (Q(bandstructure__publication__author__last_name__icontains=x) for x in keyWords))
+         ).distinct()
+    print("**************************RESULTS******************************")
+    print(results)
+    print("***************************************************************")
+    # results =  System.objects.filter(Q(atomicpositions__publication__author__last_name__icontains=search_text) | Q(synthesismethod__publication__author__last_name__icontains=search_text) | Q(excitonemission__publication__author__last_name__icontains=search_text) |Q(bandstructure__publication__author__last_name__icontains=search_text)).distinct()
+    
+    return results
 
 def search_result(search_term, search_text):
     search_results = {
