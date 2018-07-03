@@ -384,13 +384,16 @@ def getAuthorSearchResult(search_text):
     return results
 
 def search_result(search_term, search_text):
-    search_results = {
-        'formula': System.objects.filter(Q(formula__icontains=search_text) | Q(group__icontains=search_text) | Q(compound_name__icontains=search_text)).order_by('formula'),
-        'organic': System.objects.filter(organic__icontains=search_text).order_by('organic'),
-        'inorganic': System.objects.filter(inorganic__icontains=search_text).order_by('inorganic'),
-        # 'exciton_emission': System.objects.filter(excitonemission__exciton_emission__icontains=search_text)
-    }
-    return search_results[search_term]
+    if search_term == 'formula':
+        return System.objects.filter(Q(formula__icontains=search_text) | Q(group__icontains=search_text) | Q(compound_name__icontains=search_text)).order_by('formula')
+    elif search_term == 'organic':
+        return System.objects.filter(organic__icontains=search_text).order_by('organic')
+    elif search_term == 'inorganic':
+        return System.objects.filter(inorganic__icontains=search_text).order_by('inorganic')
+    elif search_term == 'author':
+        return getAuthorSearchResult(search_text)
+    else:
+        raise KeyError("Invalid search term.")
 
 # materials search form
 # class SearchFormView(generic.TemplateView):
@@ -447,6 +450,41 @@ def search_result(search_term, search_text):
 #
 #         return render(request, template_name, args)
 
+def notIn(L, author):
+    # checks if this author is already being listed for this system by comparing
+    # first and last names
+    first = author.first_name
+    last = author.last_name
+    for listedAuthor in L:
+        if (listedAuthor.first_name == first and 
+            listedAuthor.last_name == last):
+               return False # author is already listed
+    return True
+
+def getAuthors(systems):
+    # returns a dictionary mapping systems to a list of authors that will be 
+    # listed in search results; an author appears no more than once per system
+    print(systems)
+    print('sorting', len(systems), 'systems...')
+    def authorSort(author): # function that decides author sort criteria
+        return author.last_name
+    count = added = 0 # for debugging (this function could get expensive)
+    authors = {}
+    for system in systems:
+        L = []
+        for dataType in [system.atomicpositions_set, system.synthesismethod_set,
+                         system.excitonemission_set, system.bandstructure_set]:
+            for data in dataType.all():
+                for author in data.publication.author_set.all():
+                    count += 1
+                    if notIn(L, author): # don't add duplicate authors
+                        added += 1
+                        L.append(author)
+        print(len(L))
+        authors[system] = sorted(L, key=authorSort)
+    print('authors filtered:', str(count)+',', 'authors listed:', added)
+    print('Authors', authors)
+    return authors
 
 # search for system page
 class SearchFormView(generic.TemplateView):
@@ -455,7 +493,8 @@ class SearchFormView(generic.TemplateView):
         ['formula','Formula'],
         ['organic', 'Organic Component'],
         ['inorganic', 'Inorganic Component'],
-        ['exciton_emission', 'Exciton Emission']
+        ['exciton_emission', 'Exciton Emission'],
+        ['author', 'Author']
     ]
 
     def get(self, request):
@@ -515,16 +554,26 @@ class SearchFormView(generic.TemplateView):
                             system_info["bs_pk"] = 0
                         systems_info.append(system_info)
                     print(systems_info)
-        # systems = System.objects.filter(compound_name__icontains=search_text)
+                
+                # convert systems to a list of systems, not ee objects, so 
+                # authors can be extracted
+                temp = []
+                for i in range(len(systems)):
+                    temp.append(systems[i].system)
+                systemsAndAuthors = getAuthors(temp)
+                print('SYSTEMS:', systems)
             else:
                 systems = search_result(search_term, search_text)
+        
+                systemsAndAuthors = getAuthors(systems)
 
         args = {
             'systems': systems,
             'search_term': search_term,
-            'systems_info': systems_info
+            'systems_info': systems_info,
+            'systemsAndAuthors': systemsAndAuthors
         }
-
+        
         return render(request, template_name, args)
 
 class AddAPosView(generic.TemplateView):
@@ -543,7 +592,7 @@ class AddAPosView(generic.TemplateView):
         form = AddAtomicPositions(request.POST, request.FILES)
         print(request.FILES)
         if form.is_valid():
-            print("form is valid")
+            print("a_pos form is valid")
             apos_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
@@ -578,7 +627,7 @@ class AddPubView(generic.TemplateView):
         return render(request, self.template_name, {
         'search_form': search_form,
         'pub_form': pub_form,
-        'initial_state': True,
+        'initial_state': True
         })
 
     def post(self, request):
@@ -631,21 +680,18 @@ class SearchPubView(generic.TemplateView):
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
             print(search_text)
-            author_search = Author.objects.filter(
-            Q(first_name__icontains=search_text) | Q(last_name__icontains=search_text) | Q(institution__icontains=search_text)
+            author_search = Publication.objects.all().filter(
+            Q(author__first_name__icontains=search_text) | Q(author__last_name__icontains=search_text) | Q(author__institution__icontains=search_text)
             )
-            print (author_search)
+            print('authors:', author_search)
             if len(author_search) > 0:
-                author = author_search.all()[:1]
-                print(author)
+                search_result = author_search
             else:
-                author = None
-            print(author)
-            search_result = Publication.objects.filter(
-                Q(title__icontains=search_text) | Q(journal__icontains=search_text) | Q(author=author)
+                search_result = Publication.objects.filter(
+                Q(title__icontains=search_text) | Q(journal__icontains=search_text)
                 )
         return render(request, self.template_name, {'search_result': search_result})
-        
+
 class AddAuthorsToPublicationView(generic.TemplateView):
     template_name = 'materials/add_authors_to_publication.html'
     def post(self, request):
@@ -653,7 +699,7 @@ class AddAuthorsToPublicationView(generic.TemplateView):
         #variable number of author forms
         author_formset = formset_factory(AddAuthor, extra=int(author_count))
         return render(request, self.template_name, {'entered_author_count': author_count, 'author_formset': author_formset})
-        
+
 # This is for add publication page
 class SearchAuthorView(generic.TemplateView):
     # template_name = 'materials/add_publication.html'
@@ -943,7 +989,7 @@ class AddBandStructureView(generic.TemplateView):
         return render(request, self.template_name, {
         'search_form': search_form,
         'band_structure_form': band_structure_form ,
-        'initial_state': True,
+        'initial_state': True
         })
 
     def post(self, request):
