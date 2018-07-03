@@ -283,7 +283,14 @@ def all_a_pos(request, id):
     obj = System.objects.get(id=id)
     compound_name = System.objects.get(id=id).compound_name
     obj = obj.atomicpositions_set.all()
-    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'key': id})
+    entriesAndAuthors = {} # dictionary linking each entry to its authors
+    # populate entriesAndAuthors
+    for entry in obj:
+        L = []
+        for author in entry.publication.author_set.all():
+            L.append(author)
+        entriesAndAuthors[entry] = L
+    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'entriesAndAuthors': entriesAndAuthors, 'key': id})
 
 def all_entries(request, id, type):
     template_name = 'materials/all_%ss.html' % type

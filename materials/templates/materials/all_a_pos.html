@@ -15,42 +15,80 @@
       <h3>{{compound_name}}</h3>
     </div>
     <div class="panel-body">
-    {% if object %}
-    {% for entry in object %}
+      <h4>All Atomic Positions Entry Data</h4>
+      {% if object %}
+      {% for entry, authors in entriesAndAuthors.items %}
       <div class="col-md-6">
-        <h4>Atomic Positions #{{ forloop.counter }}</h4>
-          <div class="col-md-6 details-a-pos">
-            a: {{entry.a}} <br>
-            b: {{entry.b}} <br>
-            c: {{entry.c}} <br>
-          </div>
-          <div class="col-md-6 details-a-pos">
-            &alpha;: {{entry.alpha}} <br>
-            &beta;: {{entry.beta}} <br>
-            &gamma;: {{entry.gamma}} <br>
-          </div>
-          <div>
-            Phase: {{entry.phase}} <br>
-            Temperature: {{entry.temperature}} K <br>
-            Method: {{entry.method}} <br>
-            Source: {{entry.publication.author}} <br>
-            {% if entry.publication.doi_isbn %}
-            Publication: {{entry.publication.doi_isbn}} <br>
-            {% endif %}
-            <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
-            <button type="button" class="btn btn-primary"/>
-            <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-            Atomic Positions
-            </button>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            {% if entry.contributor.user.get_username == user.username %}
+            <a href="{% url "materials:update_a_pos" sys=entry.system.pk pk=entry.pk %}">
+              <button type="button" class="btn btn-success" style="float: right;">Edit Entry</button>
             </a>
+            {% endif %}
+            <h4>Entry #{{ forloop.counter }}</h4>
           </div>
+          <div class='panel-body'>
+            <div class="col-md-6 details-a-pos">
+              a: {{entry.a}} <br>
+              b: {{entry.b}} <br>
+              c: {{entry.c}} <br>
+            </div>
+            <div class="col-md-6 details-a-pos">
+              &alpha;: {{entry.alpha}} <br>
+              &beta;: {{entry.beta}} <br>
+              &gamma;: {{entry.gamma}} <br>
+            </div>
+            <div>
+              {% if entry.phase %}
+              <strong>Phase:</strong> {{entry.phase}} <br>
+              {% endif %}
+              {% if entry.temperature %}
+              <strong>Temperature:</strong> {{entry.temperature}}K <br>
+              {% endif %}
+              {% if entry.method %}
+              <div style="margin-left: 20px; text-indent: -20px;">
+                <strong>Method:</strong> {{entry.method}}
+              </div>
+              {% endif %}
+              {% if entry.specific_method %}
+              <div style="margin-left: 20px; text-indent: -20px;">
+                <strong>Specific Method:</strong> {{entry.specific_method}}
+              </div>
+              {% endif %}
+              <div style="margin-left: 20px; text-indent: -20px;">
+                <strong>Publication:</strong> {% include 'materials/reference_format.html' %} 
+              </div>
+              {% if entry.source %}
+              <div style="margin-left: 20px; text-indent: -20px;">
+                <strong>Source:</strong> {{entry.source}}
+              </div>
+              {% endif %}
+              {% if entry.data_extraction_method %}
+              <div style="margin-left: 20px; text-indent: -20px;">
+                <strong>Data Extraction Method:</strong> {{entry.data_extraction_method}}
+              </div>
+              {% endif %}
+              {% if entry.comments %}
+              <div style="margin-left: 20px; text-indent: -20px;">
+                <strong>Comments:</strong> {{entry.comments}}
+              </div>
+              {% endif %}
+              <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+                <button type="button" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                  Atomic Positions
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
       {% endfor %}
       {% else %}
-      <h3>No data available</h3>
+        <h3>No data available</h3>
       {% endif %}
-  </div>
-      </div>
+    </div>
   </div>
 
 

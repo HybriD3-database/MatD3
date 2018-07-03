@@ -8,6 +8,13 @@
   <!-- Default panel contents -->
     <div class="panel-heading">
     <b>Material</b>
+    <!-- this won't work until systems get a contributer attribute -- is this a good idea? -->
+    {% if object.contributor.user.get_username == user.username %}
+    <a href="/materials/update-system/{{object.pk}}" >
+      <button type="button" class="btn btn-success" style="float: right">Edit System Data
+      </button>
+    </a>
+    {% endif %}
     <h3>{{object.compound_name}}</h3>
     </div>
     <div class="panel-body">
@@ -63,12 +70,12 @@
                   Atomic Positions
                   </button>
                   </a>
-                  <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information" data-trigger="focus" html="true"
-                  data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
+                  {% with entry.publication.author_set.all as authors %}
+                  <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information" data-trigger="focus" html="true" data-content="{% include 'materials/reference_format.html' %}">
                   <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                     Reference
                   </button>
-
+                  {% endwith %}
 
                   <a href="{% url "materials:all_a_pos" id=object.id %}">
                   <button type="button" class="btn btn-info">
@@ -124,13 +131,13 @@
                     <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                     Synthesis Method
                     </button>
-                    </a>
-                    <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information" data-trigger="focus"
-                    data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
+                    </a>{% with entry.publication.author_set.all as authors %}
+                    <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information"
+                    data-content="{% include 'materials/reference_format.html' %}">
                     <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                       Reference
                     </button>
-
+                    {% endwith %}
 
                     <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
                     <button type="button" class="btn btn-info">
@@ -183,12 +190,12 @@
               Exciton Emission Peak
               </button>
               </a>
-              <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information"
-              data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
+              {% with entry.publication.author_set.all as authors %}
+              <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information" data-content="{% include 'materials/reference_format.html' %}">
               <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                 Reference
               </button>
-            
+              {% endwith %}
 
               <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
               <button type="button" class="btn btn-info">
@@ -264,13 +271,14 @@
                   </button>
                   </a>
                 {% endif %}
-                <button type="button" class="btn btn-info" data-toggle="popover" data-trigger="focus" title="Reference information"
-                data-content="{{entry.publication.author.last_name}}, {{entry.publication.author.first_name|slice:":1"}}. {{entry.publication}}. <em>{{entry.publication.journal}}</em> <strong>{{entry.publication.vol}},</strong> {{entry.publication.pages_start}}-{{entry.publication.pages_end}} ({{entry.publication.year}}) {{entry.publication.doi_isbn}}">
+                {% with entry.publication.author_set.all as authors %}
+                <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information"
+                data-content="{% include 'materials/reference_format.html' %}">
                 <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
                   Reference
                 </button>
-
-
+                {% endwith %}
+                
                 <a href="{% url "materials:all_entries" id=object.id type="band_structure" %}">
                 <button type="button" class="btn btn-info">
                 <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>

@@ -2,13 +2,32 @@
 
 {% block heading %}Band Structures{% endblock %}
 
-{% block entry_type %}{{entry.band_structure}}{% endblock %}
+{% block entry_type %}
+{% if entry.visible %}{{entry.band_structure}}{% endif %}
+Band gap:
+  <span style="font-weight: normal;">
+    {% if entry.band_gap|length > 0 %}
+      {{entry.band_gap}} eV
+    {% else %} N/A
+    {% endif %}
+  </span>
+{% endblock %}
 
 {% block dl_link %}
-  <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
-  <button type="button" class="btn btn-primary"/>
-  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+  {% if entry.folder_location|length > 0 and entry.plotted %}
+    <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
+    <button type="button" class="btn btn-primary"/>
+    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
     Band Structure
-  </button>
-  </a>
+    </button>
+    </a>
+  {% endif %}
+  {% if entry.band_gap != '' %}
+    <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">
+    <button type="button" class="btn btn-primary"/>
+    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+        Band Gap
+    </button>
+    </a>
+  {% endif %}
 {% endblock %}

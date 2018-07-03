@@ -1,0 +1,22 @@
+{% extends 'materials/materials_template.html' %}
+
+{% block heading %}
+<h4>Heading Goes Here</h4>
+{% endblock %}
+
+{% block mainbody %}
+{% if object.contributor.user.get_username == user.username %}
+<form id="update-entry" method="post">
+    {% csrf_token %}
+    <div style="padding-bottom: 10px">
+      <label for="publication">Publication:</label>
+      <input type="text" name="publication" class="form-control" value="{{object.publication}}" readonly>
+    </div>
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-default">Save</button>
+</form>
+{% else %}
+You must be the author of this entry to edit it. Please sign in.
+{% endif %}
+
+{% endblock %}
