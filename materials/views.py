@@ -579,7 +579,15 @@ class SearchPubView(generic.TemplateView):
                 Q(title__icontains=search_text) | Q(journal__icontains=search_text) | Q(author=author)
                 )
         return render(request, self.template_name, {'search_result': search_result})
-
+        
+class AddAuthorsToPublicationView(generic.TemplateView):
+    template_name = 'materials/add_authors_to_publication.html'
+    def post(self, request):
+        author_count = request.POST['author_count']
+        #variable number of author forms
+        author_formset = formset_factory(AddAuthor, extra=int(author_count))
+        return render(request, self.template_name, {'entered_author_count': author_count, 'author_formset': author_formset})
+        
 # This is for add publication page
 class SearchAuthorView(generic.TemplateView):
     # template_name = 'materials/add_publication.html'
