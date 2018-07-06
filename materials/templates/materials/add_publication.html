@@ -5,17 +5,19 @@
 {% endblock %}
 
 {% block mainbody %}
-<form id="search-author" method="post" action="{% url 'materials:search_author' %}">
-    {% csrf_token %}
-    <label for="id_search_text">Search term:</label>
-    <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
-    placeholder="Search using the first name, last name, and/or institution of the author." required>
-      <button type="submit" class="btn btn-default">Search for author</button>
+
+
+<form id="author-count" method="post" action="{% url 'materials:author_count' %}">
+  {% csrf_token %}
+  <label for="id_author_count">Number of authors:</label>
+  <input type="number" name="author_count" autofocus="true" class="form-control" id="id_author_count" min="1" max="50" placeholder="Please enter the number of authors associated with this publication" required>
+  <button type="submit" class="btn btn-default">Enter</button>
 </form>
-<form id="add-publication" method="post" action="{% url 'materials:add_publication' %}">
+
+<form id="add-publication" method="post" action="{% url 'materials:add_publication' %}" class="form-group hidden">
   {% csrf_token %}
   <p>
-  <div id="search-result">
+  <div id="entered-authors">
   </div>
   </p>
   {{ pub_form.as_p }}
@@ -30,7 +32,11 @@
 {% include 'materials/ajax_form_submit.html' %}
 {% include 'materials/ajax_alert_form_submit.html' %}
 <script type="text/javascript">
-  ajax_submit($('#search-author'), $('#search-result'));
+  $('#author-count').submit(function() {
+      $('#add-publication').removeClass('hidden');
+    });
+
+  ajax_submit($('#author-count'), $('#entered-authors'));
   alert_submit($('#add-publication'), $('#feedback'));
 </script>
 {% endblock %}

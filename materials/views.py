@@ -636,29 +636,69 @@ class AddPubView(generic.TemplateView):
         #     print "is ajax"
         # else:
         #     print "not ajax"
-        search_form = SearchForm()
+        search_form = SearchForm() # dead code?
+        
+        authors_info = {}
+        for key in request.POST:
+            if key.startswith("form-"):
+                value = request.POST[key]
+                authors_info[key] = value
+                if value == '':
+                    return JsonResponse({'feedback': 'failure',
+                                        'text': "Failed to submit, author information is incomplete."})
+        
+        # sanity check: each author must have first name, last name, institution
+        assert(len(authors_info) % 3 == 0)
+        author_count = len(authors_info) // 3
+        
         pub_form = AddPublication(request.POST)
         if pub_form.is_valid():
             form = pub_form.save(commit=False)
             doi_isbn = pub_form.cleaned_data["doi_isbn"]
-            pk = request.POST.get('author')
-            # check if author is found
-            if int(pk) > 0:
-                # check if doi_isbn is unique/valid, except when field is empty
-                if len(doi_isbn) == 0 or len(Publication.objects.filter(doi_isbn=doi_isbn)) == 0:
-                    form.author = Author.objects.get(pk=pk)
-                    form.save()
-                    text = "Save success!"
-                    feedback = "success"
-                else:
-                    text = "Failed to submit, publication is already in database."
-                    feedback = "failure"
+            # check if doi_isbn is unique/valid, except when field is empty
+            if len(doi_isbn) == 0 or len(Publication.objects.filter(doi_isbn=doi_isbn)) == 0:
+                form.author_count = author_count
+                form.save()
+                newPub = form
+                text = "Save success!"
+                feedback = "success"
             else:
-                text = "Failed to submit, author not found, please try again."
+                text = "Failed to submit, publication is already in database."
                 feedback = "failure"
         else:
             text = "Failed to submit, please fix the errors, and try again."
             feedback = "failure"
+        
+        if feedback == 'failure': return JsonResponse({'feedback': feedback,
+                                                       'text': text})
+        # create and save new author objects, linking them to the saved publication
+        for i in range(author_count): # for each author
+            data = {}
+            data['first_name'] = authors_info["form-%d-first_name" % i]
+            data['last_name'] = authors_info["form-%d-last_name" % i]
+            data['institution'] = authors_info["form-%d-institution" % i]
+            preexistingAuthors = Author.objects.filter(first_name__iexact=data['first_name']).filter(last_name__iexact=data['last_name']).filter(institution__iexact=data['institution'])
+            print(preexistingAuthors)
+            if preexistingAuthors.count() > 0:
+                # use the prexisting author object
+                print("This author is already in the database.",preexistingAuthors)
+                preexistingAuthors[0].publication.add(newPub)
+            
+            else: # this is a new author, so create a new object
+                print("This is a new author.", data)
+                author_form = AddAuthor(data)
+                
+                if(not author_form.is_valid()):
+                    text = "Failed to submit, author not valid. Please fix the errors, and try again."
+                    feedback = "failure"
+                    break
+                else: # author_form is valid
+                    form = author_form.save()
+                    form.publication.add(newPub)
+                    form.save()
+                    text = "Save success!"
+                    feedback = "success"
+        
         args = {
                 # 'search_form': search_form,
                 # 'pub_form': pub_form,

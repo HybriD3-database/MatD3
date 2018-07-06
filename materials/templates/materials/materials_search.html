@@ -11,14 +11,6 @@
       <label for="search_text">Search term: </label>
       <div class="input-group">
         <div class="input-group-btn">
-          <!-- <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false">Action <span class="caret"></span></button>
-          <ul class="dropdown-menu">
-            <li>Compound Name</li>
-            <li>Inorganic Component</li>
-            <li>Organic Component</li>
-            <li>Tags</li>
-          </ul> -->
           <select id="search_term" name="search_term" class="selectpicker">
             {% for search_term in search_terms %}
             <option value="{{search_term.0}}">{{search_term.1}}</option>
@@ -40,10 +32,20 @@
 {% block script %}
 {% include 'materials/ajax_form_submit.html' %}
 <script type="text/javascript">
+  $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
+
   $('#search_term').change(function() {
       if(this.value == "exciton_emission")
-      $('#search_text').attr("placeholder", "Search by range using > | >= | < | <= or a combination");
+      $('#search_text').attr("placeholder", "Search by range using >, >=, <, <=, or a combination, e.g. >=400");
+      else if(this.value == "formula")
+      $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
+      else if(this.value == "organic")
+      $('#search_text').attr("placeholder", "Search for all or part of an organic component, e.g. CH3NH3 or MA");
+      else if(this.value == "inorganic")
+      $('#search_text').attr("placeholder", "Search for all or part of an inorganic component, e.g. PbI3");
+      else
+      $('#search_text').attr("placeholder", "");
     });
- ajax_submit($('#search-system'), $('#results'));
+  ajax_submit($('#search-system'), $('#results'));
 </script>
 {% endblock %}
