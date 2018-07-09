@@ -50,10 +50,10 @@ class Author(models.Model):
     publication = models.ManyToManyField(Publication)
 
     def __str__(self):
-        inst = self.institution
-        if len(inst) > 35:
-            inst = inst[:32] + '...'
-        return self.first_name + " " + self.last_name + ", " + inst
+        value = self.first_name + " " + self.last_name + ", " + self.institution
+        if len(value) > 45:
+            value = value[:42] + '...'
+        return value
     
     def splitFirstName(self):
         return self.first_name.split()

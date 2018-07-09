@@ -2,7 +2,7 @@
   {% if forloop.last and not forloop.first %}and{% endif %}
 
   {% for fn in author.splitFirstName %}
-    {{fn.0}}{% if '.' not in fn %}.{% endif %}
+    {{fn.0}}.
   {% endfor %}
 
   {{author.last_name}}{% if not forloop.first or forloop.revcounter0 != 1 %},{% endif %}
