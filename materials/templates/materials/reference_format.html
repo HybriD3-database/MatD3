@@ -1,9 +1,12 @@
 {% for author in authors %}
+  {% if forloop.last and not forloop.first %}and{% endif %}
+
   {% for fn in author.splitFirstName %}
-    {{fn.0}}.
+    {{fn.0}}{% if '.' not in fn %}.{% endif %}
   {% endfor %}
-  
-  {{author.last_name}}{% if not forloop.last %},{% endif %}
+
+  {{author.last_name}}{% if not forloop.first or forloop.revcounter0 != 1 %},{% endif %}
+
 {% endfor %}
 
 {% if entry.publication.title %}
