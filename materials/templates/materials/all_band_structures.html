@@ -2,8 +2,24 @@
 
 {% block heading %}Band Structures{% endblock %}
 
+{% block bs_graph %}
+{% if entry.plotted and entry.visible %}
+  <div class="tab-content">
+    <div id="home{{forloop.counter}}" class="tab-pane fade in active">
+      <img src="{{entry.getFullBSPath}}" alt="Band Structure" width="500">
+    </div>
+    <div id="mini{{forloop.counter}}" class="tab-pane fade">
+      <img src="{{entry.getMiniBSPath}}" alt="Band Structure" width="500">
+    </div>
+  </div>
+  <ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home{{forloop.counter}}">Full size</a></li>
+    <li><a data-toggle="tab" href="#mini{{forloop.counter}}">Zoomed</a></li>
+  </ul>
+{% endif %}
+{% endblock %}
+
 {% block entry_type %}
-{% if entry.visible %}{{entry.band_structure}}{% endif %}
 Band gap:
   <span style="font-weight: normal;">
     {% if entry.band_gap|length > 0 %}
@@ -31,3 +47,4 @@ Band gap:
     </a>
   {% endif %}
 {% endblock %}
+

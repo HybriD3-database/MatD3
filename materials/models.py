@@ -161,6 +161,14 @@ class BandStructure(IDInfo):
     def __str__(self):
         return self.folder_location
 
+    def getFullBSPath(self):
+        path = "../../media/uploads/%s_%s_%s_bs/%s_%s_%s_bs_full.png" % (self.phase, self.system.organic, self.system.inorganic, self.phase, self.system.organic, self.system.inorganic)
+        return path
+    
+    def getMiniBSPath(self):
+        path = "../../media/uploads/%s_%s_%s_bs/%s_%s_%s_bs_min.png" % (self.phase, self.system.organic, self.system.inorganic, self.phase, self.system.organic, self.system.inorganic)
+        return path
+
 class BondAngle(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     hmh_angle = models.CharField(max_length=100, blank=True)

@@ -37,6 +37,7 @@
             <h4>Entry #{{ forloop.counter }}</h4>
           </div>
           <div class="panel-body">
+            {% block bs_graph %}{% endblock %}
             <p class="details">{% block entry_type %}Entry Type units{% endblock %}</p>
             <!--Phase: {{entry.phase}} <br>-->
             {% if entry.temperature %}
