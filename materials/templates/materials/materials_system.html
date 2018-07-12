@@ -8,8 +8,7 @@
   <!-- Default panel contents -->
     <div class="panel-heading">
     <b>Material</b>
-    <!-- this won't work until systems get a contributer attribute -- is this a good idea? -->
-    {% if object.contributor.user.get_username == user.username %}
+    {% if user.is_superuser %}
     <a href="/materials/update-system/{{object.pk}}" >
       <button type="button" class="btn btn-success" style="float: right">Edit System Data
       </button>
@@ -114,8 +113,12 @@
                     {% endif %}
                     <!--<p class="details">{{entry.synthesis_method|truncatechars:50}}</p>-->
                     <strong>Phase:</strong> {{entry.phase}} <br>
+                    {% if entry.temperature %}
                     <strong>Temperature:</strong> {{entry.temperature}}K <br>
-                    <strong>Method:</strong> {{entry.method}} <br>
+                    {% endif %}
+                    {% if entry.method %}
+                    <strong>Method:</strong> {{entry.method}} <br> <!--maybe this field should be left out-->
+                    {% endif %}
                     {% if entry.publication.doi_isbn %}
                     <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
                     {% endif %}

@@ -641,7 +641,7 @@ class AddPubView(generic.TemplateView):
         authors_info = {}
         for key in request.POST:
             if key.startswith("form-"):
-                value = request.POST[key]
+                value = request.POST[key].strip()
                 authors_info[key] = value
                 if value == '':
                     return JsonResponse({'feedback': 'failure',
@@ -720,9 +720,9 @@ class SearchPubView(generic.TemplateView):
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
             print(search_text)
-            author_search = Publication.objects.all().filter(
+            author_search = Publication.objects.filter(
             Q(author__first_name__icontains=search_text) | Q(author__last_name__icontains=search_text) | Q(author__institution__icontains=search_text)
-            )
+            ).distinct()
             print('authors:', author_search)
             if len(author_search) > 0:
                 search_result = author_search
