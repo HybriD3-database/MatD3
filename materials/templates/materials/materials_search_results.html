@@ -7,7 +7,6 @@
         <th>Common Formula</th>
         <th>Chemical Formula</th>
         <th>Exciton Emission</th>
-        <th>Authors</th>
         <th>Download</th>
       </tr>
       {% for ee in systems_info %}
@@ -32,7 +31,7 @@
     <th>Inorganic Component</th>
     <th>Authors</th>
   </tr>
-  {% for system, authorsList in systemsAndAuthors.items %}
+  {% for system in systems %}
   <tr>
     <td><a href="/materials/{{system.pk}}">{{system.compound_name}}</a></td>
     <td><a href="/materials/{{system.pk}}">{{system.formula}}</a></td>
@@ -47,8 +46,8 @@
     <td>{{system.inorganic}}</td>
     <td>
       <ul style="padding: 0px; list-style-type: none" id="authors-list">
-        {% for auth in authorsList %}
-          <li>{{auth}}</li>
+        {% for author in system.getAuthors %}
+          <li>{{author}}</li>
         {% endfor %}
       </ul>
     </td>

@@ -41,6 +41,9 @@ class Publication(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def getAuthors(self):
+        return self.author_set.all()
 
 class Author(models.Model):
     """Contain data of authors"""
@@ -82,6 +85,21 @@ class System(models.Model):
 
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
+    
+    def getAuthors(self):
+        # returns a list of authors related to a system; an author appears no more than once
+        def authorSort(author): # function that decides author sort criteria
+            return author.last_name
+            
+        L = []
+        for dataType in [self.atomicpositions_set, self.synthesismethod_set,
+                        self.excitonemission_set, self.bandstructure_set]:
+            for data in dataType.all():
+                for author in data.publication.author_set.all():
+                    if author not in L: # don't add duplicate authors
+                        L.append(author)
+       
+        return sorted(L, key=authorSort)
     
     # This type of function can be used to display numbers as subscripts in
     # chemical formulas. Simply create functions of this type for each field
@@ -130,6 +148,9 @@ class IDInfo(models.Model):
     method = models.ForeignKey(Method, on_delete=models.PROTECT, null=True)
     specific_method = models.ForeignKey(SpecificMethod, on_delete=models.PROTECT, null=True)
     comments = models.CharField(max_length=1000, blank=True)
+    
+    def getAuthors(self):
+        return self.publication.getAuthors()
 
 class ExcitonEmission(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)

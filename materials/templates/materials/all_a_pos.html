@@ -10,14 +10,20 @@
     <div class="panel-heading">
       <b>Material</b>
       <a href="{% url "materials:materials_system" pk=key %}">
-        <button type="button" class="btn btn-primary" style="float: right">Back</button>
+        <button type="button" class="btn btn-primary" style="float: right; background-color: #888888; border: none;">Back</button>
       </a>
       <h3>{{compound_name}}</h3>
     </div>
+    {% if object %}
     <div class="panel-body">
+      <a href="{% url "materials:data_dl" type="all_atomic_positions" id=object.0.system.id %}">
+        <button type="button" class="btn btn-primary" style="float: right;">
+          <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+          All Lattice Parameters
+        </button>
+      </a>
       <h4>All Atomic Positions Entry Data</h4>
-      {% if object %}
-      {% for entry, authors in entriesAndAuthors.items %}
+      {% for entry in object %}
       <div class="col-md-6">
         <div class="panel panel-info">
           <div class="panel-heading">
@@ -56,9 +62,11 @@
                 <strong>Specific Method:</strong> {{entry.specific_method}}
               </div>
               {% endif %}
+              {% with entry.getAuthors as authors %}
               <div style="margin-left: 20px; text-indent: -20px;">
                 <strong>Publication:</strong> {% include 'materials/reference_format.html' %} 
               </div>
+              {% endwith %}
               {% if entry.source %}
               <div style="margin-left: 20px; text-indent: -20px;">
                 <strong>Source:</strong> {{entry.source}}

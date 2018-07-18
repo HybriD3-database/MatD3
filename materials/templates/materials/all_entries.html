@@ -10,7 +10,7 @@
     <div class="panel-heading">
       <b>Material</b>
       <a href="{% url "materials:materials_system" pk=key %}">
-        <button type="button" class="btn btn-primary" style="float: right">Back</button>
+        <button type="button" class="btn btn-primary" style="float: right; background-color: #888888; border: none;">Back</button>
       </a>
       <h3>{{compound_name}}</h3>
     </div>
@@ -54,7 +54,7 @@
             </div>
             {% endif %}
             <div style="margin-left: 20px; text-indent: -20px;">
-              {% with entry.publication.author_set.all as authors %}
+              {% with entry.getAuthors as authors %}
               <strong>Publication:</strong> {% include 'materials/reference_format.html' %} 
               {% endwith %}
             </div>

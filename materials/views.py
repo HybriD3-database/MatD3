@@ -39,21 +39,22 @@ def data_dl(request, type, id, bandgap=False):
     if type == 'band_gap':
         type = 'band_structure'
         bandgap = True
-    obj = dictionary[type].objects.get(id=id)
     # need to find a way to change type of file based on the property being described
     # file_ext = "txt"
 
     def write_headers():
-        if not bandgap:
-            response.write(str("#HybriD³ Materials Database\n"))
-        response.write(str("\n#System: "))
-        response.write(str(p_obj.compound_name))
+        if type not in ['all_atomic_positions']:
+            if not bandgap:
+                response.write(str("#HybriD³ Materials Database\n"))
+            response.write(str("\n#System: "))
+            response.write(str(p_obj.compound_name))
         response.write(str("\n#Temperature: "))
-        response.write(str(obj.temperature))
+        response.write(str(obj.temperature +' K'))
         response.write(str("\n#Phase: "))
         response.write(str(obj.phase.phase))
-        response.write(str("\n#Authors: "))
-        for author in obj.publication.author_set.all():
+        authors = obj.publication.author_set.all()
+        response.write(str("\n#Authors ("+str(authors.count())+"): "))
+        for author in authors:
             response.write('\n    ')
             response.write(author.first_name + ' ')
             response.write(author.last_name)
@@ -65,23 +66,27 @@ def data_dl(request, type, id, bandgap=False):
             response.write(str(obj.publication.doi_isbn))
         else:
             response.write(str("N/A"))
-
-    if type == "atomic_positions":
-        p_obj = System.objects.get(atomicpositions=obj)
-        write_headers()
+    
+    def write_a_pos():
         response.write("\n#a: ")
         response.write(obj.a)
         response.write("\n#b: ")
         response.write(obj.b)
         response.write("\n#c: ")
         response.write(obj.c)
-        response.write("\nalpha: ")
+        response.write("\n#alpha: ")
         response.write(obj.alpha)
-        response.write("\nbeta: ")
+        response.write("\n#beta: ")
         response.write(obj.beta)
-        response.write("\ngamma: ")
+        response.write("\n#gamma: ")
         response.write(obj.gamma)
         response.write("\n\n")
+    
+    if type == "atomic_positions":
+        obj = dictionary[type].objects.get(id=id)
+        p_obj = System.objects.get(atomicpositions=obj)
+        write_headers()
+        write_a_pos()
         fileloc = MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' % (obj.phase, p_obj.organic, p_obj.inorganic)
         if(os.path.isfile(fileloc)):
             with open(fileloc, encoding="utf-8", mode="r+") as f:
@@ -92,8 +97,22 @@ def data_dl(request, type, id, bandgap=False):
             response.write("#-Atomic Positions input file not available-")
         # return redirect(MEDIA_URL + 'uploads/%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic))
         response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic, type)
+        
+    elif type == 'all_atomic_positions': # all the a_pos entries
+        p_obj = System.objects.get(id=id)
+        response.write(str("#HybriD³ Materials Database\n\n"))
+        name = p_obj.compound_name
+        response.write(str("#"*(len(name)+22) +"\n"))
+        response.write(str("#####  System: "))
+        response.write(str(name))
+        response.write(str("  #####\n#" + "#"*(len(name)+22) +"\n"))
+        for obj in p_obj.atomicpositions_set.all():
+            write_headers()
+            write_a_pos()
+        response['Content-Disposition'] = 'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic, p_obj.inorganic, 'ALL')
 
     elif type == "exciton_emission":
+        obj = dictionary[type].objects.get(id=id)
         p_obj = System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic, p_obj.inorganic)
         # response = HttpResponse(content_type='text/csv')
@@ -161,6 +180,7 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
 
     elif type == "synthesis":
+        obj = dictionary[type].objects.get(id=id)
         p_obj = System.objects.get(synthesismethod=obj)
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic, p_obj.inorganic)
         # response = HttpResponse(content_type='text/csv')
@@ -238,6 +258,7 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = 'attachment; filename=%s' % (meta_filename)
     
     elif type == "band_structure" and bandgap == True:
+        obj = dictionary[type].objects.get(id=id)
         p_obj = System.objects.get(bandstructure=obj)
         filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic, p_obj.inorganic)
         
@@ -255,6 +276,7 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = 'attachment; filename=%s' % (filename)
     
     elif type == "band_structure":
+        obj = dictionary[type].objects.get(id=id)
         p_obj = System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_bs' % (obj.phase, p_obj.organic, p_obj.inorganic)
         # write_headers()
@@ -329,18 +351,23 @@ def data_dl(request, type, id, bandgap=False):
 
 # The following two defines views for each specific entry type
 def all_a_pos(request, id):
+    def sortEntries(entry): # sort by temperature, but temperature is a charFields
+        try:
+            return int(entry.temperature)
+        except: # temperature field contains something other than digits (e.g. N/A)
+            temp = ''
+            for c in entry.temperature:
+                if c.isdigit(): temp += c
+                else:
+                    if temp != '': return int(temp)
+            return 9999999 # no temperature, so make this entry last
+    
     template_name = 'materials/all_a_pos.html'
     obj = System.objects.get(id=id)
     compound_name = System.objects.get(id=id).compound_name
     obj = obj.atomicpositions_set.all()
-    entriesAndAuthors = {} # dictionary linking each entry to its authors
-    # populate entriesAndAuthors
-    for entry in obj:
-        L = []
-        for author in entry.publication.author_set.all():
-            L.append(author)
-        entriesAndAuthors[entry] = L
-    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'entriesAndAuthors': entriesAndAuthors, 'key': id})
+    obj = sorted(obj, key=sortEntries)
+    return render(request, template_name, {'object': obj, 'compound_name': compound_name, 'key': id})
 
 def all_entries(request, id, type):
     template_name = 'materials/all_%ss.html' % type
@@ -450,42 +477,6 @@ def search_result(search_term, search_text):
 #
 #         return render(request, template_name, args)
 
-def notIn(L, author):
-    # checks if this author is already being listed for this system by comparing
-    # first and last names
-    first = author.first_name
-    last = author.last_name
-    for listedAuthor in L:
-        if (listedAuthor.first_name == first and 
-            listedAuthor.last_name == last):
-               return False # author is already listed
-    return True
-
-def getAuthors(systems):
-    # returns a dictionary mapping systems to a list of authors that will be 
-    # listed in search results; an author appears no more than once per system
-    print(systems)
-    print('sorting', len(systems), 'systems...')
-    def authorSort(author): # function that decides author sort criteria
-        return author.last_name
-    count = added = 0 # for debugging (this function could get expensive)
-    authors = {}
-    for system in systems:
-        L = []
-        for dataType in [system.atomicpositions_set, system.synthesismethod_set,
-                         system.excitonemission_set, system.bandstructure_set]:
-            for data in dataType.all():
-                for author in data.publication.author_set.all():
-                    count += 1
-                    if notIn(L, author): # don't add duplicate authors
-                        added += 1
-                        L.append(author)
-        print(len(L))
-        authors[system] = sorted(L, key=authorSort)
-    print('authors filtered:', str(count)+',', 'authors listed:', added)
-    print('Authors', authors)
-    return authors
-
 # search for system page
 class SearchFormView(generic.TemplateView):
     template_name = 'materials/materials_search.html'
@@ -555,23 +546,13 @@ class SearchFormView(generic.TemplateView):
                         systems_info.append(system_info)
                     print(systems_info)
                 
-                # convert systems to a list of systems, not ee objects, so 
-                # authors can be extracted
-                temp = []
-                for i in range(len(systems)):
-                    temp.append(systems[i].system)
-                systemsAndAuthors = getAuthors(temp)
-                print('SYSTEMS:', systems)
             else:
                 systems = search_result(search_term, search_text)
-        
-                systemsAndAuthors = getAuthors(systems)
 
         args = {
             'systems': systems,
             'search_term': search_term,
-            'systems_info': systems_info,
-            'systemsAndAuthors': systemsAndAuthors
+            'systems_info': systems_info
         }
         
         return render(request, template_name, args)
