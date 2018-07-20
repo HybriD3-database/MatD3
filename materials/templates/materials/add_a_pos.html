@@ -6,7 +6,7 @@
 {% load static %}
 
 {% block form %}
-<form id="add-a-pos" method="post" action="{% url 'materials:add_a_pos' %}" enctype='multipart/form-data'>
+<form id="add-a-pos" name="add-a-pos" method="post" action="{% url 'materials:add_a_pos' %}" enctype='multipart/form-data'>
     {% csrf_token %}
     <div id="publication-search-result">
     </div>
@@ -22,7 +22,9 @@
 {% endblock %}
 
 {% block ajaxscript %}
-<script type="text/javascript">
-  alert_submit($('#add-a-pos'), $('#feedback'));
-</script>
+  <script type="text/javascript">
+    alert_submit($('#add-a-pos'), $('#feedback'));
+  </script>
+  {% block synthesisScript %}
+  {% endblock %}
 {% endblock %}

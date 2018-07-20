@@ -145,7 +145,7 @@ class AddAtomicPositions(forms.ModelForm):
     all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'fhi_file', 'a', 'b', 'c', 'alpha', 'beta', 'gamma', 'volume', 'Z', 'source', 'data_extraction_method')
     class Meta:
         model = AtomicPositions
-        exclude = ('contributor', 'publication', 'system')
+        exclude = ('contributor', 'publication', 'system', 'synthesis_method')
         labels = {
             "fhi_file": "\"geometry.in\" file",
             "phase": "Crystal system",

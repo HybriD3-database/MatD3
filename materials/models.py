@@ -170,7 +170,12 @@ class SynthesisMethod(IDInfo):
     syn_file = models.FileField(upload_to=syn_file_name, blank=True)
 
     def __str__(self):
-        return self.system.formula + "_synthesis"
+        return self.system.compound_name + " synthesis #" + str(self.methodNumber())
+    
+    def methodNumber(self):
+        for i, obj in enumerate(self.system.synthesismethod_set.all()):
+            if obj.pk == self.pk:
+                return i + 1
 
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -217,6 +222,9 @@ class AtomicPositions(IDInfo):
     volume = models.CharField(max_length=50, blank=True)
     Z = models.CharField(max_length=50, blank=True)
     fhi_file = models.FileField(upload_to=file_name, blank=True)
+    synthesis_method = models.ForeignKey(SynthesisMethod,
+                                         on_delete=models.PROTECT, null=True,
+                                         blank=True)
 
     def __str__(self):
         return self.phase.phase + " " + self.system.formula

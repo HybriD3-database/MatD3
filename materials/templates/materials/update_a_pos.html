@@ -3,3 +3,10 @@
 {% block heading %}
   <h4>Update Atomic Positions Entry for: {{object.system.compound_name}}</h4>
 {% endblock %}
+
+{% block relatedEntries %}
+  <div style="padding-bottom: 10px">
+    <label for="syn-method">Related Synthesis Method:</label>
+    <input type="text" name="syn-method" class="form-control" value="{% if object.synthesis_method %}Method {{object.synthesis_method.methodNumber}} {% if object.synthesis_method.product %}-- Product: {{object.synthesis_method.product}}{% endif %}{% else %}None{% endif %}" readonly>
+  </div>
+{% endblock %}

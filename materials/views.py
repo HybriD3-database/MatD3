@@ -571,13 +571,17 @@ class AddAPosView(generic.TemplateView):
 
     def post(self, request):
         form = AddAtomicPositions(request.POST, request.FILES)
-        print(request.FILES)
         if form.is_valid():
             print("a_pos form is valid")
             apos_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print("system pk is: " + sys_pk)
+            syn_pk = request.POST.get('synthesis-methods')
+            print("synthesis method pk is: " + syn_pk)
+            try:
+                apos_form.synthesis_method = SynthesisMethod.objects.get(pk=int(syn_pk))
+            except: # no synthesis method was chosen (or an error occurred)
+                pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 apos_form.publication = Publication.objects.get(pk=pub_pk)
                 apos_form.system = System.objects.get(pk=sys_pk)

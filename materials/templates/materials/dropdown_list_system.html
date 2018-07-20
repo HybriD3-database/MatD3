@@ -3,12 +3,44 @@
   <label for="system">Select system name: </label>
   <select id="system" name="system" class="form-control" required>
   {% for system in search_result %}
-   <option value={{system.pk}}>{{system.compound_name}}, {{system.formula}} </option>
+    <option value={{system.pk}}>{{system.compound_name}}, {{system.formula}} </option>
   {% endfor %}
+  </select>
+  
+  <label for="synthesis-methods" style="padding-top: 10px;">Related Synthesis Method (optional):</label>
+  <select id="synthesis-methods" name="synthesis-methods" class="form-control">
+    <option value="None">None</option>
+    {% for syn in search_result.0.synthesismethod_set.all %}
+        <option value="{{syn.pk}}">Method {{forloop.counter}} -- {% if syn.product %}Product: {{syn.product|truncatechars:40}} {% else %} No product listed {% endif %}</option>
+    {% endfor %}
+  </select>
+
 </div>
+
 {% else %}
   <div class="alert alert-warning" role="alert">
     No results found. Please retry with a new search term or
     <a class="alert-link" target="_blank" href="{% url 'materials:add_system' %}">click here to add an system</a>.
   </div>
 {% endif %}
+
+{% block synthesisScript %}
+{% include 'materials/synthesis_select_js.html' %}
+<script type="text/javascript">
+  var SelectSynthesisMethod = {
+    'synthesis-methods': {
+      {% for system in search_result %}
+        {{system.pk}}: {
+            text: ['None', {% for syn in system.synthesismethod_set.all %}
+              'Method {{forloop.counter}} -- {% if syn.product %}Product: {{syn.product|truncatechars:40}} {% else %} No product listed {% endif %}',
+              {% endfor %}
+            ],
+            value: ['None', {% for syn in system.synthesismethod_set.all %} '{{syn.pk}}',
+              {% endfor %}
+            ]
+        },
+      {% endfor %}
+    }
+  };
+</script>
+{% endblock %}

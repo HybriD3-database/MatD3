@@ -10,7 +10,7 @@
       <button type="submit" class="btn btn-default">Search for publication</button>
     </p>
 </form>
-<form id="search-system" method="post" action="{% url 'materials:search_system' %}">
+<form id="search-system" name="search-system" method="post" action="{% url 'materials:search_system' %}">
     {% csrf_token %}
     <label for="id_search_text">Search term:</label>
     <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
@@ -19,8 +19,10 @@
       <button type="submit" class="btn btn-default">Search for system</button>
     </p>
 </form>
+
 {% block form %}
 {% endblock %}
+
 <div id="feedback">
 </div>
 {% endblock %}
