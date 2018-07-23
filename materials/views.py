@@ -557,6 +557,17 @@ class SearchFormView(generic.TemplateView):
         
         return render(request, template_name, args)
 
+def makeCorrections(form):
+    # alter user input if necessary
+    try:
+        temp = form.temperature
+        if temp.endswith('K') or temp.endswith('C'):
+            temp = temp[:-1].strip()
+            form.temperature = temp
+        return form
+    except: #just in case
+        return form
+
 class AddAPosView(generic.TemplateView):
     template_name = 'materials/add_a_pos.html'
 
@@ -567,6 +578,7 @@ class AddAPosView(generic.TemplateView):
         'search_form': search_form,
         'a_pos_form': a_pos_form,
         'initial_state': True,
+        'related_synthesis': True #determines whether this field appears on the form
         })
 
     def post(self, request):
@@ -591,6 +603,7 @@ class AddAPosView(generic.TemplateView):
                     # print apos_form.contributor
                     text = "Save success!"
                     feedback = "success"
+                    apos_form = makeCorrections(apos_form)
                     apos_form.save()
                 else:
                     text = "Failed to submit, please login and try again."
@@ -831,6 +844,7 @@ class SearchSystemView(generic.TemplateView):
 
     def post(self, request):
         form = SearchForm(request.POST)
+        related_synthesis = (request.POST['related_synthesis'] == 'True')
         search_text = ""
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
@@ -839,7 +853,7 @@ class SearchSystemView(generic.TemplateView):
             Q(compound_name__icontains=search_text) | Q(group__icontains=search_text) | Q(formula__icontains=search_text)
         )
         # ajax version
-        return render(request, self.template_name, {'search_result': search_result})
+        return render(request, self.template_name, {'search_result': search_result, 'related_synthesis': related_synthesis})
 
 class AddSystemView(generic.TemplateView):
     template_name = 'materials/add_system.html'
@@ -919,6 +933,7 @@ class AddExcitonEmissionView(generic.TemplateView):
         'search_form': search_form,
         'exciton_emission_form': exciton_emission_form,
         'initial_state': True,
+        'related_synthesis': False #determines whether this field appears on the form
         })
 
     def post(self, request):
@@ -973,6 +988,7 @@ class AddSynthesisMethodView(generic.TemplateView):
         'search_form': search_form,
         'synthesis_form': synthesis_form,
         'initial_state': True,
+        'related_synthesis': False #determines whether this field appears on the form
         })
 
     def post(self, request):
@@ -991,6 +1007,7 @@ class AddSynthesisMethodView(generic.TemplateView):
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
                     # print apos_form.contributor
+                    new_form = makeCorrections(new_form)
                     text = "Save success!"
                     feedback = "success"
                     new_form.save()
@@ -1014,7 +1031,8 @@ class AddBandStructureView(generic.TemplateView):
         return render(request, self.template_name, {
         'search_form': search_form,
         'band_structure_form': band_structure_form ,
-        'initial_state': True
+        'initial_state': True,
+        'related_synthesis': False #determines whether this field appears on the form
         })
 
     def post(self, request):
@@ -1057,6 +1075,7 @@ class AddBandStructureView(generic.TemplateView):
                     # once done, tell user that upload is successful
                     # after this thing, call another function that plots the BS. Once done, update the plotted state to done
                     # plotbs(bs_folder_loc)
+                    new_form = makeCorrections(new_form)
                     text = "Save success!"
                     feedback = "success"
                     new_form.save()
@@ -1139,9 +1158,25 @@ class AtomicPositionsUpdateView(generic.UpdateView):
         pk = self.object.system.pk
         return '/materials/%s/all-a-pos' % str(pk)
 
+class AtomicPositionsDeleteView(generic.DeleteView):
+    model = AtomicPositions
+    template_name = 'materials/delete_a_pos.html'
+    form_class = AddAtomicPositions
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/all-a-pos' % str(pk)
+
 class SynthesisMethodUpdateView(generic.UpdateView):
     model = SynthesisMethod
     template_name = 'materials/update_synthesis.html'
+    form_class = AddSynthesisMethod
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/synthesis' % str(pk)
+
+class SynthesisMethodDeleteView(generic.DeleteView):
+    model = SynthesisMethod
+    template_name = 'materials/delete_synthesis.html'
     form_class = AddSynthesisMethod
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1155,9 +1190,25 @@ class ExcitonEmissionUpdateView(generic.UpdateView):
         pk = self.object.system.pk
         return '/materials/%s/exciton_emission' % str(pk)
 
+class ExcitonEmissionDeleteView(generic.DeleteView):
+    model = ExcitonEmission
+    template_name = 'materials/delete_exciton_emission.html'
+    form_class = AddExcitonEmission
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/exciton_emission' % str(pk)
+
 class BandStructureUpdateView(generic.UpdateView):
     model = BandStructure
     template_name = 'materials/update_band_structure.html'
+    form_class = AddBandStructure
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/band_structure' % str(pk)
+
+class BandStructureDeleteView(generic.DeleteView):
+    model = BandStructure
+    template_name = 'materials/delete_band_structure.html'
     form_class = AddBandStructure
     def get_success_url(self):
         pk = self.object.system.pk

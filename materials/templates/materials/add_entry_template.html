@@ -28,11 +28,35 @@
 {% endblock %}
 
 {% block script %}
+  <script type="text/javascript">
+    var params = [
+                  {
+                      name: "related_synthesis",
+                      value: "{{related_synthesis}}"
+                  }
+    ];
+    $('#search-system').submit(function () {
+        $(this).append($.map(params, function (param) {
+            return   $('<input>', {
+                type: 'hidden',
+                name: param.name,
+                value: param.value
+            })
+        }))
+    });
+    /*
+    var formElement = document.queryselector("search-system");
+    var formData = new formData(formElement);
+    $('#search-system').submit(function () {
+      formData.append("hey", "there")
+    });*/
+  </script>
   {% include 'materials/ajax_form_submit.html' %}
   <script type="text/javascript">
   ajax_submit($('#search-publication'), $('#publication-search-result'));
   ajax_submit($('#search-system'), $('#system-search-result'));
   </script>
+  
   {% include 'materials/ajax_alert_form_submit.html' %}
   {% block ajaxscript %}
   {% endblock %}

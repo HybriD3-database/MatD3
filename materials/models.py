@@ -81,7 +81,7 @@ class System(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
     
     def __str__(self):
-        return self.formula
+        return self.compound_name
 
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()

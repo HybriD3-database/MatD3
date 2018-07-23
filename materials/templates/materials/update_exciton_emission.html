@@ -3,3 +3,9 @@
 {% block heading %}
   <h4>Update Exciton Emission Entry for: {{object.system.compound_name}}</h4>
 {% endblock %}
+
+{% block delete %}
+  <a href="{% url "materials:delete_exciton_emission" sys=object.system.pk pk=object.pk %}">
+    <button type="button" class="btn btn-danger" style="float: right;">Delete entry</button>
+  </a>
+{% endblock %}
