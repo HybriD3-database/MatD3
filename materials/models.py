@@ -76,7 +76,7 @@ class System(models.Model):
     group = models.CharField(max_length=100) # aka Alternate names
     organic = models.CharField(max_length=100)
     inorganic = models.CharField(max_length=100)
-    last_update = models.DateField(default=datetime.now)
+    last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
     
@@ -148,6 +148,7 @@ class IDInfo(models.Model):
     method = models.ForeignKey(Method, on_delete=models.PROTECT, null=True)
     specific_method = models.ForeignKey(SpecificMethod, on_delete=models.PROTECT, null=True)
     comments = models.CharField(max_length=1000, blank=True)
+    last_update = models.DateField(auto_now=True)
     
     def getAuthors(self):
         return self.publication.getAuthors()
