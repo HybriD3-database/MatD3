@@ -189,11 +189,11 @@ class BandStructure(IDInfo):
         return self.folder_location
 
     def getFullBSPath(self):
-        path = "../../media/uploads/%s_%s_%s_bs/%s_%s_%s_bs_full.png" % (self.phase, self.system.organic, self.system.inorganic, self.phase, self.system.organic, self.system.inorganic)
+        path = "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_full.png" % (self.phase, self.system.organic, self.system.inorganic, self.pk, self.phase, self.system.organic, self.system.inorganic, self.pk)
         return path
     
     def getMiniBSPath(self):
-        path = "../../media/uploads/%s_%s_%s_bs/%s_%s_%s_bs_min.png" % (self.phase, self.system.organic, self.system.inorganic, self.phase, self.system.organic, self.system.inorganic)
+        path = "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png" % (self.phase, self.system.organic, self.system.inorganic, self.pk, self.phase, self.system.organic, self.system.inorganic, self.pk)
         return path
 
 class BondAngle(IDInfo):

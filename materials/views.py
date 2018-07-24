@@ -278,7 +278,7 @@ def data_dl(request, type, id, bandgap=False):
     elif type == "band_structure":
         obj = dictionary[type].objects.get(id=id)
         p_obj = System.objects.get(bandstructure=obj)
-        file_name_prefix = '%s_%s_%s_bs' % (obj.phase, p_obj.organic, p_obj.inorganic)
+        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic, p_obj.inorganic, obj.pk)
         # write_headers()
         dir_in_str = obj.folder_location
         compound_name = dir_in_str.split("/")[-1]
@@ -1050,8 +1050,10 @@ class AddBandStructureView(generic.TemplateView):
                 # text += "Settings ready. "
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(user=request.user)
-                    # print apos_form.contributor
-                    bs_folder_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_bs" % (new_form.phase, new_form.system.organic, new_form.system.inorganic)
+                    # save so a pk can be created for use in the folder location
+                    new_form.save()
+                    print("PK:", new_form.pk)
+                    bs_folder_loc = MEDIA_ROOT + "/uploads/%s_%s_%s_%s_bs" % (new_form.phase, new_form.system.organic, new_form.system.inorganic, new_form.pk)
                     new_form.folder_location = bs_folder_loc
                     try:
                         os.mkdir(bs_folder_loc)
