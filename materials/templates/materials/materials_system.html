@@ -312,8 +312,8 @@ $('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{objec
 {% endwith %}
 {% with entry=object.bandstructure_set.all|first %}
 <script type="text/javascript">
-var imglinkfull = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs_full.png';
-var imglinkmini = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_bs_min.png';
+var imglinkfull = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs_full.png';
+var imglinkmini = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs_min.png';
 $('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
 $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
 </script>
