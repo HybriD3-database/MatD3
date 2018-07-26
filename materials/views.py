@@ -28,7 +28,8 @@ import operator
 dictionary = {
 "exciton_emission": ExcitonEmission,
 "synthesis": SynthesisMethod,
-"band_structure": BandStructure
+"band_structure": BandStructure,
+"material_prop": MaterialProperty
 }
 
 # Download a specific entry type
@@ -1101,6 +1102,47 @@ class AddBandStructureView(generic.TemplateView):
 
         return JsonResponse(args)
 
+class AddMaterialPropertyView(generic.TemplateView):
+    template_name = 'materials/add_material_property.html'
+    
+    def get(self, request):
+        search_form = SearchForm()
+        material_property_form = AddMaterialProperty()
+        return render(request, self.template_name, {
+                      'search_form': search_form,
+                      'material_property_form': material_property_form,
+                      'initial_state': True,
+                      'related_synthesis': False #determines whether this field appears on the form
+        })
+    
+    def post(self, request):
+        form = AddMaterialProperty(request.POST)
+        if form.is_valid():
+            print("form is valid")
+            new_form = form.save(commit=False)
+            pub_pk = request.POST.get('publication')
+            sys_pk = request.POST.get('system')
+            print("system pk is: " + sys_pk)
+            if int(pub_pk) > 0 and int(sys_pk) > 0:
+                new_form.publication = Publication.objects.get(pk=pub_pk)
+                new_form.system = System.objects.get(pk=sys_pk)
+                if request.user.is_authenticated:
+                    new_form.contributor = UserProfile.objects.get(user=request.user)
+                    new_form = makeCorrections(new_form)
+                    text = "Save success!"
+                    feedback = "success"
+                    new_form.save()
+                else:
+                    text = "Failed to submit, please login and try again."
+                    feedback = "failure"
+        else:
+            text = "Failed to submit, please fix the errors, and try again."
+            feedback = "failure"
+
+        args = {'feedback': feedback, 'text': text}
+
+        return JsonResponse(args)
+
 class AddBondLength(generic.TemplateView):
     template_name = 'materials/form.html'
 
@@ -1118,10 +1160,11 @@ class AddBondLength(generic.TemplateView):
 
         return render(request, self.template_name, args)
 
-# class HomeView(generic.ListView):
-#     template_name = 'materials/materials_search.html'
-#     queryset = System.objects.all().order_by('id')
-#     context_object_name = 'systems_list'
+class AddDataView(generic.TemplateView):
+    template_name = 'materials/add_data.html'
+    
+    def get(self, request):
+        return render(request, self.template_name)
 
 class SystemView(generic.DetailView):
     template_name = 'materials/materials_system.html'

@@ -86,6 +86,14 @@ class System(models.Model):
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
     
+    def listProperties(self):
+        L = []
+        for mat_prop in self.materialproperty_set.all():
+            property = mat_prop.property
+            if property not in L:
+                L.append(property)
+        return L
+    
     def getAuthors(self):
         # returns a list of authors related to a system; an author appears no more than once
         def authorSort(author): # function that decides author sort criteria
@@ -137,6 +145,15 @@ class SpecificMethod(models.Model):
 
     def __str__(self):
         return self.specific_method
+
+class Property(models.Model):
+    property = models.CharField(max_length=500)
+    
+    class Meta:
+        verbose_name_plural = "properties"
+        
+    def __str__(self):
+        return self.property
 
 class IDInfo(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
@@ -202,22 +219,6 @@ class BandStructure(IDInfo):
         path = "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png" % (self.phase, self.system.organic, self.system.inorganic, self.pk, self.phase, self.system.organic, self.system.inorganic, self.pk)
         return path
 
-class BondAngle(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    hmh_angle = models.CharField(max_length=100, blank=True)
-    mhm_angle = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return self.hmh_angle + " " + self.mhm_angle
-
-class BondLength(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    hmh_length = models.CharField(max_length=100, blank=True)
-    mhm_length = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return self.hmh_length + " " + self.mhm_length
-
 class AtomicPositions(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     a = models.CharField(max_length=50)
@@ -233,8 +234,38 @@ class AtomicPositions(IDInfo):
                                          on_delete=models.PROTECT, null=True,
                                          blank=True)
 
+    class Meta:
+        verbose_name_plural = "atomic positions"
+        
     def __str__(self):
         return self.phase.phase + " " + self.system.formula
+
+class MaterialProperty(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    value = models.CharField(max_length=500)
+
+    class Meta:
+        verbose_name_plural = "material properties"
+
+    def __str__(self):
+        return str(self.system) + ' ' + str(self.property) + ': ' + self.value
+
+class BondAngle(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    hmh_angle = models.CharField(max_length=100, blank=True)
+    mhm_angle = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.hmh_angle + " " + self.mhm_angle
+
+class BondLength(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    hmh_length = models.CharField(max_length=100, blank=True)
+    mhm_length = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.hmh_length + " " + self.mhm_length
 
 def del_bs(sender, instance, **kwargs):
     folder_loc = instance.folder_location

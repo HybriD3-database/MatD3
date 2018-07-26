@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from materials.models import Tag, System, AtomicPositions, Publication, Author, Phase, ExcitonEmission, SynthesisMethod, BandStructure, Method, SpecificMethod
+from materials.models import Tag, System, AtomicPositions, Publication, Author, Phase, ExcitonEmission, SynthesisMethod, BandStructure, Method, SpecificMethod, Property, MaterialProperty
 
 admin.site.register(System)
 admin.site.register(AtomicPositions)
@@ -16,4 +16,6 @@ admin.site.register(BandStructure)
 admin.site.register(Tag)
 admin.site.register(Method)
 admin.site.register(SpecificMethod)
+admin.site.register(Property)
+admin.site.register(MaterialProperty)
 # Register your models here.

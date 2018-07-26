@@ -174,3 +174,20 @@ class AddBondLength(forms.ModelForm):
     class Meta:
         model = BondLength
         fields = '__all__'
+
+class AddMaterialProperty(forms.ModelForm):
+    all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'source', 'data_extraction_method', 'property', 'value')
+    field_order = ('source', 'data_extraction_method', 'temperature', 'phase', 'method', 'specific_method', 'property', 'value', 'comments')
+    class Meta:
+        model = MaterialProperty
+        exclude = ('contributor', 'publication', 'system')
+        labels = {
+            "phase": "Crystal system",
+            "temperature": "Temperature (K)",
+            "value": "Value of Property"
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(AddMaterialProperty, self).__init__(*args, **kwargs)
+        for fieldname in self.all_fields:
+            self.fields[fieldname].widget.attrs['class'] = "form-control"

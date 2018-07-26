@@ -64,7 +64,7 @@
                     {% endif %}
                   </div>
                   <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
-                  <button type="button" class="btn btn-primary"/>
+                  <button type="button" class="btn btn-primary">
                   <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                   Atomic Positions
                   </button>
@@ -130,7 +130,7 @@
                       </div>
                     {% endif %}
                     <a href="{% url "materials:data_dl" type="synthesis" id=entry.id %}">
-                    <button type="button" class="btn btn-primary"/>
+                    <button type="button" class="btn btn-primary">
                     <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                     Synthesis Method
                     </button>
@@ -188,7 +188,7 @@
                 </div>
               {% endif %}
               <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
-              <button type="button" class="btn btn-primary"/>
+              <button type="button" class="btn btn-primary">
               <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
               Exciton Emission Peak
               </button>
@@ -268,7 +268,7 @@
                 {% endif %}
                 {% if entry.band_gap != '' %}
                   <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">
-                  <button type="button" class="btn btn-primary"/>
+                  <button type="button" class="btn btn-primary">
                   <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                     Band Gap
                   </button>
@@ -295,6 +295,33 @@
             </div>
           </div>
         </div>
+    </div>
+    <div class="panel-body">
+      <div class="col-md-6">
+        <div class="panel panel-info">
+          <div class="panel-heading"><h4>Material Properties</h4></div>
+          <div class="panel-body">
+            {% with object.listProperties as properties %}
+              {% if properties %}
+                <strong>Properties available:</strong>
+                <ul>
+                  {% for property in properties %}
+                    <li>{{property}}</li>
+                  {% endfor %}
+                </ul>
+                <a href="{% url "materials:all_entries" id=object.id type="material_prop" %}">
+                <button type="button" class="btn btn-info">
+                <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                See all entries ({{object.materialproperty_set.all|length}})
+                </button>
+                </a>
+              {% else %}
+                <h3>No data available</h3>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      </div>
     </div>
 </div>
 
