@@ -30,6 +30,8 @@
                 <a href="{% url "materials:update_exciton_emission" sys=entry.system.pk pk=entry.pk %}">
               {% elif data_type == "band_structure" %}
                 <a href="{% url "materials:update_band_structure" sys=entry.system.pk pk=entry.pk %}">
+              {% elif data_type == "material_prop" %}
+                <a href="{% url "materials:update_property" sys=entry.system.pk pk=entry.pk %}">
               {% endif %}
               <button type="button" class="btn btn-success" style="float: right">Edit Entry</button>
             </a>

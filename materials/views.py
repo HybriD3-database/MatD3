@@ -1267,3 +1267,19 @@ class BandStructureDeleteView(generic.DeleteView):
     def get_success_url(self):
         pk = self.object.system.pk
         return '/materials/%s/band_structure' % str(pk)
+
+class PropertyUpdateView(generic.UpdateView):
+    model = MaterialProperty
+    template_name = 'materials/update_material_property.html'
+    form_class = AddMaterialProperty
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/material_prop' % str(pk)
+
+class PropertyDeleteView(generic.DeleteView):
+    model = MaterialProperty
+    template_name = 'materials/delete_material_property.html'
+    form_class = AddMaterialProperty
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/material_prop' % str(pk)
