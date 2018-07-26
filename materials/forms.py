@@ -85,7 +85,7 @@ class AddExcitonEmission(forms.ModelForm):
     all_fields = ('temperature', 'phase', 'method', 'specific_method', 'comments', 'exciton_emission', 'source', 'data_extraction_method')
     class Meta:
         model = ExcitonEmission
-        exclude = ('contributor', 'publication', 'system', 'plotted')
+        exclude = ('contributor', 'publication', 'system', 'plotted', 'synthesis_method')
         labels = {
             "pl_file": "PL file",
             "exciton_emission": "Exciton Emission Peak (nm)",
@@ -129,7 +129,7 @@ class AddBandStructure(forms.ModelForm):
     geometry_in_file = forms.FileField(label="\"geometry.in\" file", required=False)
     class Meta:
         model = BandStructure
-        exclude = ('contributor', 'publication', 'system', 'folder_location', 'plotted')
+        exclude = ('contributor', 'publication', 'system', 'folder_location', 'plotted', 'synthesis_method')
         labels = {
             "phase": "Crystal system",
             "band_gap": "Band gap (eV)",

@@ -78,6 +78,8 @@
             {% endif %}
             {% block dl_link %}
             {% endblock %}
+            {% block related_synthesis %}
+            {% endblock %}
           </div>
         </div>
       </div>
@@ -88,4 +90,10 @@
       {% endif %}
     </div>
   </div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$('[data-toggle="popover"]').popover({placement: "top", html:true});
+</script>
 {% endblock %}

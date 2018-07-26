@@ -153,15 +153,6 @@ class IDInfo(models.Model):
     def getAuthors(self):
         return self.publication.getAuthors()
 
-class ExcitonEmission(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
-    pl_file = models.FileField(upload_to=pl_file_name, blank=True)
-    plotted = models.BooleanField(default=False)
-
-    def __str__(self):
-        return str(self.exciton_emission)
-
 class SynthesisMethod(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     synthesis_method = models.TextField(max_length=1000, blank=True)
@@ -178,12 +169,27 @@ class SynthesisMethod(IDInfo):
             if obj.pk == self.pk:
                 return i + 1
 
+class ExcitonEmission(IDInfo):
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
+    pl_file = models.FileField(upload_to=pl_file_name, blank=True)
+    plotted = models.BooleanField(default=False)
+    synthesis_method = models.ForeignKey(SynthesisMethod,
+                                         on_delete=models.PROTECT, null=True,
+                                         blank=True)
+
+    def __str__(self):
+        return str(self.exciton_emission)
+
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     band_gap = models.CharField(max_length = 10, blank=True)
     folder_location = models.CharField(max_length=500, blank=True)
     plotted = models.BooleanField(default=False)
     visible = models.BooleanField(default=False)
+    synthesis_method = models.ForeignKey(SynthesisMethod,
+                                         on_delete=models.PROTECT, null=True,
+                                         blank=True)
 
     def __str__(self):
         return self.folder_location

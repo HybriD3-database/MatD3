@@ -592,7 +592,7 @@ class AddAPosView(generic.TemplateView):
             print("synthesis method pk is: " + syn_pk)
             try:
                 apos_form.synthesis_method = SynthesisMethod.objects.get(pk=int(syn_pk))
-            except: # no synthesis method was chosen (or an error occurred)
+            except: # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 apos_form.publication = Publication.objects.get(pk=pub_pk)
@@ -933,7 +933,7 @@ class AddExcitonEmissionView(generic.TemplateView):
         'search_form': search_form,
         'exciton_emission_form': exciton_emission_form,
         'initial_state': True,
-        'related_synthesis': False #determines whether this field appears on the form
+        'related_synthesis': True #determines whether this field appears on the form
         })
 
     def post(self, request):
@@ -944,7 +944,12 @@ class AddExcitonEmissionView(generic.TemplateView):
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             # print "file: ", request.FILES.get('pl_file')
-            print("system pk is: " + sys_pk)
+            syn_pk = request.POST.get('synthesis-methods')
+            print("synthesis method pk is: " + syn_pk)
+            try:
+                new_form.synthesis_method = SynthesisMethod.objects.get(pk=int(syn_pk))
+            except: # no synthesis method was chosen (or maybe an error occurred)
+                pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
@@ -1032,7 +1037,7 @@ class AddBandStructureView(generic.TemplateView):
         'search_form': search_form,
         'band_structure_form': band_structure_form ,
         'initial_state': True,
-        'related_synthesis': False #determines whether this field appears on the form
+        'related_synthesis': True #determines whether this field appears on the form
         })
 
     def post(self, request):
@@ -1042,8 +1047,12 @@ class AddBandStructureView(generic.TemplateView):
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            # print("system pk is: " + sys_pk)
-            # text = ""
+            syn_pk = request.POST.get('synthesis-methods')
+            print("synthesis method pk is: " + syn_pk)
+            try:
+                new_form.synthesis_method = SynthesisMethod.objects.get(pk=int(syn_pk))
+            except: # no synthesis method was chosen (or maybe an error occurred)
+                pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
