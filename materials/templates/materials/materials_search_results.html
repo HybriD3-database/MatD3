@@ -29,7 +29,6 @@
     <th>Alternate Names</th>
     <th>Organic Component</th>
     <th>Inorganic Component</th>
-    <th>Authors</th>
   </tr>
   {% for system in systems %}
   <tr>
@@ -44,13 +43,6 @@
     </td>
     <td>{{system.organic}}</td>
     <td>{{system.inorganic}}</td>
-    <td>
-      <ul style="padding: 0px; list-style-type: none" id="authors-list">
-        {% for author in system.getAuthors %}
-          <li>{{author}}</li>
-        {% endfor %}
-      </ul>
-    </td>
   </tr>
   {% endfor %}
   {% endif %}
