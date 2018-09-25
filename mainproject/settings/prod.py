@@ -1,7 +1,7 @@
 from mainproject.settings.base import *
 
 # insert custom settings here
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['vwb3-web-02.egr.duke.edu', 'materials.hybrid3.duke.edu']
 
@@ -9,10 +9,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'materials',
-    	'USER': 'xd24',
-    	'PASSWORD': '',
-    	'HOST': 'localhost',
-    	'PORT': '',
+        'USER': 'xd24',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
