@@ -1,5 +1,3 @@
-
-
 # import sys
 #
 # print "This is the name of the script: ", sys.argv[0]
@@ -9,8 +7,9 @@
 # rng = sys.argv[1].strip()
 # print "Second argument: ", rng
 
+
 def parserange(rng):
-# & <= >= < >
+    # & <= >= < >
     if rng.find("&") != -1:
         ltindex = rng.find("<")
         mtindex = rng.find(">")

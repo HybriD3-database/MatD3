@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-from os import listdir, remove, rename, getcwd
-from os.path import isfile, join
-import os,sys
+from os import listdir, remove, rename
+import os
+import sys
 
 import matplotlib
-matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 
 from pylab import *
 from matplotlib import rcParams
-from mpld3 import plugins
 from numpy.linalg import *
-from numpy import dot,cross,pi
+from numpy import dot, cross, pi
 from scipy.interpolate import spline
+
+matplotlib.use('Agg')
 
 rcParams.update({'figure.autolayout': True})
 rcParams['xtick.labelsize'] = 8
@@ -31,19 +31,20 @@ LINES_BELOW = 49
 MIN_ENERGY = -7.5
 MAX_ENERGY = 7.5
 
+
 def count(input_band, num_bands):
     number = 0
     lines = 0
     with open(input_band, 'r') as fin:
         for line in fin.readlines():
-            length = len(line)
             items = line.split()
             number += len(items)
             lines += 1
     return ((number-4*21)*num_bands, number/(2*lines)-2)
 
+
 def get_all_energies(location):
-    bandfiles = ["".join([location,"/",f]) for f in listdir(location)
+    bandfiles = ["".join([location, "/", f]) for f in listdir(location)
                  if (f.startswith('band10') and f.endswith('.out'))]
     bandfiles.sort()
     # print(bandfiles)
@@ -53,8 +54,10 @@ def get_all_energies(location):
         val_energy, con_energy = get_energies(band)
         val_energies.append(val_energy)
         con_energies.append(con_energy)
-    print("Min valence energies & max conduction energies:", max(val_energies), min(con_energies))
+    print("Min valence energies & max conduction energies:",
+          max(val_energies), min(con_energies))
     return (max(val_energies), min(con_energies))
+
 
 def get_energies(input_band):
     with open(input_band, 'r') as fin:
@@ -65,8 +68,8 @@ def get_energies(input_band):
             items = line.split()
             # print(items)
             length = len(items)
-            i = 4 #get the first electron state
-            val_index = con_index = 0
+            i = 4  # get the first electron state
+            val_index = 0
             while(i < length-1):
                 if(float(items[i]) < float(1)):
                     val_index = i-1
@@ -78,12 +81,13 @@ def get_energies(input_band):
             # print(val_energies, con_energies)
     return(max(val_energies), min(con_energies))
 
+
 def get_indices(input_band, min_en, max_en):
     with open(input_band, 'r') as fin:
         line = fin.readline()
     items = line.split()
     length = len(items)
-    i = 4 #get the first electron state
+    i = 4  # get the first electron state
     low_index = min_index = hi_index = 0
     # print("Low energy:", min_en)
     # print("High energy:", max_en)
@@ -104,16 +108,10 @@ def get_indices(input_band, min_en, max_en):
         i += 2
     band_gap = float(items[min_index+3]) - float(items[min_index+1])
     offset = 0 - float(items[min_index+1])
-    # print ("low index, hi index = ", min_index, hi_index)
-    # print ("min index, min e occ, min energy = ", min_index, items[min_index], items[min_index+1])
-    # print ("val index, val e occ, val energy = ", min_index+2, items[min_index+2], items[min_index+3])
-    # print ("low index, low e occ, low energy = ", low_index, items[low_index], items[low_index+1])
-    # print ("hi index, hi e occ, hi energy = ", hi_index, items[hi_index], items[hi_index+1])
-    # print ("band gap = ", band_gap)
-    new_list = items[low_index:hi_index]
     low_energy = float(items[low_index+1]) + offset
     hi_energy = float(items[hi_index+1]) + offset
     return (low_index, hi_index, band_gap, offset, low_energy, hi_energy)
+
 
 def resize_standardize(input_band, start_index, end_index, offset):
     output_file = "_tr.".join(input_band.split("."))
@@ -121,9 +119,8 @@ def resize_standardize(input_band, start_index, end_index, offset):
     with open(input_band, 'r') as fin:
         lines = fin.readlines()
         for line in lines:
-            length = len(line)
             items = line.split()
-            i = start_index #get the first electron state
+            i = start_index  # get the first electron state
             end = end_index + 1
             fout.write(" ".join(items[0:4]) + " ")
             while(i < end):
@@ -137,12 +134,13 @@ def resize_standardize(input_band, start_index, end_index, offset):
     rename(input_band, backup_name)
     rename(output_file, input_band)
 
+
 def plotbs(location, lower, upper, band_gap):
-    print_resolution = 500          # The DPI used for printing out images
-    default_line_width = 0.5        # Change the line width of plotted bands and k-vectors, 1 is default
-    font_size = 10                 # Change the font size.  12 is the default.
-    should_spline = True            # Turn on spline interpolation for band structures NOT VERY WELL TESTED!
-    output_x_axis = True            # Whether to output the x-axis (e.g. the e=0 line) or not
+    # Change the line width of plotted bands and k-vectors, 1 is default
+    default_line_width = 0.5
+    # Turn on spline interpolation for band structures NOT VERY WELL TESTED!
+    should_spline = True
+    # Whether to output the x-axis (e.g. the e=0 line) or not
     spline_factor = 10              # If spline interpolation turned on, the sampling factor (1 is the original grid)
     maxdos_output = -1              # The maximum value of the DOS axis (a.k.a. x-axis) in the DOS
                                     # For zero or negative values, the script will use its default value, the maximum
@@ -309,10 +307,7 @@ def plotbs(location, lower, upper, band_gap):
     #######################
 
     if PLOT_BANDS:
-        print("Plotting %i band segments..."%len(band_segments))
-
-        # if output_x_axis:
-        #     ax_bands.axhline(0,color=(1.,0.,0.),linestyle=":")
+        print("Plotting %i band segments..." % len(band_segments))
 
         prev_end = band_segments[0][0]
         distance = band_totlength/30.0 # distance between line segments that do not coincide

@@ -1,49 +1,55 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
 from django.db import models
-from os.path import basename
 import os
 import shutil
 from django.db.models import signals
 from mainproject.settings.base import MEDIA_ROOT
-import string
 
-UserProfile = "accounts.UserProfile"
+UserProfile = "accounts.UserProfile"  # No need for this global variable
+
 
 def file_name(instance, filename):
     ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_apos.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    filename = "%s_%s_%s_apos.%s" % (instance.phase, instance.system.organic,
+                                     instance.system.inorganic, ext)
     return os.path.join('uploads', filename)
+
 
 def pl_file_name(instance, filename):
     ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic, instance.system.inorganic, ext)
+    filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic,
+                                   instance.system.inorganic, ext)
     return os.path.join('uploads', filename)
+
 
 def syn_file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_syn.txt" % (instance.phase, instance.system.organic, instance.system.inorganic)
+    filename = "%s_%s_%s_syn.txt" % (instance.phase, instance.system.organic,
+                                     instance.system.inorganic)
     return os.path.join('uploads', filename)
 
-# Create your models here.
+
 class Post(models.Model):
+    """Create your models here."""
     post = models.CharField(max_length=500)
+
 
 class Publication(models.Model):
     author_count = models.PositiveSmallIntegerField()
-    title = models.CharField(max_length=1000) #what's a good title?
+    title = models.CharField(max_length=1000)  # what's a good title?
     journal = models.CharField(max_length=500, blank=True)
-    vol = models.CharField(max_length=100) #should I use Integer or char?
+    vol = models.CharField(max_length=100)  # should I use Integer or char?
     pages_start = models.CharField(max_length=10)
     pages_end = models.CharField(max_length=10)
-    year = models.CharField(max_length=4) #OR models.DateField() #what's a good title?
+    # OR models.DateField() #what's a good title?
+    year = models.CharField(max_length=4)
     doi_isbn = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return self.title
-    
+
     def getAuthors(self):
         return self.author_set.all()
+
 
 class Author(models.Model):
     """Contain data of authors"""
@@ -53,13 +59,15 @@ class Author(models.Model):
     publication = models.ManyToManyField(Publication)
 
     def __str__(self):
-        value = self.first_name + " " + self.last_name + ", " + self.institution
+        value = (self.first_name + " " + self.last_name + ", " +
+                 self.institution)
         if len(value) > 45:
             value = value[:42] + '...'
         return value
-    
+
     def splitFirstName(self):
         return self.first_name.split()
+
 
 class Tag(models.Model):
     tag = models.CharField(max_length=100)
@@ -67,25 +75,25 @@ class Tag(models.Model):
     def __str__(self):
         return self.tag
 
-    # Add Contributor class
-class System(models.Model):
+
+class System(models.Model):  # Add Contributor class
     """Contains meta data for investigated system. """
     # use fhi file format.
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
-    group = models.CharField(max_length=100) # aka Alternate names
+    group = models.CharField(max_length=100)  # aka Alternate names
     organic = models.CharField(max_length=100)
     inorganic = models.CharField(max_length=100)
     last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
-    
+
     def __str__(self):
         return self.compound_name
 
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
-    
+
     def listProperties(self):
         L = []
         for mat_prop in self.materialproperty_set.all():
@@ -93,29 +101,33 @@ class System(models.Model):
             if property not in L:
                 L.append(property)
         return L
-    
+
     def getAuthors(self):
-        # returns a list of authors related to a system; an author appears no more than once
-        def authorSort(author): # function that decides author sort criteria
+        """Returns a list of authors related to a system
+
+        an author appears no more than once
+
+        """
+        def authorSort(author):  # function that decides author sort criteria
             return author.last_name
-            
+
         L = []
         for dataType in [self.atomicpositions_set, self.synthesismethod_set,
-                        self.excitonemission_set, self.bandstructure_set]:
+                         self.excitonemission_set, self.bandstructure_set]:
             for data in dataType.all():
                 for author in data.publication.author_set.all():
-                    if author not in L: # don't add duplicate authors
+                    if author not in L:  # don't add duplicate authors
                         L.append(author)
-       
+
         return sorted(L, key=authorSort)
-    
+
     # This type of function can be used to display numbers as subscripts in
     # chemical formulas. Simply create functions of this type for each field
-    # that would need subscripts, then call it from the template e.g. 
+    # that would need subscripts, then call it from the template e.g.
     # {{system.compoundNameFormat|safe}}. The |safe allows the string to be
-    # rendered as html, but has potential security issues if someone were to 
+    # rendered as html, but has potential security issues if someone were to
     # enter html into a form field (such as compound_name). This also has the
-    # problem of turning every number into a subscript, even ones that are part 
+    # problem of turning every number into a subscript, even ones that are part
     # of an abbreviation (e.g. AE4TPbI4).
     '''
     def compoundNameFormat(self):
@@ -128,11 +140,13 @@ class System(models.Model):
         return formattedString
     '''
 
+
 class Phase(models.Model):
     phase = models.CharField(max_length=50)
 
     def __str__(self):
         return self.phase
+
 
 class Method(models.Model):
     method = models.CharField(max_length=100)
@@ -140,20 +154,23 @@ class Method(models.Model):
     def __str__(self):
         return self.method
 
+
 class SpecificMethod(models.Model):
     specific_method = models.CharField(max_length=500)
 
     def __str__(self):
         return self.specific_method
 
+
 class Property(models.Model):
     property = models.CharField(max_length=500)
-    
+
     class Meta:
         verbose_name_plural = "properties"
-        
+
     def __str__(self):
         return self.property
+
 
 class IDInfo(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
@@ -163,12 +180,14 @@ class IDInfo(models.Model):
     temperature = models.CharField(max_length=20, blank=True)
     phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
     method = models.ForeignKey(Method, on_delete=models.PROTECT, null=True)
-    specific_method = models.ForeignKey(SpecificMethod, on_delete=models.PROTECT, null=True)
+    specific_method = models.ForeignKey(SpecificMethod,
+                                        on_delete=models.PROTECT, null=True)
     comments = models.CharField(max_length=1000, blank=True)
     last_update = models.DateField(auto_now=True)
-    
+
     def getAuthors(self):
         return self.publication.getAuthors()
+
 
 class SynthesisMethod(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -179,12 +198,14 @@ class SynthesisMethod(IDInfo):
     syn_file = models.FileField(upload_to=syn_file_name, blank=True)
 
     def __str__(self):
-        return self.system.compound_name + " synthesis #" + str(self.methodNumber())
-    
+        return (self.system.compound_name + " synthesis #" +
+                str(self.methodNumber()))
+
     def methodNumber(self):
         for i, obj in enumerate(self.system.synthesismethod_set.all()):
             if obj.pk == self.pk:
                 return i + 1
+
 
 class ExcitonEmission(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -198,9 +219,10 @@ class ExcitonEmission(IDInfo):
     def __str__(self):
         return str(self.exciton_emission)
 
+
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    band_gap = models.CharField(max_length = 10, blank=True)
+    band_gap = models.CharField(max_length=10, blank=True)
     folder_location = models.CharField(max_length=500, blank=True)
     plotted = models.BooleanField(default=False)
     visible = models.BooleanField(default=False)
@@ -212,12 +234,19 @@ class BandStructure(IDInfo):
         return self.folder_location
 
     def getFullBSPath(self):
-        path = "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_full.png" % (self.phase, self.system.organic, self.system.inorganic, self.pk, self.phase, self.system.organic, self.system.inorganic, self.pk)
+        path = (
+            "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_full.png" %
+            (self.phase, self.system.organic, self.system.inorganic, self.pk,
+             self.phase, self.system.organic, self.system.inorganic, self.pk))
         return path
-    
+
     def getMiniBSPath(self):
-        path = "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png" % (self.phase, self.system.organic, self.system.inorganic, self.pk, self.phase, self.system.organic, self.system.inorganic, self.pk)
+        path = (
+            "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png" %
+            (self.phase, self.system.organic, self.system.inorganic, self.pk,
+             self.phase, self.system.organic, self.system.inorganic, self.pk))
         return path
+
 
 class AtomicPositions(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -236,9 +265,10 @@ class AtomicPositions(IDInfo):
 
     class Meta:
         verbose_name_plural = "atomic positions"
-        
+
     def __str__(self):
         return self.phase.phase + " " + self.system.formula
+
 
 class MaterialProperty(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -251,6 +281,7 @@ class MaterialProperty(IDInfo):
     def __str__(self):
         return str(self.system) + ' ' + str(self.property) + ': ' + self.value
 
+
 class BondAngle(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     hmh_angle = models.CharField(max_length=100, blank=True)
@@ -258,6 +289,7 @@ class BondAngle(IDInfo):
 
     def __str__(self):
         return self.hmh_angle + " " + self.mhm_angle
+
 
 class BondLength(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -267,6 +299,7 @@ class BondLength(IDInfo):
     def __str__(self):
         return self.hmh_length + " " + self.mhm_length
 
+
 def del_bs(sender, instance, **kwargs):
     folder_loc = instance.folder_location
     if os.path.isdir(folder_loc):
@@ -274,23 +307,28 @@ def del_bs(sender, instance, **kwargs):
     else:
         pass
 
+
 def del_pl(sender, instance, **kwargs):
     if(instance.pl_file):
-        file_loc = MEDIA_ROOT + "/uploads/" + str(instance.pl_file).split("/")[1]
+        file_loc = (MEDIA_ROOT + "/uploads/" +
+                    str(instance.pl_file).split("/")[1])
         print(file_loc)
         if os.path.isfile(file_loc):
             os.remove(file_loc)
         else:
             pass
 
+
 def del_apos(sender, instance, **kwargs):
     if(instance.fhi_file):
-        file_loc = MEDIA_ROOT + "/uploads/" + str(instance.fhi_file).split("/")[1]
+        file_loc = (MEDIA_ROOT + "/uploads/" +
+                    str(instance.fhi_file).split("/")[1])
         print(file_loc)
         if os.path.isfile(file_loc):
             os.remove(file_loc)
         else:
             pass
+
 
 signals.post_delete.connect(del_bs, sender=BandStructure)
 signals.post_delete.connect(del_pl, sender=ExcitonEmission)

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
-
 from django.contrib import admin
 from accounts.models import UserProfile
 
-# Register your models here.
+
 class UserProfileAdmin(admin.ModelAdmin):
+    """Register your models here."""
     list_display = ('user', 'user_info', 'institution', 'website')
 
     def user_info(self, obj):
@@ -18,5 +17,6 @@ class UserProfileAdmin(admin.ModelAdmin):
         return queryset
 
     user_info.short_description = 'Info'
+
 
 admin.site.register(UserProfile, UserProfileAdmin)

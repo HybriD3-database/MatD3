@@ -1,3 +1,4 @@
+import os
 from mainproject.settings.base import *
 
 # insert custom settings here

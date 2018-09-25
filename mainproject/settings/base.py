@@ -89,16 +89,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+        'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+        'MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+        'CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+        'NumericPasswordValidator',
     },
 ]
 
@@ -137,7 +141,8 @@ LOGIN_URL = '/account/login'
 LOGIN_EXEMPT_URLS = (
     r'^account/logout/$',
     r'^account/register/$',
-    r'^account/activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+    r'^account/activate/(?P<uidb64>[0-9A-Za-z_\-]+)/'
+    r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
     r'^account/reset-password/$',
     r'^account/reset-password/done$',
     r'^account/reset-password/confirm(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
@@ -153,7 +158,8 @@ AUTH_EXEMPT_URLS = (
     r'^materials/(?P<pk>\d+)$',
     r'^materials/(?P<id>\d+)/all-a-pos$',
     r'^materials/(?P<id>\d+)/(?P<type>.*)$',
-    r'^materials/(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_syn>\d+)_(?P<pk_ee>\d+)_(?P<pk_bs>\d+)$',
+    r'^materials/(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_syn>\d+)_(?P<pk_ee>\d+)_'
+    r'(?P<pk_bs>\d+)$',
     r'^materials/data-dl/(?P<type>.*)/(?P<id>\d+)$',
 )
 

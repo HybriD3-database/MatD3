@@ -1,47 +1,30 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render, redirect
-from accounts.forms import (
-RegistrationForm,
-EditProfileForm,
-EditUserForm,
-ChangePasswordForm
-)
-
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
-
+from accounts.forms import (RegistrationForm, EditProfileForm, EditUserForm,
+                            ChangePasswordForm)
+from django.http import JsonResponse
 from django.urls import reverse
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode, int_to_base36, base36_to_int
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
-
+from django.utils.encoding import force_text
+from django.utils.http import base36_to_int
 from .tokens import account_activation_token
 from .models import UserProfile
-from mainproject.settings.prod import DEFAULT_FROM_EMAIL
-
-
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash, login, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash, login
 
-from django.contrib.sites.shortcuts import get_current_site
 
 def home(request):
     return render(request, 'accounts/home.html')
 
+
 def register(request):
-    if request.method =='POST':
+    if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
             form.save()
             user.save()
-
-            #Uncomment to allow for automatic email confirmation
-
+            # Uncomment to allow for automatic email confirmation
             # current_site = get_current_site(request)
             # message = render_to_string('accounts/activation_email.html', {
             #     'user': user,
@@ -50,19 +33,22 @@ def register(request):
             #     'token': account_activation_token.make_token(user),
             # })
             # print("message created")
-            # mail_subject = 'Activate your HybriD&#xb3; materials database account.'
+            # mail_subject = 'Activate your HybriD&#xb3; ' \
+            #     'materials database account.'
             # from_email = DEFAULT_FROM_EMAIL
             # to_email = form.cleaned_data.get('email')
             # print("user email gotten")
-            # email = EmailMessage(mail_subject, message, from_email, to=[to_email])
+            # email = EmailMessage(mail_subject, message, from_email,
+            #                      to=[to_email])
             # email.send()
             # print("email sent")
-            # text = 'Please confirm your email address to complete the registration.'
-
+            # text = 'Please confirm your email address to complete the ' \
+            #     'registration.'
             text = 'Please wait for our staff to activate your account.'
             feedback = "success"
         else:
-            text = 'Registration failed. Please correct the error(s) and try again.'
+            text = ('Registration failed. Please correct the error(s) and '
+                    'try again.')
             feedback = "error"
         error_list = ""
         if form.errors:
@@ -74,9 +60,9 @@ def register(request):
         # errors = str(form.errors)
         print(error_list)
         args = {
-        'errors': error_list,
-        'feedback': feedback,
-        'text': text
+            'errors': error_list,
+            'feedback': feedback,
+            'text': text
         }
         return JsonResponse(args)
     else:
@@ -84,6 +70,7 @@ def register(request):
 
         args = {'form': form}
         return render(request, 'accounts/reg_form.html', args)
+
 
 def activate(request, uidb64, token):
     template = 'accounts/activate.html'
@@ -97,10 +84,12 @@ def activate(request, uidb64, token):
         user.save()
         login(request, user)
         # return redirect('home')
-        text = "Thank you for your email confirmation. Now you can login to your account."
+        text = ('Thank you for your email confirmation. '
+                'Now you can login to your account.')
     else:
         text = "Activation link is invalid!"
     return render(request, template, {'text': text})
+
 
 def view_profile(request, pk=None):
     if pk:
@@ -110,13 +99,15 @@ def view_profile(request, pk=None):
     args = {'user': user}
     return render(request, 'accounts/profile.html', args)
 
+
 def edit_profile(request):
     template = 'accounts/edit_profile.html'
     user = request.user
     user_profile = UserProfile.objects.get(user=request.user)
     if request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=user)
-        user_profile_form = EditProfileForm(request.POST, request.FILES, instance=user_profile)
+        user_profile_form = EditProfileForm(request.POST, request.FILES,
+                                            instance=user_profile)
         print(request.FILES)
         if user_form.is_valid() and user_profile_form.is_valid():
             user_form.save()
@@ -138,6 +129,7 @@ def edit_profile(request):
         }
         return render(request, template, args)
 
+
 def change_password(request):
     if request.method == 'POST':
         form = ChangePasswordForm(data=request.POST, user=request.user)
@@ -153,7 +145,6 @@ def change_password(request):
                 'text': text
             }
             return render(request, 'accounts/change_password.html', args)
-
     else:
         form = ChangePasswordForm(user=request.user)
         args = {'form': form}
