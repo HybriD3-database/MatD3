@@ -25,6 +25,7 @@ from functools import reduce
 import operator
 
 dictionary = {
+    'atomic_positions': AtomicPositions,
     'exciton_emission': ExcitonEmission,
     'synthesis': SynthesisMethod,
     'band_structure': BandStructure,
@@ -36,7 +37,6 @@ def data_dl(request, type, id, bandgap=False):
     """Download a specific entry type"""
     # Create the HttpResponse object with the text/plain header.
     response = HttpResponse(content_type='text/fhi-aims')
-    dictionary['atomic_positions'] = AtomicPositions
     if type == 'band_gap':
         type = 'band_structure'
         bandgap = True
@@ -378,6 +378,7 @@ def all_a_pos(request, id):
 
 def all_entries(request, id, type):
     template_name = 'materials/all_%ss.html' % type
+    # This has no effect and will be overwritten
     obj = System.objects.get(id=id)
     compound_name = System.objects.get(id=id).compound_name
     obj = dictionary[type].objects.filter(system__id=id)
