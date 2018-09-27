@@ -1,32 +1,46 @@
 {% extends 'materials/materials_base.html' %}
 
 {% block body %}
-<div class="jumbotron">
-  {% if user.is_authenticated %}
-  <h1 class="display-2">Welcome, {{user.first_name}}</h1>
-  <p class="lead">to the HybriD&sup3; materials database</p>
-  {% else %}
-  <h2>Welcome to the </h2>
-  <h1 class="display-2">HybriD&sup3; materials database</h1>
-  {% endif %}
-  <hr>
-  <div class="justify-text">
-    <p>
-      The HybriD&sup3; materials database will provide a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
-    </p>
-    <p>
-      <code>At this point, the database is in its infancy.</code> 
-    </p>
-    <p>
-      The data is available under the Creative Commons license with attribution clause, described <a href="https://creativecommons.org/licenses/by/4.0/" target=_blank>here</a> and, in its full text, <a href="https://creativecommons.org/licenses/by/4.0/legalcode" target=_blank>here</a>. We also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.
-    </p>
-    <p>
-      Please contact us if you wish to add specific materials to the database - the database is intended to be accessible by the community and we would be delighted to hear from you.
-    </p>
-  </div>
-  <p class="lead">
-    <a class="btn btn-primary btn-large" href="{% url 'contact' %}">Learn more</a>
-    <a class="btn btn-primary btn-large" href="{% url 'materials:materials_home' %}">Start searching</a>
-  </p>
-</div>
+{% load static %}
+<table>
+  <tr>
+    <td>
+      <img src="{% static "materials/images/perovskite_model.png" %}" width=200 alt="perovskite_model">
+    </td>
+    <td>
+      <div class="jumbotron">
+        {% if user.is_authenticated %}
+        <h1 class="display-2">Welcome, {{user.first_name}}</h1>
+        <p class="lead">to the HybriD&sup3; materials database</p>
+        {% else %}
+        <h2>Welcome to the </h2>
+        <h1 class="display-2">HybriD&sup3; materials database</h1>
+        {% endif %}
+        <hr>
+        <div class="justify-text">
+          <p>
+            The HybriD&sup3; materials database will provide a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
+          </p>
+          <p>
+            <code>At this point, the database is in its infancy.</code> 
+          </p>
+          <p>
+            The data is available under the Creative Commons license with attribution clause, described <a href="https://creativecommons.org/licenses/by/4.0/" target=_blank>here</a> and, in its full text, <a href="https://creativecommons.org/licenses/by/4.0/legalcode" target=_blank>here</a>. We also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.
+          </p>
+          <p>
+            Please contact us if you wish to add specific materials to the database - the database is intended to be accessible by the community and we would be delighted to hear from you.
+          </p>
+        </div>
+        <p class="lead">
+          <a class="btn btn-primary btn-large" href="{% url 'contact' %}">Learn more</a>
+          <a class="btn btn-primary btn-large" href="{% url 'materials:materials_home' %}">Start searching</a>
+        </p>
+      </div>
+    </td>
+    <td>
+      <img src="{% static "materials/images/AE4TPbI4_liquid.png" %}" width=75 alt="AE4TPbI4 liquid">
+      <img src="{% static "materials/images/AE4TPbI4_crystal.png" %}" width=140 alt="AE4TPbI4 liquid">
+    </td>
+  </tr>
+</table>
 {% endblock %}
