@@ -24,6 +24,9 @@
       </div>
     </div>
 </form>
+<div class="alert alert-info" id="explanatory_text">
+  Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
+</div>
 <br>
 <ul id="results" class="list-group">
 </ul>
@@ -35,16 +38,27 @@
   $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
 
   $('#search_term').change(function() {
-      if(this.value == "exciton_emission")
-      $('#search_text').attr("placeholder", "Search by range using >, >=, <, <=, or a combination, e.g. >=400");
-      else if(this.value == "formula")
-      $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
-      else if(this.value == "organic")
-      $('#search_text').attr("placeholder", "Search for all or part of an organic component, e.g. CH3NH3");
-      else if(this.value == "inorganic")
-      $('#search_text').attr("placeholder", "Search for all or part of an inorganic component, e.g. PbI3");
-      else
-      $('#search_text').attr("placeholder", "");
+      if(this.value == "exciton_emission") {
+          text = "Search by range using >, >=, <, <=, or a combination, e.g. >=400";
+          $('#search_text').attr("placeholder", text);
+          $('#explanatory_text').text(text);
+      } else if(this.value == "formula") {
+          text = "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3"
+          $('#search_text').attr("placeholder", text);
+          $('#explanatory_text').text(text);
+      } else if(this.value == "organic") {
+          text = "Search for all or part of an organic component, e.g. CH3NH3";
+          $('#explanatory_text').text(text);
+          $('#search_text').attr("placeholder", text);
+      } else if(this.value == "inorganic") {
+          text = "Search for all or part of an inorganic component, e.g. PbI3";
+          $('#search_text').attr("placeholder", text);
+          $('#explanatory_text').text(text);
+      } else {
+          text = "";
+          $('#search_text').attr("placeholder", text);
+          $('#explanatory_text').text(text);
+      }
     });
   ajax_submit($('#search-system'), $('#results'));
 </script>
