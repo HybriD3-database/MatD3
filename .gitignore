@@ -1,3 +1,4 @@
 mainproject/media/*
 hybrid3env/*
 *.pyc
+static
