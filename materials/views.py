@@ -15,7 +15,7 @@ from materials.models import (
     AtomicPositions, Publication, Author, Tag)
 from accounts.models import UserProfile
 
-from mainproject.settings.base import MEDIA_ROOT
+from mainproject.settings import MEDIA_ROOT
 from .rangeparser import parserange
 
 import os
