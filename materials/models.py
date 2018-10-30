@@ -3,7 +3,7 @@ from django.db import models
 import os
 import shutil
 from django.db.models import signals
-from mainproject.settings.base import MEDIA_ROOT
+from mainproject.settings import MEDIA_ROOT
 
 UserProfile = "accounts.UserProfile"  # No need for this global variable
 
