@@ -86,7 +86,7 @@ DATABASES = {
     }
 }
 \end{lstlisting}
-Most settings are imported from the main settings file unmodified and only things that you want to change are recorded in the local file. Note that this is a rare exception for using \verb+import *+, which is otherwise considered poor style and in violation with the PEP 8 guidelines. In order to start the development server, the environment variable \verb+DJANGO_SETTINGS_MODULE+ has to point to the location of the local settings file in the form of a Python module:
+Most settings are imported from the main settings file unmodified and only things that you want to change are recorded in the local file. Note that this is a rare exception for using \verb+import *+, which is otherwise considered poor style and in violation with the PEP 8 guidelines. In order to start the development server, the environment variable \verb+DJANGO_SETTINGS_MODULE+ has to point to the dotted path of the local settings file:
 \lstset{language=Bash}
 \begin{lstlisting}
   export DJANGO_SETTINGS_MODULE=mainproject.settings_local
