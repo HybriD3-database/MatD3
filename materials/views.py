@@ -427,7 +427,7 @@ def search_result(search_term, search_text):
 
 class SearchFormView(generic.TemplateView):
     """Search for system page"""
-    template_name = 'materials/materials_search.html'
+    template_name = 'materials/search.html'
     search_terms = [
         ['formula', 'Formula'],
         ['organic', 'Organic Component'],
@@ -441,7 +441,7 @@ class SearchFormView(generic.TemplateView):
                       {'search_terms': self.search_terms})
 
     def post(self, request):
-        template_name = 'materials/materials_search_results.html'
+        template_name = 'materials/search_results.html'
         form = SearchForm(request.POST)
         search_text = ''
         # default search_term
@@ -1175,12 +1175,12 @@ class AddDataView(generic.TemplateView):
 
 
 class SystemView(generic.DetailView):
-    template_name = 'materials/materials_system.html'
+    template_name = 'materials/system.html'
     model = System
 
 
 class SpecificSystemView(generic.TemplateView):
-    template_name = 'materials/materials_system_specific.html'
+    template_name = 'materials/system_specific.html'
 
     def get(self, request, pk, pk_aa, pk_syn, pk_ee, pk_bs):
         system = System.objects.get(pk=pk)

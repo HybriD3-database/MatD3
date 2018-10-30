@@ -1,4 +1,4 @@
-{% extends 'materials/materials_base.html' %}
+{% extends 'materials/nav.html' %}
 {% block body %}
 
 {% load static %}
@@ -9,15 +9,15 @@
   <div class="panel-heading">
     <b>Material</b>
     {% if user.is_superuser %}
-    <a href="/materials/update-system/{{system.pk}}" >
+    <a href="/materials/update-system/{{object.pk}}" >
       <button type="button" class="btn btn-success" style="float: right">Edit System Data
       </button>
     </a>
     {% endif %}
-    <h3>{{system.compound_name}}</h3>
+    <h3>{{object.compound_name}}</h3>
   </div>
   <div class="panel-body">
-    {% with atomic_positions as entry %}
+    {% with object.atomicpositions_set.all|first as entry %}
       <div class="col-md-8">
         <div class="panel panel-primary">
           <div class="panel-heading">
@@ -80,10 +80,10 @@
               </button>
               {% endwith %}
 
-              <a href="{% url "materials:all_a_pos" id=system.id %}">
+              <a href="{% url "materials:all_a_pos" id=object.id %}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-              See all entries ({{system.atomicpositions_set.all|length}})
+              See all entries ({{object.atomicpositions_set.all|length}})
               </button>
               </a>
             {% else %}
@@ -94,7 +94,7 @@
         <div class="panel panel-info">
           <div class="panel-heading"><h4>Synthesis Method</h4></div>
           <div class="panel-body">
-            {% with entry=synthesis %}
+            {% with entry=object.synthesismethod_set.all|first %}
               {% if entry %}
               {% if entry.synthesis_method %}
                 <div style="margin-left: 20px; text-indent: -20px;">
@@ -146,10 +146,10 @@
               </button>
               {% endwith %}
 
-              <a href="{% url "materials:all_entries" id=system.id type="synthesis"%}">
+              <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-              See all entries ({{system.synthesismethod_set.all|length}})
+              See all entries ({{object.synthesismethod_set.all|length}})
               </button>
               </a>
               {% else %}
@@ -163,7 +163,7 @@
   </div>
   <div class="panel-body">
     <div class="col-md-6">
-      {% with entry=exciton_emission %}
+      {% with entry=object.excitonemission_set.all|first %}
       <div class="panel panel-info">
         <div class="panel-heading">
           <h4>PL Graph</h4>
@@ -206,10 +206,10 @@
             </button>
             {% endwith %}
 
-            <a href="{% url "materials:all_entries" id=system.id type="exciton_emission" %}">
+            <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
             <button type="button" class="btn btn-info">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-            See all entries ({{system.excitonemission_set.all|length}})
+            See all entries ({{object.excitonemission_set.all|length}})
             </button>
             </a>
           {% else %}
@@ -225,7 +225,7 @@
         <div class="panel-heading">
           <h4>Band Structure</h4>
         </div>
-        {% with entry=band_structure %}
+        {% with entry=object.bandstructure_set.all|first %}
         <div class="panel-body">
           {% if entry.plotted and entry.visible %}
           <div class="tab-content">
@@ -290,10 +290,11 @@
               Reference
             </button>
             {% endwith %}
-            <a href="{% url "materials:all_entries" id=system.id type="band_structure" %}">
+            
+            <a href="{% url "materials:all_entries" id=object.id type="band_structure" %}">
             <button type="button" class="btn btn-info">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-            See all entries ({{system.bandstructure_set.all|length}})
+            See all entries ({{object.bandstructure_set.all|length}})
             </button>
             </a>
           {% else %}
@@ -311,7 +312,7 @@
           <h4>Material Properties</h4>
         </div>
         <div class="panel-body">
-          {% with system.listProperties as properties %}
+          {% with object.listProperties as properties %}
             {% if properties %}
               <strong>Properties available:</strong>
               <ul>
@@ -319,10 +320,10 @@
                   <li>{{property}}</li>
                 {% endfor %}
               </ul>
-              <a href="{% url "materials:all_entries" id=system.id type="material_prop" %}">
+              <a href="{% url "materials:all_entries" id=object.id type="material_prop" %}">
               <button type="button" class="btn btn-info">
               <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
-              See all entries ({{system.materialproperty_set.all|length}})
+              See all entries ({{object.materialproperty_set.all|length}})
               </button>
               </a>
             {% else %}
@@ -333,6 +334,7 @@
       </div>
     </div>
   </div>
+  {% include "materials/license_note.html" %}
 </div>
 {% endblock %}
 
@@ -342,12 +344,12 @@ var citation = "{{entry.publication.doi_isbn}}";
 $('[data-toggle="popover"]').popover({placement: "top", html:true});
 </script>
 <!-- could potentially change to server served -->
-{% with entry=exciton_emission %}
+{% with entry=object.excitonemission_set.all|first %}
 <script type="text/javascript">
-$('#pl-graph').load("/media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_pl.html");
+$('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html");
 </script>
 {% endwith %}
-{% with entry=band_structure %}
+{% with entry=object.bandstructure_set.all|first %}
 <script type="text/javascript">
 var imglinkfull = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs_full.png';
 var imglinkmini = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs_min.png';
@@ -355,16 +357,16 @@ $('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
 $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
 </script>
 {% endwith %}
-{% with entry=atomic_positions %}
+{% with entry=object.atomicpositions_set.all|first %}
 <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
 <script>
 $(document).ready(function() {
   $('#jmol').html(
     Jmol.getAppletHtml("jmolApplet0", {
-    script: "load /media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_apos.in",
+    script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_apos.in",
     j2sPath: "{% static 'jsmol/j2s' %}",
-    height: 400,
-    width: 600,
+    height: 450,
+    width: 500,
   }));
 });
 </script>
