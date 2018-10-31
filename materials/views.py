@@ -355,7 +355,7 @@ def all_a_pos(request, id):
         """Sort by temperature, but temperature is a charFields"""
         try:
             return int(entry.temperature)
-        except:
+        except Exception:
             # temperature field contains something other than digits (e.g. N/A)
             temp = ''
             for c in entry.temperature:
@@ -532,7 +532,7 @@ def makeCorrections(form):
             temp = temp[:-1].strip()
             form.temperature = temp
         return form
-    except:  # just in case
+    except Exception:  # just in case
         return form
 
 
@@ -562,7 +562,7 @@ class AddAPosView(generic.TemplateView):
             try:
                 apos_form.synthesis_method = SynthesisMethod.objects.get(
                     pk=int(syn_pk))
-            except:
+            except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
@@ -688,7 +688,6 @@ class AddPubView(generic.TemplateView):
 
 class SearchPubView(generic.TemplateView):
     template_name = 'materials/dropdown_list_pub.html'
-    from itertools import chain
 
     def post(self, request):
         search_form = SearchForm(request.POST)
@@ -834,11 +833,10 @@ class SearchSystemView(generic.TemplateView):
 
     def post(self, request):
         form = SearchForm(request.POST)
-        related_synthesis = (request.POST['related_synthesis'] == 'True')
+        related_synthesis = request.POST['related_synthesis'] == 'True'
         search_text = ''
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
-
         search_result = System.objects.filter(
             Q(compound_name__icontains=search_text) |
             Q(group__icontains=search_text) |
@@ -948,7 +946,7 @@ class AddExcitonEmissionView(generic.TemplateView):
             try:
                 new_form.synthesis_method = SynthesisMethod.objects.get(
                     pk=int(syn_pk))
-            except:
+            except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
@@ -1048,7 +1046,7 @@ class AddBandStructureView(generic.TemplateView):
             try:
                 new_form.synthesis_method = SynthesisMethod.objects.get(
                     pk=int(syn_pk))
-            except:
+            except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
@@ -1068,7 +1066,7 @@ class AddBandStructureView(generic.TemplateView):
                     new_form.folder_location = bs_folder_loc
                     try:
                         os.mkdir(bs_folder_loc)
-                    except:
+                    except Exception:
                         pass
                     band_files = request.FILES.getlist('band_structure_files')
                     control_file = request.FILES.get('control_in_file')
