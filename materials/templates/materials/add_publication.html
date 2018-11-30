@@ -1,42 +1,39 @@
 {% extends 'materials/template.html' %}
 
 {% block heading %}
-<h4>Add Publication</h4>
+  <h4>Add Publication</h4>
 {% endblock %}
 
 {% block mainbody %}
+  <form id="author-count" method="post" action="{% url 'materials:author_count' %}">
+    {% csrf_token %}
+    <label for="id_author_count">Number of authors:</label>
+    <input type="number" name="author_count" autofocus="true" class="form-control" id="id_author_count" min="1" max="50" placeholder="Please enter the number of authors associated with this publication" required>
+    <button type="submit" class="btn btn-info">Enter</button>
+  </form>
 
-
-<form id="author-count" method="post" action="{% url 'materials:author_count' %}">
-  {% csrf_token %}
-  <label for="id_author_count">Number of authors:</label>
-  <input type="number" name="author_count" autofocus="true" class="form-control" id="id_author_count" min="1" max="50" placeholder="Please enter the number of authors associated with this publication" required>
-  <button type="submit" class="btn btn-default">Enter</button>
-</form>
-
-<form id="add-publication" method="post" action="{% url 'materials:add_publication' %}" class="form-group hidden">
-  {% csrf_token %}
-  <p>
-  <div id="entered-authors">
+  <form id="add-publication" method="post" action="{% url 'materials:add_publication' %}" class="form-group invisible">
+    {% csrf_token %}
+    <p>
+      <div id="entered-authors">
+      </div>
+    </p>
+    {{ pub_form.as_p }}
+    <button type="submit" class="btn btn-info">Submit new publication</button>
+  </form>
+  {{text}}
+  <div id="feedback">
   </div>
-  </p>
-  {{ pub_form.as_p }}
-  <button type="submit" class="btn btn-default">Submit new publication</button>
-</form>
-{{text}}
-<div id="feedback">
-</div>
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_form_submit.html' %}
-{% include 'materials/ajax_alert_form_submit.html' %}
-<script type="text/javascript">
-  $('#author-count').submit(function() {
-      $('#add-publication').removeClass('hidden');
-    });
-
-  ajax_submit($('#author-count'), $('#entered-authors'));
-  alert_submit($('#add-publication'), $('#feedback'));
-</script>
+  {% include 'materials/ajax_form_submit.html' %}
+  {% include 'materials/ajax_alert_form_submit.html' %}
+  <script type="text/javascript">
+   $('#author-count').submit(function() {
+     $('#add-publication').removeClass('invisible');
+   });
+   ajax_submit($('#author-count'), $('#entered-authors'));
+   alert_submit($('#add-publication'), $('#feedback'));
+  </script>
 {% endblock %}

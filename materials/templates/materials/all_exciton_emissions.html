@@ -7,7 +7,7 @@
 {% block dl_link %}
   <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
   <button type="button" class="btn btn-primary"/>
-  <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+  <span class="fa fa-download" aria-hidden="true"></span>
     Exciton Emission Data
   </button>
   </a>
@@ -37,7 +37,7 @@
             <b>Product:</b> {{syn.product|truncatechars:50}}
           </div>
         {% endif %}<b>Publication:</b>{% include "materials/reference_format.html" %}'>
-      <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
+      <span class="fa fa-book" aria-hidden="true"></span>
         Synthesis Method
     </button>
     {% endif %}

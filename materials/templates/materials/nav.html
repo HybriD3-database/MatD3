@@ -1,37 +1,45 @@
 {% extends 'mainproject/base.html' %}
 
 {% block navbar %}
-<nav class="navbar navbar-default" id="navbar">
-<div class="container-fluid">
-<!-- Brand and toggle get grouped for better mobile display -->
-<div class="navbar-header">
-<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
-<span class="sr-only">Toggle navigation</span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-</button>
-<a class="navbar-brand" href="#">HybriD&#xb3; database</a>
-</div>
-
-<!-- Collect the nav links, forms, and other content for toggling -->
-<div class="collapse navbar-collapse" id="navbar-collapse">
-<ul class="nav navbar-nav">
-<li><a href="{% url 'index'%}">Home</a></li>
-<li><a href="{% url 'contact'%}">Contact</a></li>
-<li><a href="{% url 'materials:materials_home'%}">Materials</a></li>
-<li><a href="https://hybrid3.duke.edu/">HybriD<sup>3</sup> project</a></li>
-</ul>
-<ul class="nav navbar-nav navbar-right">
-{% if user.is_authenticated %}
-<li><a href="{% url 'materials:add_data'%}">Add Data</a></li>
-<li><a href="{% url 'accounts:home'%}">Accounts</a></li>
-{% else %}
-<li><a href="{% url 'accounts:login'%}">Login</a></li>
-<li><a href="{% url 'accounts:register'%}">Register</a></li>
-{% endif %}
-</ul>
-</div><!-- /.navbar-collapse -->
-</div><!-- /.container-fluid -->
-</nav>
+  <nav class="navbar navbar-expand-md">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'index' %}">HybriD&#xb3; database</a>
+      <button class="navbar-toggler custom-toggler" type="button" data-toggle="collapse"
+              data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'materials:materials_home' %}">Materials</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://hybrid3.duke.edu/">HybriD<sup>3</sup> project</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'materials:add_data' %}">Add Data</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:home' %}">Accounts</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+  </nav>
 {% endblock %}

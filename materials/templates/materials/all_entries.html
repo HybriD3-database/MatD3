@@ -2,101 +2,96 @@
 
 {% block body %}
 
-{% load staticfiles %}
-<!-- variables needed: compound_name,  object -->
-<link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
+  {% load staticfiles %}
+  <link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
 
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <b>Material</b>
-    <a href="{% url "materials:materials_system" pk=key %}">
-      <button type="button" class="btn btn-primary" style="float: right; background-color: #888888; border: none;">Back</button>
-    </a>
-    <h3>{{compound_name}}</h3>
-  </div>
-  <div class="panel-body">
-    <h4>All {% block heading %}Entry{% endblock %} Data</h4>
-    {% if object %}
-    {% for entry in object %}
-    {% if data_type == "band_structure" and not entry.visible %}
-    {% else %}
-    <div class="col-md-6">
-      <div class="panel panel-info">
-        <div class="panel-heading">
-          {% if entry.contributor.user.get_username == user.username %}
-          {% if data_type == "synthesis" %}
-          <a href="{% url "materials:update_synthesis" sys=entry.system.pk pk=entry.pk %}">
-            {% elif data_type == "exciton_emission" %}
-            <a href="{% url "materials:update_exciton_emission" sys=entry.system.pk pk=entry.pk %}">
-              {% elif data_type == "band_structure" %}
-              <a href="{% url "materials:update_band_structure" sys=entry.system.pk pk=entry.pk %}">
-                {% elif data_type == "material_prop" %}
-                <a href="{% url "materials:update_property" sys=entry.system.pk pk=entry.pk %}">
-                  {% endif %}
-                  <button type="button" class="btn btn-success" style="float: right">Edit Entry</button>
-                </a>
-                {% endif %}
-                <h4>Entry #{{ forloop.counter }}</h4>
-        </div>
-        <div class="panel-body">
-          {% block bs_graph %}{% endblock %}
-          <p class="details">{% block entry_type %}Entry Type units{% endblock %}</p>
-          <!--Phase: {{entry.phase}} <br>-->
-          {% if entry.temperature %}
-          <strong>Temperature:</strong> {{entry.temperature}} K <br>
-          {% endif %}
-          {% if entry.method %}
-          <div style="margin-left: 20px; text-indent: -20px;">
-            <strong>Method:</strong> {{entry.method}}
-          </div>
-          {% endif %}
-          {% if entry.specific_method %}
-          <div style="margin-left: 20px; text-indent: -20px;">
-            <strong>Specific Method:</strong> {{entry.specific_method}}
-          </div>
-          {% endif %}
-          <div style="margin-left: 20px; text-indent: -20px;">
-            {% with entry.getAuthors as authors %}
-            <strong>Publication:</strong> {% include 'materials/reference_format.html' %} 
-            {% endwith %}
-          </div>
-          {% if entry.source %}
-          <div style="margin-left: 20px; text-indent: -20px;">
-            <strong>Source:</strong> {{entry.source}}
-          </div>
-          {% endif %}
-          {% if entry.data_extraction_method %}
-          <div style="margin-left: 20px; text-indent: -20px;">
-            <strong>Data Extraction Method:</strong> {{entry.data_extraction_method}}
-          </div>
-          {% endif %}
-          <div>
-            <strong>Last Updated:</strong> {{entry.last_update}}
-          </div>
-          {% if entry.comments %}
-          <div style="margin-left: 20px; text-indent: -20px;">
-            <strong>Comments:</strong> {{entry.comments}}
-          </div>
-          {% endif %}
-          {% block dl_link %}
-          {% endblock %}
-          {% block related_synthesis %}
-          {% endblock %}
-        </div>
-      </div>
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <a href="{% url "materials:materials_system" pk=key %}">
+        <button type="button" class="btn btn-primary" style="float: right; background-color: #888888; border: none;">Back</button>
+      </a>
+      <h3>{{compound_name}}</h3>
     </div>
-    {% endif %}
-    {% endfor %}
-    {% else %}
-    <h3>No data available</h3>
-    {% endif %}
+    <div class="card-body">
+      <h4>All {% block heading %}Entry{% endblock %} Data</h4>
+      {% if object %}
+        <div class="row">
+          {% for entry in object %}
+            {% if data_type == "band_structure" and not entry.visible %}
+            {% else %}
+              <div class="col-md-6">
+                <div class="card card-item">
+                  <div class="card-header">
+                    {% if entry.contributor.user.get_username == user.username %}
+                      {% if data_type == "synthesis" %}
+                        <a href="{% url "materials:update_synthesis" sys=entry.system.pk pk=entry.pk %}">
+                      {% elif data_type == "exciton_emission" %}
+                          <a href="{% url "materials:update_exciton_emission" sys=entry.system.pk pk=entry.pk %}">
+                      {% elif data_type == "band_structure" %}
+                            <a href="{% url "materials:update_band_structure" sys=entry.system.pk pk=entry.pk %}">
+                      {% elif data_type == "material_prop" %}
+                              <a href="{% url "materials:update_property" sys=entry.system.pk pk=entry.pk %}">
+                      {% endif %}
+                      <button type="button" class="btn btn-success" style="float: right">Edit Entry</button>
+                              </a>
+                    {% endif %}
+                    <h4>Entry #{{ forloop.counter }} ({{ entry.method|lower }})</h4>
+                  </div>
+                  <div class="card-body">
+                    {% block bs_graph %}{% endblock %}
+                    <p class="details">{% block entry_type %}Entry Type units{% endblock %}</p>
+                    <!--Phase: {{entry.phase}} <br>-->
+                    {% if entry.temperature %}
+                      <strong>Temperature:</strong> {{entry.temperature}} K <br>
+                    {% endif %}
+                    {% if entry.method %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Method:</strong> {{entry.method}}
+                      </div>
+                    {% endif %}
+                    {% if entry.specific_method %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Specific Method:</strong> {{entry.specific_method}}
+                      </div>
+                    {% endif %}
+                    <div style="margin-left: 20px; text-indent: -20px;">
+                      {% with entry.getAuthors as authors %}
+                        <strong>Publication:</strong> {% include 'materials/reference_format.html' %} 
+                      {% endwith %}
+                    </div>
+                    {% if entry.source %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Source:</strong> {{entry.source}}
+                      </div>
+                    {% endif %}
+                    {% if entry.data_extraction_method %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Data Extraction Method:</strong> {{entry.data_extraction_method}}
+                      </div>
+                    {% endif %}
+                    <div>
+                      <strong>Last Updated:</strong> {{entry.last_update}}
+                    </div>
+                    {% if entry.comments %}
+                      <div style="margin-left: 20px; text-indent: -20px;">
+                        <strong>Comments:</strong> {{entry.comments}}
+                      </div>
+                    {% endif %}
+                    {% block dl_link %}
+                    {% endblock %}
+                    {% block related_synthesis %}
+                    {% endblock %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+          {% include "materials/license_note.html" %}
+        </div>
+      {% else %}
+        <h3>No data available</h3>
+      {% endif %}
+    </div>
   </div>
-  {% include "materials/license_note.html" %}
-</div>
-{% endblock %}
-
-{% block script %}
-<script type="text/javascript">
-  $('[data-toggle="popover"]').popover({placement: "top", html:true});
-</script>
 {% endblock %}

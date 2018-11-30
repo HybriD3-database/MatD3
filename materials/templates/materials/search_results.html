@@ -1,53 +1,59 @@
 {% if systems.count > 0 %}
-  <table class="table">
-    <thead>
-      {% if search_term == "exciton_emission" %}
-      <tr>
-        <th>Compound Name</th>
-        <th>Common Formula</th>
-        <th>Chemical Formula</th>
-        <th>Exciton Emission</th>
-        <th>Download</th>
-      </tr>
-      {% for ee in systems_info %}
-      <tr>
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.compound_name}}</a></td>
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.common_formula}}</a></td>
-      <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
-      <td>{{ee.ee}}</td>
-      <td>
-      <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.ee_pk %}">
-      <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-      Exciton Emission Peak
-      </a></td>
-      </tr>
-      {% endfor %}
-  {% else %}
-  <tr>
-    <th>Compound Name</th>
-    <th>Chemical Formula</th>
-    <th>Alternate Names</th>
-    <th>Organic Component</th>
-    <th>Inorganic Component</th>
-  </tr>
-  {% for system in systems %}
-  <tr>
-    <td><a href="/materials/{{system.pk}}">{{system.compound_name}}</a></td>
-    <td><a href="/materials/{{system.pk}}">{{system.formula}}</a></td>
-    <td>
-      <ul style="padding: 0px; list-style-type: none" id="authors-list">
-        {% for name in system.listAlternateNames %}
-          <li><a href="/materials/{{system.pk}}">{{name}}</a></li>
+  <table class="table table-hover table-sm">
+    {% if search_term == "exciton_emission" %}
+      <thead>
+        <tr>
+          <th>Compound Name</th>
+          <th>Common Formula</th>
+          <th>Chemical Formula</th>
+          <th>Exciton Emission</th>
+          <th>Download</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ee in systems_info %}
+          <tr>
+            <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.compound_name}}</a></td>
+            <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.common_formula}}</a></td>
+            <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
+            <td>{{ee.ee}}</td>
+            <td>
+              <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.ee_pk %}">
+                <span class="fa fa-download" aria-hidden="true"></span>
+                Exciton Emission Peak
+              </a></td>
+          </tr>
         {% endfor %}
-      </ul>
-    </td>
-    <td>{{system.organic}}</td>
-    <td>{{system.inorganic}}</td>
-  </tr>
-  {% endfor %}
-  {% endif %}
-</thead>
-</table>
+      </tbody>
+    {% else %}
+      <thead>
+        <tr>
+          <th>Compound Name</th>
+          <th>Chemical Formula</th>
+          <th>Alternate Names</th>
+          <th>Organic Component</th>
+          <th>Inorganic Component</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for system in systems %}
+          <tr>
+            <td><a href="/materials/{{system.pk}}">{{system.compound_name}}</a></td>
+            <td><a href="/materials/{{system.pk}}">{{system.formula}}</a></td>
+            <td>
+              <ul style="padding: 0px; list-style-type: none" id="authors-list">
+                {% for name in system.listAlternateNames %}
+                  <li><a href="/materials/{{system.pk}}">{{name}}</a></li>
+                {% endfor %}
+              </ul>
+            </td>
+            <td>{{system.organic}}</td>
+            <td>{{system.inorganic}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    {% endif %}
+  </table>
 {% else %}
   <p class="alert alert-warning" role="alert">No results found. Please retry with a new search term</p>
 {% endif %}

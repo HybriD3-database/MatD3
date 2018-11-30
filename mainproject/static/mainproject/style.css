@@ -1,0 +1,72 @@
+body {
+    background-color: #e6e6e6;
+    font-family: Futura, Avenir, Helvetica, sans-serif;
+}
+
+.navbar {
+    background-color: #337ab7;
+    border: 0px solid #337ab7;
+    border-radius: 0px;
+    color: #fefefe;
+}
+
+.navbar .navbar-brand {
+    color: #fefefe;
+}
+
+.navbar .navbar-nav > li > a {
+    color: #fefefe;
+}
+
+.custom-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+.custom-toggler.navbar-toggler {
+    border-color: #fefefe;
+}
+
+.card-default {
+    border: 0px;
+}
+
+.card-item {
+    border: 0px;
+    box-shadow: 4px 4px 8px 1px #999;
+}
+
+.card-default > .card-header, .card-item > .card-header {
+    background-color: #E3F2FD;
+}
+
+.card-default > .card-body {
+    background-color: #ececec;
+}
+
+.card-item > .card-body {
+    background-color: 'white';
+}
+
+table.atomic-positions {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+table.atomic-positions td {
+    border: none;
+    padding: 1px;
+}
+
+.details {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.nav-tabs {
+    border-bottom: none;
+    border-top: 1px solid #E8EAF6;
+}
+
+.nav-tabs > li > a {
+    border-bottom: 1px solid #e8eaf6;
+}

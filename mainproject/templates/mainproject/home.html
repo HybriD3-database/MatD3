@@ -1,46 +1,42 @@
 {% extends 'materials/nav.html' %}
 
 {% block body %}
-{% load static %}
-<table>
-  <tr>
-    <td>
-      <img src="{% static "materials/images/perovskite_model.png" %}" width=200 alt="perovskite_model">
-    </td>
-    <td>
-      <div class="jumbotron">
-        {% if user.is_authenticated %}
-        <h1 class="display-2">Welcome, {{user.first_name}}</h1>
-        <p class="lead">to the HybriD&sup3; materials database</p>
-        {% else %}
-        <h2>Welcome to the </h2>
-        <h1 class="display-2">HybriD&sup3; materials database</h1>
-        {% endif %}
-        <hr>
-        <div class="justify-text">
-          <p>
-            The HybriD&sup3; materials database will provide a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
-          </p>
-          <p>
-            <code>At this point, the database is in its infancy.</code> 
-          </p>
-          <p>
-            The data is available under the Creative Commons license with attribution clause, described <a href="https://creativecommons.org/licenses/by/4.0/" target=_blank>here</a> and, in its full text, <a href="https://creativecommons.org/licenses/by/4.0/legalcode" target=_blank>here</a>. We also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.
-          </p>
-          <p>
-            Please contact us if you wish to add specific materials to the database - the database is intended to be accessible by the community and we would be delighted to hear from you.
-          </p>
+  {% load static %}
+  <section class="jumbotron">
+    {% if user.is_authenticated %}
+      <h2 class="text-center">Welcome, {{user.first_name}}, to the HybriD&sup3; materials database</h2>
+    {% else %}
+      <h2>Welcome to the HybriD&sup3; materials database</h2>
+    {% endif %}
+    <div class="d-none d-sm-block">
+      <img src="{% static 'materials/images/perovskite_model.png' %}"
+           class="float-left" width=180 alt="perovskite_model">
+      <img src="{% static 'materials/images/AE4TPbI4_crystal.png' %}"
+           class="float-right p-2" width=140 alt="AE4TPbI4 crystal">
+      <img src="{% static 'materials/images/AE4TPbI4_liquid.png' %}"
+           class="float-right p-2" width=75 alt="AE4TPbI4 liquid">
+    </div>
+    <div class="text-justify">
+      <p>
+        The HybriD&sup3; materials database will provide a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
+      </p>
+      <div class="d-flex">
+        <div class="alert alert-warning col-12 text-center p-0">
+          At this point, the database is in its infancy.
         </div>
-        <p class="lead">
-          <a class="btn btn-primary btn-large" href="{% url 'contact' %}">Learn more</a>
-          <a class="btn btn-primary btn-large" href="{% url 'materials:materials_home' %}">Start searching</a>
-        </p>
       </div>
-    </td>
-    <td>
-      <img src="{% static "materials/images/AE4TPbI4_liquid.png" %}" width=75 alt="AE4TPbI4 liquid">
-      <img src="{% static "materials/images/AE4TPbI4_crystal.png" %}" width=140 alt="AE4TPbI4 liquid">
-    </td>
-  </tr>
-</table>
+      <p>
+        The data is available under the Creative Commons license with attribution clause, described <a href="https://creativecommons.org/licenses/by/4.0/">here</a> and, in its full text, <a href="https://creativecommons.org/licenses/by/4.0/legalcode">here</a>. We also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.
+      </p>
+      <p>
+        Please contact us if you wish to add specific materials to the database - the database is intended to be accessible by the community and we would be delighted to hear from you.
+      </p>
+    </div>
+    <a href="{% url 'contact' %}">
+      <button type="buttom" class="btn btn-primary">Learn more</button>
+    </a>
+    <a href="{% url 'materials:materials_home' %}">
+      <button type="button" class="btn btn-primary">Start searching</button>
+    </a>
+  </section>
 {% endblock %}

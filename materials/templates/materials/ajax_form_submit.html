@@ -2,9 +2,7 @@
 function ajax_submit(form, feedback) {
   form.on('submit', function(event){
     event.preventDefault();
-    console.log("first function triggered");
     var data = new FormData(form.get(0));
-    console.log(data);
     $.ajax({
       url: form.attr('action'),
       type: form.attr('method'),
@@ -13,10 +11,7 @@ function ajax_submit(form, feedback) {
       processData: false,
       contentType: false,
       success: function(data) {
-        console.log(data);
-        feedback.html(
-           data
-        );
+        feedback.html(data);
       },
       error: function(error) {
         feedback.html(
@@ -24,9 +19,6 @@ function ajax_submit(form, feedback) {
         );
       },
     })
-    console.log(form.serialize());
-    // clear all fields, currently disabled to discourage spamming
-    // $('input').val('');
   });
 }
 </script>

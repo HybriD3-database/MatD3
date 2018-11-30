@@ -1,12 +1,12 @@
 {% extends 'materials/add_entry_template.html' %}
 
 {% block heading %}
-<h4>Add Atomic Positions</h4>
+  <h4>Add Atomic Positions</h4>
 {% endblock %}
 {% load static %}
 
 {% block form %}
-<form id="add-a-pos" name="add-a-pos" method="post" action="{% url 'materials:add_a_pos' %}" enctype='multipart/form-data'>
+  <form id="add-a-pos" name="add-a-pos" method="post" action="{% url 'materials:add_a_pos' %}" enctype='multipart/form-data'>
     {% csrf_token %}
     <div id="publication-search-result">
     </div>
@@ -17,13 +17,13 @@
       Please refer to the FHI-aims geometry.in description for file specifications:
       <a class="alert-link" href="{% static 'materials/file_templates/geometry_in_description.pdf'%}">Download FHI-aims geometry.in description</a>
     </p>
-    <button type="submit" class="btn btn-default">Submit new atomic positions</button>
-</form>
+    <button type="submit" class="btn btn-primary">Submit new atomic positions</button>
+  </form>
 {% endblock %}
 
 {% block ajaxscript %}
   <script type="text/javascript">
-    alert_submit($('#add-a-pos'), $('#feedback'));
+   alert_submit($('#add-a-pos'), $('#feedback'));
   </script>
   {% block synthesisScript %}
   {% endblock %}

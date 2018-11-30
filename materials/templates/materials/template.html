@@ -1,17 +1,15 @@
 {% extends 'materials/nav.html' %}
 
 {% block body %}
-<div class="panel panel-default">
-  <!-- Default panel contents -->
-  <div class="panel-heading">
-    {% block heading %}
-    <h4>Heading here</h4>
-    {% endblock %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      {% block heading %}
+      {% endblock %}
+    </div>
+    <div class="card-body">
+      {% block mainbody %}
+      {% endblock %}
+    </div>
   </div>
-  <div class="panel-body">
-    {% block mainbody %}
-    Mainbody here
-    {% endblock %}
-  </div>
-</div>
 {% endblock %}

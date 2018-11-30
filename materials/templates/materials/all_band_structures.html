@@ -3,24 +3,28 @@
 {% block heading %}Band Structures{% endblock %}
 
 {% block bs_graph %}
-{% if entry.plotted and entry.visible %}
-  <div class="tab-content">
-    <div id="home{{forloop.counter}}" class="tab-pane fade in active">
-      <img src="{{entry.getFullBSPath}}" alt="Band Structure" width="500">
+  {% if entry.plotted and entry.visible %}
+    <div class="tab-content">
+      <div id="home{{forloop.counter}}" class="tab-pane fade show active">
+        <img src="{{entry.getFullBSPath}}" alt="Band Structure" width="500">
+      </div>
+      <div id="mini{{forloop.counter}}" class="tab-pane fade">
+        <img src="{{entry.getMiniBSPath}}" alt="Band Structure" width="500">
+      </div>
     </div>
-    <div id="mini{{forloop.counter}}" class="tab-pane fade">
-      <img src="{{entry.getMiniBSPath}}" alt="Band Structure" width="500">
-    </div>
-  </div>
-  <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home{{forloop.counter}}">Full size</a></li>
-    <li><a data-toggle="tab" href="#mini{{forloop.counter}}">Zoomed</a></li>
-  </ul>
-{% endif %}
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#home{{forloop.counter}}">Full size</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#mini{{forloop.counter}}">Zoomed</a>
+      </li>
+    </ul>
+  {% endif %}
 {% endblock %}
 
 {% block entry_type %}
-Band gap:
+  Band gap:
   <span style="font-weight: normal;">
     {% if entry.band_gap|length > 0 %}
       {{entry.band_gap}} eV
@@ -32,51 +36,53 @@ Band gap:
 {% block dl_link %}
   {% if entry.folder_location|length > 0 and entry.plotted %}
     <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
-    <button type="button" class="btn btn-primary"/>
-    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-    Band Structure
+      <button type="button" class="btn btn-primary"/>
+      <span class="fa fa-download-alt" aria-hidden="true"></span>
+      Band Structure
     </button>
     </a>
   {% endif %}
   {% if entry.band_gap != '' %}
     <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">
-    <button type="button" class="btn btn-primary"/>
-    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-        Band Gap
-    </button>
+      <button type="button" class="btn btn-primary"/>
+      <span class="fa fa-download-alt" aria-hidden="true"></span>
+      Band Gap
+      </button>
     </a>
   {% endif %}
 {% endblock %}
 
 {% block related_synthesis %}
-    {% with entry.synthesis_method as syn %}
+  {% with entry.synthesis_method as syn %}
     {% with syn as entry %}
-    {% with syn.getAuthors as authors %}
-    {% if syn %}
-    <button type="button" class="btn btn-warning" data-toggle="popover" title="Related Synthesis Method" data-trigger="focus" html="true" data-content='<u>Method {{syn.methodNumber}}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
-          <div>
-            <b>Method:</b> {{syn.synthesis_method|truncatechars:50}}</div>
+      {% with syn.getAuthors as authors %}
+        {% if syn %}
+          <button type="button" class="btn btn-warning" data-toggle="popover"
+                  title="Related Synthesis Method" data-trigger="focus" html="true"
+                  data-content='<u>Method {{syn.methodNumber}}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
+                        <div>
+                        <b>Method:</b> {{syn.synthesis_method|truncatechars:50}}</div>
+                  {% endif %}
+                        {% if syn.starting_materials %}
+                        <div>
+                        <b>Starting Materials:</b> {{syn.starting_materials|truncatechars:50}}
+                        </div>
+                        {% endif %}
+                        {% if syn.remarks %}
+                        <div>
+                        <b>Remarks:</b> {{syn.remarks|truncatechars:50}}
+                        </div>
+                        {% endif %}
+                        {% if syn.product %}
+                        <div>
+                        <b>Product:</b> {{syn.product|truncatechars:50}}
+                        </div>
+                        {% endif %}<b>Publication:</b>{% include "materials/reference_format.html" %}'>
+            <span class="fa fa-book" aria-hidden="true"></span>
+            Synthesis Method
+          </button>
         {% endif %}
-        {% if syn.starting_materials %}
-          <div>
-            <b>Starting Materials:</b> {{syn.starting_materials|truncatechars:50}}
-          </div>
-        {% endif %}
-        {% if syn.remarks %}
-          <div>
-            <b>Remarks:</b> {{syn.remarks|truncatechars:50}}
-          </div>
-        {% endif %}
-        {% if syn.product %}
-          <div>
-            <b>Product:</b> {{syn.product|truncatechars:50}}
-          </div>
-        {% endif %}<b>Publication:</b>{% include "materials/reference_format.html" %}'>
-      <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
-        Synthesis Method
-    </button>
-    {% endif %}
+      {% endwith %}
     {% endwith %}
-    {% endwith %}
-    {% endwith %}
+  {% endwith %}
 {% endblock %}

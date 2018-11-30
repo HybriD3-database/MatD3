@@ -1,23 +1,23 @@
 {% extends 'materials/add_entry_template.html' %}
 
 {% block heading %}
-<h4>Add Material Property</h4>
+  <h4>Add Material Property</h4>
 {% endblock %}
 
 {% block form %}
-<form id="add-material-property" method="post" action="{% url 'materials:add_material_property' %}" enctype='multipart/form-data'>
+  <form id="add-material-property" method="post" action="{% url 'materials:add_material_property' %}" enctype='multipart/form-data'>
     {% csrf_token %}
     <div id="publication-search-result">
     </div>
     <div id="system-search-result">
     </div>
     {{ material_property_form.as_p }}
-    <button type="submit" class="btn btn-default">Submit new material property</button>
-</form>
+    <button type="submit" class="btn btn-primary">Submit new material property</button>
+  </form>
 {% endblock %}
 
 {% block ajaxscript %}
-<script type="text/javascript">
-  alert_submit($('#add-material-property'), $('#feedback'));
-</script>
+  <script type="text/javascript">
+   alert_submit($('#add-material-property'), $('#feedback'));
+  </script>
 {% endblock %}

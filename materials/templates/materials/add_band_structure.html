@@ -1,12 +1,12 @@
 {% extends 'materials/add_entry_template.html' %}
 
 {% block heading %}
-<h4>Add Band Structure</h4>
+  <h4>Add Band Structure</h4>
 {% endblock %}
 {% load static %}
 
 {% block form %}
-<form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
+  <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
     {% csrf_token %}
     <div id="publication-search-result">
     </div>
@@ -17,12 +17,12 @@
       Please refer to the HybriD³ Band Structure description for file specifications:
       <a class="alert-link" href="{% static 'materials/file_templates/band_structure_description.pdf'%}">Download Band Structure description</a>
     </p>
-    <button type="submit" class="btn btn-default">Submit new band structure</button>
-</form>
+    <button type="submit" class="btn btn-primary">Submit new band structure</button>
+  </form>
 {% endblock %}
 
 {% block ajaxscript %}
-<script type="text/javascript">
-  alert_submit($('#add-band-structure'), $('#feedback'));
-</script>
+  <script type="text/javascript">
+   alert_submit($('#add-band-structure'), $('#feedback'));
+  </script>
 {% endblock %}

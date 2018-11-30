@@ -1,54 +1,54 @@
 {% extends 'materials/template.html' %}
 
 {% block mainbody %}
-<form id="search-publication" method="post" action="{% url 'materials:search_publication' %}">
+  <form id="search-publication" method="post" action="{% url 'materials:search_publication' %}">
     {% csrf_token %}
     <label for="id_search_text">Search term:</label>
     <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
-    placeholder="Search by publication title, journal name, or full name of author." required>
+           placeholder="Search by publication title, journal name, or full name of author." required>
     <p>
-      <button type="submit" class="btn btn-default">Search for publication</button>
+      <button type="submit" class="btn btn-info">Search for publication</button>
     </p>
-</form>
-<form id="search-system" name="search-system" method="post" action="{% url 'materials:search_system' %}">
+  </form>
+  <form id="search-system" name="search-system" method="post" action="{% url 'materials:search_system' %}">
     {% csrf_token %}
     <label for="id_search_text">Search term:</label>
     <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
-    placeholder="Search by compound name or formula." required>
+           placeholder="Search by compound name or formula." required>
     <p>
-      <button type="submit" class="btn btn-default">Search for system</button>
+      <button type="submit" class="btn btn-info">Search for system</button>
     </p>
-</form>
+  </form>
 
-{% block form %}
-{% endblock %}
+  {% block form %}
+  {% endblock %}
 
-<div id="feedback">
-</div>
+  <div id="feedback">
+  </div>
 {% endblock %}
 
 {% block script %}
   <script type="text/javascript">
-    var params = [
-                  {
-                      name: "related_synthesis",
-                      value: "{{related_synthesis}}"
-                  }
-    ];
-    $('#search-system').submit(function () {
-        $(this).append($.map(params, function (param) {
-            return   $('<input>', {
-                type: 'hidden',
-                name: param.name,
-                value: param.value
-            })
-        }))
-    });
+   var params = [
+     {
+       name: "related_synthesis",
+       value: "{{related_synthesis}}"
+     }
+   ];
+   $('#search-system').submit(function () {
+     $(this).append($.map(params, function (param) {
+       return   $('<input>', {
+         type: 'hidden',
+         name: param.name,
+         value: param.value
+       })
+     }))
+   });
   </script>
   {% include 'materials/ajax_form_submit.html' %}
   <script type="text/javascript">
-  ajax_submit($('#search-publication'), $('#publication-search-result'));
-  ajax_submit($('#search-system'), $('#system-search-result'));
+   ajax_submit($('#search-publication'), $('#publication-search-result'));
+   ajax_submit($('#search-system'), $('#system-search-result'));
   </script>
 
   {% include 'materials/ajax_alert_form_submit.html' %}

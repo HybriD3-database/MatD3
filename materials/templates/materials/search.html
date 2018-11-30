@@ -1,65 +1,65 @@
 {% extends 'materials/template.html' %}
 
 {% block heading %}
-<h4>Search for Materials</h4>
+  <h5>Search for Materials</h5>
 {% endblock %}
 
 {% block mainbody %}
-<form id="search-system" method="post">
+  <form id="search-system" method="post">
     {% csrf_token %}
     <div class="form-group">
       <label for="search_text">Search term: </label>
       <div class="input-group">
-        <div class="input-group-btn">
+        <div class="input-group-prepend">
           <select id="search_term" name="search_term" class="selectpicker">
             {% for search_term in search_terms %}
-            <option value="{{search_term.0}}">{{search_term.1}}</option>
+              <option value="{{search_term.0}}">{{search_term.1}}</option>
             {% endfor %}
           </select>
         </div>
         <input id="search_text" class="form-control" type="text" name="search_text" required/>
-        <div class="input-group-btn">
+        <div class="input-group-append">
           <button type="submit" class="btn btn-primary">Submit</button>
         </div>
       </div>
     </div>
-</form>
-<div class="alert alert-info" id="explanatory_text">
-  Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
-</div>
-<br>
-<ul id="results" class="list-group">
-</ul>
+  </form>
+  <div class="alert alert-info" id="explanatory_text">
+    Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
+  </div>
+  <br>
+  <ul id="results" class="list-group">
+  </ul>
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_form_submit.html' %}
-<script type="text/javascript">
-  $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
+  {% include 'materials/ajax_form_submit.html' %}
+  <script type="text/javascript">
+   $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
 
-  $('#search_term').change(function() {
-      if(this.value == "exciton_emission") {
-          text = "Search by range using >, >=, <, <=, or a combination, e.g. >=400";
-          $('#search_text').attr("placeholder", text);
-          $('#explanatory_text').text(text);
-      } else if(this.value == "formula") {
-          text = "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3"
-          $('#search_text').attr("placeholder", text);
-          $('#explanatory_text').text(text);
-      } else if(this.value == "organic") {
-          text = "Search for all or part of an organic component, e.g. CH3NH3";
-          $('#explanatory_text').text(text);
-          $('#search_text').attr("placeholder", text);
-      } else if(this.value == "inorganic") {
-          text = "Search for all or part of an inorganic component, e.g. PbI3";
-          $('#search_text').attr("placeholder", text);
-          $('#explanatory_text').text(text);
-      } else {
-          text = "";
-          $('#search_text').attr("placeholder", text);
-          $('#explanatory_text').text(text);
-      }
-    });
-  ajax_submit($('#search-system'), $('#results'));
-</script>
+   $('#search_term').change(function() {
+     if(this.value == "exciton_emission") {
+       text = "Search by range using >, >=, <, <=, or a combination, e.g. >=400";
+       $('#search_text').attr("placeholder", text);
+       $('#explanatory_text').text(text);
+     } else if(this.value == "formula") {
+       text = "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3"
+       $('#search_text').attr("placeholder", text);
+       $('#explanatory_text').text(text);
+     } else if(this.value == "organic") {
+       text = "Search for all or part of an organic component, e.g. CH3NH3";
+       $('#explanatory_text').text(text);
+       $('#search_text').attr("placeholder", text);
+     } else if(this.value == "inorganic") {
+       text = "Search for all or part of an inorganic component, e.g. PbI3";
+       $('#search_text').attr("placeholder", text);
+       $('#explanatory_text').text(text);
+     } else {
+       text = "";
+       $('#search_text').attr("placeholder", text);
+       $('#explanatory_text').text(text);
+     }
+   });
+   ajax_submit($('#search-system'), $('#results'));
+  </script>
 {% endblock %}
