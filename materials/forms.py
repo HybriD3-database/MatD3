@@ -9,7 +9,7 @@ class SearchForm(forms.Form):
     search_text = forms.CharField(label='Search term', max_length=100)
 
     def __init__(self, *args, **kwargs):
-        super(SearchForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['search_text'].widget.attrs['class'] = 'form-control'
 
 
@@ -22,7 +22,7 @@ class AddAuthor(forms.ModelForm):
         exclude = ('publication',)
 
     def __init__(self, *args, **kwargs):
-        super(AddAuthor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -35,7 +35,7 @@ class AddTag(forms.ModelForm):
         fields = ('tag',)
 
     def __init__(self, *args, **kwargs):
-        super(AddTag, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -56,7 +56,7 @@ class AddPublication(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddPublication, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -95,7 +95,7 @@ class AddSystem(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddSystem, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -117,7 +117,7 @@ class AddExcitonEmission(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddExcitonEmission, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -150,7 +150,7 @@ class AddSynthesisMethod(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddSynthesisMethod, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -176,7 +176,7 @@ class AddBandStructure(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddBandStructure, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
@@ -202,7 +202,7 @@ class AddAtomicPositions(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddAtomicPositions, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
             if(fieldname == 'fhi_file'):
@@ -240,6 +240,6 @@ class AddMaterialProperty(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(AddMaterialProperty, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
