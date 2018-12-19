@@ -4,24 +4,20 @@ from django.http import HttpResponse, JsonResponse
 from django.views import generic
 from django.db.models import Q
 from django.forms import formset_factory
-
+import mainproject.settings as msettings
 from materials.forms import (
     System, SearchForm, AddAtomicPositions, AddPublication, AddAuthor, AddTag,
     AddSystem, AddExcitonEmission, AddSynthesisMethod, AddBandStructure,
     AddMaterialProperty)
-
 from materials.models import (
     ExcitonEmission, SynthesisMethod, BandStructure, MaterialProperty,
     AtomicPositions, Publication, Author, Tag)
 from accounts.models import UserProfile
-
-from mainproject.settings import MEDIA_ROOT
-from .rangeparser import parserange
-
+import materials.rangeparser
 import os
 import zipfile
-from io import BytesIO
-from functools import reduce
+import io
+import functools
 import operator
 
 dictionary = {
@@ -35,7 +31,6 @@ dictionary = {
 
 def data_dl(request, type, id, bandgap=False):
     """Download a specific entry type"""
-    # Create the HttpResponse object with the text/plain header.
     response = HttpResponse(content_type='text/fhi-aims')
     if type == 'band_gap':
         type = 'band_structure'
@@ -88,7 +83,7 @@ def data_dl(request, type, id, bandgap=False):
         p_obj = System.objects.get(atomicpositions=obj)
         write_headers()
         write_a_pos()
-        fileloc = (MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' %
+        fileloc = (msettings.MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' %
                    (obj.phase, p_obj.organic, p_obj.inorganic))
         if(os.path.isfile(fileloc)):
             with open(fileloc, encoding='utf-8', mode='r+') as f:
@@ -130,7 +125,7 @@ def data_dl(request, type, id, bandgap=False):
         #     plots =  csv.reader(csvfile, delimiter=',')
         #     for row in plots:
         #         response.write(row)
-        dir_in_str = os.path.join(MEDIA_ROOT, 'uploads')
+        dir_in_str = os.path.join(msettings.MEDIA_ROOT, 'uploads')
         # directory = os.fsencode(dir_in_str)
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
@@ -160,13 +155,11 @@ def data_dl(request, type, id, bandgap=False):
         filenames.append(meta_filepath)
         filenames.append(pl_file_csv)
         filenames.append(pl_file_html)
-        # print('Filenames')
-        print(filenames)
 
         zip_dir = file_name_prefix
         zip_filename = '%s.zip' % zip_dir
         # change response type and content deposition type
-        string = BytesIO()
+        string = io.BytesIO()
 
         zf = zipfile.ZipFile(string, 'w')
 
@@ -174,12 +167,6 @@ def data_dl(request, type, id, bandgap=False):
             # Calculate path for file in zip
             fdir, fname = os.path.split(fpath)
             zip_path = os.path.join(zip_dir, fname)
-
-            # Add file, at correct path
-            print('Fpath')
-            print(fpath)
-            print('Zip Path')
-            print(zip_path)
             zf.write(fpath, zip_path)
         # Must close zip for all contents to be written
         zf.close()
@@ -217,7 +204,6 @@ def data_dl(request, type, id, bandgap=False):
         if obj.synthesis_method:
             response.write(str('\n#Synthesis Method: '))
             response.write(str(obj.synthesis_method))
-        print('syn method', obj.synthesis_method)
         if obj.starting_materials:
             response.write(str('\n#Starting Materials: '))
             response.write(str(obj.starting_materials))
@@ -227,34 +213,6 @@ def data_dl(request, type, id, bandgap=False):
         if obj.product:
             response.write(str('\n#Product: '))
             response.write(str(obj.product))
-        # upload_file_txt = os.path.join(dir_in_str, file_name_prefix + '.txt')
-        # filenames = []
-        # filenames.append(meta_filepath)
-        # filenames.append(upload_file_txt)
-        # # print('Filenames')
-        # print(filenames)
-
-        # zip_dir = file_name_prefix
-        # zip_filename = '%s.zip' % zip_dir
-        # # change response type and content deposition type
-        # string = BytesIO()
-        #
-        # zf = zipfile.ZipFile(string, 'w')
-        #
-        # for fpath in filenames:
-        #     # Calculate path for file in zip
-        #     fdir, fname = os.path.split(fpath)
-        #     zip_path = os.path.join(zip_dir, fname)
-        #
-        #     # Add file, at correct path
-        #     print('Fpath')
-        #     print(fpath)
-        #     print('Zip Path')
-        #     print(zip_path)
-        #     zf.write(fpath, zip_path)
-        # # Must close zip for all contents to be written
-        # zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
         response.encoding = 'utf-8'
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (meta_filename))
@@ -283,7 +241,6 @@ def data_dl(request, type, id, bandgap=False):
         # write_headers()
         dir_in_str = obj.folder_location
         compound_name = dir_in_str.split('/')[-1]
-        print(dir_in_str)
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
@@ -315,15 +272,10 @@ def data_dl(request, type, id, bandgap=False):
                     filename.endswith('.txt')):
                 full_filename = os.path.join(dir_in_str, filename)
                 filenames.append(full_filename)
-                # response.write('\n')
-                # response.write(full_filename)
-        print('Filenames')
-        print(filenames)
-
         zip_dir = compound_name
         zip_filename = '%s.zip' % zip_dir
         # change response type and content deposition type
-        string = BytesIO()
+        string = io.BytesIO()
 
         zf = zipfile.ZipFile(string, 'w')
 
@@ -331,12 +283,6 @@ def data_dl(request, type, id, bandgap=False):
             # Calculate path for file in zip
             fdir, fname = os.path.split(fpath)
             zip_path = os.path.join(zip_dir, fname)
-
-            # Add file, at correct path
-            print('Fpath')
-            print(fpath)
-            print('Zip Path')
-            print(zip_path)
             zf.write(fpath, zip_path)
         # Must close zip for all contents to be written
         zf.close()
@@ -345,7 +291,6 @@ def data_dl(request, type, id, bandgap=False):
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
-    # might need to work on a more efficient method
     return response
 
 
@@ -389,21 +334,17 @@ def all_entries(request, id, type):
 
 def getAuthorSearchResult(search_text):
     keyWords = search_text.split()
-    print(keyWords)
     results = System.objects.\
-        filter(reduce(operator.or_, (
+        filter(functools.reduce(operator.or_, (
             Q(atomicpositions__publication__author__last_name__icontains=x) for
-            x in keyWords)) | reduce(operator.or_, (
+            x in keyWords)) | functools.reduce(operator.or_, (
                 Q(synthesismethod__publication__author__last_name__icontains=x)
-                for x in keyWords)) | reduce(operator.or_, (
+                for x in keyWords)) | functools.reduce(operator.or_, (
                         Q(excitonemission__publication__author__last_name__icontains=x)
-                        for x in keyWords)) | reduce(operator.or_, (
+                        for x in keyWords)) | functools.reduce(operator.or_, (
                                 Q(bandstructure__publication__author__last_name__icontains=x)
                                 for x in keyWords))
          ).distinct()
-    print('**************************RESULTS******************************')
-    print(results)
-    print('***************************************************************')
     return results
 
 
@@ -447,12 +388,11 @@ class SearchFormView(generic.TemplateView):
         # default search_term
         search_term = 'formula'
         if form.is_valid():
-            print(form.cleaned_data)
             search_text = form.cleaned_data['search_text']
             search_term = request.POST.get('search_term')
             systems_info = []
             if search_term == 'exciton_emission':
-                searchrange = parserange(search_text)
+                searchrange = materials.rangeparse.parserange(search_text)
                 if len(searchrange) > 0:
                     if searchrange[0] == 'bidirectional':
                         if searchrange[3] == '>=':
@@ -512,7 +452,6 @@ class SearchFormView(generic.TemplateView):
                         else:
                             system_info['bs_pk'] = 0
                         systems_info.append(system_info)
-                    print(systems_info)
             else:
                 systems = search_result(search_term, search_text)
 
@@ -553,12 +492,10 @@ class AddAPosView(generic.TemplateView):
     def post(self, request):
         form = AddAtomicPositions(request.POST, request.FILES)
         if form.is_valid():
-            print('a_pos form is valid')
             apos_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
-            print('synthesis method pk is: ' + syn_pk)
             try:
                 apos_form.synthesis_method = SynthesisMethod.objects.get(
                     pk=int(syn_pk))
@@ -602,12 +539,6 @@ class AddPubView(generic.TemplateView):
         })
 
     def post(self, request):
-        # check if is ajax
-        # if request.is_ajax():
-        #     print 'is ajax'
-        # else:
-        #     print 'not ajax'
-        # search_form = SearchForm()  # dead code?
         authors_info = {}
         for key in request.POST:
             if key.startswith('form-'):
@@ -654,14 +585,10 @@ class AddPubView(generic.TemplateView):
                     first_name__iexact=data['first_name']).filter(
                         last_name__iexact=data['last_name']).filter(
                             institution__iexact=data['institution']))
-            print(preexistingAuthors)
             if preexistingAuthors.count() > 0:
                 # use the prexisting author object
-                print('This author is already in the database.',
-                      preexistingAuthors)
                 preexistingAuthors[0].publication.add(newPub)
             else:  # this is a new author, so create a new object
-                print('This is a new author.', data)
                 author_form = AddAuthor(data)
                 if(not author_form.is_valid()):
                     text = ('Failed to submit, author not valid. '
@@ -694,13 +621,11 @@ class SearchPubView(generic.TemplateView):
         search_text = ''
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
-            print(search_text)
             author_search = (
                 Publication.objects.filter(
                     Q(author__first_name__icontains=search_text) |
                     Q(author__last_name__icontains=search_text) |
                     Q(author__institution__icontains=search_text)).distinct())
-            print('authors:', author_search)
             if len(author_search) > 0:
                 search_result = author_search
             else:
@@ -755,10 +680,7 @@ class AddAuthorView(generic.TemplateView):
     template_name = 'materials/add_author.html'
 
     def get(self, request):
-        # search_form = SearchForm()
         input_form = AddAuthor()
-        # pub_form = AddPublication()
-        print(input_form)
         return render(request, self.template_name, {
             'input_form': input_form,
         })
@@ -833,7 +755,8 @@ class SearchSystemView(generic.TemplateView):
 
     def post(self, request):
         form = SearchForm(request.POST)
-        related_synthesis = request.POST['related_synthesis'] == 'True'
+        related_synthesis = ('related_synthesis' in request.POST and
+                             request.POST['related_synthesis'] == 'True')
         search_text = ''
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
@@ -867,7 +790,6 @@ class AddSystemView(generic.TemplateView):
                     Q(formula__iexact=formula)
                 )
             )
-            print(q_set_len)
             if q_set_len == 0:
                 form.save()
                 text = 'System successfully added!'
@@ -879,9 +801,7 @@ class AddSystemView(generic.TemplateView):
             # return render(request, self.template_name, {'form': form})
             text = 'Failed to submit, please fix the errors, and try again.'
             feedback = 'failure'
-
         args = {'feedback': feedback, 'text': text}
-        print(args)
         return JsonResponse(args)
 
 
@@ -936,13 +856,11 @@ class AddExcitonEmissionView(generic.TemplateView):
     def post(self, request):
         form = AddExcitonEmission(request.POST, request.FILES)
         if form.is_valid():
-            print('form is valid')
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             # print 'file: ', request.FILES.get('pl_file')
             syn_pk = request.POST.get('synthesis-methods')
-            print('synthesis method pk is: ' + syn_pk)
             try:
                 new_form.synthesis_method = SynthesisMethod.objects.get(
                     pk=int(syn_pk))
@@ -960,7 +878,6 @@ class AddExcitonEmissionView(generic.TemplateView):
                     text = 'Save success!'
                     feedback = 'success'
                     ee_model = new_form.save()
-                    print(ee_model)
                 else:
                     text = 'Failed to submit, please login and try again.'
                     feedback = 'failure'
@@ -969,7 +886,6 @@ class AddExcitonEmissionView(generic.TemplateView):
             feedback = 'failure'
 
         args = {'feedback': feedback, 'text': text}
-        print(args)
         return JsonResponse(args)
 
 
@@ -990,11 +906,9 @@ class AddSynthesisMethodView(generic.TemplateView):
     def post(self, request):
         form = AddSynthesisMethod(request.POST, request.FILES)
         if form.is_valid():
-            print('form is valid')
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print('system pk is: ' + sys_pk)
             # text = ''
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
@@ -1037,12 +951,10 @@ class AddBandStructureView(generic.TemplateView):
     def post(self, request):
         form = AddBandStructure(request.POST, request.FILES)
         if form.is_valid():
-            print('Form is valid')
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
-            print('synthesis method pk is: ' + syn_pk)
             try:
                 new_form.synthesis_method = SynthesisMethod.objects.get(
                     pk=int(syn_pk))
@@ -1059,8 +971,8 @@ class AddBandStructureView(generic.TemplateView):
                     # save so a pk can be created for use in the
                     # folder location
                     new_form.save()
-                    print('PK:', new_form.pk)
-                    bs_folder_loc = (MEDIA_ROOT + '/uploads/%s_%s_%s_%s_bs' %
+                    bs_folder_loc = (msettings.MEDIA_ROOT +
+                                     '/uploads/%s_%s_%s_%s_bs' %
                                      (new_form.phase, new_form.system.organic,
                                       new_form.system.inorganic, new_form.pk))
                     new_form.folder_location = bs_folder_loc
@@ -1075,9 +987,7 @@ class AddBandStructureView(generic.TemplateView):
                     band_files.append(geometry_file)
                     for f in band_files:
                         filename = f.name
-                        print('filename is: {}', (f.name))
                         full_filename = os.path.join(bs_folder_loc, filename)
-                        print('file writen to: {}', (full_filename))
                         with open(full_filename, 'wb+') as write_bs:
                             for chunk in f.chunks():
                                 write_bs.write(chunk)
@@ -1120,11 +1030,9 @@ class AddMaterialPropertyView(generic.TemplateView):
     def post(self, request):
         form = AddMaterialProperty(request.POST)
         if form.is_valid():
-            print('form is valid')
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
-            print('system pk is: ' + sys_pk)
             if int(pub_pk) > 0 and int(sys_pk) > 0:
                 new_form.publication = Publication.objects.get(pk=pub_pk)
                 new_form.system = System.objects.get(pk=sys_pk)
@@ -1202,7 +1110,6 @@ class SpecificSystemView(generic.TemplateView):
             'exciton_emission': exciton_emission,
             'band_structure': band_structure
         }
-        print(args)
         return render(request, self.template_name, args)
 
 

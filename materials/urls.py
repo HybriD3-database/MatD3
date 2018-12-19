@@ -9,8 +9,7 @@ from .views import (
     all_entries, AddPubView, SearchPubView, SearchSystemView, AddSystemView,
     AddAuthorView, SearchAuthorView, AddAuthorsToPublicationView, AddAPosView,
     AddExcitonEmissionView, AddSynthesisMethodView, AddBandStructureView,
-    AddMaterialPropertyView, AddDataView, AddTagView, data_dl,
-    SystemUpdateView, toggle_bandstructure_visibility,
+    AddMaterialPropertyView, AddDataView, AddTagView, data_dl, SystemUpdateView
     )
 
 
@@ -45,9 +44,6 @@ urlpatterns = [
     re_path(r'^(?P<sys>\d+)/delete-property/(?P<pk>\d+)$',
             PropertyDeleteView.as_view(), name='delete_property'),
     re_path(r'^(?P<id>\d+)/all-a-pos$', all_a_pos, name='all_a_pos'),
-    re_path(r'^(?P<sys>\d+)/toggle-bandstructure-visibility/(?P<pk>\d+)$',
-            toggle_bandstructure_visibility,
-            name='toggle_bandstructure_visibility'),
     re_path(r'^(?P<id>\d+)/(?P<type>.*)$', all_entries, name='all_entries'),
     re_path(r'^add-pub$', AddPubView.as_view(), name='add_publication'),
     re_path(r'^search-pub$', SearchPubView.as_view(),
