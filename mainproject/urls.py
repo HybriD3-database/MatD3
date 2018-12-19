@@ -15,15 +15,15 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls.static import static
-from django.conf.urls import url, include
+from django.conf.urls import re_path, include
 from django.contrib import admin
 
 from . import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^$', views.index, name='index'),
-    url(r'^contact/', views.contact, name='contact'),
-    url(r'^materials/', include('materials.urls', namespace='materials')),
-    url(r'^account/', include('accounts.urls', namespace='accounts')),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^$', views.index, name='index'),
+    re_path(r'^contact/', views.contact, name='contact'),
+    re_path(r'^materials/', include('materials.urls', namespace='materials')),
+    re_path(r'^account/', include('accounts.urls', namespace='accounts')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
