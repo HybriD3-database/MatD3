@@ -5,35 +5,81 @@
 {% endblock %}
 
 {% block mainbody %}
-  <div style="padding-bottom: 10px">
-    <label for="list">Select the type of data you wish to add:</label>
-  </div>
-  <div id="list" class="list-group">
-    <a href="{% url 'materials:add_a_pos'%}" class="list-group-item list-group-item-action">
-      Atomic Positions
-    </a>
-    <a href="{% url 'materials:add_synthesis'%}" class="list-group-item list-group-item-action">
-      Synthesis Method
-    </a>
-    <a href="{% url 'materials:add_exciton_emission'%}" class="list-group-item list-group-item-action">
-      Photoluminescence Data
-    </a>
-    <a href="{% url 'materials:add_band_structure'%}" class="list-group-item list-group-item-action">
-      Band Structure and/or Band Gap
-    </a>
-    <a href="{% url 'materials:add_material_property'%}" class="list-group-item list-group-item-action">
-      Other Material Property
-    </a>
-  </div>
-  <div style="padding-bottom:10px;padding-top:10px">
-    <label for="other-list">Other options:</label>
-  </div>
-  <div id="other-list" class="list-group">
-    <a href="{% url 'materials:add_publication'%}" class="list-group-item list-group-item-action">
-      Add Publication
-    </a>
-    <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
-      Add System
-    </a>
+  {% if success_msg %}
+    <div class="d-flex">
+      <div class="alert alert-success">{{ success_msg }}</div>
+    </div>
+  {% endif %}
+  <ul class="nav nav-tabs" id="new-data-tab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="data-tab" data-toggle="tab"
+         href="#results" role="tab">
+        Add new results
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="new-property-tab" data-toggle="tab"
+         href="#properties" role="tab">
+        Define new property
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="new-unit-tab" data-toggle="tab"
+         href="#units" role="tab">
+        Define new unit
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="new-unit-tab" data-toggle="tab"
+         href="#unsorted" role="tab">
+        Other
+      </a>
+    </li>
+  </ul>
+  <div class="tab-content" id="add-results-tab-content">
+    <!-- ADD NEW RESULTS -->
+    <div class="tab-pane show active" id="results" role="tabpanel">
+    </div>
+    <!-- ADD NEW PROPERTY -->
+    <div class="tab-pane" id="properties" role="tabpanel">
+    </div>
+    <!-- ADD NEW UNIT -->
+    <div class="tab-pane" id="units" role="tabpanel">
+    </div>
+    <!-- UNSORTED -->
+    <div class="tab-pane" id="unsorted" role="tabpanel">
+      <br>
+      <div style="padding-bottom: 10px">
+        <label for="list">Select the type of data you wish to add:</label>
+      </div>
+      <div id="list" class="list-group">
+        <a href="{% url 'materials:add_a_pos'%}" class="list-group-item list-group-item-action">
+          Atomic Positions
+        </a>
+        <a href="{% url 'materials:add_synthesis'%}" class="list-group-item list-group-item-action">
+          Synthesis Method
+        </a>
+        <a href="{% url 'materials:add_exciton_emission'%}" class="list-group-item list-group-item-action">
+          Photoluminescence Data
+        </a>
+        <a href="{% url 'materials:add_band_structure'%}" class="list-group-item list-group-item-action">
+          Band Structure and/or Band Gap
+        </a>
+        <a href="{% url 'materials:add_material_property'%}" class="list-group-item list-group-item-action">
+          Other Material Property
+        </a>
+      </div>
+      <div style="padding-bottom:10px;padding-top:10px">
+        <label for="other-list">Other options:</label>
+      </div>
+      <div id="other-list" class="list-group">
+        <a href="{% url 'materials:add_publication'%}" class="list-group-item list-group-item-action">
+          Add Publication
+        </a>
+        <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
+          Add System
+        </a>
+      </div>
+    </div>
   </div>
 {% endblock %}
