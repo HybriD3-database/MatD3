@@ -1,15 +1,16 @@
 {% extends 'materials/nav.html' %}
 
 {% block body %}
-
-  {% load staticfiles %}
-  <link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
-
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'mainproject/style.css' %}">
   <br>
   <div class="card card-default">
     <div class="card-header">
       <a href="{% url "materials:materials_system" pk=key %}">
-        <button type="button" class="btn btn-primary" style="float: right; background-color: #888888; border: none;">Back</button>
+        <button type="button" class="btn btn-primary"
+                style="float: right; background-color: #888888; border: none;">
+          Back
+        </button>
       </a>
       <h3>{{compound_name}}</h3>
     </div>

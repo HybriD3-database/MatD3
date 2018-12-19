@@ -62,11 +62,11 @@ table.atomic-positions td {
   font-weight: bold;
 }
 
-.nav-tabs {
+.nav-tabs-band-structure {
     border-bottom: none;
     border-top: 1px solid #E8EAF6;
 }
 
-.nav-tabs > li > a {
+.nav-tabs-band-structure > li > a {
     border-bottom: 1px solid #e8eaf6;
 }

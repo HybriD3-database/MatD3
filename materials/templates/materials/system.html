@@ -2,7 +2,7 @@
 
 {% block body %}
   {% load static %}
-  <link rel="stylesheet" href="{% static 'materials/css/system.css' %}">
+  <link rel="stylesheet" href="{% static 'mainproject/style.css' %}">
   <br>
   <div class="card card-default">
     <div class="card-header">
@@ -260,9 +260,13 @@
                       <div id="bs-graph-mini"></div>
                     </div>
                   </div>
-                  <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#home">Full size</a></li>
-                    <li><a data-toggle="tab" href="#mini">Zoomed</a></li>
+                  <ul class="nav nav-tabs nav-tabs-band-structure">
+                    <li class="active">
+                      <a class="nav-link active" data-toggle="tab" href="#home">Full size</a>
+                    </li>
+                    <li>
+                      <a class="nav-link" data-toggle="tab" href="#mini">Zoomed</a>
+                    </li>
                   </ul>
                 {% elif entry.folder_location|length > 0 and entry.visible %}
                   <h3>Band Structure is not plotted</h3>
