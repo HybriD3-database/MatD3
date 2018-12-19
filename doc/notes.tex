@@ -23,8 +23,9 @@ filecolor=blue,%
 linkcolor=blue,%
 urlcolor=blue,%
 pdftex}
+\usepackage{tcolorbox}
 
-\title{HybriD$^3$ database}
+\title{Notes on the HybriD$^3$ database project}
 
 \begin{document}
 
@@ -32,7 +33,7 @@ pdftex}
 
 \section{Access and setup}
 
-The repository of the HybriD$^3$ database is hosted at Duke's GitLab website under Xiaochen Du's account. First, make sure you have access to the GitLab by logging in to
+The repository of the HybriD$^3$ database is hosted at Duke's GitLab website under Xiaochen Du's account. First, make sure you have access to GitLab by logging in to
 \lstset{language=Bash}
 \begin{lstlisting}
   https://gitlab.oit.duke.edu
@@ -45,12 +46,12 @@ In order to have pull/push privileges, you must upload your RSA public key to Du
 \begin{lstlisting}
   ssh-keygen
 \end{lstlisting}
-It is sufficient to press enter at each query until the keys have been generated, although protecting the key with a password would be a good idea if it's hosted at a public server. Then, at Duke's GitLab website, go to your settings, find ``SSH keys'', and enter the public key. You can upload several keys if want to have pull/push access from more than one computer. You can now clone the Git repository with
+It is sufficient to press enter at each query until the keys have been generated, although protecting the key with a password would be a good idea if you intend to keep it at a public server. Then, at Duke's GitLab website, go to your settings, find ``SSH keys'', and enter the public key. You can upload several keys in order to have pull/push access from more than one computer. You can now clone the Git repository with
 \begin{lstlisting}
   git clone git@gitlab.oit.duke.edu:xd24/hybrid3-database.git
 \end{lstlisting}
 
-In order to ensure compatibility with the correct Python packages, it is important to do the development in a Python virtual environment. You can create the virtual environment with
+In order to ensure compatibility with the correct Python packages, it is important to do the development in a Python virtual environment. You can create a virtual environment with
 \begin{lstlisting}
   python3 -m venv hybrid3env
 \end{lstlisting}
@@ -91,11 +92,11 @@ Most settings are imported from the main settings file unmodified and only thing
 \begin{lstlisting}
   export DJANGO_SETTINGS_MODULE=mainproject.settings_local
 \end{lstlisting}
-Next start the server with
+When this is set up, start the server with
 \begin{lstlisting}
   ./manage.py runserver
 \end{lstlisting}
-and open \verb+localhost:8000+ in your web browser. You can browse the site just like the public one, but you will notice that there are no materials in the database. This is because your local settings are pointing to an empty local SQLite database. One solution is to import the contents from the production server to the SQLite database, but it is better to use the same database type on both your own computer and the production server, which would be MariaDB. In order to switch to MariaDB, make the following change in the local settings file:
+and open \verb+localhost:8000+ in your web browser. You can browse the site just like the public one, but you will notice that there are no materials in the database. This is because your local settings are pointing to an empty local SQLite database. To fix this, one solution is to import the database contents from the production server to the SQLite database. However, it is generally better to use the same database type in both development and production environments. This project uses MariaDB and it is recommended for you to set it up also on your own computer. In order to switch to MariaDB, make the following change in the local settings file:
 \lstset{language=Python}
 \begin{lstlisting}
 DATABASES = {
@@ -108,7 +109,7 @@ DATABASES = {
 \end{lstlisting}
 Then perform the following steps:
 \begin{itemize}
-\item Install and start the MariaDB server on your computer. Create a database called ``materials'' for the user ``user'' (username can be anything).
+\item Install and start the MariaDB server on your computer. Create a database called ``materials'' for the user ``user'' (you can change the latter).
 \item Copy the database contents from the public server. First, log in to the server:
   \begin{lstlisting}
     ssh <user>@materials.hybrid3.duke.edu
@@ -128,7 +129,7 @@ Then perform the following steps:
   \end{lstlisting}
   You may now delete the dump file on the server and on your computer.
 \end{itemize}
-You might need to adjust some of these steps to reflect your environment. Restart the development server and you should be able to browse all the materials currently present in the database.
+You might need to adjust some of these steps to reflect your environment. Now restart the development server and you should be able to browse all the materials currently present in the database.
 
 If you want to go back to SQLite instead of MariaDB for development, you can migrate the database to SQLite using the following script:
 \begin{verbatim}
@@ -141,7 +142,7 @@ Next, you should create a superuser:
 \end{lstlisting}
 In order to access the site with admin rights, add \verb+/admin+ to the url and login as the superuser. The admin page allows editing of all data stored in the database.
 
-Typically, when making changes to the Python source code, the effects are immediately visible at the site. There is no need to even restart the server. New byte-code is automatically regenerated for modified files. However, if you are making changes to the models, it is necessary to \textit{migrate}. Migrations change the database structure, which depends on changes in the models. Unlike the byte-code, which regenerates itself on-the-fly as needed, any updates to the database need to be performed manually. If you change a model, things are unlikely to work until you migrate. To create the migration files, type
+Typically, when making changes to the Python source code, the effects are immediately visible at the site. There is no need to even restart the server. New byte-code is automatically regenerated for modified files. However, if you are making changes to the models, it is necessary to \textit{migrate}. Migrations change the database structure, which depends on changes in the models. Unlike the byte-code, which regenerates itself on-the-fly as needed, any updates to the database need to be performed manually. Thus, if you change a model, things are unlikely to work until you migrate. To create the migration files, type
 \begin{lstlisting}
   python manage.py makemigrations
 \end{lstlisting}
@@ -151,7 +152,7 @@ This creates a file in the migrations directory that explains the changes that w
 \end{lstlisting}
 
 Once you are satisfied with the changes on your local machine, the changes
-need to be communicated to the real website. This is done using the Git version control system.
+need to be synchronized with the real website. This is done using the Git version control system.
 
 \subsection{Git}
 
@@ -163,7 +164,7 @@ to see which files have been modified. Run
 \begin{lstlisting}
   git add
 \end{lstlisting}
-on each file you want to commit. By contrast, run
+on each file you want to commit. Similarly, run
 \begin{lstlisting}
   git rm
 \end{lstlisting}
@@ -172,13 +173,13 @@ In order to commit, issue
 \begin{lstlisting}
   git commit
 \end{lstlisting}
-which prompts you with the commit message before the actual commit is run. The basics of how to write a commit message are well explained in this blog post: \url{https://chris.beams.io/posts/git-commit}. In short, start with a summary line consisting of no more than 50 characters, not followed by a period. Leave a blank line followed by further description if necessary. For small commits, just the summary line may be sufficient. Write the whole commit message in the imperative tense (i.e. ``Fix typo'' not ``Fixed typo''). Attention: never run \verb+git commit -a+ unless you are an experienced Git user! Issue
+which prompts you with the commit message before the actual commit is performed. The basics of how to write a commit message are well explained in this blog post: \url{https://chris.beams.io/posts/git-commit}. In short, start with a summary line consisting of no more than 50 characters, not followed by a period. Leave a blank line followed by further description if necessary. For small commits, just the summary line may be sufficient. Write the whole commit message in the imperative tense (i.e. ``Fix typo'' not ``Fixed typo''). Attention: never run \verb+git commit -a+ unless you are an experienced Git user! Finally, issue
 \begin{lstlisting}
   git push
 \end{lstlisting}
 to push the committed files to GitLab.
 
-Git comes with tons of useful commands and being good at Git is a very useful skill to have. The basics of Git are nicely covered in the first three chapters of the Git book: \url{https://git-scm.com/book/en/v2}.
+Git comes with tons of useful commands and being good at Git is generally a very useful skill to have. The basics of Git are nicely covered in the first three chapters of the Git book: \url{https://git-scm.com/book/en/v2}.
 
 \section{Deploying on the server}
 
@@ -190,9 +191,8 @@ go to the project's directory (\verb+/var/www/django+) and run
 \begin{lstlisting}
   git pull
 \end{lstlisting}
-to update the files there. Next, migrate as you did on your own computer if necessary:
+to update the files there. As the command name suggests, this pulls in everything that was pushed to the Gitlab server in the previous section. Next,  if necessary, migrate as you did on your own computer:
 \begin{lstlisting}
-  python manage.py makemigrations
   python manage.py migrate
 \end{lstlisting}
 Do not set the \verb+DJANGO_SETTINGS_MODULE+ environment variable as we are using the default production settings on the server.
@@ -207,8 +207,179 @@ Finally, you may also need to run
 \begin{lstlisting}
   sudo systemctl restart httpd
 \end{lstlisting}
-if some of the changes do not appear on the homepage. If you are unsure about things like migrations, static files, and restarting the server, it doesn't hurt to always run those commands.
+if some of the changes do not appear on the homepage. If you are unsure about some of these steps (migrations, static files, \ldots), just perform all of them --- it never hurts.
 
 A good place to get started and learn more about Django is the official Django tutorial, which starts here: \url{https://docs.djangoproject.com/en/2.1/intro/tutorial01}.
+
+\section{Database structure}
+
+This section provides an overview of the Django models used in this project. The presentation focuses on how the models are defined in the Python source code and not the actual SQL tables. For example, even though fields such as the primary key are not listed in the following, it is understood that these are automatically created for the SQL tables.
+
+Most tables inherit from a base table which records the history of how each entry is created/updated. Since direct polymorphism is not supported in relational databases, what Django does is to explicitly copy these fields to any child models.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Base]
+  \begin{itemize}
+  \item \texttt{created} --- date the entry was created
+  \item \texttt{updated} --- date the entry was last modified
+  \item \texttt{created by} --- user that created the entry
+  \item \texttt{updated by} --- user that updated the entry
+  \end{itemize}
+\end{tcolorbox}
+
+All properties are stored in a table which contains the name and dimension of each property. Similarly, all units are stored in a table with similar fields. By requiring the dimension of a property/unit pair to match 1) makes it easier for users to enter new data (e.g., by selecting ``wavelength'' only compatible units are shown) and 2) it also serves as a consistency check.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Property(Base)]
+  \begin{itemize}
+  \item \texttt{name} --- displayed name of the property
+  \item \texttt{dimensions} --- length for ``lattice parameter''; energy and inverse distance for ``phonon energies'' (e.g. eV or cm$^{-1}$)
+  \end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Unit(Base)]
+  \begin{itemize}
+  \item \texttt{name} --- ``nm'', ``cm$^2$ V$^{-1}$ s$^{-1}$'', \ldots
+  \item \texttt{dimension} --- dimension
+  \end{itemize}
+\end{tcolorbox}
+
+The table of systems includes, among other things, fields for the organic and inorganic components. These fields are mandatory, which ensures that only organic/inorganic perovskites can be entered into the database.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=System(Base)]
+  \begin{itemize}
+  \item \texttt{compound name} --- displayed name of the material
+  \item \texttt{formula}
+  \item \texttt{group} --- alternate names
+  \item \texttt{organic} --- organic component
+  \item \texttt{inorganic} --- inorganic component
+  \item \texttt{description}
+  \item \texttt{tags}
+  \end{itemize}
+\end{tcolorbox}
+
+Authors and publications are stored in the following tables.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Author(Base)]
+  \begin{itemize}
+  \item \texttt{first\_name}
+  \item \texttt{last\_name}
+  \item \texttt{institution}
+  \item \texttt{publication} --- ManyToMany field that maps authors to publications. This should be removed! Create a foreign key in \texttt{Publication} instead.
+  \end{itemize}
+\end{tcolorbox}
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Publication(Base)]
+  \begin{itemize}
+  \item \texttt{author\_count} --- number of authors
+  \item \texttt{title}
+  \item \texttt{journal}
+  \item \texttt{vol}
+  \item \texttt{pages\_start}
+  \item \texttt{pages\_end}
+  \item \texttt{year}
+  \item \texttt{doi\_isbn}
+  \end{itemize}
+\end{tcolorbox}
+
+
+All experimental and theoretical results are contained in data sets. A data set typically refers to a single value, table, or figure found in a publication. Note that the property is also given in the \texttt{NumericalValue} table, but we include it here for search purposes.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Dataset(Base)]
+  \begin{itemize}
+  \item \texttt{label} --- description of the data set
+  \item \texttt{system} --- reference to the primary key of System
+  \item \texttt{property} --- reference to the primary key of Property
+  \item \texttt{unit} --- reference to the primary key of Unit
+  \item \texttt{reference} --- reference to the primary key of Publication
+  \item \texttt{plotted} --- whether data is plotted by default
+  \item \texttt{input\_files} --- location of input files
+  \end{itemize}
+\end{tcolorbox}
+
+A data set consists of one or more data series. If the data set describes, for example, the dielectric function measured at different temperatures, then each curve corresponding to a specific temperature would be one series in the data set. Typically, a data set consists of just one series.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Dataseries(Base)]
+  \begin{itemize}
+  \item \texttt{dataset} --- reference to the primary key of Dataset
+  \item \texttt{label} --- short description of this series
+  \end{itemize}
+\end{tcolorbox}
+
+A data series consists of one or more data points. When describing a single value such as the band gap of a material with no additional dependencies, then the whole data set would consist of one series with one data point with one numerical value.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Datapoint(Base)]
+  \begin{itemize}
+  \item \texttt{dataseries} --- reference to the primary key of Dataseries
+  \end{itemize}
+\end{tcolorbox}
+
+Finally, the actual data is stored in the \texttt{NumericalValue} table. The quantity of primary interest has the ``primary'' qualifier. For example, if the band gap depends on temperature, then the band gap and temperature would have the ``primary'' and ``secondary'' qualifiers, respectively (think of these as y- and x-values in a plot). The property of the primary value must coincide with the data set property.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValue(Base)]
+  \begin{itemize}
+  \item \texttt{datapoint} --- reference to the primary key of Datapoint
+  \item \texttt{property} --- reference to the primary key of Property
+  \item \texttt{qualifier} --- ``primary'', ``secondary'', ``fixed''
+  \item \texttt{value} --- floating point number
+  \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
+  \end{itemize}
+\end{tcolorbox}
+
+A separate table is used for values that fixed for the whole data set or series. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Whether the value is fixed at the data set or series level depends on whether the \texttt{dataset} or \texttt{dataseries} field is non-null.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValueFixed(Base)]
+  \begin{itemize}
+  \item \texttt{dataset} --- reference to the primary key of Dataset
+  \item \texttt{dataseries} --- reference to the primary key of Dataseries
+  \item \texttt{property} --- reference to the primary key of Property
+  \item \texttt{value} --- floating point number
+  \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
+  \end{itemize}
+\end{tcolorbox}
+
+If the dependence of the primary property is on something that cannot be stored as a floating point number, it is stored in the \texttt{NonNumericalValue} table. Example: the user enters band gap values a function of phase. The phases are then stored as strings in the following table.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NonNumericalValue(Base)]
+  \begin{itemize}
+  \item \texttt{datapoint} --- reference to the primary key of Datapoint
+  \item \texttt{value} --- a string
+  \end{itemize}
+\end{tcolorbox}
+
+In case of an experimental study, the details of the synthesis method can be recorded in the \texttt{SynthesisMethod} table, which accompanies a given data set.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=SynthesisMethod(Base)]
+  \begin{itemize}
+  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{method}
+  \item \texttt{starting\_materials}
+  \item \texttt{remarks}
+  \item \texttt{product}
+  \end{itemize}
+\end{tcolorbox}
+
+Similarly, in case of a theoretical study, the computational details are recorded in a separate table.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=ComputationalDetails(Base)]
+  \begin{itemize}
+  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{code}
+  \item \texttt{theory\_level\_nonperturbative}
+  \item \texttt{kgrid}
+  \item \texttt{relativity\_level}
+  \item \texttt{SO\_coupling} --- true/false
+  \item \texttt{basis\_set}
+  \item \texttt{postprocessing}
+  \item \texttt{temperature}
+  \item \texttt{pressure}
+  \end{itemize}
+\end{tcolorbox}
+
+Band structures are treated differently from other physical properties. We specify only the reference to a data set and location of the data, which is currently stored in a text format on the hard drive.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=BandStructure(Base)]
+  \begin{itemize}
+  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{folder\_location}
+  \end{itemize}
+\end{tcolorbox}
+
+All user information is stored in the \texttt{UserProfile} table.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=UserProfile]
+  \begin{itemize}
+  \item \texttt{user}
+  \item \texttt{description}
+  \item \texttt{institution}
+  \item \texttt{website}
+  \item \texttt{phone}
+  \item \texttt{image}
+  \item \texttt{duke}
+  \end{itemize}
+\end{tcolorbox}
 
 \end{document}
