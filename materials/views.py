@@ -35,8 +35,6 @@ def data_dl(request, type, id, bandgap=False):
     if type == 'band_gap':
         type = 'band_structure'
         bandgap = True
-    # need to find a way to change type of file based on the property
-    # being described file_ext = 'txt'
 
     def write_headers():
         if type not in ['all_atomic_positions']:
@@ -92,8 +90,6 @@ def data_dl(request, type, id, bandgap=False):
                     response.write(line + '\n')
         else:
             response.write('#-Atomic Positions input file not available-')
-        # return redirect(MEDIA_URL + 'uploads/%s_%s_%s.in' % \
-        #                 (obj.phase, p_obj.organic, p_obj.inorganic))
         response['Content-Disposition'] = (
             'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
                                                      p_obj.inorganic, type))
@@ -116,17 +112,7 @@ def data_dl(request, type, id, bandgap=False):
         p_obj = System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
                                             p_obj.inorganic)
-        # response = HttpResponse(content_type='text/csv')
-        # response['Content-Disposition'] = \
-        #     'attachment; filename=%s_%s_%s_%s.csv' % \
-        #     (obj.phase, p_obj.organic, p_obj.inorganic, type)
-        # writer = csv.writer(response)
-        # with open(filename, encoding='utf-8', mode='r+') as csvfile:
-        #     plots =  csv.reader(csvfile, delimiter=',')
-        #     for row in plots:
-        #         response.write(row)
         dir_in_str = os.path.join(msettings.MEDIA_ROOT, 'uploads')
-        # directory = os.fsencode(dir_in_str)
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
@@ -160,7 +146,6 @@ def data_dl(request, type, id, bandgap=False):
         zip_filename = '%s.zip' % zip_dir
         # change response type and content deposition type
         string = io.BytesIO()
-
         zf = zipfile.ZipFile(string, 'w')
 
         for fpath in filenames:
@@ -181,9 +166,7 @@ def data_dl(request, type, id, bandgap=False):
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
                                              p_obj.inorganic)
         meta_filename = file_name_prefix + '.txt'
-        # meta_filepath = os.path.join(dir_in_str, meta_filename)
         response = HttpResponse(content_type='text/plain')
-        # with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
         response.write(str('#HybriD³ Materials Database\n'))
         response.write(str('\n#System: '))
         response.write(str(p_obj.compound_name))
@@ -238,7 +221,6 @@ def data_dl(request, type, id, bandgap=False):
         p_obj = System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
-        # write_headers()
         dir_in_str = obj.folder_location
         compound_name = dir_in_str.split('/')[-1]
         meta_filename = file_name_prefix + '.txt'
@@ -276,11 +258,37 @@ def data_dl(request, type, id, bandgap=False):
         zip_filename = '%s.zip' % zip_dir
         # change response type and content deposition type
         string = io.BytesIO()
-
         zf = zipfile.ZipFile(string, 'w')
 
         for fpath in filenames:
             # Calculate path for file in zip
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(),
+                                content_type='application/x-zip-compressed')
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           zip_filename)
+    elif type == 'input_files':
+        obj = BandStructure.objects.get(id=id)
+        p_obj = System.objects.get(bandstructure=obj)
+        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
+                                               p_obj.inorganic, obj.pk)
+        dir_in_str = obj.folder_location
+        compound_name = dir_in_str.split('/')[-1]
+        filenames = []
+        for F in ('control.in', 'geometry.in'):
+            if os.path.exists(f'{dir_in_str}/{F}'):
+                filenames.append(f'{dir_in_str}/{F}')
+        zip_dir = compound_name
+        zip_filename = f'{zip_dir}.zip'
+        # change response type and content deposition type
+        string = io.BytesIO()
+        zf = zipfile.ZipFile(string, 'w')
+        for fpath in filenames:
             fdir, fname = os.path.split(fpath)
             zip_path = os.path.join(zip_dir, fname)
             zf.write(fpath, zip_path)

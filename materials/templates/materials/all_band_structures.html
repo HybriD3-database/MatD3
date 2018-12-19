@@ -50,6 +50,12 @@
       </button>
     </a>
   {% endif %}
+  <a href="{% url "materials:data_dl" type="input_files" id=entry.id %}">
+    <button type="button" class="btn btn-primary"/>
+    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+    Input files
+      </button>
+  </a>
 {% endblock %}
 
 {% block related_synthesis %}
