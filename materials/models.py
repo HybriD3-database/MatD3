@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.db import models
 import os
 import shutil
-from django.db.models import signals
-from mainproject.settings import MEDIA_ROOT
 
-UserProfile = "accounts.UserProfile"  # No need for this global variable
+from django.db import models
+from mainproject import settings
 
 
 def file_name(instance, filename):
@@ -35,12 +33,11 @@ class Post(models.Model):
 
 class Publication(models.Model):
     author_count = models.PositiveSmallIntegerField()
-    title = models.CharField(max_length=1000)  # what's a good title?
+    title = models.CharField(max_length=1000)
     journal = models.CharField(max_length=500, blank=True)
-    vol = models.CharField(max_length=100)  # should I use Integer or char?
+    vol = models.CharField(max_length=100)
     pages_start = models.CharField(max_length=10)
     pages_end = models.CharField(max_length=10)
-    # OR models.DateField() #what's a good title?
     year = models.CharField(max_length=4)
     doi_isbn = models.CharField(max_length=100, blank=True)
 
@@ -52,7 +49,6 @@ class Publication(models.Model):
 
 
 class Author(models.Model):
-    """Contain data of authors"""
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     institution = models.CharField(max_length=100, blank=True)
@@ -76,9 +72,8 @@ class Tag(models.Model):
         return self.tag
 
 
-class System(models.Model):  # Add Contributor class
+class System(models.Model):
     """Contains meta data for investigated system. """
-    # use fhi file format.
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
     group = models.CharField(max_length=100)  # aka Alternate names
@@ -162,7 +157,7 @@ class SpecificMethod(models.Model):
         return self.specific_method
 
 
-class Property(models.Model):
+class PropertyOld(models.Model):
     property = models.CharField(max_length=500)
 
     class Meta:
@@ -176,7 +171,8 @@ class IDInfo(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
     source = models.CharField(max_length=500)
     data_extraction_method = models.CharField(max_length=500)
-    contributor = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
+    contributor = models.ForeignKey('accounts.UserProfile',
+                                    on_delete=models.PROTECT)
     temperature = models.CharField(max_length=20, blank=True)
     phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
     method = models.ForeignKey(Method, on_delete=models.PROTECT, null=True)
@@ -272,7 +268,7 @@ class AtomicPositions(IDInfo):
 
 class MaterialProperty(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    property = models.ForeignKey(PropertyOld, on_delete=models.PROTECT)
     value = models.CharField(max_length=500)
 
     class Meta:
@@ -304,32 +300,24 @@ def del_bs(sender, instance, **kwargs):
     folder_loc = instance.folder_location
     if os.path.isdir(folder_loc):
         shutil.rmtree(folder_loc)
-    else:
-        pass
 
 
 def del_pl(sender, instance, **kwargs):
     if(instance.pl_file):
-        file_loc = (MEDIA_ROOT + "/uploads/" +
+        file_loc = (settings.MEDIA_ROOT + "/uploads/" +
                     str(instance.pl_file).split("/")[1])
-        print(file_loc)
         if os.path.isfile(file_loc):
             os.remove(file_loc)
-        else:
-            pass
 
 
 def del_apos(sender, instance, **kwargs):
     if(instance.fhi_file):
-        file_loc = (MEDIA_ROOT + "/uploads/" +
+        file_loc = (settings.MEDIA_ROOT + "/uploads/" +
                     str(instance.fhi_file).split("/")[1])
-        print(file_loc)
         if os.path.isfile(file_loc):
             os.remove(file_loc)
-        else:
-            pass
 
 
-signals.post_delete.connect(del_bs, sender=BandStructure)
-signals.post_delete.connect(del_pl, sender=ExcitonEmission)
-signals.post_delete.connect(del_apos, sender=AtomicPositions)
+models.signals.post_delete.connect(del_bs, sender=BandStructure)
+models.signals.post_delete.connect(del_pl, sender=ExcitonEmission)
+models.signals.post_delete.connect(del_apos, sender=AtomicPositions)
