@@ -4,6 +4,8 @@ import shutil
 
 from django.db import models
 from django.contrib.auth import get_user_model
+import django.dispatch
+
 from mainproject import settings
 
 
@@ -332,28 +334,26 @@ class BondLength(IDInfo):
         return self.hmh_length + " " + self.mhm_length
 
 
+@django.dispatch.receiver(models.signals.post_delete, sender=BandStructure)
 def del_bs(sender, instance, **kwargs):
     folder_loc = instance.folder_location
     if os.path.isdir(folder_loc):
         shutil.rmtree(folder_loc)
 
 
+@django.dispatch.receiver(models.signals.post_delete, sender=ExcitonEmission)
 def del_pl(sender, instance, **kwargs):
     if(instance.pl_file):
-        file_loc = (settings.MEDIA_ROOT + "/uploads/" +
-                    str(instance.pl_file).split("/")[1])
+        file_loc = (settings.MEDIA_ROOT + '/uploads/' +
+                    str(instance.pl_file).split('/')[1])
         if os.path.isfile(file_loc):
             os.remove(file_loc)
 
 
+@django.dispatch.receiver(models.signals.post_delete, sender=AtomicPositions)
 def del_apos(sender, instance, **kwargs):
     if(instance.fhi_file):
-        file_loc = (settings.MEDIA_ROOT + "/uploads/" +
-                    str(instance.fhi_file).split("/")[1])
+        file_loc = (settings.MEDIA_ROOT + '/uploads/' +
+                    str(instance.fhi_file).split('/')[1])
         if os.path.isfile(file_loc):
             os.remove(file_loc)
-
-
-models.signals.post_delete.connect(del_bs, sender=BandStructure)
-models.signals.post_delete.connect(del_pl, sender=ExcitonEmission)
-models.signals.post_delete.connect(del_apos, sender=AtomicPositions)
