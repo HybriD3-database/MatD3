@@ -3,7 +3,43 @@ import os
 import shutil
 
 from django.db import models
+from django.contrib.auth import get_user_model
 from mainproject import settings
+
+
+class Base(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    this = '%(app_label)s_%(class)s'
+    created_by = models.ForeignKey(get_user_model(),
+                                   related_name=f'{this}_created_by',
+                                   on_delete=models.PROTECT)
+    updated_by = models.ForeignKey(get_user_model(),
+                                   related_name=f'{this}_updated_by',
+                                   on_delete=models.PROTECT)
+
+    class Meta:
+        abstract = True
+
+    def save(self, user=None, *args, **kwargs):
+        if user:
+            self.created_by = user
+            self.updated_by = user
+        super().save(*args, **kwargs)
+
+
+class Property(Base):
+    name = models.CharField(max_length=60, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Unit(Base):
+    label = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.label
 
 
 def file_name(instance, filename):
