@@ -1,32 +1,25 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.views import generic
-from django.db.models import Q
-from django.forms import formset_factory
-import mainproject.settings as msettings
-from materials.forms import (
-    System, SearchForm, AddAtomicPositions, AddPublication, AddAuthor, AddTag,
-    AddSystem, AddExcitonEmission, AddSynthesisMethod, AddBandStructure,
-    AddMaterialProperty)
-from materials.models import (
-    ExcitonEmission, SynthesisMethod, BandStructure, MaterialProperty,
-    AtomicPositions, Publication, Author, Tag)
-from accounts.models import UserProfile
-import materials.rangeparser
-import os
-import zipfile
 import io
+import os
 import functools
 import operator
+import zipfile
 
-dictionary = {
-    'atomic_positions': AtomicPositions,
-    'exciton_emission': ExcitonEmission,
-    'synthesis': SynthesisMethod,
-    'band_structure': BandStructure,
-    'material_prop': MaterialProperty
-}
+from django.contrib import messages
+from django.db.models import Q
+from django.forms import formset_factory
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.shortcuts import reverse
+from django.views import generic
+
+from accounts.models import UserProfile
+from mainproject import settings
+from materials import forms
+from materials import models
+import materials.rangeparser
 
 
 def data_dl(request, type, id, bandgap=False):
@@ -77,11 +70,11 @@ def data_dl(request, type, id, bandgap=False):
         response.write('\n\n')
 
     if type == 'atomic_positions':
-        obj = dictionary[type].objects.get(id=id)
-        p_obj = System.objects.get(atomicpositions=obj)
+        obj = models.AtomicPositions.objects.get(id=id)
+        p_obj = models.System.objects.get(atomicpositions=obj)
         write_headers()
         write_a_pos()
-        fileloc = (msettings.MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' %
+        fileloc = (settings.MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' %
                    (obj.phase, p_obj.organic, p_obj.inorganic))
         if(os.path.isfile(fileloc)):
             with open(fileloc, encoding='utf-8', mode='r+') as f:
@@ -94,7 +87,7 @@ def data_dl(request, type, id, bandgap=False):
             'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
                                                      p_obj.inorganic, type))
     elif type == 'all_atomic_positions':  # all the a_pos entries
-        p_obj = System.objects.get(id=id)
+        p_obj = models.System.objects.get(id=id)
         response.write(str('#HybriD³ Materials Database\n\n'))
         name = p_obj.compound_name
         response.write(str('#'*(len(name)+22) + '\n'))
@@ -108,11 +101,11 @@ def data_dl(request, type, id, bandgap=False):
             'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
                                                      p_obj.inorganic, 'ALL'))
     elif type == 'exciton_emission':
-        obj = dictionary[type].objects.get(id=id)
-        p_obj = System.objects.get(excitonemission=obj)
+        obj = models.ExcitonEmission.objects.get(id=id)
+        p_obj = models.System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
                                             p_obj.inorganic)
-        dir_in_str = os.path.join(msettings.MEDIA_ROOT, 'uploads')
+        dir_in_str = os.path.join(settings.MEDIA_ROOT, 'uploads')
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
         with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
@@ -161,8 +154,8 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
     elif type == 'synthesis':
-        obj = dictionary[type].objects.get(id=id)
-        p_obj = System.objects.get(synthesismethod=obj)
+        obj = m.SynthesisMethod.objects.get(id=id)
+        p_obj = models.System.objects.get(synthesismethod=obj)
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
                                              p_obj.inorganic)
         meta_filename = file_name_prefix + '.txt'
@@ -200,8 +193,8 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (meta_filename))
     elif type == 'band_structure' and bandgap:
-        obj = dictionary[type].objects.get(id=id)
-        p_obj = System.objects.get(bandstructure=obj)
+        obj = models.BandStructure.objects.get(id=id)
+        p_obj = models.System.objects.get(bandstructure=obj)
         filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic,
                                         p_obj.inorganic)
         response.write(str('#HybriD³ Materials Database\n\n'))
@@ -217,8 +210,8 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (filename))
     elif type == 'band_structure':
-        obj = dictionary[type].objects.get(id=id)
-        p_obj = System.objects.get(bandstructure=obj)
+        obj = models.BandStructure.objects.get(id=id)
+        p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
         dir_in_str = obj.folder_location
@@ -273,8 +266,8 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
     elif type == 'input_files':
-        obj = BandStructure.objects.get(id=id)
-        p_obj = System.objects.get(bandstructure=obj)
+        obj = models.BandStructure.objects.get(id=id)
+        p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
         dir_in_str = obj.folder_location
@@ -321,8 +314,8 @@ def all_a_pos(request, id):
             return 9999999
 
     template_name = 'materials/all_a_pos.html'
-    obj = System.objects.get(id=id)
-    compound_name = System.objects.get(id=id).compound_name
+    obj = models.System.objects.get(id=id)
+    compound_name = models.System.objects.get(id=id).compound_name
     obj = obj.atomicpositions_set.all()
     obj = sorted(obj, key=sortEntries)
     return render(request, template_name,
@@ -330,11 +323,16 @@ def all_a_pos(request, id):
 
 
 def all_entries(request, id, type):
+    str_to_model = {
+        'atomic_positions': models.AtomicPositions,
+        'exciton_emission': models.ExcitonEmission,
+        'synthesis': models.SynthesisMethod,
+        'band_structure': models.BandStructure,
+        'material_prop': models.MaterialProperty
+    }
     template_name = 'materials/all_%ss.html' % type
-    # This has no effect and will be overwritten
-    obj = System.objects.get(id=id)
-    compound_name = System.objects.get(id=id).compound_name
-    obj = dictionary[type].objects.filter(system__id=id)
+    compound_name = models.System.objects.get(pk=id).compound_name
+    obj = str_to_model[type].objects.filter(system__id=id)
     return render(request, template_name,
                   {'object': obj, 'compound_name': compound_name,
                    'data_type': type, 'key': id})
@@ -342,7 +340,7 @@ def all_entries(request, id, type):
 
 def getAuthorSearchResult(search_text):
     keyWords = search_text.split()
-    results = System.objects.\
+    results = models.System.objects.\
         filter(functools.reduce(operator.or_, (
             Q(atomicpositions__publication__author__last_name__icontains=x) for
             x in keyWords)) | functools.reduce(operator.or_, (
@@ -358,15 +356,15 @@ def getAuthorSearchResult(search_text):
 
 def search_result(search_term, search_text):
     if search_term == 'formula':
-        return System.objects.filter(
+        return models.System.objects.filter(
             Q(formula__icontains=search_text) |
             Q(group__icontains=search_text) |
             Q(compound_name__icontains=search_text)).order_by('formula')
     elif search_term == 'organic':
-        return System.objects.filter(
+        return models.System.objects.filter(
             organic__icontains=search_text).order_by('organic')
     elif search_term == 'inorganic':
-        return System.objects.filter(
+        return models.System.objects.filter(
             inorganic__icontains=search_text).order_by('inorganic')
     elif search_term == 'author':
         return getAuthorSearchResult(search_text)
@@ -391,7 +389,7 @@ class SearchFormView(generic.TemplateView):
 
     def post(self, request):
         template_name = 'materials/search_results.html'
-        form = SearchForm(request.POST)
+        form = forms.SearchForm(request.POST)
         search_text = ''
         # default search_term
         search_term = 'formula'
@@ -404,11 +402,11 @@ class SearchFormView(generic.TemplateView):
                 if len(searchrange) > 0:
                     if searchrange[0] == 'bidirectional':
                         if searchrange[3] == '>=':
-                            systems = ExcitonEmission.objects.filter(
+                            systems = models.ExcitonEmission.objects.filter(
                                 exciton_emission__gte=searchrange[1]).order_by(
                                     '-exciton_emission')
                         elif searchrange[3] == '>':
-                            systems = ExcitonEmission.objects.filter(
+                            systems = models.ExcitonEmission.objects.filter(
                                 exciton_emission__gt=searchrange[1]).order_by(
                                     '-exciton_emission')
                         if searchrange[4] == '<=':
@@ -421,19 +419,19 @@ class SearchFormView(generic.TemplateView):
                                     '-exciton_emission')
                     elif searchrange[0] == 'unidirectional':
                         if searchrange[2] == '>=':
-                            systems = ExcitonEmission.objects.filter(
+                            systems = models.ExcitonEmission.objects.filter(
                                 exciton_emission__gte=searchrange[1]).order_by(
                                     '-exciton_emission')
                         elif searchrange[2] == '>':
-                            systems = ExcitonEmission.objects.filter(
+                            systems = models.ExcitonEmission.objects.filter(
                                 exciton_emission__gt=searchrange[1]).order_by(
                                     '-exciton_emission')
                         elif searchrange[2] == '<=':
-                            systems = ExcitonEmission.objects.filter(
+                            systems = models.ExcitonEmission.objects.filter(
                                 exciton_emission__lte=searchrange[1]).order_by(
                                     '-exciton_emission')
                         elif searchrange[2] == '<':
-                            systems = ExcitonEmission.objects.filter(
+                            systems = models.ExcitonEmission.objects.filter(
                                 exciton_emission__lt=searchrange[1]).order_by(
                                     '-exciton_emission')
                     for ee in systems:
@@ -487,8 +485,8 @@ class AddAPosView(generic.TemplateView):
     template_name = 'materials/add_a_pos.html'
 
     def get(self, request):
-        search_form = SearchForm()
-        a_pos_form = AddAtomicPositions()
+        search_form = forms.SearchForm()
+        a_pos_form = forms.AddAtomicPositions()
         return render(request, self.template_name, {
             'search_form': search_form,
             'a_pos_form': a_pos_form,
@@ -498,26 +496,24 @@ class AddAPosView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddAtomicPositions(request.POST, request.FILES)
+        form = forms.AddAtomicPositions(request.POST, request.FILES)
         if form.is_valid():
             apos_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
             try:
-                apos_form.synthesis_method = SynthesisMethod.objects.get(
-                    pk=int(syn_pk))
+                apos_form.synthesis_method = (
+                    models.SynthesisMethod.objects.get(pk=int(syn_pk)))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
-                apos_form.publication = Publication.objects.get(pk=pub_pk)
-                apos_form.system = System.objects.get(pk=sys_pk)
-                # text += 'Publication and System obtained, '
+                apos_form.publication = models.Publication.objects.get(pk=pub_pk)
+                apos_form.system = models.System.objects.get(pk=sys_pk)
                 if request.user.is_authenticated:
                     apos_form.contributor = UserProfile.objects.get(
                         user=request.user)
-                    # print apos_form.contributor
                     text = 'Save success!'
                     feedback = 'success'
                     apos_form = makeCorrections(apos_form)
@@ -538,8 +534,8 @@ class AddPubView(generic.TemplateView):
     template_name = 'materials/add_publication.html'
 
     def get(self, request):
-        search_form = SearchForm()
-        pub_form = AddPublication()
+        search_form = forms.SearchForm()
+        pub_form = forms.AddPublication()
         return render(request, self.template_name, {
             'search_form': search_form,
             'pub_form': pub_form,
@@ -561,13 +557,13 @@ class AddPubView(generic.TemplateView):
         # institution
         assert(len(authors_info) % 3 == 0)
         author_count = len(authors_info) // 3
-        pub_form = AddPublication(request.POST)
+        pub_form = forms.AddPublication(request.POST)
         if pub_form.is_valid():
             form = pub_form.save(commit=False)
             doi_isbn = pub_form.cleaned_data['doi_isbn']
             # check if doi_isbn is unique/valid, except when field is empty
             if len(doi_isbn) == 0 or len(
-                    Publication.objects.filter(doi_isbn=doi_isbn)) == 0:
+                    models.Publication.objects.filter(doi_isbn=doi_isbn)) == 0:
                 form.author_count = author_count
                 form.save()
                 newPub = form
@@ -589,7 +585,7 @@ class AddPubView(generic.TemplateView):
             data['last_name'] = authors_info['form-%d-last_name' % i]
             data['institution'] = authors_info['form-%d-institution' % i]
             preexistingAuthors = (
-                Author.objects.filter(
+                models.Author.objects.filter(
                     first_name__iexact=data['first_name']).filter(
                         last_name__iexact=data['last_name']).filter(
                             institution__iexact=data['institution']))
@@ -597,7 +593,7 @@ class AddPubView(generic.TemplateView):
                 # use the prexisting author object
                 preexistingAuthors[0].publication.add(newPub)
             else:  # this is a new author, so create a new object
-                author_form = AddAuthor(data)
+                author_form = forms.AddAuthor(data)
                 if(not author_form.is_valid()):
                     text = ('Failed to submit, author not valid. '
                             'Please fix the errors, and try again.')
@@ -625,19 +621,19 @@ class SearchPubView(generic.TemplateView):
     template_name = 'materials/dropdown_list_pub.html'
 
     def post(self, request):
-        search_form = SearchForm(request.POST)
+        search_form = forms.SearchForm(request.POST)
         search_text = ''
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
             author_search = (
-                Publication.objects.filter(
+                models.Publication.objects.filter(
                     Q(author__first_name__icontains=search_text) |
                     Q(author__last_name__icontains=search_text) |
                     Q(author__institution__icontains=search_text)).distinct())
             if len(author_search) > 0:
                 search_result = author_search
             else:
-                search_result = Publication.objects.filter(
+                search_result = models.Publication.objects.filter(
                     Q(title__icontains=search_text) |
                     Q(journal__icontains=search_text)
                 )
@@ -651,7 +647,7 @@ class AddAuthorsToPublicationView(generic.TemplateView):
     def post(self, request):
         author_count = request.POST['author_count']
         # variable number of author forms
-        author_formset = formset_factory(AddAuthor, extra=int(author_count))
+        author_formset = formset_factory(forms.AddAuthor, extra=int(author_count))
         return render(request, self.template_name,
                       {'entered_author_count': author_count,
                        'author_formset': author_formset})
@@ -663,12 +659,12 @@ class SearchAuthorView(generic.TemplateView):
     template_name = 'materials/dropdown_list_author.html'
 
     def post(self, request):
-        search_form = SearchForm(request.POST)
-        # pub_form = AddPublication()
+        search_form = forms.SearchForm(request.POST)
+        # pub_form = forms.AddPublication()
         search_text = ''
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
-            search_result = Author.objects.filter(
+            search_result = models.Author.objects.filter(
                 Q(first_name__icontains=search_text) |
                 Q(last_name__icontains=search_text) |
                 Q(institution__icontains=search_text))
@@ -688,21 +684,21 @@ class AddAuthorView(generic.TemplateView):
     template_name = 'materials/add_author.html'
 
     def get(self, request):
-        input_form = AddAuthor()
+        input_form = forms.AddAuthor()
         return render(request, self.template_name, {
             'input_form': input_form,
         })
 
     def post(self, request):
-        # search_form = SearchForm()
-        input_form = AddAuthor(request.POST)
+        # search_form = forms.SearchForm()
+        input_form = forms.AddAuthor(request.POST)
         if input_form.is_valid():
             first_name = input_form.cleaned_data['first_name'].lower()
             last_name = input_form.cleaned_data['last_name'].lower()
             institution = input_form.cleaned_data['institution'].lower()
             # checks to see if the author is already in database
             q_set_len = len(
-                Author.objects.filter(first_name__iexact=first_name)
+                models.Author.objects.filter(first_name__iexact=first_name)
                 .filter(last_name__iexact=last_name)
                 .filter(institution__icontains=institution)
                 )
@@ -728,18 +724,18 @@ class AddTagView(generic.TemplateView):
     template_name = 'materials/add_tag.html'
 
     def get(self, request):
-        input_form = AddTag()
+        input_form = forms.AddTag()
         return render(request, self.template_name, {
             'input_form': input_form,
         })
 
     def post(self, request):
-        # search_form = SearchForm()
-        input_form = AddTag(request.POST)
+        # search_form = forms.SearchForm()
+        input_form = forms.AddTag(request.POST)
         if input_form.is_valid():
             tag = input_form.cleaned_data['tag'].lower()
             q_set_len = len(
-                Tag.objects.filter(tag__iexact=tag)
+                models.Tag.objects.filter(tag__iexact=tag)
                 )
             if q_set_len == 0:
                 input_form.save()
@@ -762,13 +758,13 @@ class SearchSystemView(generic.TemplateView):
     template_name = 'materials/dropdown_list_system.html'
 
     def post(self, request):
-        form = SearchForm(request.POST)
+        form = forms.SearchForm(request.POST)
         related_synthesis = ('related_synthesis' in request.POST and
                              request.POST['related_synthesis'] == 'True')
         search_text = ''
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
-        search_result = System.objects.filter(
+        search_result = models.System.objects.filter(
             Q(compound_name__icontains=search_text) |
             Q(group__icontains=search_text) |
             Q(formula__icontains=search_text)
@@ -783,17 +779,17 @@ class AddSystemView(generic.TemplateView):
     template_name = 'materials/add_system.html'
 
     def get(self, request):
-        form = AddSystem()
+        form = forms.AddSystem()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = AddSystem(request.POST)
+        form = forms.AddSystem(request.POST)
         if form.is_valid():
             compound_name = form.cleaned_data['compound_name'].lower()
             formula = form.cleaned_data['formula'].lower()
             # checks to see if the author is already in database
             q_set_len = len(
-                System.objects.filter(
+                models.System.objects.filter(
                     Q(compound_name__iexact=compound_name) |
                     Q(formula__iexact=formula)
                 )
@@ -817,11 +813,11 @@ class AddPhase(generic.TemplateView):
     template_name = 'materials/form.html'
 
     def get(self, request):
-        form = AddPhase()
+        form = forms.AddPhase()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = AddPhase(request.POST)
+        form = forms.AddPhase(request.POST)
         if form.is_valid():
             form.save()
             text = form.cleaned_data['email']
@@ -833,11 +829,11 @@ class AddTemperature(generic.TemplateView):
     template_name = 'materials/form.html'
 
     def get(self, request):
-        form = AddTemperature()
+        form = forms.AddTemperature()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = AddTemperature(request.POST)
+        form = forms.AddTemperature(request.POST)
         if form.is_valid():
             form.save()
             text = form.cleaned_data['email']
@@ -851,8 +847,8 @@ class AddExcitonEmissionView(generic.TemplateView):
     template_name = 'materials/add_exciton_emission.html'
 
     def get(self, request):
-        search_form = SearchForm()
-        exciton_emission_form = AddExcitonEmission()
+        search_form = forms.SearchForm()
+        exciton_emission_form = forms.AddExcitonEmission()
         return render(request, self.template_name, {
             'search_form': search_form,
             'exciton_emission_form': exciton_emission_form,
@@ -862,7 +858,7 @@ class AddExcitonEmissionView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddExcitonEmission(request.POST, request.FILES)
+        form = forms.AddExcitonEmission(request.POST, request.FILES)
         if form.is_valid():
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
@@ -870,14 +866,14 @@ class AddExcitonEmissionView(generic.TemplateView):
             # print 'file: ', request.FILES.get('pl_file')
             syn_pk = request.POST.get('synthesis-methods')
             try:
-                new_form.synthesis_method = SynthesisMethod.objects.get(
+                new_form.synthesis_method = models.SynthesisMethod.objects.get(
                     pk=int(syn_pk))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = Publication.objects.get(pk=pub_pk)
-                new_form.system = System.objects.get(pk=sys_pk)
+                new_form.publication = models.Publication.objects.get(pk=pub_pk)
+                new_form.system = models.System.objects.get(pk=sys_pk)
                 # text += 'Publication and System obtained, '
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(
@@ -901,8 +897,8 @@ class AddSynthesisMethodView(generic.TemplateView):
     template_name = 'materials/add_synthesis.html'
 
     def get(self, request):
-        search_form = SearchForm()
-        synthesis_form = AddSynthesisMethod()
+        search_form = forms.SearchForm()
+        synthesis_form = forms.AddSynthesisMethod()
         return render(request, self.template_name, {
             'search_form': search_form,
             'synthesis_form': synthesis_form,
@@ -912,15 +908,15 @@ class AddSynthesisMethodView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddSynthesisMethod(request.POST, request.FILES)
+        form = forms.AddSynthesisMethod(request.POST, request.FILES)
         if form.is_valid():
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             # text = ''
             if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = Publication.objects.get(pk=pub_pk)
-                new_form.system = System.objects.get(pk=sys_pk)
+                new_form.publication = models.Publication.objects.get(pk=pub_pk)
+                new_form.system = models.System.objects.get(pk=sys_pk)
                 # text += 'Publication and System obtained, '
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(
@@ -946,8 +942,8 @@ class AddBandStructureView(generic.TemplateView):
     template_name = 'materials/add_band_structure.html'
 
     def get(self, request):
-        search_form = SearchForm()
-        band_structure_form = AddBandStructure()
+        search_form = forms.SearchForm()
+        band_structure_form = forms.AddBandStructure()
         return render(request, self.template_name, {
             'search_form': search_form,
             'band_structure_form': band_structure_form,
@@ -957,21 +953,21 @@ class AddBandStructureView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddBandStructure(request.POST, request.FILES)
+        form = forms.AddBandStructure(request.POST, request.FILES)
         if form.is_valid():
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
             try:
-                new_form.synthesis_method = SynthesisMethod.objects.get(
+                new_form.synthesis_method = models.SynthesisMethod.objects.get(
                     pk=int(syn_pk))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = Publication.objects.get(pk=pub_pk)
-                new_form.system = System.objects.get(pk=sys_pk)
+                new_form.publication = models.Publication.objects.get(pk=pub_pk)
+                new_form.system = models.System.objects.get(pk=sys_pk)
                 # text += 'Settings ready. '
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(
@@ -979,7 +975,7 @@ class AddBandStructureView(generic.TemplateView):
                     # save so a pk can be created for use in the
                     # folder location
                     new_form.save()
-                    bs_folder_loc = (msettings.MEDIA_ROOT +
+                    bs_folder_loc = (settings.MEDIA_ROOT +
                                      '/uploads/%s_%s_%s_%s_bs' %
                                      (new_form.phase, new_form.system.organic,
                                       new_form.system.inorganic, new_form.pk))
@@ -1025,8 +1021,8 @@ class AddMaterialPropertyView(generic.TemplateView):
     template_name = 'materials/add_material_property.html'
 
     def get(self, request):
-        search_form = SearchForm()
-        material_property_form = AddMaterialProperty()
+        search_form = forms.SearchForm()
+        material_property_form = forms.AddMaterialProperty()
         return render(request, self.template_name, {
             'search_form': search_form,
             'material_property_form': material_property_form,
@@ -1036,14 +1032,14 @@ class AddMaterialPropertyView(generic.TemplateView):
         })
 
     def post(self, request):
-        form = AddMaterialProperty(request.POST)
+        form = forms.AddMaterialProperty(request.POST)
         if form.is_valid():
             new_form = form.save(commit=False)
             pub_pk = request.POST.get('publication')
             sys_pk = request.POST.get('system')
             if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = Publication.objects.get(pk=pub_pk)
-                new_form.system = System.objects.get(pk=sys_pk)
+                new_form.publication = models.Publication.objects.get(pk=pub_pk)
+                new_form.system = models.System.objects.get(pk=sys_pk)
                 if request.user.is_authenticated:
                     new_form.contributor = UserProfile.objects.get(
                         user=request.user)
@@ -1067,11 +1063,11 @@ class AddBondLength(generic.TemplateView):
     template_name = 'materials/form.html'
 
     def get(self, request):
-        form = AddBondLength()
+        form = forms.AddBondLength()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = AddBondLength(request.POST)
+        form = forms.AddBondLength(request.POST)
         if form.is_valid():
             form.save()
             text = form.cleaned_data['email']
@@ -1085,19 +1081,46 @@ class AddDataView(generic.TemplateView):
     template_name = 'materials/add_data.html'
 
     def get(self, request):
-        return render(request, self.template_name)
+        return render(request, self.template_name, {
+            'publications': models.Publication.objects.all().order_by('year'),
+            'systems': models.System.objects.all(),
+            'properties': models.Property.objects.all(),
+            'units': models.Unit.objects.all(),
+        })
+
+
+def add_property(request):
+    property_name = request.POST['property_name']
+    prop = models.Property()
+    prop.name = property_name
+    prop.save(request.user)
+    messages.success(request,
+                     f'New property "{property_name}" successfully added to '
+                     'the database!')
+    return redirect(reverse('materials:add_data'))
+
+
+def add_unit(request):
+    unit_name = request.POST['unit_label']
+    unit = models.Unit()
+    unit.label = unit_name
+    unit.save(request.user)
+    messages.success(request,
+                     f'New unit "{unit_name}" successfully added to '
+                     'the database!')
+    return redirect(reverse('materials:add_data'))
 
 
 class SystemView(generic.DetailView):
     template_name = 'materials/system.html'
-    model = System
+    model = models.System
 
 
 class SpecificSystemView(generic.TemplateView):
     template_name = 'materials/system_specific.html'
 
     def get(self, request, pk, pk_aa, pk_syn, pk_ee, pk_bs):
-        system = System.objects.get(pk=pk)
+        system = models.System.objects.get(pk=pk)
         exciton_emission = system.excitonemission_set.get(pk=pk_ee)
         if system.synthesismethod_set.count() > 0:
             synthesis = system.synthesismethod_set.get(pk=pk_syn)
@@ -1122,16 +1145,16 @@ class SpecificSystemView(generic.TemplateView):
 
 
 class SystemUpdateView(generic.UpdateView):
-    model = System
+    model = models.System
     template_name = 'materials/system_update_form.html'
-    form_class = AddSystem
+    form_class = forms.AddSystem
     success_url = '/materials/{id}'
 
 
 class AtomicPositionsUpdateView(generic.UpdateView):
-    model = AtomicPositions
+    model = models.AtomicPositions
     template_name = 'materials/update_a_pos.html'
-    form_class = AddAtomicPositions
+    form_class = forms.AddAtomicPositions
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1139,9 +1162,9 @@ class AtomicPositionsUpdateView(generic.UpdateView):
 
 
 class AtomicPositionsDeleteView(generic.DeleteView):
-    model = AtomicPositions
+    model = models.AtomicPositions
     template_name = 'materials/delete_a_pos.html'
-    form_class = AddAtomicPositions
+    form_class = forms.AddAtomicPositions
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1149,9 +1172,9 @@ class AtomicPositionsDeleteView(generic.DeleteView):
 
 
 class SynthesisMethodUpdateView(generic.UpdateView):
-    model = SynthesisMethod
+    model = models.SynthesisMethod
     template_name = 'materials/update_synthesis.html'
-    form_class = AddSynthesisMethod
+    form_class = forms.AddSynthesisMethod
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1159,9 +1182,9 @@ class SynthesisMethodUpdateView(generic.UpdateView):
 
 
 class SynthesisMethodDeleteView(generic.DeleteView):
-    model = SynthesisMethod
+    model = models.SynthesisMethod
     template_name = 'materials/delete_synthesis.html'
-    form_class = AddSynthesisMethod
+    form_class = forms.AddSynthesisMethod
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1169,9 +1192,9 @@ class SynthesisMethodDeleteView(generic.DeleteView):
 
 
 class ExcitonEmissionUpdateView(generic.UpdateView):
-    model = ExcitonEmission
+    model = models.ExcitonEmission
     template_name = 'materials/update_exciton_emission.html'
-    form_class = AddExcitonEmission
+    form_class = forms.AddExcitonEmission
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1179,9 +1202,9 @@ class ExcitonEmissionUpdateView(generic.UpdateView):
 
 
 class ExcitonEmissionDeleteView(generic.DeleteView):
-    model = ExcitonEmission
+    model = models.ExcitonEmission
     template_name = 'materials/delete_exciton_emission.html'
-    form_class = AddExcitonEmission
+    form_class = forms.AddExcitonEmission
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1189,9 +1212,9 @@ class ExcitonEmissionDeleteView(generic.DeleteView):
 
 
 class BandStructureUpdateView(generic.UpdateView):
-    model = BandStructure
+    model = models.BandStructure
     template_name = 'materials/update_band_structure.html'
-    form_class = AddBandStructure
+    form_class = forms.AddBandStructure
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1199,9 +1222,9 @@ class BandStructureUpdateView(generic.UpdateView):
 
 
 class BandStructureDeleteView(generic.DeleteView):
-    model = BandStructure
+    model = models.BandStructure
     template_name = 'materials/delete_band_structure.html'
-    form_class = AddBandStructure
+    form_class = forms.AddBandStructure
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1209,9 +1232,9 @@ class BandStructureDeleteView(generic.DeleteView):
 
 
 class PropertyUpdateView(generic.UpdateView):
-    model = MaterialProperty
+    model = models.MaterialProperty
     template_name = 'materials/update_material_property.html'
-    form_class = AddMaterialProperty
+    form_class = forms.AddMaterialProperty
 
     def get_success_url(self):
         pk = self.object.system.pk
@@ -1219,9 +1242,9 @@ class PropertyUpdateView(generic.UpdateView):
 
 
 class PropertyDeleteView(generic.DeleteView):
-    model = MaterialProperty
+    model = models.MaterialProperty
     template_name = 'materials/delete_material_property.html'
-    form_class = AddMaterialProperty
+    form_class = forms.AddMaterialProperty
 
     def get_success_url(self):
         pk = self.object.system.pk

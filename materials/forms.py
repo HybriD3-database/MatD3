@@ -1,8 +1,7 @@
 # -*- coding: utf-8-*-
 from django import forms
-from materials.models import (
-    Author, Tag, Publication, Phase, System, ExcitonEmission, SynthesisMethod,
-    BandStructure, AtomicPositions, BondAngle, BondLength, MaterialProperty)
+
+from materials import models
 
 
 class SearchForm(forms.Form):
@@ -17,7 +16,7 @@ class AddAuthor(forms.ModelForm):
     all_fields = ('first_name', 'last_name', 'institution')
 
     class Meta:
-        model = Author
+        model = models.Author
         fields = ('first_name', 'last_name', 'institution', 'publication')
         exclude = ('publication',)
 
@@ -31,7 +30,7 @@ class AddTag(forms.ModelForm):
     all_fields = ('tag',)
 
     class Meta:
-        model = Tag
+        model = models.Tag
         fields = ('tag',)
 
     def __init__(self, *args, **kwargs):
@@ -45,7 +44,7 @@ class AddPublication(forms.ModelForm):
                   'year', 'doi_isbn')
 
     class Meta:
-        model = Publication
+        model = models.Publication
         exclude = ('author',
                    'author_count')
         labels = {
@@ -63,7 +62,7 @@ class AddPublication(forms.ModelForm):
 
 class AddPhase(forms.ModelForm):
     class Meta:
-        model = Phase
+        model = models.Phase
         fields = '__all__'
 
 
@@ -72,7 +71,7 @@ class AddSystem(forms.ModelForm):
                   'description', 'tags')
 
     class Meta:
-        model = System
+        model = models.System
         exclude = ('last_update',)
         labels = {
             'compound_name': 'Compound name (most common name)',
@@ -106,7 +105,7 @@ class AddExcitonEmission(forms.ModelForm):
                   'data_extraction_method')
 
     class Meta:
-        model = ExcitonEmission
+        model = models.ExcitonEmission
         exclude = ('contributor', 'publication', 'system', 'plotted',
                    'synthesis_method')
         labels = {
@@ -131,7 +130,7 @@ class AddSynthesisMethod(forms.ModelForm):
                    'product', 'comments')
 
     class Meta:
-        model = SynthesisMethod
+        model = models.SynthesisMethod
         exclude = ('contributor', 'publication', 'system', 'method',
                    'specific_method')
         labels = {
@@ -166,7 +165,7 @@ class AddBandStructure(forms.ModelForm):
                                        required=False)
 
     class Meta:
-        model = BandStructure
+        model = models.BandStructure
         exclude = ('contributor', 'publication', 'system', 'folder_location',
                    'plotted', 'synthesis_method')
         labels = {
@@ -187,7 +186,7 @@ class AddAtomicPositions(forms.ModelForm):
                   'gamma', 'volume', 'Z', 'source', 'data_extraction_method')
 
     class Meta:
-        model = AtomicPositions
+        model = models.AtomicPositions
         exclude = ('contributor', 'publication', 'system', 'synthesis_method')
         labels = {
             'fhi_file': '"geometry.in" file',
@@ -212,13 +211,13 @@ class AddAtomicPositions(forms.ModelForm):
 
 class AddBondAngle(forms.ModelForm):
     class Meta:
-        model = BondAngle
+        model = models.BondAngle
         fields = '__all__'
 
 
 class AddBondLength(forms.ModelForm):
     class Meta:
-        model = BondLength
+        model = models.BondLength
         fields = '__all__'
 
 
@@ -231,7 +230,7 @@ class AddMaterialProperty(forms.ModelForm):
                    'comments')
 
     class Meta:
-        model = MaterialProperty
+        model = models.MaterialProperty
         exclude = ('contributor', 'publication', 'system')
         labels = {
             'phase': 'Crystal system',

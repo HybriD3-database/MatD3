@@ -4,6 +4,8 @@
 
 import os
 
+from django.contrib.messages import constants as messages
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,7 +18,6 @@ except Exception:
 DEBUG = False
 
 ALLOWED_HOSTS = ['vwb3-web-02.egr.duke.edu', 'materials.hybrid3.duke.edu']
-
 
 # Application definition
 
@@ -61,7 +62,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mainproject.wsgi.application'
-
 
 # Database
 
@@ -159,9 +159,14 @@ ACCOUNT_ACTIVATION_DAYS = 7
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = os.environ.get("HYBRID3_EMAIL_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("HYBRID3_EMAIL_PASSWORD", "")
+EMAIL_HOST_USER = os.environ.get('HYBRID3_EMAIL_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('HYBRID3_EMAIL_PASSWORD', '')
 EMAIL_HOST_USER = 'XXXXXXX'
 EMAIL_HOST_PASSWORD = 'XXXXXXX'
 DEFAULT_FROM_EMAIL = 'HybriD3 materials database <hybrid3project@duke.edu>'
 EMAIL_USE_TLS = True
+
+# messages framework
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+}

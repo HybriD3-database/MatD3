@@ -10,26 +10,26 @@
 {% endfor %}
 
 {% if entry.publication.title %}
-    {{entry.publication.title}}.
+  {{entry.publication.title}}.
 {% endif %}
 
 {% if entry.publication.journal %}
-    <cite>{{entry.publication.journal}}</cite>
+  <cite>{{entry.publication.journal}}</cite>
 {% endif %}
 
 {% if entry.publication.vol %}
-    <strong>{{entry.publication.vol}}</strong>,
+  <strong>{{entry.publication.vol}}</strong>,
 {% endif %}
 
 {% if entry.publication.pages_start %}
-    {{entry.publication.pages_start}}{% if entry.publication.pages_end %}&#8209;{{entry.publication.pages_end}}
-{% endif %}
+  {{entry.publication.pages_start}}{% if entry.publication.pages_end %}&#8209;{{entry.publication.pages_end}}
+  {% endif %}
 {% endif %}
 
 {% if entry.publication.year %}
-    ({{entry.publication.year}}).
+  ({{entry.publication.year}}).
 {% endif %}
 
 {% if entry.publication.doi_isbn %}
-    doi:&nbsp;{{entry.publication.doi_isbn}}.
+  doi:&nbsp;{{entry.publication.doi_isbn}}.
 {% endif %}

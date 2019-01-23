@@ -25,7 +25,7 @@ class RegistrationForm(UserCreationForm):
         super(RegistrationForm, self).__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].help_text = None
-            self.fields[fieldname].widget.attrs['class'] = "form-control"
+            self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
     def save(self, commit=True):
         user = super(RegistrationForm, self).save(commit=False)
@@ -45,7 +45,7 @@ class ChangePasswordForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super(ChangePasswordForm, self).__init__(*args, **kwargs)
         for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = "form-control"
+            self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
 class EditProfileForm(forms.ModelForm):
@@ -58,10 +58,10 @@ class EditProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
         for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = "form-control"
+            self.fields[fieldname].widget.attrs['class'] = 'form-control'
             if(fieldname == 'image'):
                 self.fields[fieldname].widget.attrs['class'] = (
-                    "form-control-file")
+                    'form-control-file')
 
 
 class EditUserForm(forms.ModelForm):
@@ -78,4 +78,4 @@ class EditUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
         for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = "form-control"
+            self.fields[fieldname].widget.attrs['class'] = 'form-control'

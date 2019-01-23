@@ -5,10 +5,12 @@
 {% endblock %}
 
 {% block mainbody %}
-  {% if success_msg %}
-    <div class="d-flex">
-      <div class="alert alert-success">{{ success_msg }}</div>
-    </div>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="d-flex">
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      </div>
+    {% endfor %}
   {% endif %}
   <ul class="nav nav-tabs" id="new-data-tab" role="tablist">
     <li class="nav-item">
@@ -42,9 +44,25 @@
     </div>
     <!-- ADD NEW PROPERTY -->
     <div class="tab-pane" id="properties" role="tabpanel">
+      <br>
+      <form method="post" action="{% url 'materials:add_property' %}">
+        {% csrf_token %}
+        <label for="property_name">Property name: </label>
+        <input id="property_name" type="text" name="property_name" value="" required>
+        <br>
+        <button type="submit" name="submit_property" class="btn btn-primary">Submit</button>
+      </form>
     </div>
     <!-- ADD NEW UNIT -->
     <div class="tab-pane" id="units" role="tabpanel">
+      <br>
+      <form method="post" action="{% url 'materials:add_unit' %}">
+        {% csrf_token %}
+        <label for="unit_label">Unit label: </label>
+        <input id="unit_label" type="text" name="unit_label" value="" required>
+        <br>
+        <button type="submit" name="submit_unit" class="btn btn-primary">Submit</button>
+      </form>
     </div>
     <!-- UNSORTED -->
     <div class="tab-pane" id="unsorted" role="tabpanel">

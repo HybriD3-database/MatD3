@@ -9,7 +9,9 @@ from django.utils.http import base36_to_int
 from .tokens import account_activation_token
 from .models import UserProfile
 from django.contrib.auth.models import User
-from django.contrib.auth import update_session_auth_hash, login
+from django.contrib.auth import update_session_auth_hash
+
+from django.contrib.auth.views import login
 
 
 def home(request):
@@ -25,17 +27,17 @@ def register(request):
             form.save()
             user.save()
             text = 'Please wait for our staff to activate your account.'
-            feedback = "success"
+            feedback = 'success'
         else:
             text = ('Registration failed. Please correct the error(s) and '
                     'try again.')
-            feedback = "error"
-        error_list = ""
+            feedback = 'error'
+        error_list = ''
         if form.errors:
             for field in form:
                 for error in field.errors:
                     error_list += error
-                    error_list += "<br>"
+                    error_list += '<br>'
         args = {
             'errors': error_list,
             'feedback': feedback,
@@ -64,7 +66,7 @@ def activate(request, uidb64, token):
         text = ('Thank you for your email confirmation. '
                 'Now you can login to your account.')
     else:
-        text = "Activation link is invalid!"
+        text = 'Activation link is invalid!'
     return render(request, template, {'text': text})
 
 
@@ -114,7 +116,7 @@ def change_password(request):
             update_session_auth_hash(request, form.user)
             return redirect(reverse('accounts:view_profile'))
         else:
-            text = "An error occurred. Please try again later."
+            text = 'An error occurred. Please try again later.'
             form = ChangePasswordForm(user=request.user)
             args = {
                 'form': form,
