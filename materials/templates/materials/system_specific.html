@@ -77,7 +77,9 @@
               </button>
             </a>
             {% with entry.publication.author_set.all as authors %}
-              <button type="button" class="btn btn-warning" data-toggle="popover" title="Reference information" data-trigger="focus" html="true" data-content="{% include 'materials/reference_format.html' %}">
+              <button type="button" class="btn btn-warning" data-toggle="popover"
+                      title="Reference information" data-trigger="focus" html="true"
+                      data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
                 <span class="fa fa-book" aria-hidden="true"></span>
                 Reference
               </button>
@@ -142,8 +144,9 @@
                     Synthesis Method
                   </button>
                 </a>{% with entry.publication.author_set.all as authors %}
-                  <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information"
-                          data-content="{% include 'materials/reference_format.html' %}">
+                  <button type="button" class="btn btn-warning" data-toggle="popover"
+                          data-trigger="focus" title="Reference information"
+                          data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
                     <span class="fa fa-book" aria-hidden="true"></span>
                     Reference
                   </button>
@@ -203,7 +206,9 @@
                 </button>
               </a>
               {% with entry.publication.author_set.all as authors %}
-                <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information" data-content="{% include 'materials/reference_format.html' %}">
+                <button type="button" class="btn btn-warning" data-toggle="popover"
+                        data-trigger="focus" title="Reference information"
+                        data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
                   <span class="fa fa-book" aria-hidden="true"></span>
                   Reference
                 </button>
@@ -287,8 +292,9 @@
                 </a>
               {% endif %}
               {% with entry.publication.author_set.all as authors %}
-                <button type="button" class="btn btn-warning" data-toggle="popover" data-trigger="focus" title="Reference information"
-                        data-content="{% include 'materials/reference_format.html' %}">
+                <button type="button" class="btn btn-warning" data-toggle="popover"
+                        data-trigger="focus" title="Reference information"
+                        data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
                   <span class="fa fa-book" aria-hidden="true"></span>
                   Reference
                 </button>

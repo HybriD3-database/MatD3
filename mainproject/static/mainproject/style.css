@@ -47,6 +47,10 @@ body {
     background-color: 'white';
 }
 
+.card-add-data {
+    background-color: #f0f0f0;
+}
+
 table.atomic-positions {
     font-size: 16px;
     font-weight: bold;
@@ -55,6 +59,10 @@ table.atomic-positions {
 table.atomic-positions td {
     border: none;
     padding: 1px;
+}
+
+table.main-data {
+    font-size: 14px;
 }
 
 .details {

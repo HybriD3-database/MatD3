@@ -41,6 +41,166 @@
   <div class="tab-content" id="add-results-tab-content">
     <!-- ADD NEW RESULTS -->
     <div class="tab-pane show active" id="results" role="tabpanel">
+      <br>
+      <form method="post" action="{% url 'materials:submit_data' %}">
+        {% csrf_token %}
+        <div class="card card-item">
+          <div class="card-body card-add-data">
+            <div class="form row">
+              <div class="col-md-2 col-form-label">
+                <label for="pub-selector">Select publication</label>
+              </div>
+              <div class="col-md-7 mb-3">
+                <select name="publication" class="form-control" id="pub-selector">
+                  {% for pub in publications %}
+                    <option value={{ pub.pk }}>
+                      {{ pub.year }}
+                      {% if pub.year %}-{% endif %}
+                      {{ pub.getAuthorsAsString }}
+                      {{ pub.journal }}
+                      <strong>{{ pub.vol }}</strong>{% if pub.vol and pub.pages_start %},{% endif %}
+                      {{ pub.pages_start }}
+                      {% if pub.title == "Unpublished" %}
+                        <i>unpublished</i>
+                      {% else %}
+                        "{{ pub.title }}"
+                      {% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3 mb-3">
+                <input class="form-control" id="pub-search" type="text" placeholder="Search..">
+              </div>
+            </div>
+            <div class="form row">
+              <div class="col-md-2 col-form-label">
+                <label for="sys-selector">Select system</label>
+              </div>
+              <div class="col-md-7 mb-3">
+                <select name="system" class="form-control" id="sys-selector">
+                  {% for sys in systems %}
+                    <option value={{ sys.pk }}>
+                      {{ sys }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3 mb-3">
+                <input class="form-control" id="sys-search" type="text" placeholder="Search..">
+              </div>
+            </div>
+            <div class="form row">
+              <div class="col-md-2 col-form-label">
+                <label class="form-check-label" for="dataset-visible">Visible to public</label>
+              </div>
+              <div class="col-md-10  mb-3">
+                <input type="checkbox" class="form-check-input" name="dataset_visible"
+                       id="dataset-visible" checked="checked">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <br>
+
+        <div class="card card-item">
+          <div class="card-body card-add-data">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-row">
+                  <div class="col-md-6 mb-3">
+                    <label for="primary_property">Primary property</label>
+                    <select name="primary_property" class="form-control">
+                      {% for property in properties %}
+                        <option value="{{ property.pk }}">{{ property }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="primary_unit">Primary unit</label>
+                    <select name="primary_unit" class="form-control">
+                      {% for unit in units %}
+                        <option value="{{ unit.pk }}">{{ unit }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="col-md-6 mb-3">
+                    <label for="secondary_property">Secondary property</label>
+                    <select id="secondary-property" name="secondary_property" class="form-control">
+                      <option value="-1">- none -</option>
+                      {% for property in properties %}
+                        <option value="{{ property.pk }}">{{ property }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="secondary_unit">Secondary unit</label>
+                    <select id="secondary-unit" name="secondary_unit" class="form-control" disabled>
+                      {% for unit in units %}
+                        <option value="{{ unit.pk }}">{{ unit }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label for="main_data">Values</label>
+                <textarea id="main-data" class="form-control" name="main_data" rows="4"
+                placeholder="value_1 value_2 ..."></textarea>
+              </div>
+            </div>
+            <div id="fixed-properties">
+            </div>
+            <button type="button" id="add-fixed-property"
+                    class="btn btn-info float-right">
+              Add fixed property
+            </button>
+          </div>
+        </div>
+
+        <br>
+
+        <div class="float-right">
+          <button type="submit" name="submit_results" class="btn btn-primary">
+            Submit
+          </button>
+        </div>
+
+      </form>
+      <!-- to be copied -->
+      <div class="form-row fixed-property-template d-none">
+        <div class="col-md-4 mb-3">
+          <label for="fixed_property">Property</label>
+          <select name="fixed_property" class="form-control">
+            {% for property in properties %}
+              <option>{{ property.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="fixed_unit">Unit</label>
+          <select name="fixed_unit" class="form-control">
+            {% for unit in units %}
+              <option>{{ unit.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="fixed_data">Fixed value</label>
+          <div class="input-group">
+            <input type="text" name="fixed_data" class="form-control"
+                   maxlength="20" required>
+            <div class="input-group-append">
+              <button class="close-fixed-property btn btn-danger fa fa-times"
+                      type="button" ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end copy -->
     </div>
     <!-- ADD NEW PROPERTY -->
     <div class="tab-pane" id="properties" role="tabpanel">
@@ -100,4 +260,42 @@
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block script %}
+  {% load static %}
+  <script src="{% static 'materials/javascript/filter_form.js' %}"></script>
+  <script>
+   /* Filter dropdown menus */
+   filter_form($('#pub-search'), $('#pub-selector'));
+   filter_form($('#sys-search'), $('#sys-selector'));
+   /* Add a fixed property */
+   var counter_fixed = 0;
+   $('#add-fixed-property').click(function(){
+     var el = $('.fixed-property-template').clone(true);
+     el.removeClass('d-none');
+     el.removeClass('fixed-property-template');
+     el.find('[name="fixed_property"]').attr('name', 'fixed_property' + counter_fixed);
+     el.find('[name="fixed_unit"]').attr('name', 'fixed_unit' + counter_fixed);
+     el.find('[name="fixed_data"]').attr('name', 'fixed_data' + counter_fixed);
+     $('#fixed-properties').append(el);
+     counter_fixed = counter_fixed + 1
+   });
+   /* Remove a fixed property */
+   $('.close-fixed-property').click(function(){
+     $(this).parents('.form-row').remove();
+   });
+   /* Depending on whether the secondary property is none, set
+   visibility of the secondary unit and the placeholder */
+   $('#secondary-property').change(function() {
+     if ($('#secondary-property option:selected').attr('value') == -1) {
+       $('#secondary-unit').prop('disabled', true);
+       $('#main-data').attr('placeholder', 'value_1 value_2 ...');
+     } else {
+       $('#secondary-unit').prop('disabled', false);
+       var placeholder_text = 'x1 y1\nx2 y2\n...';
+       $('#main-data').attr('placeholder', placeholder_text);
+     }
+   });
+  </script>
 {% endblock %}

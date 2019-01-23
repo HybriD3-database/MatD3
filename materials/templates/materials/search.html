@@ -33,10 +33,10 @@
 {% endblock %}
 
 {% block script %}
-  {% include 'materials/ajax_form_submit.html' %}
+  {% load static %}
+  <script src="{% static 'materials/javascript/ajax_submit.js' %}"></script>
   <script type="text/javascript">
    $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
-
    $('#search_term').change(function() {
      if(this.value == "exciton_emission") {
        text = "Search by range using >, >=, <, <=, or a combination, e.g. >=400";

@@ -7,12 +7,12 @@
   <div class="card card-default">
     <div class="card-header">
       {% if user.is_superuser %}
-        <a href="/materials/update-system/{{object.pk}}" >
+        <a href="/materials/update-system/{{ object.pk }}" >
           <button type="button" class="btn btn-success" style="float: right">Edit System Data
           </button>
         </a>
       {% endif %}
-      <h3>{{object.compound_name}}</h3>
+      <h3>{{ object.compound_name }}</h3>
     </div>
 
     <div class="card-body">
@@ -47,31 +47,31 @@
                 {% if entry %}
                   <table class="table atomic-positions">
                     <tr>
-                      <td>a: {{entry.a}} &#8491;</td>
-                      <td>&alpha;: {{entry.alpha}}&deg;</td>
+                      <td>a: {{ entry.a }} &#8491;</td>
+                      <td>&alpha;: {{ entry.alpha }}&deg;</td>
                     </tr>
                     <tr>
-                      <td>b: {{entry.b}} &#8491;</td>
-                      <td>&beta;: {{entry.beta}}&deg;</td>
+                      <td>b: {{ entry.b }} &#8491;</td>
+                      <td>&beta;: {{ entry.beta }}&deg;</td>
                     </tr>
                     <tr>
-                      <td>c: {{entry.c}} &#8491;</td>
-                      <td>&gamma;: {{entry.gamma}}&deg;</td>
+                      <td>c: {{ entry.c }} &#8491;</td>
+                      <td>&gamma;: {{ entry.gamma }}&deg;</td>
                     </tr>
                   </table>
-                  <strong>Crystal system:</strong> {{entry.phase}} <br>
+                  <strong>Crystal system:</strong> {{ entry.phase }} <br>
                   {% if entry.temperature %}
-                    <strong>Temperature:</strong> {{entry.temperature}}K <br>
+                    <strong>Temperature:</strong> {{ entry.temperature }}K <br>
                   {% endif %}
-                  <strong>Method:</strong> {{entry.method}} <br>
+                  <strong>Method:</strong> {{ entry.method }} <br>
                   {% if entry.publication.doi_isbn %}
-                    <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+                    <strong>Publication:</strong> {{ entry.publication.doi_isbn }} <br>
                   {% endif %}
-                  <strong>Source:</strong> {{entry.source}} <br>
-                  <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                  <strong>Source:</strong> {{ entry.source }} <br>
+                  <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
                   {% if entry.comments %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Comments:</strong> {{entry.comments}}
+                      <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
                   {% with entry.publication.author_set.all as authors %}
@@ -81,7 +81,7 @@
                       Reference
                     </button>
                     <div id="reference1" class="collapse">
-                      {% include 'materials/reference_format.html' %}
+                      {% include 'materials/reference_format.html' with ref=entry.publication %}
                     </div>
                     <br>
                   {% endwith %}
@@ -94,7 +94,7 @@
                   <a href="{% url "materials:all_a_pos" id=object.id %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{object.atomicpositions_set.all|length}})
+                      See all entries ({{ object.atomicpositions_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -114,39 +114,39 @@
                 {% if entry %}
                   {% if entry.synthesis_method %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Method:</strong> {{entry.synthesis_method}}</div>
+                      <strong>Method:</strong> {{ entry.synthesis_method }}</div>
                   {% endif %}
                   {% if entry.starting_materials %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Starting Materials:</strong> {{entry.starting_materials}}
+                      <strong>Starting Materials:</strong> {{ entry.starting_materials }}
                     </div>
                   {% endif %}
                   {% if entry.remarks %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Remarks:</strong> {{entry.remarks}}
+                      <strong>Remarks:</strong> {{ entry.remarks }}
                     </div>
                   {% endif %}
                   {% if entry.product %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Product:</strong> {{entry.product}}
+                      <strong>Product:</strong> {{ entry.product }}
                     </div>
                   {% endif %}
-                  <!--<p class="details">{{entry.synthesis_method|truncatechars:50}}</p>-->
-                  <strong>Phase:</strong> {{entry.phase}} <br>
+                  <!--<p class="details">{{ entry.synthesis_method|truncatechars:50 }}</p>-->
+                  <strong>Phase:</strong> {{ entry.phase }} <br>
                   {% if entry.temperature %}
-                    <strong>Temperature:</strong> {{entry.temperature}}K <br>
+                    <strong>Temperature:</strong> {{ entry.temperature }}K <br>
                   {% endif %}
                   {% if entry.method %}
-                    <strong>Method:</strong> {{entry.method}} <br> <!--maybe this field should be left out-->
+                    <strong>Method:</strong> {{ entry.method }} <br> <!--maybe this field should be left out-->
                   {% endif %}
                   {% if entry.publication.doi_isbn %}
-                    <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+                    <strong>Publication:</strong> {{ entry.publication.doi_isbn }} <br>
                   {% endif %}
-                  <strong>Source:</strong> {{entry.source}} <br>
-                  <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                  <strong>Source:</strong> {{ entry.source }} <br>
+                  <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
                   {% if entry.comments %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Comments:</strong> {{entry.comments}}
+                      <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
                   {% with entry.publication.author_set.all as authors %}
@@ -156,7 +156,7 @@
                       Reference
                     </button>
                     <div id="reference2" class="collapse">
-                      {% include 'materials/reference_format.html' %}
+                      {% include 'materials/reference_format.html' with ref=entry.publication %}
                     </div>
                     <br>
                   {% endwith %}
@@ -169,7 +169,7 @@
                   <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{object.synthesismethod_set.all|length}})
+                      See all entries ({{ object.synthesismethod_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -196,20 +196,20 @@
                   <h3>PL file unavailable</h3>
                 {% endif %}
                 {% if entry %}
-                  <strong>Exciton Emission Peak:</strong> {{entry.exciton_emission}} nm <br>
+                  <strong>Exciton Emission Peak:</strong> {{ entry.exciton_emission }} nm <br>
                   {% if entry.temperature %}
-                    <strong>Temperature:</strong> {{entry.temperature}}K <br>
+                    <strong>Temperature:</strong> {{ entry.temperature }}K <br>
                   {% endif %}
-                  <strong>Crystal system:</strong> {{entry.phase}} <br>
-                  <strong>Method:</strong> {{entry.method}} <br>
+                  <strong>Crystal system:</strong> {{ entry.phase }} <br>
+                  <strong>Method:</strong> {{ entry.method }} <br>
                   {% if entry.publication.doi_isbn %}
-                    <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+                    <strong>Publication:</strong> {{ entry.publication.doi_isbn }} <br>
                   {% endif %}
-                  <strong>Source:</strong> {{entry.source}} <br>
-                  <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                  <strong>Source:</strong> {{ entry.source }} <br>
+                  <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
                   {% if entry.comments %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Comments:</strong> {{entry.comments}}
+                      <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
                   {% with entry.publication.author_set.all as authors %}
@@ -219,7 +219,7 @@
                       Reference
                     </button>
                     <div id="reference3" class="collapse">
-                      {% include 'materials/reference_format.html' %}
+                      {% include 'materials/reference_format.html' with ref=entry.publication %}
                     </div>
                     <br>
                   {% endwith %}
@@ -232,7 +232,7 @@
                   <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{object.excitonemission_set.all|length}})
+                      See all entries ({{ object.excitonemission_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -278,22 +278,22 @@
                   <p class="details">Band gap:
                     <span style="font-weight: normal;">
                       {% if entry.band_gap|length > 0 %}
-                        {{entry.band_gap}} eV
+                        {{ entry.band_gap }} eV
                       {% else %}N/A
                       {% endif %}
                     </span>
                   </p>
                   {% if entry.temperature %}
-                    <strong>Temperature:</strong> {{entry.temperature}} K <br>
+                    <strong>Temperature:</strong> {{ entry.temperature }} K <br>
                   {% endif %}
-                  <strong>Crystal system:</strong> {{entry.phase}} <br>
-                  <strong>Method:</strong> {{entry.method}} <br>
-                  <strong>Source:</strong> {{entry.source}}
+                  <strong>Crystal system:</strong> {{ entry.phase }} <br>
+                  <strong>Method:</strong> {{ entry.method }} <br>
+                  <strong>Source:</strong> {{ entry.source }}
                   <br>
-                  <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
+                  <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
                   {% if entry.comments %}
                     <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Comments:</strong> {{entry.comments}}
+                      <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
                   {% with entry.publication.author_set.all as authors %}
@@ -303,7 +303,7 @@
                       Reference
                     </button>
                     <div id="reference4" class="collapse">
-                      {% include 'materials/reference_format.html' %}
+                      {% include 'materials/reference_format.html' with ref=entry.publication %}
                     </div>
                     <br>
                   {% endwith %}
@@ -326,7 +326,7 @@
                   <a href="{% url "materials:all_entries" id=object.id type="band_structure" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{object.bandstructure_set.all|length}})
+                      See all entries ({{ object.bandstructure_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -349,13 +349,13 @@
                   <strong>Properties available:</strong>
                   <ul>
                     {% for property in properties %}
-                      <li>{{property}}</li>
+                      <li>{{ property }}</li>
                     {% endfor %}
                   </ul>
                   <a href="{% url "materials:all_entries" id=object.id type="material_prop" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{object.materialproperty_set.all|length}})
+                      See all entries ({{ object.materialproperty_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -366,6 +366,88 @@
           </div>
         </div>
 
+        {% for dataset in object.dataset_set.all %}
+          {% if user == dataset.created_by or dataset.visible %}
+            <div class="col-md-6">
+              <br>
+              <div class="card card-item">
+                {% if not dataset.visible %}
+                  <div style="background:#fadb9b">
+                {% endif %}
+                <div class="card-header">
+                  {% if user == dataset.created_by %}
+                    <a href="{% url 'materials:publish_system' pk=object.pk ds=dataset.pk %}">
+                      <button type="button" class="btn btn-success" style="float: right">
+                      {% if dataset.visible %}
+                        Unpublish
+                      {% else %}
+                        Publish
+                      {% endif %}
+                    </button>
+                    </a>
+                  {% endif %}
+                  <h5>{{ dataset.set_property|capfirst }}</h5>
+                </div>
+                {% if not dataset.visible %}
+                  </div>
+                {% endif %}
+                <div class="card-body">
+                  {% with series=dataset.dataseries_set.all|first %}
+                    <table class="table main-data">
+                      <thead>
+                        <tr>
+                          {% with datapoint=series.datapoint_set.all|first %}
+                            {% for value in datapoint.numericalvalue_set.all %}
+                              <th>
+                                {% if datapoint.numericalvalue_set.all|length == 1 %}
+                                  Values, {{ value.unit }}
+                                {% else %}
+                                  {{ value.value_property|capfirst }}, {{ value.unit }}
+                                {% endif %}
+                              </th>
+                            {% endfor %}
+                          {% endwith %}
+                        </tr>
+                      </thead>
+                      {% for datapoint in series.datapoint_set.all %}
+                        <tr>
+                          {% for value in datapoint.numericalvalue_set.all %}
+                            <td>{{ value.value }}</td>
+                          {% endfor %}
+                        </tr>
+                      {% endfor %}
+                    </table>
+
+                    {% if series.numericalvaluefixed_set.all|length > 0 %}
+                      <p>Fixed parameters: <br>
+                    {% endif %}
+                    {% for fixed_value in series.numericalvaluefixed_set.all %}
+                      {{ fixed_value.value_property }}: {{ fixed_value.value }}
+                      {% if fixed_value.unit != 'none' %}{{ fixed_value.unit }}{% endif %}<br>
+                    {% endfor %}
+                      </p>
+                  {% endwith %}
+
+                  Entry added on {{ dataset.created }}<br>
+                  Last updated on {{ dataset.updated }}<br>
+
+                  {% with dataset.reference.author_set.all as authors %}
+                    <button type="button" class="btn btn-primary" data-toggle="collapse"
+                            data-target="#dataset_reference">
+                      <span class="fa fa-book" aria-hidden="true"></span>
+                      Reference
+                    </button>
+                    <div id="dataset_reference" class="collapse">
+                      {% include 'materials/reference_format.html' with ref=dataset.reference %}
+                    </div>
+                    <br>
+                  {% endwith %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+
         {% include "materials/license_note.html" %}
       </div>
     </div>
@@ -375,13 +457,13 @@
 {% block script %}
   {% with entry=object.excitonemission_set.all|first %}
     <script type="text/javascript">
-     $('#pl-graph').load("../media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_pl.html");
+     $('#pl-graph').load("../media/uploads/{{ entry.phase}}_{{object.organic}}_{{object.inorganic }}_pl.html");
     </script>
   {% endwith %}
   {% with entry=object.bandstructure_set.all|first %}
     <script type="text/javascript">
-     var imglinkfull = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs_full.png';
-     var imglinkmini = '../media/uploads/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs_min.png';
+     var imglinkfull = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_full.png';
+     var imglinkmini = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_min.png';
      $('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
      $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
     </script>
@@ -392,7 +474,7 @@
      $(document).ready(function() {
        $('#jmol').html(
          Jmol.getAppletHtml("jmolApplet0", {
-           script: "load /media/uploads/{{entry.phase}}_{{object.organic}}_{{object.inorganic}}_apos.in",
+           script: "load /media/uploads/{{ entry.phase}}_{{object.organic}}_{{object.inorganic }}_apos.in",
            j2sPath: "{% static 'jsmol/j2s' %}",
            height: 450,
            width: 500,

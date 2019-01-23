@@ -1111,6 +1111,86 @@ def add_unit(request):
     return redirect(reverse('materials:add_data'))
 
 
+def submit_data(request):
+    dataset = models.Dataset()
+    dataset.system = models.System.objects.get(pk=request.POST['system'])
+    dataset.reference = models.Publication.objects.get(
+        pk=request.POST['publication'])
+    dataset.set_property = models.Property.objects.get(
+        pk=request.POST['primary_property'])
+    dataset.visible = 'dataset_visible' in request.POST
+    dataset.save(request.user)
+
+    dataseries = models.Dataseries(dataset=dataset)
+    dataseries.save(request.user)
+
+    if request.POST['secondary_property'] == '-1':
+        input_lines = request.POST['main_data'].split()
+        for value in input_lines:
+            datapoint = models.Datapoint(dataseries=dataseries)
+            datapoint.save(request.user)
+            numerical_value = models.NumericalValue(datapoint=datapoint)
+            numerical_value.qualifier = models.NumericalValue.PRIMARY
+            numerical_value.value_property = models.Property.objects.get(
+                pk=request.POST['primary_property'])
+            numerical_value.unit = models.Unit.objects.get(
+                pk=request.POST['primary_unit'])
+            numerical_value.value = float(value)
+            numerical_value.value_type = models.NumericalValue.ACCURATE
+            numerical_value.save(request.user)
+    else:
+        input_lines = request.POST['main_data'].split('\n')
+        for line in input_lines:
+            x_value, y_value = line.split()
+            datapoint = models.Datapoint(dataseries=dataseries)
+            datapoint.save(request.user)
+            numerical_value = models.NumericalValue(datapoint=datapoint)
+            numerical_value.qualifier = models.NumericalValue.SECONDARY
+            numerical_value.value_property = models.Property.objects.get(
+                pk=request.POST['secondary_property'])
+            numerical_value.unit = models.Unit.objects.get(
+                pk=request.POST['secondary_unit'])
+            numerical_value.value = float(x_value)
+            numerical_value.value_type = models.NumericalValue.ACCURATE
+            numerical_value.save(request.user)
+
+            numerical_value = models.NumericalValue(datapoint=datapoint)
+            numerical_value.qualifier = models.NumericalValue.PRIMARY
+            numerical_value.value_property = models.Property.objects.get(
+                pk=request.POST['primary_property'])
+            numerical_value.unit = models.Unit.objects.get(
+                pk=request.POST['primary_unit'])
+            numerical_value.value = float(y_value)
+            numerical_value.value_type = models.NumericalValue.ACCURATE
+            numerical_value.save(request.user)
+
+    n_fixed = 0
+    for key in request.POST:
+        if key.startswith('fixed_property'):
+            n_fixed += 1
+    for counter in range(n_fixed):
+        fixed_value = models.NumericalValueFixed(dataseries=dataseries)
+        fixed_value.value_property = models.Property.objects.get(
+            name=request.POST[f'fixed_property{counter}'])
+        fixed_value.unit = models.Unit.objects.get(
+            label=request.POST[f'fixed_unit{counter}'])
+        fixed_value.value = float(request.POST[f'fixed_data{counter}'])
+        fixed_value.value_type = models.NumericalValueFixed.ACCURATE
+        fixed_value.save(request.user)
+    messages.success(request,
+                     f'{len(input_lines)} new data point'
+                     f'{"s" if len(input_lines) > 1 else ""} successfully '
+                     'added to the database!')
+    return redirect(reverse('materials:add_data'))
+
+
+def toggle_system_publish(request, pk, ds):
+    dataset = models.Dataset.objects.get(pk=ds)
+    dataset.visible = not dataset.visible
+    dataset.save(request.user)
+    return redirect(reverse('materials:materials_system', args=[pk]))
+
+
 class SystemView(generic.DetailView):
     template_name = 'materials/system.html'
     model = models.System

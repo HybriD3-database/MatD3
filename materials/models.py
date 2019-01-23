@@ -46,20 +46,20 @@ class Unit(Base):
 
 def file_name(instance, filename):
     ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_apos.%s" % (instance.phase, instance.system.organic,
+    filename = '%s_%s_%s_apos.%s' % (instance.phase, instance.system.organic,
                                      instance.system.inorganic, ext)
     return os.path.join('uploads', filename)
 
 
 def pl_file_name(instance, filename):
     ext = filename.split('.')[-1]
-    filename = "%s_%s_%s_pl.%s" % (instance.phase, instance.system.organic,
+    filename = '%s_%s_%s_pl.%s' % (instance.phase, instance.system.organic,
                                    instance.system.inorganic, ext)
     return os.path.join('uploads', filename)
 
 
 def syn_file_name(instance, filename):
-    filename = "%s_%s_%s_syn.txt" % (instance.phase, instance.system.organic,
+    filename = '%s_%s_%s_syn.txt' % (instance.phase, instance.system.organic,
                                      instance.system.inorganic)
     return os.path.join('uploads', filename)
 
@@ -77,6 +77,13 @@ class Publication(models.Model):
     def __str__(self):
         return self.title
 
+    def getAuthorsAsString(self):
+        names = ', '.join([f'{x.first_name[0]}. {x.last_name}' for
+                           x in self.author_set.all()])
+        if names:
+            names += ','
+        return names
+
     def getAuthors(self):
         return self.author_set.all()
 
@@ -88,7 +95,7 @@ class Author(models.Model):
     publication = models.ManyToManyField(Publication)
 
     def __str__(self):
-        value = (self.first_name + " " + self.last_name + ", " +
+        value = (self.first_name + ' ' + self.last_name + ', ' +
                  self.institution)
         if len(value) > 45:
             value = value[:42] + '...'
@@ -106,7 +113,7 @@ class Tag(models.Model):
 
 
 class System(models.Model):
-    """Contains meta data for investigated system. """
+    """Contains meta data for investigated system."""
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
     group = models.CharField(max_length=100)  # aka Alternate names
@@ -131,9 +138,9 @@ class System(models.Model):
         return L
 
     def getAuthors(self):
-        """Returns a list of authors related to a system
+        """Returns a list of authors related to a system.
 
-        an author appears no more than once
+        An author appears no more than once.
 
         """
         def authorSort(author):  # function that decides author sort criteria
@@ -148,25 +155,6 @@ class System(models.Model):
                         L.append(author)
 
         return sorted(L, key=authorSort)
-
-    # This type of function can be used to display numbers as subscripts in
-    # chemical formulas. Simply create functions of this type for each field
-    # that would need subscripts, then call it from the template e.g.
-    # {{system.compoundNameFormat|safe}}. The |safe allows the string to be
-    # rendered as html, but has potential security issues if someone were to
-    # enter html into a form field (such as compound_name). This also has the
-    # problem of turning every number into a subscript, even ones that are part
-    # of an abbreviation (e.g. AE4TPbI4).
-    '''
-    def compoundNameFormat(self):
-        formattedString = ''
-        for c in self.compound_name:
-            if c.isdigit():
-                formattedString += '<sub>' + c + '</sub>'
-            else:
-                formattedString += c
-        return formattedString
-    '''
 
 
 class Phase(models.Model):
@@ -194,7 +182,7 @@ class PropertyOld(models.Model):
     property = models.CharField(max_length=500)
 
     class Meta:
-        verbose_name_plural = "properties"
+        verbose_name_plural = 'properties'
 
     def __str__(self):
         return self.property
@@ -227,7 +215,7 @@ class SynthesisMethod(IDInfo):
     syn_file = models.FileField(upload_to=syn_file_name, blank=True)
 
     def __str__(self):
-        return (self.system.compound_name + " synthesis #" +
+        return (self.system.compound_name + ' synthesis #' +
                 str(self.methodNumber()))
 
     def methodNumber(self):
@@ -264,14 +252,14 @@ class BandStructure(IDInfo):
 
     def getFullBSPath(self):
         path = (
-            "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_full.png" %
+            '../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_full.png' %
             (self.phase, self.system.organic, self.system.inorganic, self.pk,
              self.phase, self.system.organic, self.system.inorganic, self.pk))
         return path
 
     def getMiniBSPath(self):
         path = (
-            "../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png" %
+            '../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png' %
             (self.phase, self.system.organic, self.system.inorganic, self.pk,
              self.phase, self.system.organic, self.system.inorganic, self.pk))
         return path
@@ -293,10 +281,10 @@ class AtomicPositions(IDInfo):
                                          blank=True)
 
     class Meta:
-        verbose_name_plural = "atomic positions"
+        verbose_name_plural = 'atomic positions'
 
     def __str__(self):
-        return self.phase.phase + " " + self.system.formula
+        return self.phase.phase + ' ' + self.system.formula
 
 
 class MaterialProperty(IDInfo):
@@ -305,7 +293,7 @@ class MaterialProperty(IDInfo):
     value = models.CharField(max_length=500)
 
     class Meta:
-        verbose_name_plural = "material properties"
+        verbose_name_plural = 'material properties'
 
     def __str__(self):
         return str(self.system) + ' ' + str(self.property) + ': ' + self.value
@@ -317,7 +305,7 @@ class BondAngle(IDInfo):
     mhm_angle = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.hmh_angle + " " + self.mhm_angle
+        return self.hmh_angle + ' ' + self.mhm_angle
 
 
 class BondLength(IDInfo):
@@ -326,7 +314,63 @@ class BondLength(IDInfo):
     mhm_length = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.hmh_length + " " + self.mhm_length
+        return self.hmh_length + ' ' + self.mhm_length
+
+
+class Dataset(Base):
+    label = models.CharField(max_length=1000)
+    system = models.ForeignKey(System, on_delete=models.PROTECT)
+    set_property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    reference = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    visible = models.BooleanField()
+
+
+class Dataseries(Base):
+    label = models.CharField(max_length=100)
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+
+
+class Datapoint(Base):
+    dataseries = models.ForeignKey(Dataseries, on_delete=models.CASCADE)
+
+
+class NumericalValueBase(Base):
+    ACCURATE = 0
+    APPROXIMATE = 1
+    LOWER_BOUND = 2
+    UPPER_BOUND = 3
+    ERROR = 4
+    VALUE_TYPES = (
+        (ACCURATE, 'accurate'),
+        (APPROXIMATE, 'approximate'),
+        (LOWER_BOUND, 'lower_bound'),
+        (UPPER_BOUND, 'upper_bound'),
+        (ERROR, 'error'),
+    )
+    value_property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    value = models.FloatField()
+    value_type = models.PositiveSmallIntegerField(choices=VALUE_TYPES)
+
+    class Meta:
+        abstract = True
+
+
+class NumericalValue(NumericalValueBase):
+    PRIMARY = 0
+    SECONDARY = 1
+    QUALIFIER_TYPES = (
+        (PRIMARY, 'primary'),
+        (SECONDARY, 'secondary'),
+    )
+    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
+    qualifier = models.PositiveSmallIntegerField(choices=QUALIFIER_TYPES)
+
+
+class NumericalValueFixed(NumericalValueBase):
+    dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE)
+    dataseries = models.ForeignKey(Dataseries, null=True,
+                                   on_delete=models.CASCADE)
 
 
 @django.dispatch.receiver(models.signals.post_delete, sender=BandStructure)
