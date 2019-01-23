@@ -64,11 +64,6 @@ def syn_file_name(instance, filename):
     return os.path.join('uploads', filename)
 
 
-class Post(models.Model):
-    """Create your models here."""
-    post = models.CharField(max_length=500)
-
-
 class Publication(models.Model):
     author_count = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=1000)
