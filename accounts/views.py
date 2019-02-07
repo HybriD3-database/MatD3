@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.shortcuts import render, redirect
 from accounts.forms import (RegistrationForm, EditProfileForm, EditUserForm,
                             ChangePasswordForm)

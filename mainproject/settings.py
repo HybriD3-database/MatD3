@@ -1,4 +1,4 @@
-"""Django settings for myproject project.
+"""Django settings for HybriD3.
 
 """
 
