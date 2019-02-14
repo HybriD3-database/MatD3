@@ -374,7 +374,7 @@ class NumericalValueFixed(NumericalValueBase):
 
 @django.dispatch.receiver(models.signals.post_delete, sender=BandStructure)
 def del_bs(sender, instance, **kwargs):
-    folder_loc = instance.folder_location
+    folder_loc = os.path.join(settings.MEDIA_ROOT, instance.folder_location)
     if os.path.isdir(folder_loc):
         shutil.rmtree(folder_loc)
 

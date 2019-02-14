@@ -1,7 +1,7 @@
-import io
-import os
 import functools
+import io
 import operator
+import os
 import zipfile
 
 from django.contrib import messages
@@ -213,7 +213,7 @@ def data_dl(request, type, id, bandgap=False):
         p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
-        dir_in_str = obj.folder_location
+        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
         compound_name = dir_in_str.split('/')[-1]
         meta_filename = file_name_prefix + '.txt'
         meta_filepath = os.path.join(dir_in_str, meta_filename)
@@ -269,7 +269,7 @@ def data_dl(request, type, id, bandgap=False):
         p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
-        dir_in_str = obj.folder_location
+        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
         compound_name = dir_in_str.split('/')[-1]
         filenames = []
         for F in ('control.in', 'geometry.in'):
@@ -974,8 +974,7 @@ class AddBandStructureView(generic.TemplateView):
                     # save so a pk can be created for use in the
                     # folder location
                     new_form.save()
-                    bs_folder_loc = (settings.MEDIA_ROOT +
-                                     '/uploads/%s_%s_%s_%s_bs' %
+                    bs_folder_loc = ('uploads/%s_%s_%s_%s_bs' %
                                      (new_form.phase, new_form.system.organic,
                                       new_form.system.inorganic, new_form.pk))
                     new_form.folder_location = bs_folder_loc

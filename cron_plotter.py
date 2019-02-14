@@ -26,7 +26,7 @@ for emission in emissions:
 band_structures = BandStructure.objects.filter(plotted=False)
 
 for band in band_structures:
-    folder_loc = band.folder_location
+    folder_loc = os.path.join(settings.MEDIA_ROOT, band.folder_location)
     if os.path.isdir(folder_loc):
         prep_and_plot(folder_loc)
         band.plotted = True
