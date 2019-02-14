@@ -1,20 +1,22 @@
 from django.contrib import admin
 
-from materials.models import (
-    Tag, System, AtomicPositions, Publication, Author, Phase, ExcitonEmission,
-    SynthesisMethod, BandStructure, Method, SpecificMethod, PropertyOld,
-    MaterialProperty)
+from . import models
 
-admin.site.register(System)
-admin.site.register(AtomicPositions)
-admin.site.register(Publication)
-admin.site.register(Author)
-admin.site.register(Phase)
-admin.site.register(ExcitonEmission)
-admin.site.register(SynthesisMethod)
-admin.site.register(BandStructure)
-admin.site.register(Tag)
-admin.site.register(Method)
-admin.site.register(SpecificMethod)
-admin.site.register(PropertyOld)
-admin.site.register(MaterialProperty)
+
+class BandStructureAdmin(admin.ModelAdmin):
+    list_display = ('system', 'folder_location')
+
+
+admin.site.register(models.System)
+admin.site.register(models.AtomicPositions)
+admin.site.register(models.Publication)
+admin.site.register(models.Author)
+admin.site.register(models.Phase)
+admin.site.register(models.ExcitonEmission)
+admin.site.register(models.SynthesisMethod)
+admin.site.register(models.BandStructure, BandStructureAdmin)
+admin.site.register(models.Tag)
+admin.site.register(models.Method)
+admin.site.register(models.SpecificMethod)
+admin.site.register(models.PropertyOld)
+admin.site.register(models.MaterialProperty)
