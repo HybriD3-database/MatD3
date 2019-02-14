@@ -2,7 +2,7 @@ import sys
 import os
 import django
 
-from mainproject.settings.base import MEDIA_ROOT
+from mainproject.settings import MEDIA_ROOT
 from materials.plotting.pl_plotting import plotpl
 from materials.plotting.bs_plotting import prep_and_plot
 from materials.models import ExcitonEmission, BandStructure
@@ -26,7 +26,7 @@ for emission in emissions:
 band_structures = BandStructure.objects.filter(plotted=False)
 
 for band in band_structures:
-    folder_loc = os.path.join(settings.MEDIA_ROOT, band.folder_location)
+    folder_loc = os.path.join(MEDIA_ROOT, band.folder_location)
     if os.path.isdir(folder_loc):
         prep_and_plot(folder_loc)
         band.plotted = True
