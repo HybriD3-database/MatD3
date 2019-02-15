@@ -375,18 +375,27 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
+                  <h5>{{ dataset.set_property|capfirst }}</h5>
                   {% if user == dataset.created_by %}
+                    <a href="{% url 'materials:toggle_plotted' pk=object.pk ds=dataset.pk %}">
+                      <button type="button" class="btn btn-success">
+                        {% if dataset.plotted %}
+                          Show table
+                        {% else %}
+                          Show figure
+                        {% endif %}
+                      </button>
+                    </a>
                     <a href="{% url 'materials:publish_system' pk=object.pk ds=dataset.pk %}">
-                      <button type="button" class="btn btn-success" style="float: right">
-                      {% if dataset.visible %}
-                        Unpublish
-                      {% else %}
-                        Publish
-                      {% endif %}
-                    </button>
+                      <button type="button" class="btn btn-success">
+                        {% if dataset.visible %}
+                          Unpublish
+                        {% else %}
+                          Publish
+                        {% endif %}
+                      </button>
                     </a>
                   {% endif %}
-                  <h5>{{ dataset.set_property|capfirst }}</h5>
                 </div>
                 {% if not dataset.visible %}
                   </div>

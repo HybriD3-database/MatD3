@@ -1186,9 +1186,16 @@ def submit_data(request):
     return redirect(reverse('materials:add_data'))
 
 
-def toggle_system_publish(request, pk, ds):
+def toggle_dataset_publish(request, pk, ds):
     dataset = models.Dataset.objects.get(pk=ds)
     dataset.visible = not dataset.visible
+    dataset.save(request.user)
+    return redirect(reverse('materials:materials_system', args=[pk]))
+
+
+def toggle_dataset_plotted(request, pk, ds):
+    dataset = models.Dataset.objects.get(pk=ds)
+    dataset.plotted = not dataset.plotted
     dataset.save(request.user)
     return redirect(reverse('materials:materials_system', args=[pk]))
 
