@@ -78,3 +78,25 @@ table.main-data {
 .nav-tabs-band-structure > li > a {
     border-bottom: 1px solid #e8eaf6;
 }
+
+.tooltip-container {
+    color:#bcdbea;
+}
+
+.tooltip-container .tooltiptext {
+    visibility: hidden;
+    width: 300px;
+    font-weight: normal;
+    background-color: #ccebfa;
+    font-size: 12px;
+    text-align: left;
+    color: #555;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip-container:hover .tooltiptext {
+    visibility: visible;
+}

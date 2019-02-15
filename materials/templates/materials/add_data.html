@@ -49,6 +49,9 @@
             <div class="form row">
               <div class="col-md-2 col-form-label">
                 <label for="pub-selector">Select publication</label>
+                <i class="fa fa-question-circle tooltip-container" style="margin-right:-50px">
+                  <span class="tooltiptext">Select publication where the data to be inserted is published.</span>
+                </i>
               </div>
               <div class="col-md-7 mb-3">
                 <select name="publication" class="form-control" id="pub-selector">
@@ -76,6 +79,9 @@
             <div class="form row">
               <div class="col-md-2 col-form-label">
                 <label for="sys-selector">Select system</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
+                </i>
               </div>
               <div class="col-md-7 mb-3">
                 <select name="system" class="form-control" id="sys-selector">
@@ -94,11 +100,17 @@
               <input type="checkbox" class="form-check-input" name="dataset_visible"
                      id="dataset-visible" checked="checked">
               <label class="form-check-label" for="dataset-visible">Visible to public</label>
+              <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
+                <span class="tooltiptext">Choose whether the data should be initially visible on the website. If not, only you can view the data. This setting can be easily toggled later.</span>
+              </i>
             </div>
             <div class="form-check form-check-inline">
               <input type="checkbox" class="form-check-input" name="dataset_plotted"
                      id="dataset-plotted">
               <label class="form-check-label" for="dataset-plotted">Plotted</label>
+              <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
+                <span class="tooltiptext">Choose whether the data is more suitably presented as a figure or as a table. Especially for a large amount of data points, a figure ("plotted") might make more sense.</span>
+              </i>
             </div>
           </div>
         </div>
@@ -112,6 +124,9 @@
                 <div class="form-row">
                   <div class="col-md-6 mb-3">
                     <label for="primary_property">Primary property</label>
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Define the primary property of interest (in a figure, this typically denotes the y-axis).</span>
+                    </i>
                     <select name="primary_property" class="form-control">
                       {% for property in properties %}
                         <option value="{{ property.pk }}">{{ property }}</option>
@@ -120,6 +135,9 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="primary_unit">Primary unit</label>
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Define the primary unit of interest (in a figure, this typically denotes the unit of the y-axis). For dimensionless physical properties, select "none". If the data is in arbitray units, select "a.u." (note that this is different from "none").</span>
+                    </i>
                     <select name="primary_unit" class="form-control">
                       {% for unit in units %}
                         <option value="{{ unit.pk }}">{{ unit }}</option>
@@ -130,6 +148,9 @@
                 <div class="form-row">
                   <div class="col-md-6 mb-3">
                     <label for="secondary_property">Secondary property</label>
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Define the secondary property of interest (in a figure, this typically denotes the x-axis). When inserting values that have no direct dependence on a physical property (e.g., a list of phonon energies), the secondary property may be left empty.</span>
+                    </i>
                     <select id="secondary-property" name="secondary_property" class="form-control">
                       <option value="-1">- none -</option>
                       {% for property in properties %}
@@ -139,6 +160,9 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="secondary_unit">Secondary unit</label>
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Define the secondry unit of interest (in a figure, this typically denotes the unit of the x-axis).</span>
+                    </i>
                     <select id="secondary-unit" name="secondary_unit" class="form-control" disabled>
                       {% for unit in units %}
                         <option value="{{ unit.pk }}">{{ unit }}</option>
@@ -149,12 +173,18 @@
               </div>
               <div class="col-md-4">
                 <label for="main_data">Values</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values).</span>
+                </i>
                 <textarea id="main-data" class="form-control" name="main_data" rows="4"
-                placeholder="value_1 value_2 ..."></textarea>
+                          placeholder="value_1 value_2 ..."></textarea>
               </div>
             </div>
             <div id="fixed-properties">
             </div>
+            <i class="fa fa-question-circle fa-2x float-right tooltip-container">
+              <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
+            </i>
             <button type="button" id="add-fixed-property"
                     class="btn btn-info float-right">
               Add fixed property
