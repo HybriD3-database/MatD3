@@ -392,32 +392,37 @@
                   </div>
                 {% endif %}
                 <div class="card-body">
-                  {% with series=dataset.dataseries_set.all|first %}
-                    <table class="table main-data">
-                      <thead>
-                        <tr>
-                          {% with datapoint=series.datapoint_set.all|first %}
+                  {% if dataset.plotted %}
+                    <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
+                  {% else %}
+                    {% with series=dataset.dataseries_set.all|first %}
+                      <table class="table main-data">
+                        <thead>
+                          <tr>
+                            {% with datapoint=series.datapoint_set.all|first %}
+                              {% for value in datapoint.numericalvalue_set.all %}
+                                <th>
+                                  {% if datapoint.numericalvalue_set.all|length == 1 %}
+                                    Values, {{ value.unit }}
+                                  {% else %}
+                                    {{ value.value_property|capfirst }}, {{ value.unit }}
+                                  {% endif %}
+                                </th>
+                              {% endfor %}
+                            {% endwith %}
+                          </tr>
+                        </thead>
+                        {% for datapoint in series.datapoint_set.all %}
+                          <tr>
                             {% for value in datapoint.numericalvalue_set.all %}
-                              <th>
-                                {% if datapoint.numericalvalue_set.all|length == 1 %}
-                                  Values, {{ value.unit }}
-                                {% else %}
-                                  {{ value.value_property|capfirst }}, {{ value.unit }}
-                                {% endif %}
-                              </th>
+                              <td>{{ value.value }}</td>
                             {% endfor %}
-                          {% endwith %}
-                        </tr>
-                      </thead>
-                      {% for datapoint in series.datapoint_set.all %}
-                        <tr>
-                          {% for value in datapoint.numericalvalue_set.all %}
-                            <td>{{ value.value }}</td>
-                          {% endfor %}
-                        </tr>
-                      {% endfor %}
-                    </table>
-
+                          </tr>
+                        {% endfor %}
+                      </table>
+                    {% endwith %}
+                  {% endif %} <!-- if figure -->
+                  {% with series=dataset.dataseries_set.all|first %}
                     {% if series.numericalvaluefixed_set.all|length > 0 %}
                       <p>Fixed parameters: <br>
                     {% endif %}
@@ -480,6 +485,27 @@
            width: 500,
          }));
      });
+    </script>
+    <script src="{% static 'materials/javascript/plot_data.js' %}"></script>
+    <script>
+     {% for dataset in object.dataset_set.all %}
+     {% with series=dataset.dataseries_set.all|first %}
+     data = [
+       {% for datapoint in series.datapoint_set.all %}
+       {x: {{ datapoint.numericalvalue_set.all.0.value }},
+        y: {{ datapoint.numericalvalue_set.all.1.value }}},
+       {% endfor %}
+     ];
+     plot_data(
+       'figure_{{ dataset.pk }}',
+       data,
+       '{{ series.datapoint_set.all.0.numericalvalue_set.all.0.value_property }}',
+       '{{ series.datapoint_set.all.0.numericalvalue_set.all.0.unit }}',
+       '{{ series.datapoint_set.all.0.numericalvalue_set.all.1.value_property }}',
+       '{{ series.datapoint_set.all.0.numericalvalue_set.all.1.unit }}',
+     );
+     {% endwith %}
+     {% endfor %}
     </script>
   {% endwith %}
 {% endblock %}

@@ -90,14 +90,15 @@
                 <input class="form-control" id="sys-search" type="text" placeholder="Search..">
               </div>
             </div>
-            <div class="form row">
-              <div class="col-md-2 col-form-label">
-                <label class="form-check-label" for="dataset-visible">Visible to public</label>
-              </div>
-              <div class="col-md-10  mb-3">
-                <input type="checkbox" class="form-check-input" name="dataset_visible"
-                       id="dataset-visible" checked="checked">
-              </div>
+            <div class="form-check form-check-inline">
+              <input type="checkbox" class="form-check-input" name="dataset_visible"
+                     id="dataset-visible" checked="checked">
+              <label class="form-check-label" for="dataset-visible">Visible to public</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input type="checkbox" class="form-check-input" name="dataset_plotted"
+                     id="dataset-plotted">
+              <label class="form-check-label" for="dataset-plotted">Plotted</label>
             </div>
           </div>
         </div>
@@ -286,7 +287,7 @@
      $(this).parents('.form-row').remove();
    });
    /* Depending on whether the secondary property is none, set
-   visibility of the secondary unit and the placeholder */
+      visibility of the secondary unit and the placeholder */
    $('#secondary-property').change(function() {
      if ($('#secondary-property option:selected').attr('value') == -1) {
        $('#secondary-unit').prop('disabled', true);

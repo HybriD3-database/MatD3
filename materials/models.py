@@ -322,6 +322,7 @@ class Dataset(Base):
     set_property = models.ForeignKey(Property, on_delete=models.PROTECT)
     reference = models.ForeignKey(Publication, on_delete=models.PROTECT)
     visible = models.BooleanField()
+    plotted = models.BooleanField(default=True)
 
 
 class Dataseries(Base):
