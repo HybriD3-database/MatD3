@@ -1,5 +1,6 @@
 import functools
 import io
+import logging
 import operator
 import os
 import zipfile
@@ -19,6 +20,9 @@ from mainproject import settings
 from materials import forms
 from materials import models
 import materials.rangeparser
+
+
+logger = logging.getLogger(__name__)
 
 
 def data_dl(request, type, id, bandgap=False):
