@@ -129,7 +129,7 @@ class AddSynthesisMethod(forms.ModelForm):
                    'product', 'comments')
 
     class Meta:
-        model = models.SynthesisMethod
+        model = models.SynthesisMethodOld
         exclude = ('contributor', 'publication', 'system', 'method',
                    'specific_method')
         labels = {

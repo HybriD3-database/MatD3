@@ -110,7 +110,7 @@
               <h5>Synthesis Methods</h5>
             </div>
             <div class="card-body">
-              {% with entry=object.synthesismethod_set.all|first %}
+              {% with entry=object.synthesismethodold_set.all|first %}
                 {% if entry %}
                   {% if entry.synthesis_method %}
                     <div style="margin-left: 20px; text-indent: -20px;">
@@ -169,7 +169,7 @@
                   <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{ object.synthesismethod_set.all|length }})
+                      See all entries ({{ object.synthesismethodold_set.all|length }})
                     </button>
                   </a>
                 {% else %}

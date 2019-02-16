@@ -11,7 +11,7 @@
       <label for="synthesis-methods" style="padding-top: 10px;">Related Synthesis Method (optional):</label>
       <select id="synthesis-methods" name="synthesis-methods" class="form-control">
         <option value="None">None</option>
-        {% for syn in search_result.0.synthesismethod_set.all %}
+        {% for syn in search_result.0.synthesismethodold_set.all %}
           <option value="{{syn.pk}}">Method {{forloop.counter}} -- {% if syn.product %}Product: {{syn.product|truncatechars:40}} {% else %} No product listed {% endif %}</option>
         {% endfor %}
       </select>
@@ -32,11 +32,11 @@
      'synthesis-methods': {
        {% for system in search_result %}
        {{system.pk}}: {
-         text: ['None', {% for syn in system.synthesismethod_set.all %}
+         text: ['None', {% for syn in system.synthesismethodold_set.all %}
                 'Method {{forloop.counter}} -- {% if syn.product %}Product: {{syn.product|truncatechars:40}} {% else %} No product listed {% endif %}',
          {% endfor %}
          ],
-         value: ['None', {% for syn in system.synthesismethod_set.all %} '{{syn.pk}}',
+         value: ['None', {% for syn in system.synthesismethodold_set.all %} '{{syn.pk}}',
          {% endfor %}
          ]
        },

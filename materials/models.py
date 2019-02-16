@@ -205,7 +205,7 @@ class IDInfo(models.Model):
         return self.publication.getAuthors()
 
 
-class SynthesisMethod(IDInfo):
+class SynthesisMethodOld(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     synthesis_method = models.TextField(max_length=1000, blank=True)
     starting_materials = models.TextField(max_length=1000, blank=True)
@@ -228,7 +228,7 @@ class ExcitonEmission(IDInfo):
     exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
     pl_file = models.FileField(upload_to=pl_file_name, blank=True)
     plotted = models.BooleanField(default=False)
-    synthesis_method = models.ForeignKey(SynthesisMethod,
+    synthesis_method = models.ForeignKey(SynthesisMethodOld,
                                          on_delete=models.PROTECT, null=True,
                                          blank=True)
 
@@ -242,7 +242,7 @@ class BandStructure(IDInfo):
     folder_location = models.CharField(max_length=500, blank=True)
     plotted = models.BooleanField(default=False)
     visible = models.BooleanField(default=False)
-    synthesis_method = models.ForeignKey(SynthesisMethod,
+    synthesis_method = models.ForeignKey(SynthesisMethodOld,
                                          on_delete=models.PROTECT, null=True,
                                          blank=True)
 
@@ -275,7 +275,7 @@ class AtomicPositions(IDInfo):
     volume = models.CharField(max_length=50, blank=True)
     Z = models.CharField(max_length=50, blank=True)
     fhi_file = models.FileField(upload_to=file_name, blank=True)
-    synthesis_method = models.ForeignKey(SynthesisMethod,
+    synthesis_method = models.ForeignKey(SynthesisMethodOld,
                                          on_delete=models.PROTECT, null=True,
                                          blank=True)
 

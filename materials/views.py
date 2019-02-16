@@ -157,7 +157,7 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
     elif type == 'synthesis':
-        obj = m.SynthesisMethod.objects.get(id=id)
+        obj = m.SynthesisMethodOld.objects.get(id=id)
         p_obj = models.System.objects.get(synthesismethod=obj)
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
                                              p_obj.inorganic)
@@ -329,7 +329,7 @@ def all_entries(request, id, type):
     str_to_model = {
         'atomic_positions': models.AtomicPositions,
         'exciton_emission': models.ExcitonEmission,
-        'synthesis': models.SynthesisMethod,
+        'synthesis': models.SynthesisMethodOld,
         'band_structure': models.BandStructure,
         'material_prop': models.MaterialProperty
     }
@@ -507,7 +507,7 @@ class AddAPosView(generic.TemplateView):
             syn_pk = request.POST.get('synthesis-methods')
             try:
                 apos_form.synthesis_method = (
-                    models.SynthesisMethod.objects.get(pk=int(syn_pk)))
+                    models.SynthesisMethodOld.objects.get(pk=int(syn_pk)))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
@@ -869,7 +869,7 @@ class AddExcitonEmissionView(generic.TemplateView):
             # print 'file: ', request.FILES.get('pl_file')
             syn_pk = request.POST.get('synthesis-methods')
             try:
-                new_form.synthesis_method = models.SynthesisMethod.objects.get(
+                new_form.synthesis_method = models.SynthesisMethodOld.objects.get(
                     pk=int(syn_pk))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
@@ -963,7 +963,7 @@ class AddBandStructureView(generic.TemplateView):
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
             try:
-                new_form.synthesis_method = models.SynthesisMethod.objects.get(
+                new_form.synthesis_method = models.SynthesisMethodOld.objects.get(
                     pk=int(syn_pk))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
@@ -1261,7 +1261,7 @@ class AtomicPositionsDeleteView(generic.DeleteView):
 
 
 class SynthesisMethodUpdateView(generic.UpdateView):
-    model = models.SynthesisMethod
+    model = models.SynthesisMethodOld
     template_name = 'materials/update_synthesis.html'
     form_class = forms.AddSynthesisMethod
 
@@ -1271,7 +1271,7 @@ class SynthesisMethodUpdateView(generic.UpdateView):
 
 
 class SynthesisMethodDeleteView(generic.DeleteView):
-    model = models.SynthesisMethod
+    model = models.SynthesisMethodOld
     template_name = 'materials/delete_synthesis.html'
     form_class = forms.AddSynthesisMethod
 
