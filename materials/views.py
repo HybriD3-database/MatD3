@@ -1114,6 +1114,7 @@ def add_unit(request):
 
 
 def submit_data(request):
+    # Create data set
     dataset = models.Dataset()
     dataset.system = models.System.objects.get(pk=request.POST['system'])
     dataset.reference = models.Publication.objects.get(
@@ -1122,10 +1123,22 @@ def submit_data(request):
         pk=request.POST['primary_property'])
     dataset.visible = 'dataset_visible' in request.POST
     dataset.save(request.user)
-
+    # Computational details
+    # Only include this if there are any computational details!
+    computational = models.ComputationalDetails(dataset=dataset)
+    computational.code = request.POST['codeName']
+    computational.nonperturbative_level = request.POST['nonperturbativeLevel']
+    computational.kgrid = request.POST['Kgrid']
+    computational.relativity_level = request.POST['relativityLevel']
+    computational.SO_coupling = (request.POST['SOcouplingYesNo'] ==
+                                 'SO_coupling_yes')
+    computational.basis = request.POST['basisSets']
+    computational.postprocessing = request.POST['postProcessing']
+    computational.save(request.user)
+    # Create data series
     dataseries = models.Dataseries(dataset=dataset)
     dataseries.save(request.user)
-
+    # Read in main data
     if request.POST['secondary_property'] == '-1':
         input_lines = request.POST['main_data'].split()
         for value in input_lines:
@@ -1146,6 +1159,7 @@ def submit_data(request):
             x_value, y_value = line.split()
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
+            # x-values
             numerical_value = models.NumericalValue(datapoint=datapoint)
             numerical_value.qualifier = models.NumericalValue.SECONDARY
             numerical_value.value_property = models.Property.objects.get(
@@ -1155,7 +1169,7 @@ def submit_data(request):
             numerical_value.value = float(x_value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
-
+            # y-values
             numerical_value = models.NumericalValue(datapoint=datapoint)
             numerical_value.qualifier = models.NumericalValue.PRIMARY
             numerical_value.value_property = models.Property.objects.get(
@@ -1165,7 +1179,7 @@ def submit_data(request):
             numerical_value.value = float(y_value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
-
+    # Fixed properties
     n_fixed = 0
     for key in request.POST:
         if key.startswith('fixed_property'):

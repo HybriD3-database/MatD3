@@ -442,17 +442,50 @@
                       </p>
                   {% endwith %}
 
-                  Entry added on {{ dataset.created }}<br>
-                  Last updated on {{ dataset.updated }}<br>
-
-                  {% with dataset.reference.author_set.all as authors %}
-                    <button type="button" class="btn btn-primary" data-toggle="collapse"
-                            data-target="#dataset_reference">
-                      <span class="fa fa-book" aria-hidden="true"></span>
+                  <div class="card">
+                    <button class="btn" data-toggle="collapse"
+                            data-target="#computational-body-{{ dataset.pk }}">
+                      Computational details
+                    </button>
+                    <div class="collapse" id="computational-body-{{ dataset.pk }}">
+                      <div class="card-body">
+                        {% with dataset.computationaldetails_set.all|first as comp %}
+                          {% if comp.code %}
+                            <p>Code: {{ comp.code }}</p>
+                          {% endif %}
+                          {% if comp.nonperturbative_level %}
+                            <p>Non-perturbative level of theory: {{ comp.nonperturbative_level }}</p>
+                          {% endif %}
+                          {% if comp.kgrid %}
+                            <p>K-point grid: {{ comp.kgrid }}</p>
+                          {% endif %}
+                          {% if comp.relativity_level %}
+                            <p>Level of relativity: {{ comp.relativity_level }}</p>
+                          {% endif %}
+                          {% if comp.SO_coupling %}
+                            <p>Spin-orbit coupling: yes</p>
+                          {% else %}
+                            <p>Spin-orbit coupling: no</p>
+                          {% endif %}
+                          {% if comp.basis %}
+                            <p>Basis sets: {{ comp.basis }}</p>
+                          {% endif %}
+                          {% if comp.postprocessing %}
+                            <p>Postprocessing: {{ comp.postprocessing }}</p>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <button class="btn" data-toggle="collapse"
+                            data-target="#reference-body-{{ dataset.pk }}">
                       Reference
                     </button>
-                    <div id="dataset_reference" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=dataset.reference %}
+                    <div class="collapse" id="reference-body-{{ dataset.pk }}">
+                      <div class="card-body">
+                        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+                      </div>
                     </div>
                     <br>
                   {% endwith %}
@@ -495,14 +528,16 @@
          }));
      });
     </script>
-    <script src="{% static 'materials/javascript/plot_data.js' %}"></script>
-    <script>
-     {% for dataset in object.dataset_set.all %}
+  {% endwith %}
+  <script src="{% static 'materials/javascript/plot_data.js' %}"></script>
+  <script>
+   {% for dataset in object.dataset_set.all %}
+   if (document.getElementById('figure_{{ dataset.pk }}')) {
      {% with series=dataset.dataseries_set.all|first %}
      data = [
        {% for datapoint in series.datapoint_set.all %}
        {x: {{ datapoint.numericalvalue_set.all.0.value }},
-        y: {{ datapoint.numericalvalue_set.all.1.value }}},
+        y: {{ datapoint.numericalvalue_set.all.1.value|default:0 }}},
        {% endfor %}
      ];
      plot_data(

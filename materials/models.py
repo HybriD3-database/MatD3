@@ -373,6 +373,18 @@ class NumericalValueFixed(NumericalValueBase):
                                    on_delete=models.CASCADE)
 
 
+class ComputationalDetails(Base):
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    code = models.CharField(max_length=40)
+    nonperturbative_level = models.CharField(max_length=50)
+    kgrid = models.CharField(max_length=40)
+    relativity_level = models.CharField(max_length=40)
+    SO_coupling = models.BooleanField()
+    basis = models.CharField(max_length=100)
+    postprocessing = models.CharField(max_length=100)
+    dispersion_correction = models.CharField(max_length=100)
+
+
 @django.dispatch.receiver(models.signals.post_delete, sender=BandStructure)
 def del_bs(sender, instance, **kwargs):
     folder_loc = os.path.join(settings.MEDIA_ROOT, instance.folder_location)
