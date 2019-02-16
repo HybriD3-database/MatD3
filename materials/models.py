@@ -239,6 +239,14 @@ class ExcitonEmission(IDInfo):
     def __str__(self):
         return str(self.exciton_emission)
 
+    def delete(self, *args, **kwargs):
+        if(self.pl_file):
+            file_loc = os.path.join(settings.MEDIA_ROOT, 'uploads',
+                                    str(self.pl_file).split('/')[1])
+            if os.path.isfile(file_loc):
+                os.remove(file_loc)
+        super().delete(*args, **kwargs)
+
 
 class BandStructure(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -267,6 +275,12 @@ class BandStructure(IDInfo):
              self.phase, self.system.organic, self.system.inorganic, self.pk))
         return path
 
+    def delete(self, *args, **kwargs):
+        folder_loc = os.path.join(settings.MEDIA_ROOT, self.folder_location)
+        if os.path.isdir(folder_loc):
+            shutil.rmtree(folder_loc)
+        super().delete(*args, **kwargs)
+
 
 class AtomicPositions(IDInfo):
     system = models.ForeignKey(System, on_delete=models.PROTECT)
@@ -288,6 +302,14 @@ class AtomicPositions(IDInfo):
 
     def __str__(self):
         return self.phase.phase + ' ' + self.system.formula
+
+    def delete(self, *args, **kwargs):
+        if(self.fhi_file):
+            file_loc = os.path.join(settings.MEDIA_ROOT, 'uploads',
+                                    str(self.fhi_file).split('/')[1])
+            if os.path.isfile(file_loc):
+                os.remove(file_loc)
+        super().delete(*args, **kwargs)
 
 
 class MaterialProperty(IDInfo):
@@ -403,28 +425,3 @@ class ComputationalDetails(Base):
     basis = models.CharField(max_length=100)
     postprocessing = models.CharField(max_length=100)
     dispersion_correction = models.CharField(max_length=100)
-
-
-@django.dispatch.receiver(models.signals.post_delete, sender=BandStructure)
-def del_bs(sender, instance, **kwargs):
-    folder_loc = os.path.join(settings.MEDIA_ROOT, instance.folder_location)
-    if os.path.isdir(folder_loc):
-        shutil.rmtree(folder_loc)
-
-
-@django.dispatch.receiver(models.signals.post_delete, sender=ExcitonEmission)
-def del_pl(sender, instance, **kwargs):
-    if(instance.pl_file):
-        file_loc = (settings.MEDIA_ROOT + '/uploads/' +
-                    str(instance.pl_file).split('/')[1])
-        if os.path.isfile(file_loc):
-            os.remove(file_loc)
-
-
-@django.dispatch.receiver(models.signals.post_delete, sender=AtomicPositions)
-def del_apos(sender, instance, **kwargs):
-    if(instance.fhi_file):
-        file_loc = (settings.MEDIA_ROOT + '/uploads/' +
-                    str(instance.fhi_file).split('/')[1])
-        if os.path.isfile(file_loc):
-            os.remove(file_loc)
