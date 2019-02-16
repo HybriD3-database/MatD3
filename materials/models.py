@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 
@@ -6,6 +7,9 @@ from django.contrib.auth import get_user_model
 import django.dispatch
 
 from mainproject import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 class Base(models.Model):
@@ -317,12 +321,28 @@ class BondLength(IDInfo):
 
 
 class Dataset(Base):
-    label = models.CharField(max_length=1000)
+    # Files associated with each dataset are uploaded in
+    # media/uploads/dataset_{{ pk }}
+    label = models.TextField(max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     set_property = models.ForeignKey(Property, on_delete=models.PROTECT)
     reference = models.ForeignKey(Publication, on_delete=models.PROTECT)
     visible = models.BooleanField()
-    plotted = models.BooleanField(default=True)
+    plotted = models.BooleanField()
+    has_files = models.BooleanField()
+    experimental = models.BooleanField()  # theoretical if false
+    comment = models.TextField(max_length=500)
+    dimensionality = models.PositiveSmallIntegerField(choices=((2, 2), (3, 3)))
+
+    def delete(self, *args, **kwargs):
+        """Remove any files uploaded by the user."""
+        if self.has_files:
+            loc = os.path.join(settings.MEDIA_ROOT,
+                               f'uploads/dataset_{self.pk}')
+            for file_ in os.listdir(loc):
+                logger.info(f'deleting dataset_{self.pk}/{file_}')
+            shutil.rmtree(loc)
+        super().delete(*args, **kwargs)
 
 
 class Dataseries(Base):

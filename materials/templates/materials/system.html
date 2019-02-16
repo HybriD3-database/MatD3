@@ -375,7 +375,13 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  <h5>{{ dataset.set_property|capfirst }}</h5>
+                  <h5>{{ dataset.set_property|capfirst }}
+                    {% if dataset.experimental %}
+                      (experimental)
+                    {% else %}
+                      (theoretical)
+                    {% endif %}
+                  </h5>
                   {% if user == dataset.created_by %}
                     <a href="{% url 'materials:toggle_plotted' pk=object.pk ds=dataset.pk %}">
                       <button type="button" class="btn btn-success">
@@ -395,6 +401,12 @@
                         {% endif %}
                       </button>
                     </a>
+                    <button data-reverse-url=
+                            "{% url 'materials:delete_dataset' pk=object.pk ds=dataset.pk %}"
+                            type="button"
+                            class="btn btn-danger delete_button">
+                      Delete
+                    </button>
                   {% endif %}
                 </div>
                 {% if not dataset.visible %}
@@ -487,8 +499,20 @@
                         {% include 'materials/reference_format.html' with ref=dataset.reference %}
                       </div>
                     </div>
-                    <br>
-                  {% endwith %}
+                  </div>
+
+                  {% if dataset.has_files %}
+                    <a href="{% url "materials:get_dataset_files" pk=dataset.pk %}">
+                      <button type="button" class="btn btn-primary">
+                        <span class="fa fa-download" aria-hidden="true"></span>
+                        Files
+                      </button>
+                    </a>
+                  {% endif %}
+
+                  Entry added on {{ dataset.created }}<br>
+                  Last updated on {{ dataset.updated }}<br>
+
                 </div>
               </div>
             </div>
@@ -549,7 +573,14 @@
        '{{ series.datapoint_set.all.0.numericalvalue_set.all.1.unit }}',
      );
      {% endwith %}
-     {% endfor %}
-    </script>
-  {% endwith %}
+   }
+   {% endfor %}
+  </script>
+  <script>
+   $('.delete_button').click(function() {
+     if (confirm('Are you sure you want to remove this data set from the database?')) {
+       window.open($(this).attr('data-reverse-url'), '_top');
+     }
+   });
+  </script>
 {% endblock %}

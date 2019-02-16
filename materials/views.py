@@ -6,6 +6,7 @@ import os
 import zipfile
 
 from django.contrib import messages
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.forms import formset_factory
 from django.http import HttpResponse
@@ -1122,6 +1123,14 @@ def submit_data(request):
     dataset.set_property = models.Property.objects.get(
         pk=request.POST['primary_property'])
     dataset.visible = 'dataset_visible' in request.POST
+    dataset.plotted = 'dataset_plotted' in request.POST
+    dataset.has_files = bool(request.FILES)
+    dataset.experimental = (request.POST['experimentalOrTheoretical'] ==
+                            'experimental_study')
+    dataset.label = request.POST['datasetLabel']
+    dataset.comment = request.POST['datasetComment']
+    dataset.dimensionality = 3 if (request.POST['systemDimensionality'] ==
+                                   'system_3D') else 2
     dataset.save(request.user)
     # Computational details
     # Only include this if there are any computational details!
@@ -1193,6 +1202,15 @@ def submit_data(request):
         fixed_value.value = float(request.POST[f'fixed_data{counter}'])
         fixed_value.value_type = models.NumericalValueFixed.ACCURATE
         fixed_value.save(request.user)
+    # User submitted files
+    if dataset.has_files:
+        fs = FileSystemStorage(os.path.join(settings.MEDIA_ROOT,
+                                            f'uploads/dataset_{dataset.pk}'))
+        for file_ in request.FILES.getlist('uploadedFiles'):
+            fs.save(file_.name, file_)
+            logger.info(f'uploading dataset_{dataset.pk}/{file_}')
+    # If all went well, let the user know how much data was
+    # successfully added
     messages.success(request,
                      f'{len(input_lines)} new data point'
                      f'{"s" if len(input_lines) > 1 else ""} successfully '
@@ -1211,6 +1229,30 @@ def toggle_dataset_plotted(request, pk, ds):
     dataset = models.Dataset.objects.get(pk=ds)
     dataset.plotted = not dataset.plotted
     dataset.save(request.user)
+    return redirect(reverse('materials:materials_system', args=[pk]))
+
+
+def download_dataset_files(request, pk):
+    loc = os.path.join(settings.MEDIA_ROOT, f'uploads/dataset_{pk}')
+    files = os.listdir(loc)
+    file_full_paths = [os.path.join(loc, f) for f in files]
+    zip_dir = 'files'
+    zip_filename = 'files.zip'
+    in_memory_object = io.BytesIO()
+    zf = zipfile.ZipFile(in_memory_object, 'w')
+    for file_path, file_name in zip(file_full_paths, files):
+        zf.write(file_path, os.path.join(zip_dir, file_name))
+    zf.close()
+    response = HttpResponse(in_memory_object.getvalue(),
+                            content_type='application/x-zip-compressed')
+    response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+    return response
+
+
+def delete_dataset_and_files(request, pk, ds):
+    """Delete current data set and all associated files."""
+    dataset = models.Dataset.objects.get(pk=ds)
+    dataset.delete()
     return redirect(reverse('materials:materials_system', args=[pk]))
 
 

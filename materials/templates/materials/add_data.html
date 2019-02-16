@@ -42,7 +42,7 @@
     <!-- ADD NEW RESULTS -->
     <div class="tab-pane show active" id="results" role="tabpanel">
       <br>
-      <form method="post" action="{% url 'materials:submit_data' %}">
+      <form method="post" action="{% url 'materials:submit_data' %}" enctype="multipart/form-data">
         {% csrf_token %}
         <!-- GENERAL -->
         <div class="card card-item">
@@ -100,6 +100,28 @@
                 <input class="form-control" id="sys-search" type="text" placeholder="Search..">
               </div>
             </div>
+            <div class="form row">
+              <div class="col-md-2 col-form-label">
+                <label for="dataset-label">Data set label</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
+                </i>
+              </div>
+              <div class="col-md-10 mb-3">
+                <input class="form-control" id="dataset-label" name="datasetLabel" type="text">
+              </div>
+            </div>
+            <div class="form row">
+              <div class="col-md-2 col-form-label">
+                <label for="dataset-comment">Comments</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
+                </i>
+              </div>
+              <div class="col-md-10 mb-3">
+                <input class="form-control" id="dataset-comment" name="datasetComment" type="text">
+              </div>
+            </div>
             <div class="form-check form-check-inline">
               <input type="checkbox" class="form-check-input" name="dataset_visible"
                      id="dataset-visible" checked="checked">
@@ -115,6 +137,41 @@
               <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
                 <span class="tooltiptext">Choose whether the data is more suitably presented as a figure or as a table. Especially for a large amount of data points, a figure ("plotted") might make more sense. This setting can be easily toggled later.</span>
               </i>
+            </div>
+            <br>
+            <div class="row">
+              <legend class="col-form-label col-sm-2">Origin of data:
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select whether the origin of data is experimental or theoretical.</span>
+                </i>
+              </legend>
+              <div class="form-check form-check-inline" style="margin-left:-20px">
+                <input class="form-check-input" type="radio" name="experimentalOrTheoretical"
+                       id="button-experimental" value="experimental_study" checked>
+                <label class="form-check-label" for="button-experimental">Experimental</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="experimentalOrTheoretical"
+                       id="button-theoretical" value="theoretical_study">
+                <label class="form-check-label" for="button-theoretical">Theoretical</label>
+              </div>
+            </div>
+            <div class="row">
+              <legend class="col-form-label col-sm-4">Dimensionality of the system:
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select whether the dimensionality of the system.</span>
+                </i>
+              </legend>
+              <div class="form-check form-check-inline" style="margin-left:-75px">
+                <input class="form-check-input" type="radio" name="systemDimensionality"
+                       id="button-3d-system" value="system_3D" checked>
+                <label class="form-check-label" for="button-3d-system">3D</label>
+                <div class="form-check form-check-inline">
+                </div>
+                <input class="form-check-input" type="radio" name="systemDimensionality"
+                       id="button-2d-system" value="system_2D">
+                <label class="form-check-label" for="button-2d-system">2D</label>
+              </div>
             </div>
           </div>
         </div>
@@ -278,6 +335,22 @@
                     class="btn btn-info float-right">
               Add fixed property
             </button>
+          </div>
+        </div>
+
+        <br>
+
+        <!-- ADDITIONAL DATA -->
+        <div class="card card-item">
+          <div class="card-header">
+            Additional data
+          </div>
+          <div class="card-body card-add-data">
+            <label for="fileUpload">Upload files</label>
+            <i class="fa fa-question-circle tooltip-container">
+              <span class="tooltiptext">Upload files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...). Multiple files can be selected here.</span>
+            </i>
+            <input type="file" id="fileUpload" name="uploadedFiles" multiple>
           </div>
         </div>
 
