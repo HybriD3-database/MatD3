@@ -1,16 +1,18 @@
-from django.shortcuts import render, redirect
-from accounts.forms import (RegistrationForm, EditProfileForm, EditUserForm,
-                            ChangePasswordForm)
+from django.contrib.auth import login
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.http import base36_to_int
-from .tokens import account_activation_token
-from .models import UserProfile
-from django.contrib.auth.models import User
-from django.contrib.auth import update_session_auth_hash
 
-from django.contrib.auth.views import login
+from .forms import ChangePasswordForm
+from .forms import EditProfileForm
+from .forms import EditUserForm
+from .forms import RegistrationForm
+from .models import UserProfile
+from .tokens import account_activation_token
 
 
 def home(request):
