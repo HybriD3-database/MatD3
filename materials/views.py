@@ -402,7 +402,7 @@ class SearchFormView(generic.TemplateView):
             search_term = request.POST.get('search_term')
             systems_info = []
             if search_term == 'exciton_emission':
-                searchrange = materials.rangeparse.parserange(search_text)
+                searchrange = materials.rangeparser.parserange(search_text)
                 if len(searchrange) > 0:
                     if searchrange[0] == 'bidirectional':
                         if searchrange[3] == '>=':
