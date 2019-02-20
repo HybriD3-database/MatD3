@@ -251,81 +251,162 @@
 
         <br>
 
+        <!-- SYNTHESIS METHOD -->
+        <div class="card card-item">
+          <button class="btn text-left" data-toggle="collapse" type="button"
+                  id="synthesis-button" data-target="#synthesis-body"
+                  style="background:#dce9ff">
+            Synthesis method (click to add)
+          </button>
+          <input type="hidden" id="with-synthesis-details" name="with-synthesis-details"
+                 value="false">
+          <div class="collapse" id="synthesis-body">
+            <div class="card-body card-add-data">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="starting-materials">Starting materials</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Specify starting materials.</span>
+                  </i>
+                  <input class="form-control" id="starting-materials" name="starting-materials"
+                         type="text">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="synthesis-product">Product</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Specify the final product of synthesis.</span>
+                  </i>
+                  <input class="form-control" id="synthesis-product" name="synthesis-product"
+                         type="text">
+                </div>
+              </div>
+              <label for="synthesis-description">Description</label>
+              <i class="fa fa-question-circle tooltip-container">
+                <span class="tooltiptext">Describe the steps of the synthesis process.</span>
+              </i>
+              <textarea class="form-control" id="synthesis-description"
+                        name="synthesis-description" rows="3"></textarea>
+              <label for="synthesis-comment">Comments</label>
+              <i class="fa fa-question-circle tooltip-container">
+                <span class="tooltiptext">Additional information not revelant or suitable for the description part.</span>
+              </i>
+              <input class="form-control" id="synthesis-comment" name="synthesis-comment">
+            </div>
+          </div>
+        </div>
+
+        <br>
+
+        <!-- EXPERIMENTAL DETAILS -->
+        <div class="card card-item">
+          <button class="btn text-left" data-toggle="collapse" type="button"
+                  id="experimental-button" data-target="#experimental-body"
+                  style="background:#dce9ff">
+            Experimental details (click to add)
+          </button>
+          <input type="hidden" id="with-experimental-details" name="with-experimental-details"
+                 value="false">
+          <div class="collapse" id="experimental-body">
+            <div class="card-body card-add-data">
+              <label for="experimental-method">Method</label>
+              <i class="fa fa-question-circle tooltip-container">
+                <span class="tooltiptext">Short name of the method used, e.g., "X-ray diffraction".</span>
+              </i>
+              <input class="form-control" id="experimental-method" name="experimental-method"
+                     type="text">
+              <label for="experimental-description">Description</label>
+              <i class="fa fa-question-circle tooltip-container">
+                <span class="tooltiptext">Describe all experimental steps here.</span>
+              </i>
+              <textarea class="form-control" id="experimental-description"
+                        name="experimental-description" rows="3"></textarea>
+              <label for="experimental-comment">Comments</label>
+              <i class="fa fa-question-circle tooltip-container">
+                <span class="tooltiptext">Additional information not revelant or suitable for the description part.</span>
+              </i>
+              <input class="form-control" id="experimental-comment" name="experimental-comment">
+            </div>
+          </div>
+        </div>
+
+        <br>
+
         <!-- COMPUTATIONAL DETAILS -->
         <div class="card card-item">
-          <div class="card-header">
-            Computational details
-          </div>
-          <div class="card-body card-add-data">
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="code-name">Code</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Name of the code(s) used for calculations. It is recommended to also include other identifiers such as version number, branch name, or even the commit number if applicable.</span>
-                </i>
-                <input class="form-control" id="code-name" name="codeName" type="text"
-                       placeholder="Abinit, Quantum espresso..">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="nonperturbative-level">Non-perturbative level of theory</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">yet to come...</span>
-                </i>
-                <input class="form-control" id="nonperturbative-level"
-                       name="nonperturbativeLevel" type="text"
-                       placeholder="DFT, Hartree-Fock, tight-binding, empirical model..">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="kgrid">K-point grid</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">yet to come...</span>
-                </i>
-                <input class="form-control" id="kgrid" name="Kgrid" type="text"
-                       placeholder="3x3x3, 4x5x4 (Monkhorst-Pack)..">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="relativity-level">Level of relativity</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">yet to come...</span>
-                </i>
-                <input class="form-control" id="relativity-level" name="relativityLevel" type="text"
-                       placeholder="none, ZORA, Koelling-Harmon..">
-              </div>
-              <div class="form-group col-md-6">
-                <label>Spin-orbit coupling</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">yet to come...</span>
-                </i>
-                <br>
-
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="SOcouplingYesNo"
-                         id="button-SO-coupling-yes" value="SO_coupling_yes">
-                  <label class="form-check-label" for="button-SO-coupling-yes">Yes</label>
+          <button class="btn text-left" data-toggle="collapse" type="button"
+                  id="computational-button" data-target="#computational-body"
+                  style="background:#dce9ff">
+            Computational details (click to add)
+          </button>
+          <input type="hidden" id="with-computational-details" name="with-computational-details"
+                 value="false">
+          <div class="collapse" id="computational-body">
+            <div class="card-body card-add-data">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="code-name">Code</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Name of the code(s) used for calculations. It is recommended to also include other identifiers such as version number, branch name, or even the commit number if applicable.</span>
+                  </i>
+                  <input class="form-control" id="code-name" name="code-name" type="text"
+                         placeholder="Abinit, Quantum espresso..">
                 </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="SOcouplingYesNo"
-                         id="button-SO-coupling-no" value="SO_coupling_no" checked>
-                  <label class="form-check-label" for="button-SO-coupling-no">No</label>
+                <div class="form-group col-md-6">
+                  <label for="level-of-theory">Level of theory</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">yet to come...</span>
+                  </i>
+                  <input class="form-control" id="level-of-theory"
+                         name="level-of-theory" type="text"
+                         placeholder="DFT, Hartree-Fock, tight-binding, empirical model..">
                 </div>
-
+                <div class="form-group col-md-6">
+                  <label for="xc-functional">Exchange-correlation functional</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">yet to come...</span>
+                  </i>
+                  <input class="form-control" id="xc-functional" name="xc-functional" type="text"
+                         placeholder="PBE, PW91..">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="k-grid">K-point grid</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">yet to come...</span>
+                  </i>
+                  <input class="form-control" id="k-grid" name="k-grid" type="text"
+                         placeholder="3x3x3, 4x5x4 (Monkhorst-Pack)..">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="relativity-level">Level of relativity</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Specify the level of relativity. Note that this also includes the description of spin-orbit coupling!</span>
+                  </i>
+                  <input class="form-control" id="relativity-level" name="relativity-level"
+                         type="text" placeholder="non-relativistic, atomic ZORA with SOC, Koelling-Harmon..">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="basis-sets">Basis set definition</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">yet to come...</span>
+                  </i>
+                  <input class="form-control" id="basis-sets" name="basis-sets" type="text"
+                         placeholder="JTH PAW, TM PP with semicore..">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="numerical-accuracy">Numerical accuracy</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Include all parameters here that describe the accuracy of the calculation (tolerance parameters for an SCF cycle, quality of integration grids, number of excited states included, ...).</span>
+                  </i>
+                  <input class="form-control" id="numerical-accuracy" name="numerical-accuracy"
+                         type="text"
+                         placeholder="SCF tol. 1 meV/atom, Lebedev grids for angular integration..">
+                </div>
               </div>
-              <div class="form-group col-md-6">
-                <label for="basis-sets">Basis sets</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">yet to come...</span>
-                </i>
-                <input class="form-control" id="basis-sets" name="basisSets" type="text"
-                       placeholder="JTH PAW, TM PP with semicore..">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="postprocessing_THIS">Postprocessing</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">yet to come...</span>
-                </i>
-                <input class="form-control" id="postprocessing" name="postProcessing" type="text"
-                       placeholder="band gap from GW, transport properties with Wannier90..">
-              </div>
+              <label for="computational-comment">Comments</label>
+              <i class="fa fa-question-circle tooltip-container">
+                <span class="tooltiptext">Additional information relevant to the calculation.</span>
+              </i>
+              <input class="form-control" id="computational-comment" name="computational-comment">
             </div>
           </div>
         </div>
@@ -531,5 +612,23 @@
    }
    toggleUnitVisibility('#secondary-property', '#secondary-unit');
    toggleUnitVisibility('#primary-property', '#primary-unit');
+  </script>
+  <script>
+   function toggleSectionInclusivity(button, hidden_field) {
+     $(button).click(function() {
+       if ($(hidden_field).val() == 'true') {
+         $(hidden_field).val('false');
+         $(button).css({'background': '#dce9ff'});
+         $(button).html($(button).html().split('remove)')[0] + 'add)');
+       } else {
+         $(hidden_field).val('true');
+         $(button).css({'background': '#f3ebff'});
+         $(button).html($(button).html().split('add)')[0] + 'remove)');
+       }
+     });
+   }
+   toggleSectionInclusivity('#synthesis-button', '#with-synthesis-details');
+   toggleSectionInclusivity('#experimental-button', '#with-experimental-details');
+   toggleSectionInclusivity('#computational-button', '#with-computational-details');
   </script>
 {% endblock %}

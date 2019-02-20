@@ -26,15 +26,15 @@ import materials.rangeparser
 logger = logging.getLogger(__name__)
 
 
-def data_dl(request, type, id, bandgap=False):
+def data_dl(request, type_, id_, bandgap=False):
     """Download a specific entry type"""
     response = HttpResponse(content_type='text/fhi-aims')
-    if type == 'band_gap':
-        type = 'band_structure'
+    if type_ == 'band_gap':
+        type_ = 'band_structure'
         bandgap = True
 
     def write_headers():
-        if type not in ['all_atomic_positions']:
+        if type_ not in ['all_atomic_positions']:
             if not bandgap:
                 response.write(str('#HybriD³ Materials Database\n'))
             response.write(str('\n#System: '))
@@ -73,8 +73,8 @@ def data_dl(request, type, id, bandgap=False):
         response.write(obj.gamma)
         response.write('\n\n')
 
-    if type == 'atomic_positions':
-        obj = models.AtomicPositions.objects.get(id=id)
+    if type_ == 'atomic_positions':
+        obj = models.AtomicPositions.objects.get(id=id_)
         p_obj = models.System.objects.get(atomicpositions=obj)
         write_headers()
         write_a_pos()
@@ -89,9 +89,9 @@ def data_dl(request, type, id, bandgap=False):
             response.write('#-Atomic Positions input file not available-')
         response['Content-Disposition'] = (
             'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
-                                                     p_obj.inorganic, type))
-    elif type == 'all_atomic_positions':  # all the a_pos entries
-        p_obj = models.System.objects.get(id=id)
+                                                     p_obj.inorganic, type_))
+    elif type_ == 'all_atomic_positions':  # all the a_pos entries
+        p_obj = models.System.objects.get(id=id_)
         response.write(str('#HybriD³ Materials Database\n\n'))
         name = p_obj.compound_name
         response.write(str('#'*(len(name)+22) + '\n'))
@@ -104,8 +104,8 @@ def data_dl(request, type, id, bandgap=False):
         response['Content-Disposition'] = (
             'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
                                                      p_obj.inorganic, 'ALL'))
-    elif type == 'exciton_emission':
-        obj = models.ExcitonEmission.objects.get(id=id)
+    elif type_ == 'exciton_emission':
+        obj = models.ExcitonEmission.objects.get(id=id_)
         p_obj = models.System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
                                             p_obj.inorganic)
@@ -157,8 +157,8 @@ def data_dl(request, type, id, bandgap=False):
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
-    elif type == 'synthesis':
-        obj = m.SynthesisMethodOld.objects.get(id=id)
+    elif type_ == 'synthesis':
+        obj = m.SynthesisMethodOld.objects.get(id=id_)
         p_obj = models.System.objects.get(synthesismethod=obj)
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
                                              p_obj.inorganic)
@@ -196,8 +196,8 @@ def data_dl(request, type, id, bandgap=False):
         response.encoding = 'utf-8'
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (meta_filename))
-    elif type == 'band_structure' and bandgap:
-        obj = models.BandStructure.objects.get(id=id)
+    elif type_ == 'band_structure' and bandgap:
+        obj = models.BandStructure.objects.get(id=id_)
         p_obj = models.System.objects.get(bandstructure=obj)
         filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic,
                                         p_obj.inorganic)
@@ -213,8 +213,8 @@ def data_dl(request, type, id, bandgap=False):
         response.encoding = 'utf-8'
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (filename))
-    elif type == 'band_structure':
-        obj = models.BandStructure.objects.get(id=id)
+    elif type_ == 'band_structure':
+        obj = models.BandStructure.objects.get(id=id_)
         p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
@@ -269,8 +269,8 @@ def data_dl(request, type, id, bandgap=False):
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
-    elif type == 'input_files':
-        obj = models.BandStructure.objects.get(id=id)
+    elif type_ == 'input_files':
+        obj = models.BandStructure.objects.get(id=id_)
         p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
@@ -299,7 +299,7 @@ def data_dl(request, type, id, bandgap=False):
     return response
 
 
-def all_a_pos(request, id):
+def all_a_pos(request, id_):
     """Defines views for each specific entry type."""
     def sortEntries(entry):
         """Sort by temperature, but temperature is a charFields"""
@@ -318,15 +318,15 @@ def all_a_pos(request, id):
             return 9999999
 
     template_name = 'materials/all_a_pos.html'
-    obj = models.System.objects.get(id=id)
-    compound_name = models.System.objects.get(id=id).compound_name
+    obj = models.System.objects.get(id=id_)
+    compound_name = models.System.objects.get(id=id_).compound_name
     obj = obj.atomicpositions_set.all()
     obj = sorted(obj, key=sortEntries)
     return render(request, template_name,
-                  {'object': obj, 'compound_name': compound_name, 'key': id})
+                  {'object': obj, 'compound_name': compound_name, 'key': id_})
 
 
-def all_entries(request, id, type):
+def all_entries(request, id_, type_):
     str_to_model = {
         'atomic_positions': models.AtomicPositions,
         'exciton_emission': models.ExcitonEmission,
@@ -334,12 +334,12 @@ def all_entries(request, id, type):
         'band_structure': models.BandStructure,
         'material_prop': models.MaterialProperty
     }
-    template_name = 'materials/all_%ss.html' % type
-    compound_name = models.System.objects.get(pk=id).compound_name
-    obj = str_to_model[type].objects.filter(system__id=id)
+    template_name = 'materials/all_%ss.html' % type_
+    compound_name = models.System.objects.get(pk=id_).compound_name
+    obj = str_to_model[type_].objects.filter(system__id=id_)
     return render(request, template_name,
                   {'object': obj, 'compound_name': compound_name,
-                   'data_type': type, 'key': id})
+                   'data_type': type_, 'key': id_})
 
 
 def getAuthorSearchResult(search_text):
@@ -1117,6 +1117,21 @@ def add_unit(request):
 
 
 def submit_data(request):
+    """Primary function for submitting data from the user."""
+    def add_comment(model, label):
+        """Shortcut for conditionally attaching comments to a model instance.
+
+        The purpose of this shortcut is to avoid checking the presence
+        of a particular type of comment in POST and the created_by
+        and updated_by fields with every call.
+
+        """
+        if label in request.POST:
+            model.comment_set.create(text=request.POST[label],
+                                     created_by=request.user,
+                                     updated_by=request.user)
+            logger.info(f'Creating {label} comment '
+                        f'#{model.comment_set.all()[0].pk}')
     # Create data set
     dataset = models.Dataset()
     dataset.system = models.System.objects.get(pk=request.POST['system'])
@@ -1143,17 +1158,33 @@ def submit_data(request):
     dataset.has_files = bool(request.FILES)
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')
+    # Synthesis method
+    if request.POST['with-synthesis-details'] == 'true':
+        synthesis = models.SynthesisMethod(dataset=dataset)
+        synthesis.starting_materials = request.POST['starting-materials']
+        synthesis.product = request.POST['synthesis-product']
+        synthesis.description = request.POST['synthesis-description']
+        synthesis.save(request.user)
+        logger.info(f'Creating synthesis details #{synthesis.pk}')
+        add_comment(synthesis, 'synthesis-comment')
+    # Experimental details
+    if request.POST['with-experimental-details'] == 'true':
+        experimental = models.ExperimentalDetails(dataset=dataset)
+        experimental.method = request.POST['experimental-method']
+        experimental.description = request.POST['experimental-description']
+        experimental.save(request.user)
+        logger.info(f'Creating experimental details #{experimental.pk}')
+        add_comment(experimental, 'experimental-comment')
     # Computational details
     if request.POST['with-computational-details'] == 'true':
         computational = models.ComputationalDetails(dataset=dataset)
         computational.code = request.POST['code-name']
-        computational.nonperturbative_level = (
-            request.POST['nonperturbative-level'])
+        computational.level_of_theory = request.POST['level-of-theory']
+        computational.xc_functional = request.POST['xc-functional']
         computational.kgrid = request.POST['k-grid']
         computational.relativity_level = request.POST['relativity-level']
-        computational.SO_coupling = request.POST['with-SO-coupling'] == 'true'
         computational.basis = request.POST['basis-sets']
-        computational.postprocessing = request.POST['post-processing']
+        computational.numerical_accuracy = request.POST['numerical-accuracy']
         computational.save(request.user)
         logger.info(f'Creating computational details #{computational.pk}')
         add_comment(computational, 'computational-comment')

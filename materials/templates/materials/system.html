@@ -473,6 +473,61 @@
                     {% endif %}
                   {% endwith %}
 
+                  <!-- SYNTHESIS METHOD -->
+                  {% if dataset.synthesismethod_set.all %}
+                    <div class="card">
+                      <button class="btn text-left expand-hide-button"
+                              data-toggle="collapse"
+                              data-target="#synthesis-body-{{ dataset.pk }}">
+                        Synthesis method (click to expand)
+                      </button>
+                      <div class="collapse" id="synthesis-body-{{ dataset.pk }}">
+                        <div class="card-body">
+                          {% with dataset.synthesismethod_set.all|first as synthesis %}
+                            {% if synthesis.starting_materials %}
+                              <p>Starting materials: {{ synthesis.starting_materials }}</p>
+                            {% endif %}
+                            {% if synthesis.product %}
+                              <p>Product: {{ synthesis.product }}</p>
+                            {% endif %}
+                            {% if synthesis.description %}
+                              <p>Description: {{ synthesis.description }}</p>
+                            {% endif %}
+                            {% if synthesis.comment_set %}
+                              <p><i>Comment: {{ synthesis.comment_set.all|first }}</i></p>
+                            {% endif %}
+                          {% endwith %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  <!-- EXPERIMENTAL DETAILS -->
+                  {% if dataset.experimentaldetails_set.all %}
+                    <div class="card">
+                      <button class="btn text-left expand-hide-button"
+                              data-toggle="collapse"
+                              data-target="#experimental-body-{{ dataset.pk }}">
+                        Experimental details (click to expand)
+                      </button>
+                      <div class="collapse" id="experimental-body-{{ dataset.pk }}">
+                        <div class="card-body">
+                          {% with dataset.experimentaldetails_set.all|first as exp %}
+                            {% if exp.method %}
+                              <p>Method: {{ exp.method }}</p>
+                            {% endif %}
+                            {% if exp.description %}
+                              <p>Description: {{ exp.description }}</p>
+                            {% endif %}
+                            {% if exp.comment_set %}
+                              <p><i>Comment: {{ exp.comment_set.all|first }}</i></p>
+                            {% endif %}
+                          {% endwith %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+
                   <!-- COMPUTATIONAL DETAILS -->
                   {% if dataset.computationaldetails_set.all %}
                     <div class="card">
@@ -487,9 +542,12 @@
                             {% if comp.code %}
                               <p>Code: {{ comp.code }}</p>
                             {% endif %}
-                            {% if comp.nonperturbative_level %}
-                              <p>Non-perturbative level of theory:
-                                {{ comp.nonperturbative_level }}</p>
+                            {% if comp.level_of_theory %}
+                              <p>Level of theory:
+                                {{ comp.level_of_theory }}</p>
+                            {% endif %}
+                            {% if comp.xc_functional %}
+                              <p>Exchange-correlation functional: {{ comp.xc_functional }}</p>
                             {% endif %}
                             {% if comp.kgrid %}
                               <p>K-point grid: {{ comp.kgrid }}</p>
@@ -497,16 +555,11 @@
                             {% if comp.relativity_level %}
                               <p>Level of relativity: {{ comp.relativity_level }}</p>
                             {% endif %}
-                            {% if comp.SO_coupling %}
-                              <p>Spin-orbit coupling: yes</p>
-                            {% else %}
-                              <p>Spin-orbit coupling: no</p>
-                            {% endif %}
                             {% if comp.basis %}
-                              <p>Basis sets: {{ comp.basis }}</p>
+                              <p>Basis set definition: {{ comp.basis }}</p>
                             {% endif %}
-                            {% if comp.postprocessing %}
-                              <p>Postprocessing: {{ comp.postprocessing }}</p>
+                            {% if comp.numerical_accuracy %}
+                              <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
                             {% endif %}
                             {% if comp.comment_set %}
                               <p><i>Comment: {{ comp.comment_set.all|first }}</i></p>

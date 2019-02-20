@@ -452,10 +452,35 @@ class NumericalValueFixed(NumericalValueBase):
 class ComputationalDetails(Base):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     code = models.CharField(max_length=40)
-    nonperturbative_level = models.CharField(max_length=50)
+    level_of_theory = models.CharField(max_length=50)
+    xc_functional = models.CharField(max_length=50)
     kgrid = models.CharField(max_length=40)
     relativity_level = models.CharField(max_length=40)
-    SO_coupling = models.BooleanField()
     basis = models.CharField(max_length=100)
-    postprocessing = models.CharField(max_length=100)
-    dispersion_correction = models.CharField(max_length=100)
+    numerical_accuracy = models.CharField(max_length=500)
+
+
+class ExperimentalDetails(Base):
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    method = models.CharField(max_length=100)
+    description = models.TextField(max_length=1000)
+
+
+class SynthesisMethod(Base):
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    starting_materials = models.TextField(max_length=1000, blank=True)
+    product = models.TextField(max_length=1000, blank=True)
+    description = models.TextField(max_length=1000, blank=True)
+
+
+class Comment(Base):
+    computational_details = models.ForeignKey(ComputationalDetails, null=True,
+                                              on_delete=models.CASCADE)
+    experimental_details = models.ForeignKey(ExperimentalDetails, null=True,
+                                             on_delete=models.CASCADE)
+    synthesis_method = models.ForeignKey(SynthesisMethod, null=True,
+                                         on_delete=models.CASCADE)
+    text = models.TextField(max_length=500)
+
+    def __str__(self):
+        return self.text
