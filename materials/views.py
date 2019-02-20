@@ -1093,7 +1093,7 @@ class AddDataView(generic.TemplateView):
 
 
 def add_property(request):
-    property_name = request.POST['property_name']
+    property_name = request.POST['property-name']
     prop = models.Property()
     prop.name = property_name
     prop.save(request.user)
@@ -1104,7 +1104,7 @@ def add_property(request):
 
 
 def add_unit(request):
-    unit_name = request.POST['unit_label']
+    unit_name = request.POST['unit-label']
     unit = models.Unit()
     unit.label = unit_name
     unit.save(request.user)
@@ -1120,100 +1120,99 @@ def submit_data(request):
     dataset.system = models.System.objects.get(pk=request.POST['system'])
     dataset.reference = models.Publication.objects.get(
         pk=request.POST['publication'])
-    dataset.set_property = models.Property.objects.get(
-        pk=request.POST['primary_property'])
-    dataset.visible = 'dataset_visible' in request.POST
-    dataset.plotted = 'dataset_plotted' in request.POST
+    dataset.label = request.POST['dataset-label']
+    if request.POST['primary-property'] != '-1':
+        dataset.primary_property = models.Property.objects.get(
+            pk=request.POST['primary-property'])
+        dataset.primary_unit = models.Unit.objects.get(
+            pk=request.POST['primary-unit'])
+    if request.POST['secondary-property'] != '-1':
+        dataset.secondary_property = models.Property.objects.get(
+            pk=request.POST['secondary-property'])
+        dataset.secondary_unit = models.Unit.objects.get(
+            pk=request.POST['secondary-unit'])
+    dataset.visible = 'dataset-visible' in request.POST
+    dataset.plotted = 'dataset-plotted' in request.POST
+    dataset.experimental = 'is-experimental' in request.POST
+    dataset.dimensionality = (
+        3 if (request.POST['is-3d-system'] == 'true') else 2)
     dataset.has_files = bool(request.FILES)
-    dataset.experimental = (request.POST['experimentalOrTheoretical'] ==
-                            'experimental_study')
-    dataset.label = request.POST['datasetLabel']
-    dataset.comment = request.POST['datasetComment']
-    dataset.dimensionality = 3 if (request.POST['systemDimensionality'] ==
-                                   'system_3D') else 2
     dataset.save(request.user)
+    logger.info(f'Create dataset #{dataset.pk}')
     # Computational details
-    # Only include this if there are any computational details!
-    computational = models.ComputationalDetails(dataset=dataset)
-    computational.code = request.POST['codeName']
-    computational.nonperturbative_level = request.POST['nonperturbativeLevel']
-    computational.kgrid = request.POST['Kgrid']
-    computational.relativity_level = request.POST['relativityLevel']
-    computational.SO_coupling = (request.POST['SOcouplingYesNo'] ==
-                                 'SO_coupling_yes')
-    computational.basis = request.POST['basisSets']
-    computational.postprocessing = request.POST['postProcessing']
-    computational.save(request.user)
+    if request.POST['with-computational-details'] == 'true':
+        computational = models.ComputationalDetails(dataset=dataset)
+        computational.code = request.POST['code-name']
+        computational.nonperturbative_level = (
+            request.POST['nonperturbative-level'])
+        computational.kgrid = request.POST['k-grid']
+        computational.relativity_level = request.POST['relativity-level']
+        computational.SO_coupling = request.POST['with-SO-coupling'] == 'true'
+        computational.basis = request.POST['basis-sets']
+        computational.postprocessing = request.POST['post-processing']
+        computational.save(request.user)
+        logger.info(f'Creating computational details #{computational.pk}')
+        add_comment(computational, 'computational-comment')
     # Create data series
     dataseries = models.Dataseries(dataset=dataset)
+    if 'dataseries-label' in request.POST:
+        dataseries.label = request.POST['dataseries-label']
     dataseries.save(request.user)
     # Read in main data
-    if request.POST['secondary_property'] == '-1':
-        input_lines = request.POST['main_data'].split()
-        for value in input_lines:
+    if request.POST['secondary-property'] == '-1':
+        input_lines = request.POST['main-data'].split()
+        for i_value, value in enumerate(input_lines):
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
             numerical_value = models.NumericalValue(datapoint=datapoint)
             numerical_value.qualifier = models.NumericalValue.PRIMARY
-            numerical_value.value_property = models.Property.objects.get(
-                pk=request.POST['primary_property'])
-            numerical_value.unit = models.Unit.objects.get(
-                pk=request.POST['primary_unit'])
             numerical_value.value = float(value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
     else:
-        input_lines = request.POST['main_data'].split('\n')
-        for line in input_lines:
+        input_lines = request.POST['main-data'].split('\n')
+        for i_line, line in enumerate(input_lines):
             x_value, y_value = line.split()
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
             # x-values
             numerical_value = models.NumericalValue(datapoint=datapoint)
             numerical_value.qualifier = models.NumericalValue.SECONDARY
-            numerical_value.value_property = models.Property.objects.get(
-                pk=request.POST['secondary_property'])
-            numerical_value.unit = models.Unit.objects.get(
-                pk=request.POST['secondary_unit'])
             numerical_value.value = float(x_value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
             # y-values
             numerical_value = models.NumericalValue(datapoint=datapoint)
             numerical_value.qualifier = models.NumericalValue.PRIMARY
-            numerical_value.value_property = models.Property.objects.get(
-                pk=request.POST['primary_property'])
-            numerical_value.unit = models.Unit.objects.get(
-                pk=request.POST['primary_unit'])
             numerical_value.value = float(y_value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
     # Fixed properties
-    n_fixed = 0
+    fixed_ids = []
     for key in request.POST:
-        if key.startswith('fixed_property'):
-            n_fixed += 1
-    for counter in range(n_fixed):
+        if key.startswith('fixed-property'):
+            fixed_ids.append(key.split('fixed-property')[1])
+    for fixed_id in fixed_ids:
         fixed_value = models.NumericalValueFixed(dataseries=dataseries)
-        fixed_value.value_property = models.Property.objects.get(
-            name=request.POST[f'fixed_property{counter}'])
+        fixed_value.physical_property = models.Property.objects.get(
+            name=request.POST[f'fixed-property{fixed_id}'])
         fixed_value.unit = models.Unit.objects.get(
-            label=request.POST[f'fixed_unit{counter}'])
-        fixed_value.value = float(request.POST[f'fixed_data{counter}'])
+            label=request.POST[f'fixed-unit{fixed_id}'])
+        fixed_value.value = float(request.POST[f'fixed-value{fixed_id}'])
         fixed_value.value_type = models.NumericalValueFixed.ACCURATE
         fixed_value.save(request.user)
     # User submitted files
     if dataset.has_files:
         fs = FileSystemStorage(os.path.join(settings.MEDIA_ROOT,
                                             f'uploads/dataset_{dataset.pk}'))
-        for file_ in request.FILES.getlist('uploadedFiles'):
+        for file_ in request.FILES.getlist('uploaded-files'):
             fs.save(file_.name, file_)
             logger.info(f'uploading dataset_{dataset.pk}/{file_}')
     # If all went well, let the user know how much data was
     # successfully added
     messages.success(request,
                      f'{len(input_lines)} new data point'
-                     f'{"s" if len(input_lines) > 1 else ""} successfully '
+                     f'{"s" if len(input_lines) != 1 else ""} successfully '
                      'added to the database!')
     return redirect(reverse('materials:add_data'))
 

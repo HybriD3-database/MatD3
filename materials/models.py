@@ -4,7 +4,6 @@ import shutil
 
 from django.db import models
 from django.contrib.auth import get_user_model
-import django.dispatch
 
 from mainproject import settings
 
@@ -347,7 +346,17 @@ class Dataset(Base):
     # media/uploads/dataset_{{ pk }}
     label = models.TextField(max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
-    set_property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    primary_property = models.ForeignKey(
+        Property, null=True, on_delete=models.PROTECT,
+        related_name='primary_property')
+    primary_unit = models.ForeignKey(
+        Unit, null=True, on_delete=models.PROTECT, related_name='primary_unit')
+    secondary_property = models.ForeignKey(
+        Property, null=True, on_delete=models.PROTECT,
+        related_name='secondary_property')
+    secondary_unit = models.ForeignKey(
+        Unit, null=True, on_delete=models.PROTECT,
+        related_name='secondary_unit')
     reference = models.ForeignKey(Publication, on_delete=models.PROTECT)
     visible = models.BooleanField()
     plotted = models.BooleanField()
@@ -357,7 +366,7 @@ class Dataset(Base):
     dimensionality = models.PositiveSmallIntegerField(choices=((2, 2), (3, 3)))
 
     def delete(self, *args, **kwargs):
-        """Remove any files uploaded by the user."""
+        """Additionally remove any files uploaded by the user."""
         if self.has_files:
             loc = os.path.join(settings.MEDIA_ROOT,
                                f'uploads/dataset_{self.pk}')
@@ -389,8 +398,6 @@ class NumericalValueBase(Base):
         (UPPER_BOUND, 'upper_bound'),
         (ERROR, 'error'),
     )
-    value_property = models.ForeignKey(Property, on_delete=models.PROTECT)
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     value = models.FloatField()
     value_type = models.PositiveSmallIntegerField(choices=VALUE_TYPES)
 
@@ -410,6 +417,8 @@ class NumericalValue(NumericalValueBase):
 
 
 class NumericalValueFixed(NumericalValueBase):
+    physical_property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE)
     dataseries = models.ForeignKey(Dataseries, null=True,
                                    on_delete=models.CASCADE)

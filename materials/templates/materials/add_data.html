@@ -52,13 +52,13 @@
           <div class="card-body card-add-data">
             <div class="form row">
               <div class="col-md-2 col-form-label">
-                <label for="pub-selector">Select publication</label>
+                <label for="publication">Select publication</label>
                 <i class="fa fa-question-circle tooltip-container" style="margin-right:-50px">
                   <span class="tooltiptext">Select publication where the data to be inserted is published.</span>
                 </i>
               </div>
               <div class="col-md-7 mb-3">
-                <select name="publication" class="form-control" id="pub-selector">
+                <select name="publication" class="form-control" id="publication">
                   {% for pub in publications %}
                     <option value={{ pub.pk }}>
                       {{ pub.year }}
@@ -77,18 +77,19 @@
                 </select>
               </div>
               <div class="col-md-3 mb-3">
-                <input class="form-control" id="pub-search" type="text" placeholder="Search..">
+                <input class="form-control" id="publication-search" type="text"
+                       placeholder="Search..">
               </div>
             </div>
             <div class="form row">
               <div class="col-md-2 col-form-label">
-                <label for="sys-selector">Select system</label>
+                <label for="system">Select system</label>
                 <i class="fa fa-question-circle tooltip-container">
                   <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
                 </i>
               </div>
               <div class="col-md-7 mb-3">
-                <select name="system" class="form-control" id="sys-selector">
+                <select name="system" class="form-control" id="system">
                   {% for sys in systems %}
                     <option value={{ sys.pk }}>
                       {{ sys }}
@@ -97,33 +98,73 @@
                 </select>
               </div>
               <div class="col-md-3 mb-3">
-                <input class="form-control" id="sys-search" type="text" placeholder="Search..">
+                <input class="form-control" id="system-search" type="text" placeholder="Search..">
               </div>
             </div>
             <div class="form row">
               <div class="col-md-2 col-form-label">
                 <label for="dataset-label">Data set label</label>
                 <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
+                  <span class="tooltiptext">Description of the data set.</span>
                 </i>
               </div>
-              <div class="col-md-10 mb-3">
-                <input class="form-control" id="dataset-label" name="datasetLabel" type="text">
+              <div class="col-md-10">
+                <input class="form-control" id="dataset-label" name="dataset-label" type="text">
               </div>
             </div>
-            <div class="form row">
-              <div class="col-md-2 col-form-label">
-                <label for="dataset-comment">Comments</label>
+            <hr>
+            <!-- Properties and units -->
+            <div class="row">
+              <div class="col-md-4">
+                <label for="primary-property">Primary property</label>
                 <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
+                  <span class="tooltiptext">Define the primary property of interest (in a figure, this typically denotes the y-axis).</span>
                 </i>
+                <select class="form-control" id="primary-property" name="primary-property">
+                  <option value="-1">none</option>
+                  {% for property in properties %}
+                    <option value="{{ property.pk }}">{{ property }}</option>
+                  {% endfor %}
+                </select>
               </div>
-              <div class="col-md-10 mb-3">
-                <input class="form-control" id="dataset-comment" name="datasetComment" type="text">
+              <div class="col-md-2">
+                <label for="primary-unit">Primary unit</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Define the primary unit of interest (in a figure, this typically denotes the unit of the y-axis). For dimensionless physical properties, select "none". If the data is in arbitray units, select "a.u." (note that this is different from "none").</span>
+                </i>
+                <select class="form-control" id="primary-unit" name="primary-unit" disabled="true">
+                  {% for unit in units %}
+                    <option value="{{ unit.pk }}">{{ unit }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="secondary-property">Secondary property</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Define the secondary property of interest (in a figure, this typically denotes the x-axis). When inserting values that have no direct dependence on a physical property (e.g., a list of phonon energies), the secondary property may be left empty.</span>
+                </i>
+                <select class="form-control" id="secondary-property" name="secondary-property">
+                  <option value="-1">none</option>
+                  {% for property in properties %}
+                    <option value="{{ property.pk }}">{{ property }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label for="secondary-unit">Secondary unit</label>
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Define the secondry unit of interest (in a figure, this typically denotes the unit of the x-axis).</span>
+                </i>
+                <select class="form-control" id="secondary-unit" name="secondary-unit" disabled="true">
+                  {% for unit in units %}
+                    <option value="{{ unit.pk }}">{{ unit }}</option>
+                  {% endfor %}
+                </select>
               </div>
             </div>
+            <hr>
             <div class="form-check form-check-inline">
-              <input type="checkbox" class="form-check-input" name="dataset_visible"
+              <input type="checkbox" class="form-check-input" name="dataset-visible"
                      id="dataset-visible" checked="checked">
               <label class="form-check-label" for="dataset-visible">Visible to public</label>
               <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
@@ -131,7 +172,7 @@
               </i>
             </div>
             <div class="form-check form-check-inline">
-              <input type="checkbox" class="form-check-input" name="dataset_plotted"
+              <input type="checkbox" class="form-check-input" name="dataset-plotted"
                      id="dataset-plotted">
               <label class="form-check-label" for="dataset-plotted">Plotted</label>
               <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
@@ -146,31 +187,31 @@
                 </i>
               </legend>
               <div class="form-check form-check-inline" style="margin-left:-20px">
-                <input class="form-check-input" type="radio" name="experimentalOrTheoretical"
-                       id="button-experimental" value="experimental_study" checked>
-                <label class="form-check-label" for="button-experimental">Experimental</label>
+                <input class="form-check-input" type="radio" id="is-experimental"
+                       name="is-experimental" value="true" checked>
+                <label class="form-check-label" for="is-experimental">Experimental</label>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="experimentalOrTheoretical"
-                       id="button-theoretical" value="theoretical_study">
-                <label class="form-check-label" for="button-theoretical">Theoretical</label>
+                <input class="form-check-input" type="radio" id="is-theoretical"
+                       name="is-experimental" value="false" >
+                <label class="form-check-label" for="is-theoretical">Theoretical</label>
               </div>
             </div>
             <div class="row">
               <legend class="col-form-label col-sm-4">Dimensionality of the system:
                 <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select whether the dimensionality of the system.</span>
+                  <span class="tooltiptext">Select the dimensionality of the system.</span>
                 </i>
               </legend>
               <div class="form-check form-check-inline" style="margin-left:-75px">
-                <input class="form-check-input" type="radio" name="systemDimensionality"
-                       id="button-3d-system" value="system_3D" checked>
-                <label class="form-check-label" for="button-3d-system">3D</label>
-                <div class="form-check form-check-inline">
-                </div>
-                <input class="form-check-input" type="radio" name="systemDimensionality"
-                       id="button-2d-system" value="system_2D">
-                <label class="form-check-label" for="button-2d-system">2D</label>
+                <input class="form-check-input" type="radio" id="is-3d-system"
+                       name="is-3d-system" value="true" checked>
+                <label class="form-check-label" for="is-3d-system">3D</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="is-2d-system"
+                       name="is-3d-system" value="false">
+                <label class="form-check-label" for="is-2d-system">2D</label>
               </div>
             </div>
           </div>
@@ -267,74 +308,31 @@
           <div class="card-body card-add-data">
             <div class="row">
               <div class="col-md-8">
-                <div class="form-row">
-                  <div class="col-md-6 mb-3">
-                    <label for="primary_property">Primary property</label>
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Define the primary property of interest (in a figure, this typically denotes the y-axis).</span>
-                    </i>
-                    <select name="primary_property" class="form-control">
-                      {% for property in properties %}
-                        <option value="{{ property.pk }}">{{ property }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="primary_unit">Primary unit</label>
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Define the primary unit of interest (in a figure, this typically denotes the unit of the y-axis). For dimensionless physical properties, select "none". If the data is in arbitray units, select "a.u." (note that this is different from "none").</span>
-                    </i>
-                    <select name="primary_unit" class="form-control">
-                      {% for unit in units %}
-                        <option value="{{ unit.pk }}">{{ unit }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
+                <div class="form-group">
+                  <label for="dataseries-label">Data series label:</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Description of the data series (optional). If this is the only series in the set (e.g., the only curve in a figure), providing just the data set label is probably sufficient.</span>
+                  </i>
+                  <input class="form-control" id="dataseries-label" name="dataseries-label">
                 </div>
-                <div class="form-row">
-                  <div class="col-md-6 mb-3">
-                    <label for="secondary_property">Secondary property</label>
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Define the secondary property of interest (in a figure, this typically denotes the x-axis). When inserting values that have no direct dependence on a physical property (e.g., a list of phonon energies), the secondary property may be left empty.</span>
-                    </i>
-                    <select id="secondary-property" name="secondary_property" class="form-control">
-                      <option value="-1">- none -</option>
-                      {% for property in properties %}
-                        <option value="{{ property.pk }}">{{ property }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="secondary_unit">Secondary unit</label>
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Define the secondry unit of interest (in a figure, this typically denotes the unit of the x-axis).</span>
-                    </i>
-                    <select id="secondary-unit" name="secondary_unit" class="form-control" disabled>
-                      {% for unit in units %}
-                        <option value="{{ unit.pk }}">{{ unit }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
+                <div id="fixed-properties">
                 </div>
+                <button type="button" id="add-fixed-property" class="btn btn-info">
+                  Add fixed property
+                </button>
+                <i class="fa fa-question-circle fa-2x tooltip-container">
+                  <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
+                </i>
               </div>
               <div class="col-md-4">
-                <label for="main_data">Values</label>
+                <label for="main-data">Values</label>
                 <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values).</span>
+                  <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
                 </i>
-                <textarea id="main-data" class="form-control" name="main_data" rows="4"
-                          placeholder="value_1 value_2 ..."></textarea>
+                <textarea class="form-control" id="main-data" name="main-data"
+                          placeholder="value_1 value_2 ..." style="height:80%"></textarea>
               </div>
             </div>
-            <div id="fixed-properties">
-            </div>
-            <i class="fa fa-question-circle fa-2x float-right tooltip-container">
-              <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
-            </i>
-            <button type="button" id="add-fixed-property"
-                    class="btn btn-info float-right">
-              Add fixed property
-            </button>
           </div>
         </div>
 
@@ -346,18 +344,18 @@
             Additional data
           </div>
           <div class="card-body card-add-data">
-            <label for="fileUpload">Upload files</label>
+            <label for="uploaded-files">Upload files</label>
             <i class="fa fa-question-circle tooltip-container">
               <span class="tooltiptext">Upload files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...). Multiple files can be selected here.</span>
             </i>
-            <input type="file" id="fileUpload" name="uploadedFiles" multiple>
+            <input type="file" id="uploaded-files" name="uploaded-files" multiple>
           </div>
         </div>
 
         <br>
 
         <div class="float-right">
-          <button type="submit" name="submit_results" class="btn btn-primary">
+          <button type="submit" name="submit-results" class="btn btn-primary">
             Submit
           </button>
         </div>
@@ -366,25 +364,25 @@
       <!-- to be copied -->
       <div class="form-row fixed-property-template d-none">
         <div class="col-md-4 mb-3">
-          <label for="fixed_property">Property</label>
-          <select name="fixed_property" class="form-control">
+          <label for="fixed-property">Property</label>
+          <select class="form-control" id="fixed-property" name="fixed-property">
             {% for property in properties %}
               <option>{{ property.name }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="col-md-4 mb-3">
-          <label for="fixed_unit">Unit</label>
-          <select name="fixed_unit" class="form-control">
+          <label for="fixed-unit">Unit</label>
+          <select class="form-control" id="fixed-unit" name="fixed-unit">
             {% for unit in units %}
               <option>{{ unit.label }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="col-md-4 mb-3">
-          <label for="fixed_data">Fixed value</label>
+          <label for="fixed-value">Fixed value</label>
           <div class="input-group">
-            <input type="text" name="fixed_data" class="form-control"
+            <input class="form-control" id="fixed-value" name="fixed-value" type="text"
                    maxlength="20" required>
             <div class="input-group-append">
               <button class="close-fixed-property btn btn-danger fa fa-times"
@@ -400,10 +398,10 @@
       <br>
       <form method="post" action="{% url 'materials:add_property' %}">
         {% csrf_token %}
-        <label for="property_name">Property name: </label>
-        <input id="property_name" type="text" name="property_name" value="" required>
+        <label for="property-name">Property name: </label>
+        <input id="property-name" name="property-name" type="text" required>
         <br>
-        <button type="submit" name="submit_property" class="btn btn-primary">Submit</button>
+        <button type="submit" name="submit-property" class="btn btn-primary">Submit</button>
       </form>
     </div>
     <!-- ADD NEW UNIT -->
@@ -411,10 +409,10 @@
       <br>
       <form method="post" action="{% url 'materials:add_unit' %}">
         {% csrf_token %}
-        <label for="unit_label">Unit label: </label>
-        <input id="unit_label" type="text" name="unit_label" value="" required>
+        <label for="unit-label">Unit label: </label>
+        <input id="unit-label" name="unit-label" type="text" required>
         <br>
-        <button type="submit" name="submit_unit" class="btn btn-primary">Submit</button>
+        <button type="submit" name="submit-unit" class="btn btn-primary">Submit</button>
       </form>
     </div>
     <!-- UNSORTED -->
@@ -460,17 +458,19 @@
   <script src="{% static 'materials/javascript/filter_form.js' %}"></script>
   <script>
    /* Filter dropdown menus */
-   filter_form($('#pub-search'), $('#pub-selector'));
-   filter_form($('#sys-search'), $('#sys-selector'));
+   filter_form($('#publication-search'), $('#publication'));
+   filter_form($('#system-search'), $('#system'));
+  </script>
+  <script>
    /* Add a fixed property */
    var counter_fixed = 0;
    $('#add-fixed-property').click(function(){
      var el = $('.fixed-property-template').clone(true);
      el.removeClass('d-none');
      el.removeClass('fixed-property-template');
-     el.find('[name="fixed_property"]').attr('name', 'fixed_property' + counter_fixed);
-     el.find('[name="fixed_unit"]').attr('name', 'fixed_unit' + counter_fixed);
-     el.find('[name="fixed_data"]').attr('name', 'fixed_data' + counter_fixed);
+     el.find('[name="fixed-property"]').attr('name', 'fixed-property' + counter_fixed);
+     el.find('[name="fixed-unit"]').attr('name', 'fixed-unit' + counter_fixed);
+     el.find('[name="fixed-value"]').attr('name', 'fixed-value' + counter_fixed);
      $('#fixed-properties').append(el);
      counter_fixed = counter_fixed + 1
    });
@@ -478,17 +478,26 @@
    $('.close-fixed-property').click(function(){
      $(this).parents('.form-row').remove();
    });
-   /* Depending on whether the secondary property is none, set
-      visibility of the secondary unit and the placeholder */
-   $('#secondary-property').change(function() {
-     if ($('#secondary-property option:selected').attr('value') == -1) {
-       $('#secondary-unit').prop('disabled', true);
-       $('#main-data').attr('placeholder', 'value_1 value_2 ...');
-     } else {
-       $('#secondary-unit').prop('disabled', false);
-       var placeholder_text = 'x1 y1\nx2 y2\n...';
-       $('#main-data').attr('placeholder', placeholder_text);
-     }
-   });
+  </script>
+  <script>
+   /* Depending on whether the property is none, set visibility of the
+      unit and #main-data placeholder */
+   function toggleUnitVisibility(property, unit) {
+     $(property).change(function() {
+       if ($(property + ' option:selected').attr('value') == -1) {
+         $(unit).prop('disabled', true);
+         if (property == '#secondary-property') {
+           $('#main-data').attr('placeholder', 'value_1 value_2 ...');
+         }
+       } else {
+         $(unit).prop('disabled', false);
+         if (property == '#secondary-property') {
+           $('#main-data').attr('placeholder', 'x1 y1\nx2 y2\n...');
+         }
+       }
+     });
+   }
+   toggleUnitVisibility('#secondary-property', '#secondary-unit');
+   toggleUnitVisibility('#primary-property', '#primary-unit');
   </script>
 {% endblock %}

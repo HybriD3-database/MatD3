@@ -375,7 +375,7 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  <h5>{{ dataset.set_property|capfirst }}
+                  <h5>{{ dataset.primary_property|capfirst }}
                     {% if dataset.experimental %}
                       (experimental)
                     {% else %}
@@ -413,6 +413,7 @@
                   </div>
                 {% endif %}
                 <div class="card-body">
+                  <h5>{{ dataset.label }}</h5>
                   {% if dataset.plotted %}
                     <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
                   {% else %}
@@ -420,17 +421,16 @@
                       <table class="table main-data">
                         <thead>
                           <tr>
-                            {% with datapoint=series.datapoint_set.all|first %}
-                              {% for value in datapoint.numericalvalue_set.all %}
-                                <th>
-                                  {% if datapoint.numericalvalue_set.all|length == 1 %}
-                                    Values, {{ value.unit }}
-                                  {% else %}
-                                    {{ value.value_property|capfirst }}, {{ value.unit }}
-                                  {% endif %}
-                                </th>
-                              {% endfor %}
-                            {% endwith %}
+                            {% if dataset.primary_property %}
+                              <th>
+                                {{ dataset.primary_property }}, {{ dataset.primary_unit }}
+                              </th>
+                            {% endif %}
+                            {% if dataset.secondary_property %}
+                              <th>
+                                {{ dataset.secondary_property }}, {{ dataset.secondary_unit }}
+                              </th>
+                            {% endif %}
                           </tr>
                         </thead>
                         {% for datapoint in series.datapoint_set.all %}
@@ -442,57 +442,84 @@
                         {% endfor %}
                       </table>
                     {% endwith %}
-                  {% endif %} <!-- if figure -->
-                  {% with series=dataset.dataseries_set.all|first %}
-                    {% if series.numericalvaluefixed_set.all|length > 0 %}
-                      <p>Fixed parameters: <br>
-                    {% endif %}
-                    {% for fixed_value in series.numericalvaluefixed_set.all %}
-                      {{ fixed_value.value_property }}: {{ fixed_value.value }}
-                      {% if fixed_value.unit != 'none' %}{{ fixed_value.unit }}{% endif %}<br>
-                    {% endfor %}
-                      </p>
-                  {% endwith %}
+                  {% endif %} <!-- if plotted -->
 
+                  <!-- SYSTEM DESCRIPTION -->
                   <div class="card">
-                    <button class="btn" data-toggle="collapse"
-                            data-target="#computational-body-{{ dataset.pk }}">
-                      Computational details
-                    </button>
-                    <div class="collapse" id="computational-body-{{ dataset.pk }}">
-                      <div class="card-body">
-                        {% with dataset.computationaldetails_set.all|first as comp %}
-                          {% if comp.code %}
-                            <p>Code: {{ comp.code }}</p>
-                          {% endif %}
-                          {% if comp.nonperturbative_level %}
-                            <p>Non-perturbative level of theory: {{ comp.nonperturbative_level }}</p>
-                          {% endif %}
-                          {% if comp.kgrid %}
-                            <p>K-point grid: {{ comp.kgrid }}</p>
-                          {% endif %}
-                          {% if comp.relativity_level %}
-                            <p>Level of relativity: {{ comp.relativity_level }}</p>
-                          {% endif %}
-                          {% if comp.SO_coupling %}
-                            <p>Spin-orbit coupling: yes</p>
-                          {% else %}
-                            <p>Spin-orbit coupling: no</p>
-                          {% endif %}
-                          {% if comp.basis %}
-                            <p>Basis sets: {{ comp.basis }}</p>
-                          {% endif %}
-                          {% if comp.postprocessing %}
-                            <p>Postprocessing: {{ comp.postprocessing }}</p>
-                          {% endif %}
-                        {% endwith %}
-                      </div>
+                    <div class="card-header">
+                      System description
+                    </div>
+                    <div class="card-body">
+                      Dimensionality: {{ dataset.dimensionality }}D
                     </div>
                   </div>
+
+                  <!-- FIXED PARAMETERS -->
+                  {% with series=dataset.dataseries_set.all|first %}
+                    {% if series.numericalvaluefixed_set.all %}
+                      <div class="card">
+                        <div class="card-header">
+                          Fixed parameters
+                        </div>
+                        <div class="card-body">
+                          {% for fixed_value in series.numericalvaluefixed_set.all %}
+                            {{ fixed_value.physical_property }}: {{ fixed_value.value }}
+                            {% if fixed_value.unit != 'none' %}{{ fixed_value.unit }}{% endif %}<br>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endwith %}
+
+                  <!-- COMPUTATIONAL DETAILS -->
+                  {% if dataset.computationaldetails_set.all %}
+                    <div class="card">
+                      <button class="btn text-left expand-hide-button"
+                              data-toggle="collapse"
+                              data-target="#computational-body-{{ dataset.pk }}">
+                        Computational details (click to expand)
+                      </button>
+                      <div class="collapse" id="computational-body-{{ dataset.pk }}">
+                        <div class="card-body">
+                          {% with dataset.computationaldetails_set.all|first as comp %}
+                            {% if comp.code %}
+                              <p>Code: {{ comp.code }}</p>
+                            {% endif %}
+                            {% if comp.nonperturbative_level %}
+                              <p>Non-perturbative level of theory:
+                                {{ comp.nonperturbative_level }}</p>
+                            {% endif %}
+                            {% if comp.kgrid %}
+                              <p>K-point grid: {{ comp.kgrid }}</p>
+                            {% endif %}
+                            {% if comp.relativity_level %}
+                              <p>Level of relativity: {{ comp.relativity_level }}</p>
+                            {% endif %}
+                            {% if comp.SO_coupling %}
+                              <p>Spin-orbit coupling: yes</p>
+                            {% else %}
+                              <p>Spin-orbit coupling: no</p>
+                            {% endif %}
+                            {% if comp.basis %}
+                              <p>Basis sets: {{ comp.basis }}</p>
+                            {% endif %}
+                            {% if comp.postprocessing %}
+                              <p>Postprocessing: {{ comp.postprocessing }}</p>
+                            {% endif %}
+                            {% if comp.comment_set %}
+                              <p><i>Comment: {{ comp.comment_set.all|first }}</i></p>
+                            {% endif %}
+                          {% endwith %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  <!-- REFERENCE -->
                   <div class="card">
-                    <button class="btn" data-toggle="collapse"
+                    <button class="btn text-left expand-hide-button" data-toggle="collapse"
                             data-target="#reference-body-{{ dataset.pk }}">
-                      Reference
+                      Reference (click to expand)
                     </button>
                     <div class="collapse" id="reference-body-{{ dataset.pk }}">
                       <div class="card-body">
@@ -501,18 +528,25 @@
                     </div>
                   </div>
 
+                  <!-- UPLOADED FILES -->
                   {% if dataset.has_files %}
-                    <a href="{% url "materials:get_dataset_files" pk=dataset.pk %}">
-                      <button type="button" class="btn btn-primary">
-                        <span class="fa fa-download" aria-hidden="true"></span>
-                        Files
-                      </button>
-                    </a>
+                    <br>
+                    <p>
+                      <a href="{% url "materials:get_dataset_files" pk=dataset.pk %}">
+                        <button type="button" class="btn btn-primary">
+                          <span class="fa fa-download" aria-hidden="true"></span>
+                          Files
+                        </button>
+                      </a>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">Files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...)</span>
+                      </i>
+                    </p>
                   {% endif %}
 
+                  Dataset ID: {{ dataset.pk }}<br>
                   Entry added on {{ dataset.created }}<br>
                   Last updated on {{ dataset.updated }}<br>
-
                 </div>
               </div>
             </div>
@@ -580,6 +614,16 @@
    $('.delete_button').click(function() {
      if (confirm('Are you sure you want to remove this data set from the database?')) {
        window.open($(this).attr('data-reverse-url'), '_top');
+     }
+   });
+  </script>
+  <script>
+   /* Change "click to expand" to "click to hide" and vice versa */
+   $('.expand-hide-button').click(function() {
+     if ($(this).html().includes('expand)')) {
+       $(this).html($(this).html().split('expand)')[0] + 'hide)');
+     } else {
+       $(this).html($(this).html().split('hide)')[0] + 'expand)');
      }
    });
   </script>
