@@ -63,7 +63,6 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         login(request, user)
-        # return redirect('home')
         text = ('Thank you for your email confirmation. '
                 'Now you can login to your account.')
     else:
