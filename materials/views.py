@@ -1089,6 +1089,8 @@ class AddDataView(generic.TemplateView):
             'systems': models.System.objects.all(),
             'properties': models.Property.objects.all(),
             'units': models.Unit.objects.all(),
+            'sample_types': models.Dataset.SAMPLE_TYPES,
+            'crystal_systems': models.Dataset.CRYSTAL_SYSTEMS,
         })
 
 
@@ -1136,6 +1138,8 @@ def submit_data(request):
     dataset.experimental = 'is-experimental' in request.POST
     dataset.dimensionality = (
         3 if (request.POST['is-3d-system'] == 'true') else 2)
+    dataset.sample_type = int(request.POST['sample-type'])
+    dataset.crystal_system = int(request.POST['crystal-system'])
     dataset.has_files = bool(request.FILES)
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')

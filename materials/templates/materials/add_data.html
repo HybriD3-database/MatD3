@@ -214,6 +214,38 @@
                 <label class="form-check-label" for="is-2d-system">2D</label>
               </div>
             </div>
+            <div class="row">
+              <legend class="col-form-label col-sm-2">Sample type:
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select the type of the sample.</span>
+                </i>
+              </legend>
+              {% for type in sample_types %}
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" id="is-{{ type.1 }}"
+                         name="sample-type" value="{{ type.0 }}"
+                         {% if forloop.first %}checked{% endif %}
+                         {% if forloop.first %}style="margin-left:-30px"{% endif %}>
+                  <label class="form-check-label" for="is-{{ type.1 }}">{{ type.1|capfirst }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="row">
+              <legend class="col-form-label col-sm-2">Crystal system:
+                <i class="fa fa-question-circle tooltip-container">
+                  <span class="tooltiptext">Select the crystal system.</span>
+                </i>
+              </legend>
+              {% for sys in crystal_systems %}
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" id="is-{{ sys.1 }}"
+                         name="crystal-system" value="{{ sys.0 }}"
+                         {% if forloop.first %}checked{% endif %}
+                         {% if forloop.first %}style="margin-left:-15px"{% endif %}>
+                  <label class="form-check-label" for="is-{{ sys.1 }}">{{ sys.1|capfirst }}</label>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
 

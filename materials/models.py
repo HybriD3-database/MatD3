@@ -344,6 +344,30 @@ class BondLength(IDInfo):
 class Dataset(Base):
     # Files associated with each dataset are uploaded in
     # media/uploads/dataset_{{ pk }}
+    SINGLE_CRYSTAL = 0
+    POWDER = 1
+    FILM = 2
+    SAMPLE_TYPES = (
+        (SINGLE_CRYSTAL, 'single crystal'),
+        (POWDER, 'powder'),
+        (FILM, 'film'),
+    )
+    TRICLINIC = 0
+    MONOCLINIC = 1
+    ORTHORHOMBIC = 2
+    TETRAGONAL = 3
+    TRIGONAL = 4
+    HEXAGONAL = 5
+    CUBIC = 6
+    CRYSTAL_SYSTEMS = (
+        (TRICLINIC, 'triclinic'),
+        (MONOCLINIC, 'monoclinic'),
+        (ORTHORHOMBIC, 'orthorhombic'),
+        (TETRAGONAL, 'tetragonal'),
+        (TRIGONAL, 'trigonal'),
+        (HEXAGONAL, 'hexagonal'),
+        (CUBIC, 'cubic'),
+    )
     label = models.TextField(max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     primary_property = models.ForeignKey(
@@ -362,8 +386,9 @@ class Dataset(Base):
     plotted = models.BooleanField()
     has_files = models.BooleanField()
     experimental = models.BooleanField()  # theoretical if false
-    comment = models.TextField(max_length=500)
     dimensionality = models.PositiveSmallIntegerField(choices=((2, 2), (3, 3)))
+    sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
+    crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
 
     def delete(self, *args, **kwargs):
         """Additionally remove any files uploaded by the user."""
@@ -377,7 +402,7 @@ class Dataset(Base):
 
 
 class Dataseries(Base):
-    label = models.CharField(max_length=100)
+    label = models.CharField(max_length=100, null=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
 
 
