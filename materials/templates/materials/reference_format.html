@@ -1,35 +1,35 @@
-{% for author in authors %}
+{% for author in ref.author_set.all %}
   {% if forloop.last and not forloop.first %}and{% endif %}
 
   {% for fn in author.splitFirstName %}
-    {{fn.0}}.
+    {{ fn.0 }}.
   {% endfor %}
 
-  {{author.last_name}}{% if not forloop.first or forloop.revcounter0 != 1 %},{% endif %}
+  {{ author.last_name }}{% if not forloop.first or forloop.revcounter0 != 1 %},{% endif %}
 
 {% endfor %}
 
 {% if ref.title %}
-  {{ref.title}}.
+  <i>{{ ref.title }}</i>,
 {% endif %}
 
 {% if ref.journal %}
-  <cite>{{ref.journal}}</cite>
+  {{ ref.journal }}
 {% endif %}
 
 {% if ref.vol %}
-  <strong>{{ref.vol}}</strong>,
+  <strong>{{ ref.vol }}</strong>,
 {% endif %}
 
 {% if ref.pages_start %}
-  {{ref.pages_start}}{% if ref.pages_end %}&#8209;{{ref.pages_end}}
+  {{ ref.pages_start }}{% if ref.pages_end %}&#8209;{{ ref.pages_end }}
   {% endif %}
 {% endif %}
 
 {% if ref.year %}
-  ({{ref.year}}).
+  ({{ ref.year }}).
 {% endif %}
 
 {% if ref.doi_isbn %}
-  doi:&nbsp;{{ref.doi_isbn}}.
+  doi:&nbsp;{{ ref.doi_isbn }}.
 {% endif %}
