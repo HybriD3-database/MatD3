@@ -1150,7 +1150,7 @@ def submit_data(request):
             pk=request.POST['secondary-unit'])
     dataset.visible = 'dataset-visible' in request.POST
     dataset.plotted = 'dataset-plotted' in request.POST
-    dataset.experimental = 'is-experimental' in request.POST
+    dataset.experimental = request.POST['is-experimental'] == 'true'
     dataset.dimensionality = (
         3 if (request.POST['is-3d-system'] == 'true') else 2)
     dataset.sample_type = int(request.POST['sample-type'])

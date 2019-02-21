@@ -653,14 +653,9 @@
         y: {{ datapoint.numericalvalue_set.all.1.value|default:0 }}},
        {% endfor %}
      ];
-     plot_data(
-       'figure_{{ dataset.pk }}',
-       data,
-       '{{ series.datapoint_set.all.0.numericalvalue_set.all.0.value_property }}',
-       '{{ series.datapoint_set.all.0.numericalvalue_set.all.0.unit }}',
-       '{{ series.datapoint_set.all.0.numericalvalue_set.all.1.value_property }}',
-       '{{ series.datapoint_set.all.0.numericalvalue_set.all.1.unit }}',
-     );
+     plot_data('figure_{{ dataset.pk }}', data,
+       '{{ dataset.primary_property }}', '{{ dataset.primary_unit }}',
+       '{{ dataset.secondary_property }}', '{{ dataset.secondary_unit }}');
      {% endwith %}
    }
    {% endfor %}
