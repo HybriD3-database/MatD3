@@ -1,6 +1,8 @@
 import functools
 import io
 import logging
+import matplotlib
+import numpy
 import operator
 import os
 import zipfile
@@ -23,6 +25,7 @@ from materials import models
 import materials.rangeparser
 
 
+matplotlib.use('Agg')
 logger = logging.getLogger(__name__)
 
 
@@ -1194,17 +1197,7 @@ def submit_data(request):
         dataseries.label = request.POST['dataseries-label']
     dataseries.save(request.user)
     # Read in main data
-    if request.POST['secondary-property'] == '-1':
-        input_lines = request.POST['main-data'].split()
-        for i_value, value in enumerate(input_lines):
-            datapoint = models.Datapoint(dataseries=dataseries)
-            datapoint.save(request.user)
-            numerical_value = models.NumericalValue(datapoint=datapoint)
-            numerical_value.qualifier = models.NumericalValue.PRIMARY
-            numerical_value.value = float(value)
-            numerical_value.value_type = models.NumericalValue.ACCURATE
-            numerical_value.save(request.user)
-    else:
+    if dataset.primary_property and dataset.secondary_property:
         input_lines = request.POST['main-data'].split('\n')
         for i_line, line in enumerate(input_lines):
             x_value, y_value = line.split()
@@ -1220,6 +1213,16 @@ def submit_data(request):
             numerical_value = models.NumericalValue(datapoint=datapoint)
             numerical_value.qualifier = models.NumericalValue.PRIMARY
             numerical_value.value = float(y_value)
+            numerical_value.value_type = models.NumericalValue.ACCURATE
+            numerical_value.save(request.user)
+    elif dataset.primary_property:
+        input_lines = request.POST['main-data'].split()
+        for i_value, value in enumerate(input_lines):
+            datapoint = models.Datapoint(dataseries=dataseries)
+            datapoint.save(request.user)
+            numerical_value = models.NumericalValue(datapoint=datapoint)
+            numerical_value.qualifier = models.NumericalValue.PRIMARY
+            numerical_value.value = float(value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
     # Fixed properties
@@ -1428,3 +1431,122 @@ class PropertyDeleteView(generic.DeleteView):
     def get_success_url(self):
         pk = self.object.system.pk
         return '/materials/%s/material_prop' % str(pk)
+
+
+def dataset_image(request, pk):
+    """Return a png image of the data set."""
+    from matplotlib import pyplot
+    dataset = models.Dataset.objects.get(pk=pk)
+    dataseries = dataset.dataseries_set.all()[0]
+    datapoints = dataseries.datapoint_set.all()
+    x_values = numpy.zeros(len(datapoints))
+    y_values = numpy.zeros(len(datapoints))
+    for i_dp, datapoint in enumerate(datapoints):
+        x_value = datapoint.numericalvalue_set.get(
+            qualifier=models.NumericalValue.SECONDARY)
+        x_values[i_dp] = x_value.value
+        y_value = datapoint.numericalvalue_set.get(
+            qualifier=models.NumericalValue.PRIMARY)
+        y_values[i_dp] = y_value.value
+    pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3)
+    pyplot.title(dataset.label)
+    pyplot.ylabel(f'{dataset.primary_property.name}, '
+                  f'{dataset.primary_unit.label}')
+    pyplot.xlabel(f'{dataset.secondary_property.name}, '
+                  f'{dataset.secondary_unit.label}')
+    in_memory_object = io.BytesIO()
+    pyplot.savefig(in_memory_object, format='png')
+    image = in_memory_object.getvalue()
+    pyplot.close()
+    in_memory_object.close()
+    return HttpResponse(image, content_type='image/png')
+
+
+def dataset_data(request, pk):
+    """Return the data set as a text file."""
+    dataset = models.Dataset.objects.get(pk=pk)
+    dataseries = dataset.dataseries_set.all()[0]
+    datapoints = dataseries.datapoint_set.all()
+    text = ''
+    for i_dp, datapoint in enumerate(datapoints):
+        x_value = datapoint.numericalvalue_set.get(
+            qualifier=models.NumericalValue.SECONDARY)
+        y_value = datapoint.numericalvalue_set.get(
+            qualifier=models.NumericalValue.PRIMARY)
+        text += f'{x_value.value} {y_value.value}\n'
+    return HttpResponse(text, content_type='text/plain')
+
+
+def publication_data(request, pk):
+    """Return a key-value representation of the data set.
+
+    The representation conforms to the one used in Qresp
+    (http://qresp.org/).
+
+    """
+    data = {}
+    data['info'] = {
+        'downloadPath': request.get_host(),
+        'fileServerPath': '',
+        'folderAbsolutePath': '',
+        'insertedBy': {
+            'firstName': '',
+            'lastName': '',
+            'middleName': ''
+        },
+        'isPublic': 'true',
+        'notebookFile': '',
+        'notebookPath': '',
+        'serverPath': request.get_host(),
+        'timeStamp': '2017-06-22 18:19:02'
+    }
+    publication = models.Publication.objects.get(pk=pk)
+    data['reference'] = {}
+    data['reference']['journal'] = {
+        'abbrevName': publication.journal,
+        'fullName': publication.journal,
+        'kind': 'journal',
+        'page': publication.pages_start,
+        'publishedAbstract': '',
+        'publishedDate': '',
+        'receivedDate': '',
+        'title': publication.title,
+        'volume': publication.vol,
+        'year': publication.year,
+    }
+    data['reference']['authors'] = []
+    for author in publication.author_set.all():
+        data['reference']['authors'].append({
+            'firstname': author.first_name,
+            'lastname': author.last_name,
+        })
+    data['PIs'] = []
+    data['PIs'].append({'firstname': '', 'lastname': ''})
+    data['collections'] = []
+    data['collections'].append('')
+    datasets = publication.dataset_set.all()
+    data['charts'] = []
+    dataset_counter = 1
+    for dataset in datasets:
+        chart = {
+            'caption': dataset.label,
+            'files': [f'/materials/dataset-{dataset.pk}/data.txt'],
+            'id': '',
+            'imageFile': f'/materials/dataset-{dataset.pk}/image.png',
+            'kind': 'figure' if dataset.plotted else 'table',
+            'notebookFile': '',
+            'number': dataset_counter,
+            'properties': [],
+        }
+        if dataset.secondary_property:
+            chart['properties'].append(dataset.secondary_property.name)
+        if dataset.primary_property:
+            chart['properties'].append(dataset.primary_property.name)
+        loc = os.path.join(settings.MEDIA_ROOT,
+                           f'uploads/dataset_{dataset.pk}')
+        for file_ in os.listdir(loc):
+            chart['files'].append(settings.MEDIA_URL +
+                                  f'uploads/dataset_{dataset.pk}/{file_}')
+        data['charts'].append(chart)
+        dataset_counter += 1
+    return JsonResponse(data)

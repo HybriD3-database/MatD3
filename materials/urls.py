@@ -77,4 +77,9 @@ urlpatterns = [
             name='data_dl'),
     re_path(r'^update-system/(?P<pk>\d+)$', views.SystemUpdateView.as_view(),
             name='update_system'),
+    path('publication-data/<int:pk>', views.publication_data,
+         name='publication_data'),
+    path('dataset-<int:pk>/image.png', views.dataset_image,
+         name='dataset_image'),
+    path('dataset-<int:pk>/data.txt', views.dataset_data, name='dataset_data'),
 ]
