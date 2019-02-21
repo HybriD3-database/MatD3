@@ -654,8 +654,10 @@
        {% endfor %}
      ];
      plot_data('figure_{{ dataset.pk }}', data,
-       '{{ dataset.primary_property }}', '{{ dataset.primary_unit }}',
-       '{{ dataset.secondary_property }}', '{{ dataset.secondary_unit }}');
+               '{{ dataset.secondary_property }}',
+               '{{ dataset.secondary_unit }}',
+               '{{ dataset.primary_property }}',
+               '{{ dataset.primary_unit }}');
      {% endwith %}
    }
    {% endfor %}
