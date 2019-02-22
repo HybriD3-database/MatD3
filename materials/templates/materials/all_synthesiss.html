@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block dl_link %}
-  <a href="{% url "materials:data_dl" type="synthesis" id=entry.id %}">
+  <a href="{% url "materials:data_dl" type="synthesis" pk=entry.pk %}">
     <button type="button" class="btn btn-primary"/>
     <span class="fa fa-download" aria-hidden="true"></span>
     Synthesis Method

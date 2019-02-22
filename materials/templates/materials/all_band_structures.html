@@ -35,7 +35,7 @@
 
 {% block dl_link %}
   {% if entry.folder_location|length > 0 and entry.plotted %}
-    <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
+    <a href="{% url "materials:data_dl" data_type="band_structure" pk=entry.pk %}">
       <button type="button" class="btn btn-primary"/>
       <span class="fa fa-download-alt" aria-hidden="true"></span>
       Band Structure
@@ -43,14 +43,14 @@
     </a>
   {% endif %}
   {% if entry.band_gap != '' %}
-    <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">
+    <a href="{% url "materials:data_dl" data_type="band_gap" pk=entry.pk %}">
       <button type="button" class="btn btn-primary"/>
       <span class="fa fa-download-alt" aria-hidden="true"></span>
       Band Gap
       </button>
     </a>
   {% endif %}
-  <a href="{% url "materials:data_dl" type="input_files" id=entry.id %}">
+  <a href="{% url "materials:data_dl" data_type="input_files" pk=entry.pk %}">
     <button type="button" class="btn btn-primary"/>
     <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
     Input files

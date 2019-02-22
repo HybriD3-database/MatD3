@@ -5,7 +5,7 @@
 {% block entry_type %}{{entry.exciton_emission}} nm{% endblock %}
 
 {% block dl_link %}
-  <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
+  <a href="{% url "materials:data_dl" data_type="exciton_emission" pk=entry.pk %}">
   <button type="button" class="btn btn-primary"/>
   <span class="fa fa-download" aria-hidden="true"></span>
     Exciton Emission Data

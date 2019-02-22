@@ -29,15 +29,15 @@ matplotlib.use('Agg')
 logger = logging.getLogger(__name__)
 
 
-def data_dl(request, type_, id_, bandgap=False):
+def data_dl(request, data_type, pk, bandgap=False):
     """Download a specific entry type"""
     response = HttpResponse(content_type='text/fhi-aims')
-    if type_ == 'band_gap':
-        type_ = 'band_structure'
+    if data_type == 'band_gap':
+        data_type = 'band_structure'
         bandgap = True
 
     def write_headers():
-        if type_ not in ['all_atomic_positions']:
+        if data_type not in ['all_atomic_positions']:
             if not bandgap:
                 response.write(str('#HybriD³ Materials Database\n'))
             response.write(str('\n#System: '))
@@ -76,8 +76,8 @@ def data_dl(request, type_, id_, bandgap=False):
         response.write(obj.gamma)
         response.write('\n\n')
 
-    if type_ == 'atomic_positions':
-        obj = models.AtomicPositions.objects.get(id=id_)
+    if data_type == 'atomic_positions':
+        obj = models.AtomicPositions.objects.get(pk=pk)
         p_obj = models.System.objects.get(atomicpositions=obj)
         write_headers()
         write_a_pos()
@@ -91,10 +91,10 @@ def data_dl(request, type_, id_, bandgap=False):
         else:
             response.write('#-Atomic Positions input file not available-')
         response['Content-Disposition'] = (
-            'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
-                                                     p_obj.inorganic, type_))
-    elif type_ == 'all_atomic_positions':  # all the a_pos entries
-        p_obj = models.System.objects.get(id=id_)
+            'attachment; filename=%s_%s_%s_%s.in' % (
+                obj.phase, p_obj.organic, p_obj.inorganic, data_type))
+    elif data_type == 'all_atomic_positions':  # all the a_pos entries
+        p_obj = models.System.objects.get(pk=pk)
         response.write(str('#HybriD³ Materials Database\n\n'))
         name = p_obj.compound_name
         response.write(str('#'*(len(name)+22) + '\n'))
@@ -107,8 +107,8 @@ def data_dl(request, type_, id_, bandgap=False):
         response['Content-Disposition'] = (
             'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
                                                      p_obj.inorganic, 'ALL'))
-    elif type_ == 'exciton_emission':
-        obj = models.ExcitonEmission.objects.get(id=id_)
+    elif data_type == 'exciton_emission':
+        obj = models.ExcitonEmission.objects.get(pk=pk)
         p_obj = models.System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
                                             p_obj.inorganic)
@@ -160,8 +160,8 @@ def data_dl(request, type_, id_, bandgap=False):
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
-    elif type_ == 'synthesis':
-        obj = m.SynthesisMethodOld.objects.get(id=id_)
+    elif data_type == 'synthesis':
+        obj = models.SynthesisMethodOld.objects.get(pk=pk)
         p_obj = models.System.objects.get(synthesismethod=obj)
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
                                              p_obj.inorganic)
@@ -199,8 +199,8 @@ def data_dl(request, type_, id_, bandgap=False):
         response.encoding = 'utf-8'
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (meta_filename))
-    elif type_ == 'band_structure' and bandgap:
-        obj = models.BandStructure.objects.get(id=id_)
+    elif data_type == 'band_structure' and bandgap:
+        obj = models.BandStructure.objects.get(pk=pk)
         p_obj = models.System.objects.get(bandstructure=obj)
         filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic,
                                         p_obj.inorganic)
@@ -216,8 +216,8 @@ def data_dl(request, type_, id_, bandgap=False):
         response.encoding = 'utf-8'
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (filename))
-    elif type_ == 'band_structure':
-        obj = models.BandStructure.objects.get(id=id_)
+    elif data_type == 'band_structure':
+        obj = models.BandStructure.objects.get(pk=pk)
         p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
@@ -272,8 +272,8 @@ def data_dl(request, type_, id_, bandgap=False):
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            zip_filename)
-    elif type_ == 'input_files':
-        obj = models.BandStructure.objects.get(id=id_)
+    elif data_type == 'input_files':
+        obj = models.BandStructure.objects.get(pk=pk)
         p_obj = models.System.objects.get(bandstructure=obj)
         file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
                                                p_obj.inorganic, obj.pk)
@@ -302,7 +302,7 @@ def data_dl(request, type_, id_, bandgap=False):
     return response
 
 
-def all_a_pos(request, id_):
+def all_a_pos(request, pk):
     """Defines views for each specific entry type."""
     def sortEntries(entry):
         """Sort by temperature, but temperature is a charFields"""
@@ -321,15 +321,15 @@ def all_a_pos(request, id_):
             return 9999999
 
     template_name = 'materials/all_a_pos.html'
-    obj = models.System.objects.get(id=id_)
-    compound_name = models.System.objects.get(id=id_).compound_name
+    obj = models.System.objects.get(pk=pk)
+    compound_name = models.System.objects.get(pk=pk).compound_name
     obj = obj.atomicpositions_set.all()
     obj = sorted(obj, key=sortEntries)
     return render(request, template_name,
-                  {'object': obj, 'compound_name': compound_name, 'key': id_})
+                  {'object': obj, 'compound_name': compound_name, 'key': pk})
 
 
-def all_entries(request, id_, type_):
+def all_entries(request, pk, data_type):
     str_to_model = {
         'atomic_positions': models.AtomicPositions,
         'exciton_emission': models.ExcitonEmission,
@@ -337,12 +337,15 @@ def all_entries(request, id_, type_):
         'band_structure': models.BandStructure,
         'material_prop': models.MaterialProperty
     }
-    template_name = 'materials/all_%ss.html' % type_
-    compound_name = models.System.objects.get(pk=id_).compound_name
-    obj = str_to_model[type_].objects.filter(system__id=id_)
-    return render(request, template_name,
-                  {'object': obj, 'compound_name': compound_name,
-                   'data_type': type_, 'key': id_})
+    template_name = 'materials/all_%ss.html' % data_type
+    compound_name = models.System.objects.get(pk=pk).compound_name
+    obj = str_to_model[data_type].objects.filter(system__pk=pk)
+    return render(request, template_name, {
+        'object': obj,
+        'compound_name': compound_name,
+        'data_type': data_type,
+        'key': pk
+    })
 
 
 def getAuthorSearchResult(search_text):
@@ -1098,23 +1101,21 @@ class AddDataView(generic.TemplateView):
 
 
 def add_property(request):
-    property_name = request.POST['property-name']
     prop = models.Property()
-    prop.name = property_name
+    prop.name = request.POST['property-name']
     prop.save(request.user)
     messages.success(request,
-                     f'New property "{property_name}" successfully added to '
+                     f'New property "{prop.name}" successfully added to '
                      'the database!')
     return redirect(reverse('materials:add_data'))
 
 
 def add_unit(request):
-    unit_name = request.POST['unit-label']
     unit = models.Unit()
-    unit.label = unit_name
+    unit.label = request.POST['unit-label']
     unit.save(request.user)
     messages.success(request,
-                     f'New unit "{unit_name}" successfully added to '
+                     f'New unit "{unit.label}" successfully added to '
                      'the database!')
     return redirect(reverse('materials:add_data'))
 
@@ -1330,7 +1331,7 @@ class SystemUpdateView(generic.UpdateView):
     model = models.System
     template_name = 'materials/system_update_form.html'
     form_class = forms.AddSystem
-    success_url = '/materials/{id}'
+    success_url = '/materials/{pk}'
 
 
 class AtomicPositionsUpdateView(generic.UpdateView):

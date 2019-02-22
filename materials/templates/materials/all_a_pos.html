@@ -15,7 +15,7 @@
             <h5>All Atomic Positions</h5>
           </div>
           <a class="p-2 ml-auto"
-             href="{% url "materials:data_dl" type="all_atomic_positions" id=object.0.system.id %}">
+             href="{% url "materials:data_dl" data_type="all_atomic_positions" pk=object.0.system.pk %}">
             <button type="button" class="btn btn-primary">
               <span class="fa fa-download" aria-hidden="true"></span>
               All Lattice Parameters
@@ -91,7 +91,7 @@
                         <strong>Comments:</strong> {{entry.comments}}
                       </div>
                     {% endif %}
-                    <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+                    <a href="{% url "materials:data_dl" data_type="atomic_positions" pk=entry.pk %}">
                       <button type="button" class="btn btn-primary">
                         <span class="fa fa-download" aria-hidden="true"></span>
                         Atomic Positions

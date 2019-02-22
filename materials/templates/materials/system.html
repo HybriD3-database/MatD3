@@ -85,13 +85,13 @@
                     </div>
                     <br>
                   {% endwith %}
-                  <a href="{% url "materials:data_dl" type="atomic_positions" id=entry.id %}">
+                  <a href="{% url "materials:data_dl" data_type="atomic_positions" pk=entry.pk %}">
                     <button type="button" class="btn btn-primary">
                       <span class="fa fa-download" aria-hidden="true"></span>
                       Atomic Positions
                     </button>
                   </a>
-                  <a href="{% url "materials:all_a_pos" id=object.id %}">
+                  <a href="{% url "materials:all_a_pos" pk=object.pk %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
                       See all entries ({{ object.atomicpositions_set.all|length }})
@@ -160,13 +160,13 @@
                     </div>
                     <br>
                   {% endwith %}
-                  <a href="{% url "materials:data_dl" type="synthesis" id=entry.id %}">
+                  <a href="{% url "materials:data_dl" data_type="synthesis" pk=entry.pk %}">
                     <button type="button" class="btn btn-primary">
                       <span class="fa fa-download" aria-hidden="true"></span>
                       Synthesis Method
                     </button>
                   </a>
-                  <a href="{% url "materials:all_entries" id=object.id type="synthesis"%}">
+                  <a href="{% url "materials:all_entries" pk=object.pk data_type="synthesis"%}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
                       See all entries ({{ object.synthesismethodold_set.all|length }})
@@ -223,13 +223,13 @@
                     </div>
                     <br>
                   {% endwith %}
-                  <a href="{% url "materials:data_dl" type="exciton_emission" id=entry.id %}">
+                  <a href="{% url "materials:data_dl" data_type="exciton_emission" pk=entry.pk %}">
                     <button type="button" class="btn btn-primary">
                       <span class="fa fa-download" aria-hidden="true"></span>
                       Exciton Emission Peak
                     </button>
                   </a>
-                  <a href="{% url "materials:all_entries" id=object.id type="exciton_emission" %}">
+                  <a href="{% url "materials:all_entries" pk=object.pk data_type="exciton_emission" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
                       See all entries ({{ object.excitonemission_set.all|length }})
@@ -308,7 +308,7 @@
                     <br>
                   {% endwith %}
                   {% if entry.folder_location and entry.plotted %}
-                    <a href="{% url "materials:data_dl" type="band_structure" id=entry.id %}">
+                    <a href="{% url "materials:data_dl" data_type="band_structure" pk=entry.pk %}">
                       <button type="button" class="btn btn-primary">
                         <span class="fa fa-download" aria-hidden="true"></span>
                         Band Structure
@@ -316,14 +316,14 @@
                     </a>
                   {% endif %}
                   {% if entry.band_gap != '' %}
-                    <a href="{% url "materials:data_dl" type="band_gap" id=entry.id %}">
+                    <a href="{% url "materials:data_dl" data_type="band_gap" pk=entry.pk %}">
                       <button type="button" class="btn btn-primary">
                         <span class="fa fa-download" aria-hidden="true"></span>
                         Band Gap
                       </button>
                     </a>
                   {% endif %}
-                  <a href="{% url "materials:all_entries" id=object.id type="band_structure" %}">
+                  <a href="{% url "materials:all_entries" pk=object.pk data_type="band_structure" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
                       See all entries ({{ object.bandstructure_set.all|length }})
@@ -352,7 +352,7 @@
                       <li>{{ property }}</li>
                     {% endfor %}
                   </ul>
-                  <a href="{% url "materials:all_entries" id=object.id type="material_prop" %}">
+                  <a href="{% url "materials:all_entries" pk=object.pk data_type="material_prop" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
                       See all entries ({{ object.materialproperty_set.all|length }})

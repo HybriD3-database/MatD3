@@ -18,7 +18,7 @@
             <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
             <td>{{ee.ee}}</td>
             <td>
-              <a href="{% url "materials:data_dl" type="exciton_emission" id=ee.ee_pk %}">
+              <a href="{% url "materials:data_dl" data_type="exciton_emission" pk=ee.ee_pk %}">
                 <span class="fa fa-download" aria-hidden="true"></span>
                 Exciton Emission Peak
               </a></td>
