@@ -1,3 +1,4 @@
+import datetime
 import functools
 import io
 import logging
@@ -1499,7 +1500,7 @@ def publication_data(request, pk):
         'notebookFile': '',
         'notebookPath': '',
         'serverPath': request.get_host(),
-        'timeStamp': '2017-06-22 18:19:02'
+        'timeStamp': datetime.datetime.now()
     }
     publication = models.Publication.objects.get(pk=pk)
     data['reference'] = {}
