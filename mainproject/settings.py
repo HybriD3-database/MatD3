@@ -4,11 +4,11 @@
 
 import os
 import raven
+import socket
 
 from django.contrib.messages import constants as messages
 
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 try:
@@ -43,7 +43,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'mainproject.middleware.LoginRequiredMiddleware'
 ]
 
 ROOT_URLCONF = 'mainproject.urls'
@@ -100,7 +99,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
@@ -130,35 +128,12 @@ LOGIN_REDIRECT_URL = '/'
 
 LOGIN_URL = '/account/login'
 
-LOGIN_EXEMPT_URLS = (
-    r'^account/logout/$',
-    r'^account/register/$',
-    r'^account/activate/(?P<uidb64>[0-9A-Za-z_\-]+)/'
-    r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-    r'^account/reset-password/$',
-    r'^account/reset-password/done$',
-    r'^account/reset-password/confirm(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-    r'^account/reset-password/complete/$',
-)
+# Account settings
 
-AUTH_EXEMPT_URLS = (
-    r'^$',
-    r'^media/',
-    r'^static/',
-    r'^contact/$',
-    r'^materials/$',
-    r'^materials/(?P<pk>\d+)$',
-    r'^materials/(?P<id>\d+)/all-a-pos$',
-    r'^materials/(?P<id>\d+)/(?P<type>.*)$',
-    r'^materials/(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_syn>\d+)_(?P<pk_ee>\d+)_'
-    r'(?P<pk_bs>\d+)$',
-    r'^materials/data-dl/(?P<type>.*)/(?P<id>\d+)$',
-)
-
-# account settings
 ACCOUNT_ACTIVATION_DAYS = 7
 
-# email settings
+# Email settings
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
@@ -169,28 +144,29 @@ EMAIL_HOST_PASSWORD = 'XXXXXXX'
 DEFAULT_FROM_EMAIL = 'HybriD3 materials database <hybrid3project@duke.edu>'
 EMAIL_USE_TLS = True
 
-# messages framework
+# Messages framework
+
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# logging
+# Logging
+
 RAVEN_CONFIG = {
     'dsn': 'https://768890a8001b4782bd27155f351fdea6:817997aed0d1430282276964afbe22bc@sentry.io/1395175',
     'release': raven.fetch_git_sha(BASE_DIR),
 }
+# Disable Sentry for development
+if socket.gethostname() not in ALLOWED_HOSTS:
+    RAVEN_CONFIG['dsn'] = ''
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s  %(module)s  %(message)s',
-        },
-    },
-    'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+            'format': '{levelname} - {asctime} - {module} - {message}',
+            'style': '{',
         },
     },
     'handlers': {
@@ -200,7 +176,8 @@ LOGGING = {
         },
         'sentry': {
             'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'class':
+            'raven.contrib.django.raven_compat.handlers.SentryHandler',
         },
     },
     'loggers': {

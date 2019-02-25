@@ -9,11 +9,15 @@ import os
 import zipfile
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.forms import formset_factory
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.shortcuts import reverse
@@ -28,6 +32,24 @@ import materials.rangeparser
 
 matplotlib.use('Agg')
 logger = logging.getLogger(__name__)
+
+
+def dataset_author_check(view):
+    """Test whether the logged on user is the creator of the data set."""
+    @login_required
+    def wrap(request, *args, **kwargs):
+        dataset = get_object_or_404(models.Dataset, pk=kwargs['dataset_pk'])
+        if dataset.created_by == request.user:
+            return view(request, *args, **kwargs)
+        else:
+            logger.warning(f'Data set was created by {dataset.created_by} but '
+                           'an attempt was made to delete it by '
+                           f'{request.user}',
+                           extra={'request': request})
+            return PermissionDenied
+    wrap.__doc__ = view.__doc__
+    wrap.__name__ = view.__name__
+    return wrap
 
 
 def data_dl(request, data_type, pk, bandgap=False):
@@ -492,7 +514,7 @@ def makeCorrections(form):
         return form
 
 
-class AddAPosView(generic.TemplateView):
+class AddAPosView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_a_pos.html'
 
     def get(self, request):
@@ -541,7 +563,7 @@ class AddAPosView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddPubView(generic.TemplateView):
+class AddPubView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_publication.html'
 
     def get(self, request):
@@ -652,7 +674,7 @@ class SearchPubView(generic.TemplateView):
                       {'search_result': search_result})
 
 
-class AddAuthorsToPublicationView(generic.TemplateView):
+class AddAuthorsToPublicationView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_authors_to_publication.html'
 
     def post(self, request):
@@ -691,7 +713,7 @@ class SearchAuthorView(generic.TemplateView):
                       {'search_result': search_result})
 
 
-class AddAuthorView(generic.TemplateView):
+class AddAuthorView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_author.html'
 
     def get(self, request):
@@ -731,7 +753,7 @@ class AddAuthorView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddTagView(generic.TemplateView):
+class AddTagView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_tag.html'
 
     def get(self, request):
@@ -786,7 +808,7 @@ class SearchSystemView(generic.TemplateView):
                        'related_synthesis': related_synthesis})
 
 
-class AddSystemView(generic.TemplateView):
+class AddSystemView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_system.html'
 
     def get(self, request):
@@ -820,7 +842,7 @@ class AddSystemView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddPhase(generic.TemplateView):
+class AddPhase(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/form.html'
 
     def get(self, request):
@@ -836,7 +858,7 @@ class AddPhase(generic.TemplateView):
         return render(request, self.template_name, args)
 
 
-class AddTemperature(generic.TemplateView):
+class AddTemperature(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/form.html'
 
     def get(self, request):
@@ -854,7 +876,7 @@ class AddTemperature(generic.TemplateView):
         return render(request, self.template_name, args)
 
 
-class AddExcitonEmissionView(generic.TemplateView):
+class AddExcitonEmissionView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_exciton_emission.html'
 
     def get(self, request):
@@ -904,7 +926,7 @@ class AddExcitonEmissionView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddSynthesisMethodView(generic.TemplateView):
+class AddSynthesisMethodView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_synthesis.html'
 
     def get(self, request):
@@ -949,7 +971,7 @@ class AddSynthesisMethodView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddBandStructureView(generic.TemplateView):
+class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_band_structure.html'
 
     def get(self, request):
@@ -1027,7 +1049,7 @@ class AddBandStructureView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddMaterialPropertyView(generic.TemplateView):
+class AddMaterialPropertyView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_material_property.html'
 
     def get(self, request):
@@ -1069,7 +1091,7 @@ class AddMaterialPropertyView(generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddBondLength(generic.TemplateView):
+class AddBondLength(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/form.html'
 
     def get(self, request):
@@ -1087,7 +1109,7 @@ class AddBondLength(generic.TemplateView):
         return render(request, self.template_name, args)
 
 
-class AddDataView(generic.TemplateView):
+class AddDataView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_data.html'
 
     def get(self, request):
@@ -1101,6 +1123,7 @@ class AddDataView(generic.TemplateView):
         })
 
 
+@login_required
 def add_property(request):
     prop = models.Property()
     prop.name = request.POST['property-name']
@@ -1111,6 +1134,7 @@ def add_property(request):
     return redirect(reverse('materials:add_data'))
 
 
+@login_required
 def add_unit(request):
     unit = models.Unit()
     unit.label = request.POST['unit-label']
@@ -1121,6 +1145,7 @@ def add_unit(request):
     return redirect(reverse('materials:add_data'))
 
 
+@login_required
 def submit_data(request):
     """Primary function for submitting data from the user."""
     def add_comment(model, label):
@@ -1257,18 +1282,20 @@ def submit_data(request):
     return redirect(reverse('materials:add_data'))
 
 
-def toggle_dataset_publish(request, pk, ds):
-    dataset = models.Dataset.objects.get(pk=ds)
+@dataset_author_check
+def toggle_dataset_visibility(request, system_pk, dataset_pk):
+    dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.visible = not dataset.visible
     dataset.save(request.user)
-    return redirect(reverse('materials:materials_system', args=[pk]))
+    return redirect(reverse('materials:materials_system', args=[system_pk]))
 
 
-def toggle_dataset_plotted(request, pk, ds):
-    dataset = models.Dataset.objects.get(pk=ds)
+@dataset_author_check
+def toggle_dataset_plotted(request, system_pk, dataset_pk):
+    dataset = models.Dataset.objects.get(system_pk=dataset_pk)
     dataset.plotted = not dataset.plotted
     dataset.save(request.user)
-    return redirect(reverse('materials:materials_system', args=[pk]))
+    return redirect(reverse('materials:materials_system', args=[system_pk]))
 
 
 def download_dataset_files(request, pk):
@@ -1288,11 +1315,12 @@ def download_dataset_files(request, pk):
     return response
 
 
-def delete_dataset_and_files(request, pk, ds):
+@dataset_author_check
+def delete_dataset_and_files(request, system_pk, dataset_pk):
     """Delete current data set and all associated files."""
-    dataset = models.Dataset.objects.get(pk=ds)
+    dataset = models.Dataset.objects.get(system_pk=dataset_pk)
     dataset.delete()
-    return redirect(reverse('materials:materials_system', args=[pk]))
+    return redirect(reverse('materials:materials_system', args=[system_pk]))
 
 
 class SystemView(generic.DetailView):
