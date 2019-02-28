@@ -2,7 +2,7 @@
 
 {% block heading %}Exciton Emission{% endblock %}
 
-{% block entry_type %}{{entry.exciton_emission}} nm{% endblock %}
+{% block entry_type %}{{ entry.exciton_emission }} nm{% endblock %}
 
 {% block dl_link %}
   <a href="{% url "materials:data_dl" data_type="exciton_emission" pk=entry.pk %}">
@@ -18,23 +18,23 @@
     {% with syn as entry %}
     {% with syn.getAuthors as authors %}
     {% if syn %}
-    <button type="button" class="btn btn-warning" data-toggle="popover" title="Related Synthesis Method" data-trigger="focus" html="true" data-content='<u>Method {{syn.methodNumber}}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
+    <button type="button" class="btn btn-warning" data-toggle="popover" title="Related Synthesis Method" data-trigger="focus" html="true" data-content='<u>Method {{ syn.methodNumber }}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
           <div>
-            <b>Method:</b> {{syn.synthesis_method|truncatechars:50}}</div>
+            <b>Method:</b> {{ syn.synthesis_method|truncatechars:50 }}</div>
         {% endif %}
         {% if syn.starting_materials %}
           <div>
-            <b>Starting Materials:</b> {{syn.starting_materials|truncatechars:50}}
+            <b>Starting Materials:</b> {{ syn.starting_materials|truncatechars:50 }}
           </div>
         {% endif %}
         {% if syn.remarks %}
           <div>
-            <b>Remarks:</b> {{syn.remarks|truncatechars:50}}
+            <b>Remarks:</b> {{ syn.remarks|truncatechars:50 }}
           </div>
         {% endif %}
         {% if syn.product %}
           <div>
-            <b>Product:</b> {{syn.product|truncatechars:50}}
+            <b>Product:</b> {{ syn.product|truncatechars:50 }}
           </div>
         {% endif %}<b>Publication:</b>
                   {% include 'materials/reference_format.html' with ref=entry.publication %}'>

@@ -13,7 +13,7 @@
         <div class="input-group-prepend">
           <select id="search_term" name="search_term" class="selectpicker">
             {% for search_term in search_terms %}
-              <option value="{{search_term.0}}">{{search_term.1}}</option>
+              <option value="{{ search_term.0 }}">{{ search_term.1 }}</option>
             {% endfor %}
           </select>
         </div>

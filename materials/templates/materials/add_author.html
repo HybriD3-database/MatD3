@@ -16,7 +16,8 @@
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_alert_form_submit.html' %}
+  {% load static %}
+  <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
 <script type="text/javascript">
   var form = $('#add-author');
   var feedback = $('#results');

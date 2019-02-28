@@ -13,10 +13,10 @@
       <tbody>
         {% for ee in systems_info %}
           <tr>
-            <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.compound_name}}</a></td>
-            <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.common_formula}}</a></td>
-            <td><a href="/materials/{{ee.sys_pk}}_{{ee.apos_pk}}_{{ee.syn_pk}}_{{ee.ee_pk}}_{{ee.bs_pk}}">{{ee.chemical_formula}}</a></td>
-            <td>{{ee.ee}}</td>
+            <td><a href="/materials/{{ ee.sys_pk }}_{{ ee.apos_pk }}_{{ ee.syn_pk }}_{{ ee.ee_pk }}_{{ ee.bs_pk }}">{{ ee.compound_name }}</a></td>
+            <td><a href="/materials/{{ ee.sys_pk }}_{{ ee.apos_pk }}_{{ ee.syn_pk }}_{{ ee.ee_pk }}_{{ ee.bs_pk }}">{{ ee.common_formula }}</a></td>
+            <td><a href="/materials/{{ ee.sys_pk }}_{{ ee.apos_pk }}_{{ ee.syn_pk }}_{{ ee.ee_pk }}_{{ ee.bs_pk }}">{{ ee.chemical_formula }}</a></td>
+            <td>{{ ee.ee }}</td>
             <td>
               <a href="{% url "materials:data_dl" data_type="exciton_emission" pk=ee.ee_pk %}">
                 <span class="fa fa-download" aria-hidden="true"></span>
@@ -38,17 +38,17 @@
       <tbody>
         {% for system in systems %}
           <tr>
-            <td><a href="/materials/{{system.pk}}">{{system.compound_name}}</a></td>
-            <td><a href="/materials/{{system.pk}}">{{system.formula}}</a></td>
+            <td><a href="/materials/{{ system.pk }}">{{ system.compound_name }}</a></td>
+            <td><a href="/materials/{{ system.pk }}">{{ system.formula }}</a></td>
             <td>
               <ul style="padding: 0px; list-style-type: none" id="authors-list">
                 {% for name in system.listAlternateNames %}
-                  <li><a href="/materials/{{system.pk}}">{{name}}</a></li>
+                  <li><a href="/materials/{{ system.pk }}">{{ name }}</a></li>
                 {% endfor %}
               </ul>
             </td>
-            <td>{{system.organic}}</td>
-            <td>{{system.inorganic}}</td>
+            <td>{{ system.organic }}</td>
+            <td>{{ system.inorganic }}</td>
           </tr>
         {% endfor %}
       </tbody>

@@ -6,7 +6,7 @@
   <br>
   <div class="card card-default">
     <div class="card-header">
-      <h3>{{compound_name}}</h3>
+      <h3>{{ compound_name }}</h3>
     </div>
     <div class="card-body">
       {% if object %}
@@ -38,33 +38,33 @@
                 <div class='card-body'>
                   <table class="table atomic-positions">
                     <tr>
-                      <td>a: {{entry.a}} &#8491;</td>
-                      <td>&alpha;: {{entry.alpha}}&deg;</td>
+                      <td>a: {{ entry.a }} &#8491;</td>
+                      <td>&alpha;: {{ entry.alpha }}&deg;</td>
                     </tr>
                     <tr>
-                      <td>b: {{entry.b}} &#8491;</td>
-                      <td>&beta;: {{entry.beta}}&deg;</td>
+                      <td>b: {{ entry.b }} &#8491;</td>
+                      <td>&beta;: {{ entry.beta }}&deg;</td>
                     </tr>
                     <tr>
-                      <td>c: {{entry.c}} &#8491;</td>
-                      <td>&gamma;: {{entry.gamma}}&deg;</td>
+                      <td>c: {{ entry.c }} &#8491;</td>
+                      <td>&gamma;: {{ entry.gamma }}&deg;</td>
                     </tr>
                   </table>
                   <div>
                     {% if entry.phase %}
-                      <strong>Phase:</strong> {{entry.phase}} <br>
+                      <strong>Phase:</strong> {{ entry.phase }} <br>
                     {% endif %}
                     {% if entry.temperature %}
-                      <strong>Temperature:</strong> {{entry.temperature}} K <br>
+                      <strong>Temperature:</strong> {{ entry.temperature }} K <br>
                     {% endif %}
                     {% if entry.method %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Method:</strong> {{entry.method}}
+                        <strong>Method:</strong> {{ entry.method }}
                       </div>
                     {% endif %}
                     {% if entry.specific_method %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Specific Method:</strong> {{entry.specific_method}}
+                        <strong>Specific Method:</strong> {{ entry.specific_method }}
                       </div>
                     {% endif %}
                     {% with entry.getAuthors as authors %}
@@ -75,20 +75,20 @@
                     {% endwith %}
                     {% if entry.source %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Source:</strong> {{entry.source}}
+                        <strong>Source:</strong> {{ entry.source }}
                       </div>
                     {% endif %}
                     {% if entry.data_extraction_method %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Data Extraction Method:</strong> {{entry.data_extraction_method}}
+                        <strong>Data Extraction Method:</strong> {{ entry.data_extraction_method }}
                       </div>
                     {% endif %}
                     <div>
-                      <strong>Last Updated:</strong> {{entry.last_update}}
+                      <strong>Last Updated:</strong> {{ entry.last_update }}
                     </div>
                     {% if entry.comments %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Comments:</strong> {{entry.comments}}
+                        <strong>Comments:</strong> {{ entry.comments }}
                       </div>
                     {% endif %}
                     <a href="{% url "materials:data_dl" data_type="atomic_positions" pk=entry.pk %}">
@@ -101,23 +101,23 @@
                       {% with syn as entry %}
                         {% with syn.getAuthors as authors %}
                           {% if syn %}
-                            <button type="button" class="btn btn-warning" data-toggle="popover" title="Related Synthesis Method" data-trigger="focus" html="true" data-content='<u>Method {{syn.methodNumber}}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
+                            <button type="button" class="btn btn-warning" data-toggle="popover" title="Related Synthesis Method" data-trigger="focus" html="true" data-content='<u>Method {{ syn.methodNumber }}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
                                           <div>
-                                          <b>Method:</b> {{syn.synthesis_method|truncatechars:50}}</div>
+                                          <b>Method:</b> {{ syn.synthesis_method|truncatechars:50 }}</div>
                             {% endif %}
                                           {% if syn.starting_materials %}
                                           <div>
-                                          <b>Starting Materials:</b> {{syn.starting_materials|truncatechars:50}}
+                                          <b>Starting Materials:</b> {{ syn.starting_materials|truncatechars:50 }}
                                           </div>
                                           {% endif %}
                                           {% if syn.remarks %}
                                           <div>
-                                          <b>Remarks:</b> {{syn.remarks|truncatechars:50}}
+                                          <b>Remarks:</b> {{ syn.remarks|truncatechars:50 }}
                                           </div>
                                           {% endif %}
                                           {% if syn.product %}
                                           <div>
-                                          <b>Product:</b> {{syn.product|truncatechars:50}}
+                                          <b>Product:</b> {{ syn.product|truncatechars:50 }}
                                           </div>
                                           {% endif %}<b>Publication:</b>{% include "materials/reference_format.html" %}'>
                               <span class="fa fa-book" aria-hidden="true"></span>

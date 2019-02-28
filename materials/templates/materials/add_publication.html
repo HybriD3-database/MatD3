@@ -27,9 +27,10 @@
 {% endblock %}
 
 {% block script %}
-  {% include 'materials/ajax_form_submit.html' %}
-  {% include 'materials/ajax_alert_form_submit.html' %}
-  <script type="text/javascript">
+  {% load static %}
+  <script src="{% static 'materials/javascript/ajax_form_submit.js' %}"></script>
+  <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
+  <script>
    $('#author-count').submit(function() {
      $('#add-publication').removeClass('invisible');
    });

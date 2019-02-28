@@ -1,27 +1,27 @@
 {% extends 'accounts/main_template.html' %}
 
 {% block head %}
-<title>Registration</title>
+  <title>Registration</title>
 {% endblock %}
 
 {% block heading %}
-<h4>Register for HybriD&#xb3; database</h4>
+  <h4>Register for HybriD&#xb3; database</h4>
 {% endblock %}
 
 {% block mainbody %}
-<form id="register" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-default">Register</button>
-  {{ text }}
-</form>
-<div id="feedback">
-</div>
+  <form id="register" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-default">Register</button>
+    {{ text }}
+  </form>
+  <div id="feedback">
+  </div>
 {% endblock %}
 
 {% block script %}
-{% include 'accounts/ajax_alert_form_submit.html' %}
-<script type="text/javascript">
-  alert_submit($('#register'), $('#feedback'));
-</script>
+  <script src="{% static 'accounts/javascript/ajax_submit.js' %}"></script>
+  <script>
+   alert_submit($('#register'), $('#feedback'));
+  </script>
 {% endblock %}

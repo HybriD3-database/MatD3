@@ -3,7 +3,7 @@
     <label for="system">Select system name: </label>
     <select id="system" name="system" class="form-control" required>
       {% for system in search_result %}
-        <option value={{system.pk}}>{{system.compound_name}}, {{system.formula}} </option>
+        <option value={{ system.pk }}>{{ system.compound_name }}, {{ system.formula }} </option>
       {% endfor %}
     </select>
 
@@ -12,7 +12,7 @@
       <select id="synthesis-methods" name="synthesis-methods" class="form-control">
         <option value="None">None</option>
         {% for syn in search_result.0.synthesismethodold_set.all %}
-          <option value="{{syn.pk}}">Method {{forloop.counter}} -- {% if syn.product %}Product: {{syn.product|truncatechars:40}} {% else %} No product listed {% endif %}</option>
+          <option value="{{ syn.pk }}">Method {{ forloop.counter }} -- {% if syn.product %}Product: {{ syn.product|truncatechars:40 }} {% else %} No product listed {% endif %}</option>
         {% endfor %}
       </select>
     {% endif %}
@@ -26,17 +26,18 @@
 {% endif %}
 
 {% block synthesisScript %}
-  {% include 'materials/synthesis_select_js.html' %}
+  {% load static %}
+  <script src="{% static 'materials/javascript/synthesis_select.js' %}"></script>
   <script type="text/javascript">
    var SelectSynthesisMethod = {
      'synthesis-methods': {
        {% for system in search_result %}
-       {{system.pk}}: {
+       {{ system.pk }}: {
          text: ['None', {% for syn in system.synthesismethodold_set.all %}
-                'Method {{forloop.counter}} -- {% if syn.product %}Product: {{syn.product|truncatechars:40}} {% else %} No product listed {% endif %}',
+                'Method {{ forloop.counter }} -- {% if syn.product %}Product: {{ syn.product|truncatechars:40 }} {% else %} No product listed {% endif %}',
          {% endfor %}
          ],
-         value: ['None', {% for syn in system.synthesismethodold_set.all %} '{{syn.pk}}',
+         value: ['None', {% for syn in system.synthesismethodold_set.all %} '{{ syn.pk }}',
          {% endfor %}
          ]
        },

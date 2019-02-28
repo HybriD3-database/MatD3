@@ -1,25 +1,26 @@
 {% extends 'materials/template.html' %}
 
 {% block heading %}
-<h4>Add Tag</h4>
+  <h4>Add Tag</h4>
 {% endblock %}
 
 {% block mainbody %}
-<form id="add-tag" method="post" action="/materials/add-tag">
+  <form id="add-tag" method="post" action="/materials/add-tag">
     {% csrf_token %}
     {{ input_form.as_p }}
     <button type="submit" class="btn btn-default">Add new tag</button>
-</form>
-    {{ text }}
-<div id="results">
-</div>
+  </form>
+  {{ text }}
+  <div id="results">
+  </div>
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_alert_form_submit.html' %}
-<script type="text/javascript">
-  var form = $('#add-tag');
-  var feedback = $('#results');
-  alert_submit(form, feedback)
-</script>
+  {% load static %}
+  <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
+  <script type="text/javascript">
+   var form = $('#add-tag');
+   var feedback = $('#results');
+   alert_submit(form, feedback)
+  </script>
 {% endblock %}

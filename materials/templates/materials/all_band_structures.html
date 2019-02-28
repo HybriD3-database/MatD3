@@ -5,19 +5,19 @@
 {% block bs_graph %}
   {% if entry.plotted and entry.visible %}
     <div class="tab-content">
-      <div id="home{{forloop.counter}}" class="tab-pane fade show active">
-        <img src="{{entry.getFullBSPath}}" alt="Band Structure" width="500">
+      <div id="home{{ forloop.counter }}" class="tab-pane fade show active">
+        <img src="{{ entry.getFullBSPath }}" alt="Band Structure" width="500">
       </div>
-      <div id="mini{{forloop.counter}}" class="tab-pane fade">
-        <img src="{{entry.getMiniBSPath}}" alt="Band Structure" width="500">
+      <div id="mini{{ forloop.counter }}" class="tab-pane fade">
+        <img src="{{ entry.getMiniBSPath }}" alt="Band Structure" width="500">
       </div>
     </div>
     <ul class="nav nav-tabs nav-tabs-band-structure">
       <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#home{{forloop.counter}}">Full size</a>
+        <a class="nav-link active" data-toggle="tab" href="#home{{ forloop.counter }}">Full size</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#mini{{forloop.counter}}">Zoomed</a>
+        <a class="nav-link" data-toggle="tab" href="#mini{{ forloop.counter }}">Zoomed</a>
       </li>
     </ul>
   {% endif %}
@@ -27,7 +27,7 @@
   Band gap:
   <span style="font-weight: normal;">
     {% if entry.band_gap|length > 0 %}
-      {{entry.band_gap}} eV
+      {{ entry.band_gap }} eV
     {% else %} N/A
     {% endif %}
   </span>
@@ -65,23 +65,23 @@
         {% if syn %}
           <button type="button" class="btn btn-warning" data-toggle="popover"
                   title="Related Synthesis Method" data-trigger="focus" html="true"
-                  data-content='<u>Method {{syn.methodNumber}}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
+                  data-content='<u>Method {{ syn.methodNumber }}</u> (see synthesis methods page) <br> {% if syn.synthesis_method %} <br>
                         <div>
-                        <b>Method:</b> {{syn.synthesis_method|truncatechars:50}}</div>
+                        <b>Method:</b> {{ syn.synthesis_method|truncatechars:50 }}</div>
                   {% endif %}
                         {% if syn.starting_materials %}
                         <div>
-                        <b>Starting Materials:</b> {{syn.starting_materials|truncatechars:50}}
+                        <b>Starting Materials:</b> {{ syn.starting_materials|truncatechars:50 }}
                         </div>
                         {% endif %}
                         {% if syn.remarks %}
                         <div>
-                        <b>Remarks:</b> {{syn.remarks|truncatechars:50}}
+                        <b>Remarks:</b> {{ syn.remarks|truncatechars:50 }}
                         </div>
                         {% endif %}
                         {% if syn.product %}
                         <div>
-                        <b>Product:</b> {{syn.product|truncatechars:50}}
+                        <b>Product:</b> {{ syn.product|truncatechars:50 }}
                         </div>
                         {% endif %}<b>Publication:</b>
                         {% include 'materials/reference_format.html' with ref=entry.publication %}'>

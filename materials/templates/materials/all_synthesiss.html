@@ -5,22 +5,22 @@
 {% block entry_type %}
   {% if entry.synthesis_method %}
     <div style="margin-left: 20px; text-indent: -20px;">
-      <strong>Method:</strong> {{entry.synthesis_method}}
+      <strong>Method:</strong> {{ entry.synthesis_method }}
     </div>
   {% endif %}
   {% if entry.starting_materials %}
     <div style="margin-left: 20px; text-indent: -20px;">
-      <strong>Starting Materials: </strong>{{entry.starting_materials}}
+      <strong>Starting Materials: </strong>{{ entry.starting_materials }}
     </div>
   {% endif %}
   {% if entry.remarks %}
     <div style="margin-left: 20px; text-indent: -20px;">
-      <strong>Remarks:</strong> {{entry.remarks}}
+      <strong>Remarks:</strong> {{ entry.remarks }}
     </div>
   {% endif %}
   {% if entry.product %}
     <div style="margin-left: 20px; text-indent: -20px;">
-      <strong>Product:</strong> {{entry.product}}
+      <strong>Product:</strong> {{ entry.product }}
     </div>
   {% endif %}
 {% endblock %}

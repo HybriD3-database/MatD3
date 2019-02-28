@@ -12,7 +12,7 @@
           Back
         </button>
       </a>
-      <h3>{{compound_name}}</h3>
+      <h3>{{ compound_name }}</h3>
     </div>
     <div class="card-body">
       <h4>All {% block heading %}Entry{% endblock %} Data</h4>
@@ -42,18 +42,18 @@
                   <div class="card-body">
                     {% block bs_graph %}{% endblock %}
                     <p class="details">{% block entry_type %}Entry Type units{% endblock %}</p>
-                    <!--Phase: {{entry.phase}} <br>-->
+                    <!--Phase: {{ entry.phase }} <br>-->
                     {% if entry.temperature %}
-                      <strong>Temperature:</strong> {{entry.temperature}} K <br>
+                      <strong>Temperature:</strong> {{ entry.temperature }} K <br>
                     {% endif %}
                     {% if entry.method %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Method:</strong> {{entry.method}}
+                        <strong>Method:</strong> {{ entry.method }}
                       </div>
                     {% endif %}
                     {% if entry.specific_method %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Specific Method:</strong> {{entry.specific_method}}
+                        <strong>Specific Method:</strong> {{ entry.specific_method }}
                       </div>
                     {% endif %}
                     <div style="margin-left: 20px; text-indent: -20px;">
@@ -64,20 +64,20 @@
                     </div>
                     {% if entry.source %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Source:</strong> {{entry.source}}
+                        <strong>Source:</strong> {{ entry.source }}
                       </div>
                     {% endif %}
                     {% if entry.data_extraction_method %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Data Extraction Method:</strong> {{entry.data_extraction_method}}
+                        <strong>Data Extraction Method:</strong> {{ entry.data_extraction_method }}
                       </div>
                     {% endif %}
                     <div>
-                      <strong>Last Updated:</strong> {{entry.last_update}}
+                      <strong>Last Updated:</strong> {{ entry.last_update }}
                     </div>
                     {% if entry.comments %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Comments:</strong> {{entry.comments}}
+                        <strong>Comments:</strong> {{ entry.comments }}
                       </div>
                     {% endif %}
                     {% block dl_link %}

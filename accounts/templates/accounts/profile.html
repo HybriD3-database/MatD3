@@ -1,7 +1,7 @@
 {% extends 'accounts/main_template.html' %}
 
 {% block head %}
-<title>Profile</title>
+  <title>Profile</title>
 {% endblock %}
 
 {% block heading %}
@@ -9,40 +9,40 @@
 {% endblock %}
 
 {% block mainbody %}
-<div class="list-group">
-  <div class="list-group-item">
-    <h5 class="mb-1">Username</h5>
-    <p class="mb-1">{{ user }}</p>
+  <div class="list-group">
+    <div class="list-group-item">
+      <h5 class="mb-1">Username</h5>
+      <p class="mb-1">{{ user }}</p>
+    </div>
+    <div class="list-group-item">
+      <h5 class="mb-1">First name</h5>
+      <p class="mb-1">{{ user.first_name }}</p>
+    </div>
+    <div class="list-group-item">
+      <h5 class="mb-1">Last name</h5>
+      <p class="mb-1">{{ user.last_name }}</p>
+    </div>
+    <div class="list-group-item">
+      <h5 class="mb-1">Email</h5>
+      <p class="mb-1">{{ user.email }}</p>
+    </div>
+    <div class="list-group-item">
+      <h5 class="mb-1">Description</h5>
+      <p class="mb-1">{{ user.userprofile.description }}</p>
+    </div>
+    <div class="list-group-item">
+      <h5 class="mb-1">Institution</h5>
+      <p class="mb-1">{{ user.userprofile.institution }}</p>
+    </div>
+    <div class="list-group-item">
+      <h5 class="mb-1">Website</h5>
+      <p class="mb-1">{{ user.userprofile.website }}</p>
+    </div>
+    {% if user.userprofile.image %}
+      <div class="list-group-item">
+        <h5 class="mb-1">Profile Image</h5>
+        <img src="{{ user.userprofile.image.url }}" width="240">
+      </div>
+    {% endif %}
   </div>
-  <div class="list-group-item">
-    <h5 class="mb-1">First name</h5>
-    <p class="mb-1">{{ user.first_name }}</p>
-  </div>
-  <div class="list-group-item">
-    <h5 class="mb-1">Last name</h5>
-    <p class="mb-1">{{ user.last_name }}</p>
-  </div>
-  <div class="list-group-item">
-    <h5 class="mb-1">Email</h5>
-    <p class="mb-1">{{ user.email }}</p>
-  </div>
-  <div class="list-group-item">
-    <h5 class="mb-1">Description</h5>
-    <p class="mb-1">{{ user.userprofile.description }}</p>
-  </div>
-  <div class="list-group-item">
-    <h5 class="mb-1">Institution</h5>
-    <p class="mb-1">{{ user.userprofile.institution }}</p>
-  </div>
-  <div class="list-group-item">
-    <h5 class="mb-1">Website</h5>
-    <p class="mb-1">{{ user.userprofile.website }}</p>
-  </div>
-  {% if user.userprofile.image %}
-  <div class="list-group-item">
-    <h5 class="mb-1">Profile Image</h5>
-    <img src="{{ user.userprofile.image.url }}" width="240">
-  </div>
-  {% endif %}
-</div>
 {% endblock %}

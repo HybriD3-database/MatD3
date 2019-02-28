@@ -1,11 +1,11 @@
 {% extends 'materials/template.html' %}
 
 {% block heading %}
-<h4>Add System</h4>
+  <h4>Add System</h4>
 {% endblock %}
 
 {% block mainbody %}
-<form id="add-system" method="post" action="/materials/add-system">
+  <form id="add-system" method="post" action="/materials/add-system">
     {% csrf_token %}
     {{ form.as_p }}
     <div class="alert alert-warning" role="alert">
@@ -13,14 +13,15 @@
       <a class="alert-link" target="_blank" href="{% url 'materials:add_tag' %}">click here to add a tag</a>.
     </div>
     <button type="submit" class="btn btn-primary">Add new system</button>
-</form>
-<div id="results">
-</div>
+  </form>
+  <div id="results">
+  </div>
 {% endblock %}
 
 {% block script %}
-{% include 'materials/ajax_alert_form_submit.html' %}
-<script type="text/javascript">
-  alert_submit($('#add-system'), $('#results'));
-</script>
+  {% load static %}
+  <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
+  <script type="text/javascript">
+   alert_submit($('#add-system'), $('#results'));
+  </script>
 {% endblock %}

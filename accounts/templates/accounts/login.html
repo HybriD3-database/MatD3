@@ -1,20 +1,20 @@
 {% extends 'accounts/main_template.html' %}
 
 {% block head %}
-<title>Login</title>
+  <title>Login</title>
 {% endblock %}
 
 {% block heading %}
-<h4>Welcome</h4>
+  <h4>Welcome</h4>
 {% endblock %}
 
 {% block mainbody %}
-<p>
-Please login here!
-</p>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Login</button>
-</form>
+  <p>
+    Please login here!
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
 {% endblock %}

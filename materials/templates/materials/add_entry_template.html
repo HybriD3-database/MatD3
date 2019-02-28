@@ -28,11 +28,12 @@
 {% endblock %}
 
 {% block script %}
+  {% load static %}
   <script type="text/javascript">
    var params = [
      {
        name: "related_synthesis",
-       value: "{{related_synthesis}}"
+       value: "{{ related_synthesis }}"
      }
    ];
    $('#search-system').submit(function () {
@@ -45,13 +46,11 @@
      }))
    });
   </script>
-  {% include 'materials/ajax_form_submit.html' %}
+  <script src="{% static 'materials/javascript/ajax_form_submit.js' %}"></script>
   <script type="text/javascript">
    ajax_submit($('#search-publication'), $('#publication-search-result'));
    ajax_submit($('#search-system'), $('#system-search-result'));
   </script>
-
-  {% include 'materials/ajax_alert_form_submit.html' %}
   {% block ajaxscript %}
   {% endblock %}
 {% endblock %}
