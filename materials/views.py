@@ -1323,9 +1323,12 @@ def delete_dataset_and_files(request, system_pk, dataset_pk):
     return redirect(reverse('materials:materials_system', args=[system_pk]))
 
 
-class SystemView(generic.DetailView):
-    template_name = 'materials/system.html'
+class SystemDetailView(generic.DetailView):
     model = models.System
+
+
+class PublicationDetailView(generic.DetailView):
+    model = models.Publication
 
 
 class SpecificSystemView(generic.TemplateView):

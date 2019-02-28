@@ -6,7 +6,8 @@ from materials import views
 app_name = 'materials'
 urlpatterns = [
     path('', views.SearchFormView.as_view(), name='materials_home'),
-    path('<int:pk>', views.SystemView.as_view(), name='materials_system'),
+    path('<int:pk>', views.SystemDetailView.as_view(),
+         name='materials_system'),
     re_path(r'^(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_syn>\d+)_(?P<pk_ee>\d+)_'
             r'(?P<pk_bs>\d+)$', views.SpecificSystemView.as_view(),
             name='specific_materials_system'),
@@ -79,4 +80,5 @@ urlpatterns = [
     path('dataset-<int:pk>/image.png', views.dataset_image,
          name='dataset_image'),
     path('dataset-<int:pk>/data.txt', views.dataset_data, name='dataset_data'),
+    path('publication/<int:pk>', views.PublicationDetailView.as_view(), name='publication'),
 ]

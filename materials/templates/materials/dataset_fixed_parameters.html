@@ -1,0 +1,15 @@
+{% with series=dataset.dataseries_set.all|first %}
+  {% if series.numericalvaluefixed_set.all %}
+    <div class="card">
+      <div class="card-header">
+        Fixed parameters
+      </div>
+      <div class="card-body">
+        {% for fixed_value in series.numericalvaluefixed_set.all %}
+          {{ fixed_value.physical_property }}: {{ fixed_value.value }}
+          {% if fixed_value.unit != 'none' %}{{ fixed_value.unit }}{% endif %}<br>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+{% endwith %}

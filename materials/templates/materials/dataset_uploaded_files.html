@@ -1,0 +1,14 @@
+{% if dataset.has_files %}
+  <br>
+  <p>
+    <a href="{% url "materials:get_dataset_files" pk=dataset.pk %}">
+      <button type="button" class="btn btn-primary">
+        <span class="fa fa-download" aria-hidden="true"></span>
+        Files
+      </button>
+    </a>
+    <i class="fa fa-question-circle tooltip-container">
+      <span class="tooltiptext">Files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...)</span>
+    </i>
+  </p>
+{% endif %}

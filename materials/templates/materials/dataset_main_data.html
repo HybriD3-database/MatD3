@@ -1,0 +1,30 @@
+<h5>{{ dataset.label }}</h5>
+{% if dataset.plotted %}
+  <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
+{% else %}
+  {% with series=dataset.dataseries_set.all|first %}
+    <table class="table main-data">
+      <thead>
+        <tr>
+          {% if dataset.primary_property %}
+            <th>
+              {{ dataset.primary_property }}, {{ dataset.primary_unit }}
+            </th>
+          {% endif %}
+          {% if dataset.secondary_property %}
+            <th>
+              {{ dataset.secondary_property }}, {{ dataset.secondary_unit }}
+            </th>
+          {% endif %}
+        </tr>
+      </thead>
+      {% for datapoint in series.datapoint_set.all %}
+        <tr>
+          {% for value in datapoint.numericalvalue_set.all %}
+            <td>{{ value.value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  {% endwith %}
+{% endif %} <!-- if plotted -->

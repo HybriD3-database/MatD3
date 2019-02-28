@@ -1,0 +1,27 @@
+{% if dataset.synthesismethod_set.all %}
+  <div class="card">
+    <button class="btn text-left expand-hide-button"
+            data-toggle="collapse"
+            data-target="#synthesis-body-{{ dataset.pk }}">
+      Synthesis method (click to expand)
+    </button>
+    <div class="collapse" id="synthesis-body-{{ dataset.pk }}">
+      <div class="card-body">
+        {% with dataset.synthesismethod_set.all|first as synthesis %}
+          {% if synthesis.starting_materials %}
+            <p>Starting materials: {{ synthesis.starting_materials }}</p>
+          {% endif %}
+          {% if synthesis.product %}
+            <p>Product: {{ synthesis.product }}</p>
+          {% endif %}
+          {% if synthesis.description %}
+            <p>Description: {{ synthesis.description }}</p>
+          {% endif %}
+          {% if synthesis.comment_set %}
+            <p><i>Comment: {{ synthesis.comment_set.all|first }}</i></p>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+{% endif %}

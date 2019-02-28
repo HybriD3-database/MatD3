@@ -1,0 +1,40 @@
+{% if dataset.computationaldetails_set.all %}
+  <div class="card">
+    <button class="btn text-left expand-hide-button"
+            data-toggle="collapse"
+            data-target="#computational-body-{{ dataset.pk }}">
+      Computational details (click to expand)
+    </button>
+    <div class="collapse" id="computational-body-{{ dataset.pk }}">
+      <div class="card-body">
+        {% with dataset.computationaldetails_set.all|first as comp %}
+          {% if comp.code %}
+            <p>Code: {{ comp.code }}</p>
+          {% endif %}
+          {% if comp.level_of_theory %}
+            <p>Level of theory:
+              {{ comp.level_of_theory }}</p>
+          {% endif %}
+          {% if comp.xc_functional %}
+            <p>Exchange-correlation functional: {{ comp.xc_functional }}</p>
+          {% endif %}
+          {% if comp.kgrid %}
+            <p>K-point grid: {{ comp.kgrid }}</p>
+          {% endif %}
+          {% if comp.relativity_level %}
+            <p>Level of relativity: {{ comp.relativity_level }}</p>
+          {% endif %}
+          {% if comp.basis %}
+            <p>Basis set definition: {{ comp.basis }}</p>
+          {% endif %}
+          {% if comp.numerical_accuracy %}
+            <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
+          {% endif %}
+          {% if comp.comment_set %}
+            <p><i>Comment: {{ comp.comment_set.all|first }}</i></p>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+{% endif %}
