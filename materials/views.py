@@ -185,7 +185,7 @@ def data_dl(request, data_type, pk, bandgap=False):
                                            zip_filename)
     elif data_type == 'synthesis':
         obj = models.SynthesisMethodOld.objects.get(pk=pk)
-        p_obj = models.System.objects.get(synthesismethod=obj)
+        p_obj = models.System.objects.get(synthesismethodold=obj)
         file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
                                              p_obj.inorganic)
         meta_filename = file_name_prefix + '.txt'
@@ -377,7 +377,7 @@ def getAuthorSearchResult(search_text):
         filter(functools.reduce(operator.or_, (
             Q(atomicpositions__publication__author__last_name__icontains=x) for
             x in keyWords)) | functools.reduce(operator.or_, (
-                Q(synthesismethod__publication__author__last_name__icontains=x)
+                Q(synthesismethodold__publication__author__last_name__icontains=x)
                 for x in keyWords)) | functools.reduce(operator.or_, (
                         Q(excitonemission__publication__author__last_name__icontains=x)
                         for x in keyWords)) | functools.reduce(operator.or_, (
@@ -475,9 +475,9 @@ class SearchFormView(generic.TemplateView):
                         system_info['ee'] = str(ee.exciton_emission)
                         system_info['sys_pk'] = ee.system.pk
                         system_info['ee_pk'] = ee.pk
-                        if ee.system.synthesismethod_set.count() > 0:
+                        if ee.system.synthesismethodold_set.count() > 0:
                             system_info['syn_pk'] = (
-                                ee.system.synthesismethod_set.first().pk)
+                                ee.system.synthesismethodold_set.first().pk)
                         else:
                             system_info['syn_pk'] = 0
                         if ee.system.atomicpositions_set.count() > 0:
@@ -1337,8 +1337,8 @@ class SpecificSystemView(generic.TemplateView):
     def get(self, request, pk, pk_aa, pk_syn, pk_ee, pk_bs):
         system = models.System.objects.get(pk=pk)
         exciton_emission = system.excitonemission_set.get(pk=pk_ee)
-        if system.synthesismethod_set.count() > 0:
-            synthesis = system.synthesismethod_set.get(pk=pk_syn)
+        if system.synthesismethodold_set.count() > 0:
+            synthesis = system.synthesismethodold_set.get(pk=pk_syn)
         else:
             synthesis = None
         if system.atomicpositions_set.count() > 0:

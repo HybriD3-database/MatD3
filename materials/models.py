@@ -149,7 +149,7 @@ class System(models.Model):
             return author.last_name
 
         L = []
-        for dataType in [self.atomicpositions_set, self.synthesismethod_set,
+        for dataType in [self.atomicpositions_set, self.synthesismethodold_set,
                          self.excitonemission_set, self.bandstructure_set]:
             for data in dataType.all():
                 for author in data.publication.author_set.all():
@@ -221,7 +221,7 @@ class SynthesisMethodOld(IDInfo):
                 str(self.methodNumber()))
 
     def methodNumber(self):
-        for i, obj in enumerate(self.system.synthesismethod_set.all()):
+        for i, obj in enumerate(self.system.synthesismethodold_set.all()):
             if obj.pk == self.pk:
                 return i + 1
 
