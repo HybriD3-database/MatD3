@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block mainbody %}
+  {% load materials_tags %}
   {% if messages %}
     {% for message in messages %}
       <div class="d-flex">
@@ -103,13 +104,11 @@
             </div>
             <div class="form row">
               <div class="col-md-2 col-form-label">
-                <label for="dataset-label">Data set label</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Description of the data set.</span>
-                </i>
+                {{ form.data_set_label.label_tag }}
+                {{ form.data_set_label.help_text|tooltip }}
               </div>
               <div class="col-md-10">
-                <input class="form-control" id="dataset-label" name="dataset-label" type="text">
+                {{ form.data_set_label }}
               </div>
             </div>
             <hr>
@@ -128,7 +127,7 @@
                 </select>
               </div>
               <div class="col-md-2">
-                <label for="primary-unit">Primary unit</label>
+                <label id="primary-unit-label" for="primary-unit">Primary unit</label>
                 <i class="fa fa-question-circle tooltip-container">
                   <span class="tooltiptext">Define the primary unit of interest (in a figure, this typically denotes the unit of the y-axis). For dimensionless physical properties, select "none". If the data is in arbitray units, select "a.u." (note that this is different from "none").</span>
                 </i>
@@ -138,8 +137,10 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="col-md-4">
-                <label for="secondary-property">Secondary property</label>
+              <div id="secondary-property-col" class="col-md-4">
+                <label id="secondary-property-label" for="secondary-property">
+                  Secondary property
+                </label>
                 <i class="fa fa-question-circle tooltip-container">
                   <span class="tooltiptext">Define the secondary property of interest (in a figure, this typically denotes the x-axis). When inserting values that have no direct dependence on a physical property (e.g., a list of phonon energies), the secondary property may be left empty.</span>
                 </i>
@@ -151,7 +152,7 @@
                 </select>
               </div>
               <div class="col-md-2">
-                <label for="secondary-unit">Secondary unit</label>
+                <label id="secondary-unit-label" for="secondary-unit">Secondary unit</label>
                 <i class="fa fa-question-circle tooltip-container">
                   <span class="tooltiptext">Define the secondry unit of interest (in a figure, this typically denotes the unit of the x-axis).</span>
                 </i>
@@ -264,33 +265,14 @@
             <div class="card-body card-add-data">
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label for="starting-materials">Starting materials</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Specify starting materials.</span>
-                  </i>
-                  <input class="form-control" id="starting-materials" name="starting-materials"
-                         type="text">
+                  {% include 'materials/input_field.html' with field=form.starting_materials %}
                 </div>
                 <div class="form-group col-md-6">
-                  <label for="synthesis-product">Product</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Specify the final product of synthesis.</span>
-                  </i>
-                  <input class="form-control" id="synthesis-product" name="synthesis-product"
-                         type="text">
+                  {% include 'materials/input_field.html' with field=form.product %}
                 </div>
               </div>
-              <label for="synthesis-description">Description</label>
-              <i class="fa fa-question-circle tooltip-container">
-                <span class="tooltiptext">Describe the steps of the synthesis process.</span>
-              </i>
-              <textarea class="form-control" id="synthesis-description"
-                        name="synthesis-description" rows="3"></textarea>
-              <label for="synthesis-comment">Comments</label>
-              <i class="fa fa-question-circle tooltip-container">
-                <span class="tooltiptext">Additional information not revelant or suitable for the description part.</span>
-              </i>
-              <input class="form-control" id="synthesis-comment" name="synthesis-comment">
+              {% include 'materials/input_field.html' with field=form.synthesis_description %}
+              {% include 'materials/input_field.html' with field=form.synthesis_comment %}
             </div>
           </div>
         </div>
@@ -320,11 +302,7 @@
               </i>
               <textarea class="form-control" id="experimental-description"
                         name="experimental-description" rows="3"></textarea>
-              <label for="experimental-comment">Comments</label>
-              <i class="fa fa-question-circle tooltip-container">
-                <span class="tooltiptext">Additional information not revelant or suitable for the description part.</span>
-              </i>
-              <input class="form-control" id="experimental-comment" name="experimental-comment">
+              {% include 'materials/input_field.html' with field=form.experimental_comment %}
             </div>
           </div>
         </div>
@@ -402,11 +380,7 @@
                          placeholder="SCF tol. 1 meV/atom, Lebedev grids for angular integration..">
                 </div>
               </div>
-              <label for="computational-comment">Comments</label>
-              <i class="fa fa-question-circle tooltip-container">
-                <span class="tooltiptext">Additional information relevant to the calculation.</span>
-              </i>
-              <input class="form-control" id="computational-comment" name="computational-comment">
+              {% include 'materials/input_field.html' with field=form.computational_comment %}
             </div>
           </div>
         </div>

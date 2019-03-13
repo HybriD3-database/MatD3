@@ -241,3 +241,65 @@ class AddMaterialProperty(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for fieldname in self.all_fields:
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
+
+
+class AddDataForm(forms.Form):
+    """Main form for submitting data."""
+    class CharField(forms.CharField):
+        """Convenience class for the input fields.
+
+        * By default, the field is not required.
+        * Maximum length is determined by the model and field
+          arguments.
+
+        """
+        def __init__(self, model=None, field=None, *args, **kwargs):
+            if model:
+                max_length = model._meta.get_field(field).max_length
+            else:
+                max_length = None
+            super().__init__(required=False, max_length=max_length,
+                             *args, **kwargs)
+
+    # General
+    data_set_label = CharField(
+        model=models.Dataset, field='label',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Description of the data set.')
+
+    # Synthesis
+    starting_materials = CharField(
+        model=models.SynthesisMethod, field='starting_materials',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Specify starting materials.')
+    product = CharField(
+        model=models.SynthesisMethod, field='product',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Specify the final product of synthesis.')
+    synthesis_description = CharField(
+        label='Description',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
+        help_text='Describe the steps of the synthesis process.')
+    synthesis_comment = CharField(
+        label='Comments',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Additional information not revelant or suitable for the '
+        'description part.')
+
+    # Experimental
+    experimental_comment = CharField(
+        label='Comments',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Additional information not revelant or suitable for the '
+        'description part.')
+
+    # Computational
+    computational_comment = CharField(
+        label='Comments',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Additional information not revelant or suitable for the '
+        'description part.')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label_suffix = ''

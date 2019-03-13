@@ -1120,6 +1120,7 @@ class AddDataView(LoginRequiredMixin, generic.TemplateView):
             'units': models.Unit.objects.all(),
             'sample_types': models.Dataset.SAMPLE_TYPES,
             'crystal_systems': models.Dataset.CRYSTAL_SYSTEMS,
+            'form': forms.AddDataForm(),
         })
 
 
@@ -1148,26 +1149,38 @@ def add_unit(request):
 @login_required
 def submit_data(request):
     """Primary function for submitting data from the user."""
-    def add_comment(model, label):
+    def add_comment(model, label, form):
         """Shortcut for conditionally attaching comments to a model instance.
 
         The purpose of this shortcut is to avoid checking the presence
-        of a particular type of comment in POST and the created_by
-        and updated_by fields with every call.
+        of a particular type of comment in form and the created_by and
+        updated_by fields with every call.
 
         """
-        if label in request.POST:
-            model.comment_set.create(text=request.POST[label],
+        if label in form.cleaned_data:
+            model.comment_set.create(text=form.cleaned_data[label],
                                      created_by=request.user,
                                      updated_by=request.user)
             logger.info(f'Creating {label} comment '
                         f'#{model.comment_set.all()[0].pk}')
+    form = forms.AddDataForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, 'Recheck all fields')
+        return render(request, 'materials/add_data.html', {
+            'publications': models.Publication.objects.all().order_by('year'),
+            'systems': models.System.objects.all(),
+            'properties': models.Property.objects.all(),
+            'units': models.Unit.objects.all(),
+            'sample_types': models.Dataset.SAMPLE_TYPES,
+            'crystal_systems': models.Dataset.CRYSTAL_SYSTEMS,
+            'form': form,
+        })
     # Create data set
     dataset = models.Dataset()
     dataset.system = models.System.objects.get(pk=request.POST['system'])
     dataset.reference = models.Publication.objects.get(
         pk=request.POST['publication'])
-    dataset.label = request.POST['dataset-label']
+    dataset.label = form.cleaned_data['data_set_label']
     if request.POST['primary-property'] != '-1':
         dataset.primary_property = models.Property.objects.get(
             pk=request.POST['primary-property'])
@@ -1185,18 +1198,18 @@ def submit_data(request):
         3 if (request.POST['is-3d-system'] == 'true') else 2)
     dataset.sample_type = int(request.POST['sample-type'])
     dataset.crystal_system = int(request.POST['crystal-system'])
-    dataset.has_files = bool(request.FILES)
+    dataset.has_files = 'uploaded-files' in request.FILES
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')
     # Synthesis method
     if request.POST['with-synthesis-details'] == 'true':
         synthesis = models.SynthesisMethod(dataset=dataset)
-        synthesis.starting_materials = request.POST['starting-materials']
-        synthesis.product = request.POST['synthesis-product']
-        synthesis.description = request.POST['synthesis-description']
+        synthesis.starting_materials = form.cleaned_data['starting_materials']
+        synthesis.product = form.cleaned_data['product']
+        synthesis.description = form.cleaned_data['synthesis_description']
         synthesis.save(request.user)
         logger.info(f'Creating synthesis details #{synthesis.pk}')
-        add_comment(synthesis, 'synthesis-comment')
+        add_comment(synthesis, 'synthesis_comment', form)
     # Experimental details
     if request.POST['with-experimental-details'] == 'true':
         experimental = models.ExperimentalDetails(dataset=dataset)
@@ -1204,7 +1217,7 @@ def submit_data(request):
         experimental.description = request.POST['experimental-description']
         experimental.save(request.user)
         logger.info(f'Creating experimental details #{experimental.pk}')
-        add_comment(experimental, 'experimental-comment')
+        add_comment(experimental, 'experimental_comment', form)
     # Computational details
     if request.POST['with-computational-details'] == 'true':
         computational = models.ComputationalDetails(dataset=dataset)
@@ -1217,7 +1230,7 @@ def submit_data(request):
         computational.numerical_accuracy = request.POST['numerical-accuracy']
         computational.save(request.user)
         logger.info(f'Creating computational details #{computational.pk}')
-        add_comment(computational, 'computational-comment')
+        add_comment(computational, 'computational_comment', form)
     # Create data series
     dataseries = models.Dataseries(dataset=dataset)
     if 'dataseries-label' in request.POST:
@@ -1226,7 +1239,9 @@ def submit_data(request):
     # Read in main data
     if dataset.primary_property and dataset.secondary_property:
         input_lines = request.POST['main-data'].split('\n')
-        for i_line, line in enumerate(input_lines):
+        for line in input_lines:
+            if line.startswith('#') or not line:
+                continue
             x_value, y_value = line.split()
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
@@ -1244,7 +1259,9 @@ def submit_data(request):
             numerical_value.save(request.user)
     elif dataset.primary_property:
         input_lines = request.POST['main-data'].split()
-        for i_value, value in enumerate(input_lines):
+        for value in input_lines:
+            if value.startswith('#') or not value:
+                continue
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
             numerical_value = models.NumericalValue(datapoint=datapoint)
@@ -1287,15 +1304,15 @@ def toggle_dataset_visibility(request, system_pk, dataset_pk):
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.visible = not dataset.visible
     dataset.save(request.user)
-    return redirect(reverse('materials:materials_system', args=[system_pk]))
+    return redirect(reverse('materials:materials_system', args=(system_pk,)))
 
 
 @dataset_author_check
 def toggle_dataset_plotted(request, system_pk, dataset_pk):
-    dataset = models.Dataset.objects.get(system_pk=dataset_pk)
+    dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.plotted = not dataset.plotted
     dataset.save(request.user)
-    return redirect(reverse('materials:materials_system', args=[system_pk]))
+    return redirect(reverse('materials:materials_system', args=(system_pk,)))
 
 
 def download_dataset_files(request, pk):
@@ -1318,9 +1335,9 @@ def download_dataset_files(request, pk):
 @dataset_author_check
 def delete_dataset_and_files(request, system_pk, dataset_pk):
     """Delete current data set and all associated files."""
-    dataset = models.Dataset.objects.get(system_pk=dataset_pk)
+    dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.delete()
-    return redirect(reverse('materials:materials_system', args=[system_pk]))
+    return redirect(reverse('materials:materials_system', args=(system_pk,)))
 
 
 class SystemDetailView(generic.DetailView):
