@@ -1,3 +1,5 @@
+{% load materials_tags %}
+
 <h5>{{ dataset.label }}</h5>
 {% if dataset.primary_property.name == 'atomic coordinates' %}
   <!-- Atomic coordinates require special treatment -->
@@ -38,8 +40,8 @@
         </thead>
         {% for datapoint in series.datapoint_set.all %}
           <tr>
-            {% for value in datapoint.numericalvalue_set.all %}
-              <td>{{ value.value }}</td>
+            {% for value in datapoint|datapoint %}
+              {% if value %}<td>{{ value }}</td>{% endif %}
             {% endfor %}
           </tr>
         {% endfor %}

@@ -1151,6 +1151,59 @@ def add_unit(request):
 @login_required
 def submit_data(request):
     """Primary function for submitting data from the user."""
+    def clean_value(value):
+        error = None
+        if re.match(r'[-\d]', value):
+            value_type = models.NumericalValue.ACCURATE
+        elif value.startswith('<'):
+            value_type = models.NumericalValue.UPPER_BOUND
+            value = value[1:]
+        elif value.startswith('>'):
+            value_type = models.NumericalValue.LOWER_BOUND
+            value = value[1:]
+        elif value.startswith(('≈', '~')):
+            value_type = models.NumericalValue.APPROXIMATE
+            value = value[1:]
+        if '(' in value:
+            left_paren_start = value.find('(')
+            right_paren_start = value.find(')')
+            error = value[left_paren_start+1:right_paren_start]
+            if '.' not in error and left_paren_start > len(error):
+                error = re.sub('[1-9]', '0',
+                               value[:left_paren_start-1]) + error
+            value = value[:left_paren_start]
+        elif '±' in value:
+            value, error = value.split('±')
+        return float(value), value_type, error
+
+    def insert_numerical_value(datapoint, value, is_primary):
+        """Clean and insert numerical value into database.
+
+        datapoint: models.Datapoint
+            data point for which the numerical value is entered
+        value : string
+            numerical value
+        is_primary : boolean
+            whether the numerical value is of primary of secondary
+            type
+
+        """
+        numerical_value = models.NumericalValue(datapoint=datapoint)
+        if is_primary:
+            numerical_value.qualifier = models.NumericalValue.PRIMARY
+        else:
+            numerical_value.qualifier = models.NumericalValue.SECONDARY
+        value, value_type, error = clean_value(value)
+        numerical_value.value = value
+        numerical_value.value_type = value_type
+        if error:
+            error_value = models.NumericalValue(datapoint=datapoint)
+            error_value.qualifier = numerical_value.qualifier
+            error_value.value_type = models.NumericalValue.ERROR
+            error_value.value = float(error)
+            error_value.save(request.user)
+        numerical_value.save(request.user)
+
     def add_comment(model, label, form):
         """Shortcut for conditionally attaching comments to a model instance.
 
@@ -1279,18 +1332,8 @@ def submit_data(request):
             x_value, y_value = line.split()
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
-            # x-values
-            numerical_value = models.NumericalValue(datapoint=datapoint)
-            numerical_value.qualifier = models.NumericalValue.SECONDARY
-            numerical_value.value = float(x_value)
-            numerical_value.value_type = models.NumericalValue.ACCURATE
-            numerical_value.save(request.user)
-            # y-values
-            numerical_value = models.NumericalValue(datapoint=datapoint)
-            numerical_value.qualifier = models.NumericalValue.PRIMARY
-            numerical_value.value = float(y_value)
-            numerical_value.value_type = models.NumericalValue.ACCURATE
-            numerical_value.save(request.user)
+            insert_numerical_value(datapoint, x_value, False)
+            insert_numerical_value(datapoint, y_value, True)
     elif (dataset.primary_property and
           not dataset.primary_property.require_input_files):
         input_lines = request.POST['main-data'].split()
@@ -1299,11 +1342,7 @@ def submit_data(request):
                 continue
             datapoint = models.Datapoint(dataseries=dataseries)
             datapoint.save(request.user)
-            numerical_value = models.NumericalValue(datapoint=datapoint)
-            numerical_value.qualifier = models.NumericalValue.PRIMARY
-            numerical_value.value = float(value)
-            numerical_value.value_type = models.NumericalValue.ACCURATE
-            numerical_value.save(request.user)
+            insert_numerical_value(datapoint, value, True)
     elif (dataset.primary_property and
           dataset.primary_property.name == 'atomic coordinates'):
         extract_lattice_parameters(dataseries)
@@ -1312,14 +1351,31 @@ def submit_data(request):
     for key in request.POST:
         if key.startswith('fixed-property'):
             fixed_ids.append(key.split('fixed-property')[1])
+    fixed_properties = []
     for fixed_id in fixed_ids:
         fixed_value = models.NumericalValueFixed(dataseries=dataseries)
         fixed_value.physical_property = models.Property.objects.get(
             name=request.POST[f'fixed-property{fixed_id}'])
+        if fixed_value.physical_property not in fixed_properties:
+            fixed_properties.append(fixed_value.physical_property)
+        else:
+            messages.error(request,
+                           'All fixed properties must be of different type: '
+                           f'{fixed_value.physical_property}')
+            return redirect(reverse('materials:add_data'))
         fixed_value.unit = models.Unit.objects.get(
             label=request.POST[f'fixed-unit{fixed_id}'])
-        fixed_value.value = float(request.POST[f'fixed-value{fixed_id}'])
-        fixed_value.value_type = models.NumericalValueFixed.ACCURATE
+        value, value_type, error = clean_value(
+            request.POST[f'fixed-value{fixed_id}'])
+        fixed_value.value = value
+        fixed_value.value_type = value_type
+        if error:
+            error_value = models.NumericalValueFixed(dataseries=dataseries)
+            error_value.physical_property = fixed_value.physical_property
+            error_value.unit = fixed_value.unit
+            error_value.value_type = models.NumericalValueFixed.ERROR
+            error_value.value = float(error)
+            error_value.save(request.user)
         fixed_value.save(request.user)
     # Input files
     if (
