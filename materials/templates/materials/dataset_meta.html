@@ -1,0 +1,13 @@
+<div class="card">
+  <button class="btn text-left expand-hide-button" data-toggle="collapse"
+          data-target="#meta-body-{{ dataset.pk }}">
+    Meta (click to expand)
+  </button>
+  <div class="collapse" id="meta-body-{{ dataset.pk }}">
+    <div class="card-body">
+      Extraction method: {{ dataset.extraction_method }}<br>
+      Entry added on {{ dataset.created }}<br>
+      Last updated on {{ dataset.updated }}<br>
+    </div>
+  </div>
+</div>

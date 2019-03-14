@@ -397,9 +397,8 @@
                   {% include 'materials/dataset_computational_details.html' %}
                   {% include 'materials/dataset_reference.html' %}
                   {% include 'materials/dataset_uploaded_files.html' %}
-                  Dataset ID: {{ dataset.pk }}<br>
-                  Entry added on {{ dataset.created }}<br>
-                  Last updated on {{ dataset.updated }}<br>
+                  {% include 'materials/dataset_meta.html' %}
+                  <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
                 </div>
               </div>
             </div>
