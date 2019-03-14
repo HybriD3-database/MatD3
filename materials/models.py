@@ -34,6 +34,7 @@ class Base(models.Model):
 
 class Property(Base):
     name = models.CharField(max_length=60, unique=True)
+    require_input_files = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -396,7 +397,13 @@ class Dataset(Base):
             loc = os.path.join(settings.MEDIA_ROOT,
                                f'uploads/dataset_{self.pk}')
             for file_ in os.listdir(loc):
-                logger.info(f'deleting dataset_{self.pk}/{file_}')
+                logger.info(f'deleting input_files/dataset_{self.pk}/{file_}')
+            shutil.rmtree(loc)
+        if self.primary_property.require_input_files:
+            loc = os.path.join(settings.MEDIA_ROOT,
+                               f'input_files/dataset_{self.pk}')
+            for file_ in os.listdir(loc):
+                logger.info(f'deleting input_files/dataset_{self.pk}/{file_}')
             shutil.rmtree(loc)
         super().delete(*args, **kwargs)
 
@@ -439,6 +446,11 @@ class NumericalValue(NumericalValueBase):
     )
     datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
     qualifier = models.PositiveSmallIntegerField(choices=QUALIFIER_TYPES)
+
+
+class DatapointSymbol(Base):
+    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
+    symbol = models.CharField(max_length=10)
 
 
 class NumericalValueFixed(NumericalValueBase):

@@ -41,6 +41,8 @@ urlpatterns = [
          views.toggle_dataset_plotted, name='toggle_plotted'),
     path('download-dataset-files/<int:pk>', views.download_dataset_files,
          name='download_dataset_files'),
+    path('download-input-data-file/<int:pk>', views.download_input_file,
+         name='download_input_file'),
     path('<int:system_pk>/delete-dataset/<int:dataset_pk>',
          views.delete_dataset_and_files, name='delete_dataset'),
     path('<int:pk>/all-a-pos', views.all_a_pos, name='all_a_pos'),
@@ -82,4 +84,6 @@ urlpatterns = [
     path('dataset-<int:pk>/data.txt', views.dataset_data, name='dataset_data'),
     path('publication/<int:pk>', views.PublicationDetailView.as_view(),
          name='publication'),
+    path('autofill-input-data', views.autofill_input_data,
+         name='autofill_input_data'),
 ]

@@ -100,3 +100,27 @@ table.main-data {
 .tooltip-container:hover .tooltiptext {
     visibility: visible;
 }
+
+.inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+.inputfile + label {
+    font-size: 14px;
+    color: #f9f9f9;
+    background-color: #007bff;
+    display: inline-block;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.1em 0.3em;
+    border-radius: 0.5em;
+}
+
+.inputfile + label:hover {
+    background-color: #007bdd;
+}

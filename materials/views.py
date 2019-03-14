@@ -6,6 +6,7 @@ import matplotlib
 import numpy
 import operator
 import os
+import re
 import zipfile
 
 from django.contrib import messages
@@ -13,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import FileSystemStorage
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 from django.forms import formset_factory
 from django.http import HttpResponse
@@ -1163,6 +1165,41 @@ def submit_data(request):
                                      updated_by=request.user)
             logger.info(f'Creating {label} comment '
                         f'#{model.comment_set.all()[0].pk}')
+
+    def extract_lattice_parameters(dataseries):
+        """Extract lattice parameters from input file."""
+        def get_angle(v1, v2, norm1, norm2):
+            return numpy.arccos(numpy.dot(v1, v2)/norm1/norm2)*360/2/numpy.pi
+        content = UploadedFile(request.FILES.getlist(
+            'input-data-files')[0]).read().decode('utf-8')
+        lattice_vectors = []
+        for line in content.split('\n'):
+            m = re.match(r' *lattice_vector' + 3*r'\s+(-?\d+(?:\.\d+)?)' +
+                         r'\b', line)
+            if m:
+                lattice_vectors.append([float(m.group(1)), float(m.group(2)),
+                                        float(m.group(3))])
+                if len(lattice_vectors) == 3:
+                    break
+        a = numpy.linalg.norm(lattice_vectors[0])
+        b = numpy.linalg.norm(lattice_vectors[1])
+        c = numpy.linalg.norm(lattice_vectors[2])
+        alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c)
+        beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c)
+        gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b)
+        for x, y in (('a', a), ('α', alpha), ('b', b), ('β', beta), ('c', c),
+                     ('γ', gamma)):
+            datapoint = models.Datapoint(dataseries=dataseries)
+            datapoint.save(request.user)
+            symbol = models.DatapointSymbol(datapoint=datapoint)
+            symbol.symbol = x
+            symbol.save(request.user)
+            numerical_value = models.NumericalValue(datapoint=datapoint)
+            numerical_value.qualifier = models.NumericalValue.PRIMARY
+            numerical_value.value = float(y)
+            numerical_value.value_type = models.NumericalValue.ACCURATE
+            numerical_value.save(request.user)
+
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
         messages.error(request, 'Recheck all fields')
@@ -1237,6 +1274,7 @@ def submit_data(request):
         dataseries.label = request.POST['dataseries-label']
     dataseries.save(request.user)
     # Read in main data
+    input_lines = None
     if dataset.primary_property and dataset.secondary_property:
         input_lines = request.POST['main-data'].split('\n')
         for line in input_lines:
@@ -1257,7 +1295,8 @@ def submit_data(request):
             numerical_value.value = float(y_value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
-    elif dataset.primary_property:
+    elif (dataset.primary_property and
+          not dataset.primary_property.require_input_files):
         input_lines = request.POST['main-data'].split()
         for value in input_lines:
             if value.startswith('#') or not value:
@@ -1269,6 +1308,8 @@ def submit_data(request):
             numerical_value.value = float(value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
+    elif dataset.primary_property.name == 'atomic coordinates':
+        extract_lattice_parameters(dataseries)
     # Fixed properties
     fixed_ids = []
     for key in request.POST:
@@ -1283,19 +1324,30 @@ def submit_data(request):
         fixed_value.value = float(request.POST[f'fixed-value{fixed_id}'])
         fixed_value.value_type = models.NumericalValueFixed.ACCURATE
         fixed_value.save(request.user)
-    # User submitted files
+    # Input files
+    if dataset.primary_property.require_input_files:
+        fs = FileSystemStorage(os.path.join(
+            settings.MEDIA_ROOT, f'input_files/dataset_{dataset.pk}'))
+        for file_ in request.FILES.getlist('input-data-files'):
+            fs.save(file_.name, file_)
+            logger.info(f'uploading input_files/dataset_{dataset.pk}/{file_}')
+    # Additional files
     if dataset.has_files:
         fs = FileSystemStorage(os.path.join(settings.MEDIA_ROOT,
                                             f'uploads/dataset_{dataset.pk}'))
         for file_ in request.FILES.getlist('uploaded-files'):
             fs.save(file_.name, file_)
-            logger.info(f'uploading dataset_{dataset.pk}/{file_}')
+            logger.info(f'uploading uploads/dataset_{dataset.pk}/{file_}')
     # If all went well, let the user know how much data was
     # successfully added
-    messages.success(request,
-                     f'{len(input_lines)} new data point'
-                     f'{"s" if len(input_lines) != 1 else ""} successfully '
-                     'added to the database!')
+    if input_lines:
+        messages.success(request,
+                         f'{len(input_lines)} new data point'
+                         f'{"s" if len(input_lines) != 1 else ""} '
+                         'successfully added to the database!')
+    else:
+        messages.success(request,
+                         'New data successfully added to the database!')
     return redirect(reverse('materials:add_data'))
 
 
@@ -1316,6 +1368,23 @@ def toggle_dataset_plotted(request, system_pk, dataset_pk):
 
 
 def download_dataset_files(request, pk):
+    loc = os.path.join(settings.MEDIA_ROOT, f'input_data/dataset_{pk}')
+    files = os.listdir(loc)
+    file_full_paths = [os.path.join(loc, f) for f in files]
+    zip_dir = 'files'
+    zip_filename = 'files.zip'
+    in_memory_object = io.BytesIO()
+    zf = zipfile.ZipFile(in_memory_object, 'w')
+    for file_path, file_name in zip(file_full_paths, files):
+        zf.write(file_path, os.path.join(zip_dir, file_name))
+    zf.close()
+    response = HttpResponse(in_memory_object.getvalue(),
+                            content_type='application/x-zip-compressed')
+    response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+    return response
+
+
+def download_input_file(request, pk):
     loc = os.path.join(settings.MEDIA_ROOT, f'uploads/dataset_{pk}')
     files = os.listdir(loc)
     file_full_paths = [os.path.join(loc, f) for f in files]
@@ -1600,3 +1669,13 @@ def publication_data(request, pk):
         data['charts'].append(chart)
         dataset_counter += 1
     return JsonResponse(data)
+
+
+def autofill_input_data(request):
+    """Process an AJAX request to autofill the main data textarea."""
+    content = UploadedFile(request.FILES['file']).read().decode('utf-8')
+    output = io.StringIO()
+    for line in content.split('\n'):
+        output.write(line)
+        output.write('\n')
+    return HttpResponse(output.getvalue())

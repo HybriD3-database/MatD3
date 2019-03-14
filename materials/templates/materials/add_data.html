@@ -122,7 +122,10 @@
                 <select class="form-control" id="primary-property" name="primary-property">
                   <option value="-1">none</option>
                   {% for property in properties %}
-                    <option value="{{ property.pk }}">{{ property }}</option>
+                    <option value="{{ property.pk }}"
+                            require-input-files="{{ property.require_input_files }}">
+                      {{ property }}
+                    </option>
                   {% endfor %}
                 </select>
               </div>
@@ -147,7 +150,9 @@
                 <select class="form-control" id="secondary-property" name="secondary-property">
                   <option value="-1">none</option>
                   {% for property in properties %}
-                    <option value="{{ property.pk }}">{{ property }}</option>
+                    {% if not property.require_input_files %}
+                      <option value="{{ property.pk }}">{{ property }}</option>
+                    {% endif %}
                   {% endfor %}
                 </select>
               </div>
@@ -412,10 +417,17 @@
                 </i>
               </div>
               <div class="col-md-4">
-                <label for="main-data">Values</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
-                </i>
+                <label for="main-data">Values
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
+                  </i>
+                </label>
+                <div class="float-right">
+                  <input type="file" id="input-data-files" name="input-data-files"
+                         class="inputfile" multiple>
+                  <label for="input-data-files"><i class="fa fa-upload" aria-hidden="true"></i>
+                    Import from file..</label>
+                </div>
                 <textarea class="form-control" id="main-data" name="main-data"
                           placeholder="value_1 value_2 ..." style="height:80%"></textarea>
               </div>
@@ -542,6 +554,7 @@
 
 {% block script %}
   {% load static %}
+  <script src="{% static 'materials/javascript/ajax_csrf_setup.js' %}"></script>
   <script src="{% static 'materials/javascript/filter_form.js' %}"></script>
   <script>
    /* Filter dropdown menus */
@@ -586,6 +599,56 @@
    }
    toggleUnitVisibility('#secondary-property', '#secondary-unit');
    toggleUnitVisibility('#primary-property', '#primary-unit');
+  </script>
+  <script>
+   /* Properties that require input files */
+   var saved_main_data_placeholder = '';
+   $('#primary-property').change(function() {
+     primary_unit = $(this).parent().next();
+     secondary_property = primary_unit.next();
+     secondary_unit = secondary_property.next();
+     if ($(this).find(':selected').attr('require-input-files') == 'True') {
+       primary_unit.hide();
+       secondary_property.hide();
+       secondary_unit.hide();
+       $('#main-data').prop('disabled', true);
+       saved_main_data_placeholder = $('#main-data').attr('placeholder');
+       $('#main-data').attr('placeholder', '...');
+     } else if (saved_main_data_placeholder) {
+       primary_unit.show();
+       secondary_property.show();
+       secondary_unit.show();
+       $('#main-data').prop('disabled', false);
+       $('#main-data').attr('placeholder', saved_main_data_placeholder);
+       saved_main_data_placeholder = '';
+     }
+   });
+  </script>
+  <script>
+   /* Autofill the main input data textarea */
+   $('#input-data-files').change(function() {
+     if ($('#primary-property').find(':selected').attr('require-input-files') == 'False') {
+       var form_data = new FormData();
+       form_data.append('file', this.files[0]);
+       $(this).val('');  /* Clear the file list */
+       $.ajax({
+         url: "{% url 'materials:autofill_input_data' %}",
+         type: 'POST',
+         processData: false,
+         contentType: false,
+         dataType: 'text',
+         data: form_data,
+         success: function(result) {
+           $('#main-data').html(result);
+         },
+         error: function(result) {
+           $('#main-data').html(result);
+         },
+       });
+     } else {
+       $('#main-data').html('');
+     }
+   });
   </script>
   <script>
    function toggleSectionInclusivity(button, hidden_field) {
