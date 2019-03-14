@@ -399,7 +399,7 @@ class Dataset(Base):
             for file_ in os.listdir(loc):
                 logger.info(f'deleting input_files/dataset_{self.pk}/{file_}')
             shutil.rmtree(loc)
-        if self.primary_property.require_input_files:
+        if self.primary_property and self.primary_property.require_input_files:
             loc = os.path.join(settings.MEDIA_ROOT,
                                f'input_files/dataset_{self.pk}')
             for file_ in os.listdir(loc):

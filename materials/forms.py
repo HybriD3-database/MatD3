@@ -246,13 +246,6 @@ class AddMaterialProperty(forms.ModelForm):
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
     class CharField(forms.CharField):
-        """Convenience class for the input fields.
-
-        * By default, the field is not required.
-        * Maximum length is determined by the model and field
-          arguments.
-
-        """
         def __init__(self, model=None, field=None, *args, **kwargs):
             if model:
                 max_length = model._meta.get_field(field).max_length
@@ -261,11 +254,56 @@ class AddDataForm(forms.Form):
             super().__init__(required=False, max_length=max_length,
                              *args, **kwargs)
 
+    class PropertySelect(forms.Select):
+        """Include require_input_files for each option."""
+        def create_option(self, name, value, label, selected, index,
+                          subindex=None, attrs=None):
+            options = super().create_option(name, value, label, selected,
+                                            index, subindex=None, attrs=None)
+            if isinstance(value, int):
+                options['attrs']['require_input_files'] = str(
+                    models.Property.objects.get(
+                        pk=int(value)).require_input_files)
+            return options
+
+    class ModelChoiceField(forms.ModelChoiceField):
+        def __init__(self, *args, **kwargs):
+            super().__init__(empty_label='none', required=False,
+                             *args, **kwargs)
+
     # General
     data_set_label = CharField(
         model=models.Dataset, field='label',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Description of the data set.')
+    primary_property = ModelChoiceField(
+        queryset=models.Property.objects.all().order_by('name'),
+        widget=PropertySelect(attrs={'class': 'form-control'}),
+        help_text='Define the primary property of interest (in a figure, this '
+        'typically denotes the y-axis).')
+    primary_unit = ModelChoiceField(
+        queryset=models.Unit.objects.all().order_by('label'),
+        widget=forms.Select(attrs={'class': 'form-control',
+                                   'disabled': 'true'}),
+        help_text='Define the primary unit of interest (in a figure, this '
+        'typically denotes the unit of the y-axis). For dimensionless '
+        'physical properties, select "none". If the data is in arbitray '
+
+        'units, select "a.u." (note that this is different from "none").')
+    secondary_property = ModelChoiceField(
+        queryset=models.Property.objects.filter(
+            require_input_files=False).order_by('name'),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text='Define the secondary property of interest (in a figure, '
+        'this typically denotes the x-axis). When inserting values that have '
+        'no direct dependence on a physical property (e.g., a list of phonon '
+        'energies), the secondary property may be left empty.')
+    secondary_unit = ModelChoiceField(
+        queryset=models.Unit.objects.all().order_by('label'),
+        widget=forms.Select(attrs={'class': 'form-control',
+                                   'disabled': 'true'}),
+        help_text='Define the secondry unit of interest (in a figure, this '
+        'typically denotes the unit of the x-axis).')
 
     # Synthesis
     starting_materials = CharField(

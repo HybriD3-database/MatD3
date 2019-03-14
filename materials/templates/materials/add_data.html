@@ -115,57 +115,16 @@
             <!-- Properties and units -->
             <div class="row">
               <div class="col-md-4">
-                <label for="primary-property">Primary property</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Define the primary property of interest (in a figure, this typically denotes the y-axis).</span>
-                </i>
-                <select class="form-control" id="primary-property" name="primary-property">
-                  <option value="-1">none</option>
-                  {% for property in properties %}
-                    <option value="{{ property.pk }}"
-                            require-input-files="{{ property.require_input_files }}">
-                      {{ property }}
-                    </option>
-                  {% endfor %}
-                </select>
+                {% include 'materials/input_field.html' with field=form.primary_property %}
               </div>
               <div class="col-md-2">
-                <label id="primary-unit-label" for="primary-unit">Primary unit</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Define the primary unit of interest (in a figure, this typically denotes the unit of the y-axis). For dimensionless physical properties, select "none". If the data is in arbitray units, select "a.u." (note that this is different from "none").</span>
-                </i>
-                <select class="form-control" id="primary-unit" name="primary-unit" disabled="true">
-                  {% for unit in units %}
-                    <option value="{{ unit.pk }}">{{ unit }}</option>
-                  {% endfor %}
-                </select>
+                {% include 'materials/input_field.html' with field=form.primary_unit %}
               </div>
-              <div id="secondary-property-col" class="col-md-4">
-                <label id="secondary-property-label" for="secondary-property">
-                  Secondary property
-                </label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Define the secondary property of interest (in a figure, this typically denotes the x-axis). When inserting values that have no direct dependence on a physical property (e.g., a list of phonon energies), the secondary property may be left empty.</span>
-                </i>
-                <select class="form-control" id="secondary-property" name="secondary-property">
-                  <option value="-1">none</option>
-                  {% for property in properties %}
-                    {% if not property.require_input_files %}
-                      <option value="{{ property.pk }}">{{ property }}</option>
-                    {% endif %}
-                  {% endfor %}
-                </select>
+              <div class="col-md-4">
+                {% include 'materials/input_field.html' with field=form.secondary_property %}
               </div>
               <div class="col-md-2">
-                <label id="secondary-unit-label" for="secondary-unit">Secondary unit</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Define the secondry unit of interest (in a figure, this typically denotes the unit of the x-axis).</span>
-                </i>
-                <select class="form-control" id="secondary-unit" name="secondary-unit" disabled="true">
-                  {% for unit in units %}
-                    <option value="{{ unit.pk }}">{{ unit }}</option>
-                  {% endfor %}
-                </select>
+                {% include 'materials/input_field.html' with field=form.secondary_unit %}
               </div>
             </div>
             <hr>
@@ -584,30 +543,30 @@
       unit and #main-data placeholder */
    function toggleUnitVisibility(property, unit) {
      $(property).change(function() {
-       if ($(property + ' option:selected').attr('value') == -1) {
+       if ($(property + ' option:selected').attr('value') == "") {
          $(unit).prop('disabled', true);
-         if (property == '#secondary-property') {
+         if (property == '#id_secondary_property') {
            $('#main-data').attr('placeholder', 'value_1 value_2 ...');
          }
        } else {
          $(unit).prop('disabled', false);
-         if (property == '#secondary-property') {
+         if (property == '#id_secondary_property') {
            $('#main-data').attr('placeholder', 'x1 y1\nx2 y2\n...');
          }
        }
      });
    }
-   toggleUnitVisibility('#secondary-property', '#secondary-unit');
-   toggleUnitVisibility('#primary-property', '#primary-unit');
+   toggleUnitVisibility('#id_secondary_property', '#id_secondary_unit');
+   toggleUnitVisibility('#id_primary_property', '#id_primary_unit');
   </script>
   <script>
    /* Properties that require input files */
    var saved_main_data_placeholder = '';
-   $('#primary-property').change(function() {
+   $('#id_primary_property').change(function() {
      primary_unit = $(this).parent().next();
      secondary_property = primary_unit.next();
      secondary_unit = secondary_property.next();
-     if ($(this).find(':selected').attr('require-input-files') == 'True') {
+     if ($(this).find(':selected').attr('require_input_files') == 'True') {
        primary_unit.hide();
        secondary_property.hide();
        secondary_unit.hide();
@@ -627,7 +586,7 @@
   <script>
    /* Autofill the main input data textarea */
    $('#input-data-files').change(function() {
-     if ($('#primary-property').find(':selected').attr('require-input-files') == 'False') {
+     if ($('#id_primary_property').find(':selected').attr('require_input_files') == 'False') {
        var form_data = new FormData();
        form_data.append('file', this.files[0]);
        $(this).val('');  /* Clear the file list */

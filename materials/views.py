@@ -1218,16 +1218,12 @@ def submit_data(request):
     dataset.reference = models.Publication.objects.get(
         pk=request.POST['publication'])
     dataset.label = form.cleaned_data['data_set_label']
-    if request.POST['primary-property'] != '-1':
-        dataset.primary_property = models.Property.objects.get(
-            pk=request.POST['primary-property'])
-        dataset.primary_unit = models.Unit.objects.get(
-            pk=request.POST['primary-unit'])
-    if request.POST['secondary-property'] != '-1':
-        dataset.secondary_property = models.Property.objects.get(
-            pk=request.POST['secondary-property'])
-        dataset.secondary_unit = models.Unit.objects.get(
-            pk=request.POST['secondary-unit'])
+    if form.cleaned_data['primary_property']:
+        dataset.primary_property = form.cleaned_data['primary_property']
+        dataset.primary_unit = form.cleaned_data['primary_unit']
+    if form.cleaned_data['secondary_property']:
+        dataset.secondary_property = form.cleaned_data['secondary_property']
+        dataset.secondary_unit = form.cleaned_data['secondary_unit']
     dataset.visible = 'dataset-visible' in request.POST
     dataset.plotted = 'dataset-plotted' in request.POST
     dataset.experimental = request.POST['is-experimental'] == 'true'
@@ -1308,7 +1304,8 @@ def submit_data(request):
             numerical_value.value = float(value)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
-    elif dataset.primary_property.name == 'atomic coordinates':
+    elif (dataset.primary_property and
+          dataset.primary_property.name == 'atomic coordinates'):
         extract_lattice_parameters(dataseries)
     # Fixed properties
     fixed_ids = []
@@ -1325,7 +1322,9 @@ def submit_data(request):
         fixed_value.value_type = models.NumericalValueFixed.ACCURATE
         fixed_value.save(request.user)
     # Input files
-    if dataset.primary_property.require_input_files:
+    if (
+            dataset.primary_property and
+            dataset.primary_property.require_input_files):
         fs = FileSystemStorage(os.path.join(
             settings.MEDIA_ROOT, f'input_files/dataset_{dataset.pk}'))
         for file_ in request.FILES.getlist('input-data-files'):

@@ -1,7 +1,6 @@
 <h5>{{ dataset.label }}</h5>
-{% if dataset.plotted %}
-  <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
-{% elif dataset.primary_property.name == 'atomic coordinates' %}
+{% if dataset.primary_property.name == 'atomic coordinates' %}
+  <!-- Atomic coordinates require special treatment -->
   {% with series=dataset.dataseries_set.all|first %}
     {% if series.datapoint_set.all %}
       <table class="table atomic-positions">
@@ -15,7 +14,11 @@
       </table>
     {% endif %}
   {% endwith %}
+{% elif dataset.plotted %}
+  <!-- Plotted data -->
+  <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
 {% else %}
+  <!-- Tabulated data -->
   {% with series=dataset.dataseries_set.all|first %}
     {% if series.datapoint_set.all %}
       <table class="table main-data">
@@ -43,4 +46,4 @@
       </table>
     {% endif %}
   {% endwith %}
-{% endif %} <!-- if plotted -->
+{% endif %}
