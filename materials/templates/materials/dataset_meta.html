@@ -5,7 +5,9 @@
   </button>
   <div class="collapse" id="meta-body-{{ dataset.pk }}">
     <div class="card-body">
-      Extraction method: {{ dataset.extraction_method }}<br>
+      {% if dataset.extraction_method %}
+        Extraction method: {{ dataset.extraction_method }}<br>
+      {% endif %}
       Entry added on {{ dataset.created }}<br>
       Last updated on {{ dataset.updated }}<br>
     </div>

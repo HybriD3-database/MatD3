@@ -1439,8 +1439,8 @@ def download_dataset_files(request, pk):
     return response
 
 
-def download_input_file(request, pk):
-    loc = os.path.join(settings.MEDIA_ROOT, f'uploads/dataset_{pk}')
+def download_input_files(request, pk):
+    loc = os.path.join(settings.MEDIA_ROOT, f'input_files/dataset_{pk}')
     files = os.listdir(loc)
     file_full_paths = [os.path.join(loc, f) for f in files]
     zip_dir = 'files'
