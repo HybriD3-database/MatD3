@@ -1285,6 +1285,7 @@ def submit_data(request):
     dataset.sample_type = int(request.POST['sample-type'])
     dataset.crystal_system = int(request.POST['crystal-system'])
     dataset.has_files = 'uploaded-files' in request.FILES
+    dataset.extraction_method = form.cleaned_data['extraction_method']
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')
     # Synthesis method

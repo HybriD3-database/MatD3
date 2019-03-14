@@ -211,6 +211,15 @@
                 </div>
               {% endfor %}
             </div>
+            <div class="form row">
+              <div class="col-md-3 col-form-label">
+                {{ form.extraction_method.label_tag }}
+                {{ form.extraction_method.help_text|tooltip }}
+              </div>
+              <div class="col-md-9">
+                {{ form.extraction_method }}
+              </div>
+            </div>
           </div>
         </div>
 

@@ -304,6 +304,12 @@ class AddDataForm(forms.Form):
                                    'disabled': 'true'}),
         help_text='Define the secondry unit of interest (in a figure, this '
         'typically denotes the unit of the x-axis).')
+    extraction_method = CharField(
+        model=models.Dataset, field='extraction_method',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='How was the current data set obtained? For example, '
+        'manually extracted from a publication, from author, from another '
+        'database, ...')
 
     # Synthesis
     starting_materials = CharField(
