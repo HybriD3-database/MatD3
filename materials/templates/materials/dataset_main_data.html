@@ -1,7 +1,7 @@
 {% load materials_tags %}
 
 <h5>{{ dataset.label }}</h5>
-{% if dataset.primary_property.name == 'atomic coordinates' %}
+{% if dataset.primary_property.name == 'atomic coordinates' or dataset.primary_property.name == 'lattice parameter'%}
   <!-- Atomic coordinates require special treatment -->
   {% with series=dataset.dataseries_set.all|first %}
     {% if series.datapoint_set.all %}
@@ -16,14 +16,6 @@
       </table>
     {% endif %}
   {% endwith %}
-  <p class="text-center">
-    <a href="{% url "materials:download_input_files" pk=dataset.pk %}">
-      <button type="button" class="btn btn-primary">
-        <span class="fa fa-download" aria-hidden="true"></span>
-        {{ dataset.primary_property.name }}
-      </button>
-    </a>
-  </p>
 {% elif dataset.plotted %}
   <!-- Plotted data -->
   <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
@@ -56,4 +48,15 @@
       </table>
     {% endif %}
   {% endwith %}
+{% endif %}
+
+{% if dataset.primary_property.require_input_files %}
+  <p class="text-center">
+    <a href="{% url "materials:download_input_files" pk=dataset.pk %}">
+      <button type="button" class="btn btn-primary">
+        <span class="fa fa-download" aria-hidden="true"></span>
+        {{ dataset.primary_property.name }}
+      </button>
+    </a>
+  </p>
 {% endif %}
