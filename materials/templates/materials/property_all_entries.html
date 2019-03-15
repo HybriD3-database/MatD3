@@ -5,13 +5,13 @@
   <br>
   <div class="card card-default">
     <div class="card-header">
-      <h5>{% include 'materials/reference_format.html' with ref=object %}</h5>
+      <h3>{{ object_list.0.system }}: {{ object_list.0.primary_property }}</h3>
     </div>
 
     <div class="card-body">
       <div class="row">
 
-        {% for dataset in object.dataset_set.all %}
+        {% for dataset in object_list %}
           {% if user == dataset.created_by or dataset.visible %}
             <div class="col-md-6">
               <div class="card card-item">
@@ -19,14 +19,11 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  <h5><a href="{% url 'materials:materials_system' pk=dataset.system.pk %}">
-                    {{ dataset.system.compound_name }}</a>: {{ dataset.primary_property }}
                     {% if dataset.experimental %}
-                      (experimental)
+                      <h5>Experimental</h5>
                     {% else %}
-                      (theoretical)
+                      <h5>Theoretical</h5>
                     {% endif %}
-                  </h5>
                   {% if user == dataset.created_by %}
                     {% include 'materials/dataset_buttons.html' with object=dataset %}
                   {% endif %}
@@ -41,9 +38,9 @@
                   {% include 'materials/dataset_synthesis_method.html' %}
                   {% include 'materials/dataset_experimental_details.html' %}
                   {% include 'materials/dataset_computational_details.html' %}
+                  {% include 'materials/dataset_reference.html' %}
                   {% include 'materials/dataset_uploaded_files.html' %}
                   {% include 'materials/dataset_meta.html' %}
-                  {% include 'materials/dataset_all_entries.html' %}
                   <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
                 </div>
               </div>

@@ -46,8 +46,6 @@ urlpatterns = [
     path('<int:system_pk>/delete-dataset/<int:dataset_pk>',
          views.delete_dataset_and_files, name='delete_dataset'),
     path('<int:pk>/all-a-pos', views.all_a_pos, name='all_a_pos'),
-    re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
-            name='all_entries'),
     path('add-pub', views.AddPubView.as_view(), name='add_publication'),
     path('search-pub', views.SearchPubView.as_view(),
          name='search_publication'),
@@ -86,4 +84,8 @@ urlpatterns = [
          name='publication'),
     path('autofill-input-data', views.autofill_input_data,
          name='autofill_input_data'),
+    path('<int:system_pk>/property-all-entries/<int:prop_pk>',
+         views.PropertyAllEntriesView.as_view(), name='property_all_entries'),
+    re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
+            name='all_entries'),
 ]
