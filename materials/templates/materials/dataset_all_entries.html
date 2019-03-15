@@ -1,0 +1,9 @@
+{% with dataset.num_all_entries as num %}
+  {% if num > 1 %}
+    <p class="text-center m-1">
+      <a href="{% url 'materials:property_all_entries' system_pk=dataset.system.pk prop_pk=dataset.primary_property.pk %}">
+        See all entries for this property ({{ num }} total)
+      </a>
+    </p>
+  {% endif %}
+{% endwith %}

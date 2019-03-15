@@ -409,6 +409,10 @@ class Dataset(Base):
             shutil.rmtree(loc)
         super().delete(*args, **kwargs)
 
+    def num_all_entries(self, *args, **kwargs):
+        return len(Dataset.objects.filter(
+            system=self.system).filter(primary_property=self.primary_property))
+
 
 class Dataseries(Base):
     label = models.CharField(max_length=100, null=True)

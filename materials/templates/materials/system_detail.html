@@ -18,7 +18,6 @@
       <div class="row">
 
         <div class="col-md-6">
-          <br>
           <div class="card card-item">
             <div class="card-header">
               <h5>Molecular Model</h5>
@@ -33,10 +32,10 @@
               </div>
             {% endwith %}
           </div>
+          <br>
         </div>
 
         <div class="col-md-6">
-          <br>
           <div class="card card-item">
             <div class="card-header">
               <h5>Atomic Positions</h5>
@@ -101,6 +100,7 @@
                 {% endif %}
               </div>
             {% endwith %}
+            <br>
           </div>
 
           <br>
@@ -177,10 +177,10 @@
               {% endwith %}
             </div>
           </div>
+          <br>
         </div>
 
         <div class="col-md-6">
-          <br>
           <div class="card card-item">
             {% with entry=object.excitonemission_set.all|first %}
               <div class="card-header">
@@ -240,10 +240,10 @@
             {% endwith %}
               </div>
           </div>
+          <br>
         </div>
 
         <div class="col-md-6">
-          <br>
           <div class="card card-item">
             {% with entry=object.bandstructure_set.all|first %}
               <div class="card-header">
@@ -334,10 +334,10 @@
             {% endwith %}
               </div>
           </div>
+          <br>
         </div>
 
         <div class="col-md-6">
-          <br>
           <div class="card card-item">
             <div class="card-header">
               <h5>Material Properties</h5>
@@ -363,13 +363,13 @@
               {% endwith %}
             </div>
           </div>
+          <br>
         </div>
 
         {% for dataset in object.dataset_set.all %}
           {% if dataset.representative %}
             {% if user == dataset.created_by or dataset.visible %}
               <div class="col-md-6">
-                <br>
                 <div class="card card-item">
                   {% if not dataset.visible %}
                     <div style="background:#fadb9b">
@@ -399,9 +399,11 @@
                     {% include 'materials/dataset_reference.html' %}
                     {% include 'materials/dataset_uploaded_files.html' %}
                     {% include 'materials/dataset_meta.html' %}
+                    {% include 'materials/dataset_all_entries.html' %}
                     <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
                   </div>
                 </div>
+                <br>
               </div>
             {% endif %}
           {% endif %}

@@ -1287,8 +1287,9 @@ def submit_data(request):
     dataset.has_files = 'uploaded-files' in request.FILES
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
-    dataset.representative = bool(models.Dataset.objects.filter(
-        primary_property=dataset.primary_property))
+    dataset.representative = not bool(models.Dataset.objects.filter(
+        system=dataset.system).filter(
+            primary_property=dataset.primary_property))
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')
     # Synthesis method
@@ -1738,3 +1739,13 @@ def autofill_input_data(request):
         output.write(line)
         output.write('\n')
     return HttpResponse(output.getvalue())
+
+
+class PropertyAllEntriesView(generic.ListView):
+    """Display all data sets for a given property and system."""
+    template_name = 'materials/property_all_entries.html'
+
+    def get_queryset(self, **kwargs):
+        return models.Dataset.objects.filter(
+            system__pk=self.kwargs['system_pk']).filter(
+                primary_property__pk=self.kwargs['prop_pk'])
