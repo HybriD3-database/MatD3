@@ -391,6 +391,7 @@ class Dataset(Base):
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
     extraction_method = models.CharField(max_length=100, null=True)
+    representative = models.BooleanField(default=False)
 
     def delete(self, *args, **kwargs):
         """Additionally remove any files uploaded by the user."""

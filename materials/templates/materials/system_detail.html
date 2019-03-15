@@ -366,42 +366,44 @@
         </div>
 
         {% for dataset in object.dataset_set.all %}
-          {% if user == dataset.created_by or dataset.visible %}
-            <div class="col-md-6">
-              <br>
-              <div class="card card-item">
-                {% if not dataset.visible %}
-                  <div style="background:#fadb9b">
-                {% endif %}
-                <div class="card-header">
-                  <h5>{{ dataset.primary_property|capfirst }}
-                    {% if dataset.experimental %}
-                      (experimental)
-                    {% else %}
-                      (theoretical)
-                    {% endif %}
-                  </h5>
-                  {% if user == dataset.created_by %}
-                    {% include 'materials/dataset_buttons.html' %}
+          {% if dataset.representative %}
+            {% if user == dataset.created_by or dataset.visible %}
+              <div class="col-md-6">
+                <br>
+                <div class="card card-item">
+                  {% if not dataset.visible %}
+                    <div style="background:#fadb9b">
                   {% endif %}
-                </div>
-                {% if not dataset.visible %}
+                  <div class="card-header">
+                    <h5>{{ dataset.primary_property|capfirst }}
+                      {% if dataset.experimental %}
+                        (experimental)
+                      {% else %}
+                        (theoretical)
+                      {% endif %}
+                    </h5>
+                    {% if user == dataset.created_by %}
+                      {% include 'materials/dataset_buttons.html' %}
+                    {% endif %}
                   </div>
-                {% endif %}
-                <div class="card-body">
-                  {% include 'materials/dataset_main_data.html' %}
-                  {% include 'materials/dataset_system_description.html' %}
-                  {% include 'materials/dataset_fixed_parameters.html' %}
-                  {% include 'materials/dataset_synthesis_method.html' %}
-                  {% include 'materials/dataset_experimental_details.html' %}
-                  {% include 'materials/dataset_computational_details.html' %}
-                  {% include 'materials/dataset_reference.html' %}
-                  {% include 'materials/dataset_uploaded_files.html' %}
-                  {% include 'materials/dataset_meta.html' %}
-                  <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
+                  {% if not dataset.visible %}
+                    </div>
+                  {% endif %}
+                  <div class="card-body">
+                    {% include 'materials/dataset_main_data.html' %}
+                    {% include 'materials/dataset_system_description.html' %}
+                    {% include 'materials/dataset_fixed_parameters.html' %}
+                    {% include 'materials/dataset_synthesis_method.html' %}
+                    {% include 'materials/dataset_experimental_details.html' %}
+                    {% include 'materials/dataset_computational_details.html' %}
+                    {% include 'materials/dataset_reference.html' %}
+                    {% include 'materials/dataset_uploaded_files.html' %}
+                    {% include 'materials/dataset_meta.html' %}
+                    <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
+                  </div>
                 </div>
               </div>
-            </div>
+            {% endif %}
           {% endif %}
         {% endfor %}
 

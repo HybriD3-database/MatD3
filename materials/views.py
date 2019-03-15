@@ -1286,6 +1286,9 @@ def submit_data(request):
     dataset.crystal_system = int(request.POST['crystal-system'])
     dataset.has_files = 'uploaded-files' in request.FILES
     dataset.extraction_method = form.cleaned_data['extraction_method']
+    # Make representative by default if first entry of its kind
+    dataset.representative = bool(models.Dataset.objects.filter(
+        primary_property=dataset.primary_property))
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')
     # Synthesis method
