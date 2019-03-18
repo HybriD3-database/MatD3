@@ -516,55 +516,6 @@ def makeCorrections(form):
         return form
 
 
-class AddAPosView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_a_pos.html'
-
-    def get(self, request):
-        search_form = forms.SearchForm()
-        a_pos_form = forms.AddAtomicPositions()
-        return render(request, self.template_name, {
-            'search_form': search_form,
-            'a_pos_form': a_pos_form,
-            'initial_state': True,
-            # determines whether this field appears on the form
-            'related_synthesis': True
-        })
-
-    def post(self, request):
-        form = forms.AddAtomicPositions(request.POST, request.FILES)
-        if form.is_valid():
-            apos_form = form.save(commit=False)
-            pub_pk = request.POST.get('publication')
-            sys_pk = request.POST.get('system')
-            syn_pk = request.POST.get('synthesis-methods')
-            try:
-                apos_form.synthesis_method = (
-                    models.SynthesisMethodOld.objects.get(pk=int(syn_pk)))
-            except Exception:
-                # no synthesis method was chosen (or maybe an error occurred)
-                pass
-            if int(pub_pk) > 0 and int(sys_pk) > 0:
-                apos_form.publication = models.Publication.objects.get(pk=pub_pk)
-                apos_form.system = models.System.objects.get(pk=sys_pk)
-                if request.user.is_authenticated:
-                    apos_form.contributor = UserProfile.objects.get(
-                        user=request.user)
-                    text = 'Save success!'
-                    feedback = 'success'
-                    apos_form = makeCorrections(apos_form)
-                    apos_form.save()
-                else:
-                    text = 'Failed to submit, please login and try again.'
-                    feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-
-        args = {'feedback': feedback, 'text': text}
-
-        return JsonResponse(args)
-
-
 class AddPubView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_publication.html'
 
@@ -878,101 +829,6 @@ class AddTemperature(LoginRequiredMixin, generic.TemplateView):
         return render(request, self.template_name, args)
 
 
-class AddExcitonEmissionView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_exciton_emission.html'
-
-    def get(self, request):
-        search_form = forms.SearchForm()
-        exciton_emission_form = forms.AddExcitonEmission()
-        return render(request, self.template_name, {
-            'search_form': search_form,
-            'exciton_emission_form': exciton_emission_form,
-            'initial_state': True,
-            # determines whether this field appears on the form
-            'related_synthesis': True
-        })
-
-    def post(self, request):
-        form = forms.AddExcitonEmission(request.POST, request.FILES)
-        if form.is_valid():
-            new_form = form.save(commit=False)
-            pub_pk = request.POST.get('publication')
-            sys_pk = request.POST.get('system')
-            # print 'file: ', request.FILES.get('pl_file')
-            syn_pk = request.POST.get('synthesis-methods')
-            try:
-                new_form.synthesis_method = models.SynthesisMethodOld.objects.get(
-                    pk=int(syn_pk))
-            except Exception:
-                # no synthesis method was chosen (or maybe an error occurred)
-                pass
-            if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = models.Publication.objects.get(pk=pub_pk)
-                new_form.system = models.System.objects.get(pk=sys_pk)
-                # text += 'Publication and System obtained, '
-                if request.user.is_authenticated:
-                    new_form.contributor = UserProfile.objects.get(
-                        user=request.user)
-                    # print apos_form.contributor
-                    text = 'Save success!'
-                    feedback = 'success'
-                    ee_model = new_form.save()
-                else:
-                    text = 'Failed to submit, please login and try again.'
-                    feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-
-        args = {'feedback': feedback, 'text': text}
-        return JsonResponse(args)
-
-
-class AddSynthesisMethodView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_synthesis.html'
-
-    def get(self, request):
-        search_form = forms.SearchForm()
-        synthesis_form = forms.AddSynthesisMethod()
-        return render(request, self.template_name, {
-            'search_form': search_form,
-            'synthesis_form': synthesis_form,
-            'initial_state': True,
-            # determines whether this field appears on the form
-            'related_synthesis': False
-        })
-
-    def post(self, request):
-        form = forms.AddSynthesisMethod(request.POST, request.FILES)
-        if form.is_valid():
-            new_form = form.save(commit=False)
-            pub_pk = request.POST.get('publication')
-            sys_pk = request.POST.get('system')
-            # text = ''
-            if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = models.Publication.objects.get(pk=pub_pk)
-                new_form.system = models.System.objects.get(pk=sys_pk)
-                # text += 'Publication and System obtained, '
-                if request.user.is_authenticated:
-                    new_form.contributor = UserProfile.objects.get(
-                        user=request.user)
-                    # print apos_form.contributor
-                    new_form = makeCorrections(new_form)
-                    text = 'Save success!'
-                    feedback = 'success'
-                    new_form.save()
-                else:
-                    text = 'Failed to submit, please login and try again.'
-                    feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-
-        args = {'feedback': feedback, 'text': text}
-
-        return JsonResponse(args)
-
-
 class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_band_structure.html'
 
@@ -1035,48 +891,6 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
                     # successful after this thing, call another
                     # function that plots the BS. Once done, update
                     # the plotted state to done plotbs(bs_folder_loc)
-                    new_form = makeCorrections(new_form)
-                    text = 'Save success!'
-                    feedback = 'success'
-                    new_form.save()
-                else:
-                    text = 'Failed to submit, please login and try again.'
-                    feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-
-        args = {'feedback': feedback, 'text': text}
-
-        return JsonResponse(args)
-
-
-class AddMaterialPropertyView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_material_property.html'
-
-    def get(self, request):
-        search_form = forms.SearchForm()
-        material_property_form = forms.AddMaterialProperty()
-        return render(request, self.template_name, {
-            'search_form': search_form,
-            'material_property_form': material_property_form,
-            'initial_state': True,
-            # determines whether this field appears on the form
-            'related_synthesis': False
-        })
-
-    def post(self, request):
-        form = forms.AddMaterialProperty(request.POST)
-        if form.is_valid():
-            new_form = form.save(commit=False)
-            pub_pk = request.POST.get('publication')
-            sys_pk = request.POST.get('system')
-            if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = models.Publication.objects.get(pk=pub_pk)
-                new_form.system = models.System.objects.get(pk=sys_pk)
-                if request.user.is_authenticated:
-                    new_form.contributor = UserProfile.objects.get(
-                        user=request.user)
                     new_form = makeCorrections(new_form)
                     text = 'Save success!'
                     feedback = 'success'
@@ -1513,66 +1327,6 @@ class SystemUpdateView(generic.UpdateView):
     success_url = '/materials/{pk}'
 
 
-class AtomicPositionsUpdateView(generic.UpdateView):
-    model = models.AtomicPositions
-    template_name = 'materials/update_a_pos.html'
-    form_class = forms.AddAtomicPositions
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/all-a-pos' % str(pk)
-
-
-class AtomicPositionsDeleteView(generic.DeleteView):
-    model = models.AtomicPositions
-    template_name = 'materials/delete_a_pos.html'
-    form_class = forms.AddAtomicPositions
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/all-a-pos' % str(pk)
-
-
-class SynthesisMethodUpdateView(generic.UpdateView):
-    model = models.SynthesisMethodOld
-    template_name = 'materials/update_synthesis.html'
-    form_class = forms.AddSynthesisMethod
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/synthesis' % str(pk)
-
-
-class SynthesisMethodDeleteView(generic.DeleteView):
-    model = models.SynthesisMethodOld
-    template_name = 'materials/delete_synthesis.html'
-    form_class = forms.AddSynthesisMethod
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/synthesis' % str(pk)
-
-
-class ExcitonEmissionUpdateView(generic.UpdateView):
-    model = models.ExcitonEmission
-    template_name = 'materials/update_exciton_emission.html'
-    form_class = forms.AddExcitonEmission
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/exciton_emission' % str(pk)
-
-
-class ExcitonEmissionDeleteView(generic.DeleteView):
-    model = models.ExcitonEmission
-    template_name = 'materials/delete_exciton_emission.html'
-    form_class = forms.AddExcitonEmission
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/exciton_emission' % str(pk)
-
-
 class BandStructureUpdateView(generic.UpdateView):
     model = models.BandStructure
     template_name = 'materials/update_band_structure.html'
@@ -1591,26 +1345,6 @@ class BandStructureDeleteView(generic.DeleteView):
     def get_success_url(self):
         pk = self.object.system.pk
         return '/materials/%s/band_structure' % str(pk)
-
-
-class PropertyUpdateView(generic.UpdateView):
-    model = models.MaterialProperty
-    template_name = 'materials/update_material_property.html'
-    form_class = forms.AddMaterialProperty
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/material_prop' % str(pk)
-
-
-class PropertyDeleteView(generic.DeleteView):
-    model = models.MaterialProperty
-    template_name = 'materials/delete_material_property.html'
-    form_class = forms.AddMaterialProperty
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/material_prop' % str(pk)
 
 
 def dataset_image(request, pk):

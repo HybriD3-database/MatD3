@@ -25,9 +25,7 @@
                 <div class="card card-item">
                   <div class="card-header">
                     {% if entry.contributor.user.get_username == user.username %}
-                      {% if data_type == "synthesis" %}
-                        <a href="{% url "materials:update_synthesis" sys=entry.system.pk pk=entry.pk %}">
-                      {% elif data_type == "exciton_emission" %}
+                      {% if data_type == "exciton_emission" %}
                           <a href="{% url "materials:update_exciton_emission" sys=entry.system.pk pk=entry.pk %}">
                       {% elif data_type == "band_structure" %}
                             <a href="{% url "materials:update_band_structure" sys=entry.system.pk pk=entry.pk %}">

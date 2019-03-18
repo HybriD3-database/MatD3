@@ -132,14 +132,6 @@ class System(models.Model):
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
 
-    def listProperties(self):
-        L = []
-        for mat_prop in self.materialproperty_set.all():
-            property = mat_prop.property
-            if property not in L:
-                L.append(property)
-        return L
-
     def getAuthors(self):
         """Returns a list of authors related to a system.
 
@@ -179,16 +171,6 @@ class SpecificMethod(models.Model):
 
     def __str__(self):
         return self.specific_method
-
-
-class PropertyOld(models.Model):
-    property = models.CharField(max_length=500)
-
-    class Meta:
-        verbose_name_plural = 'properties'
-
-    def __str__(self):
-        return self.property
 
 
 class IDInfo(models.Model):
@@ -310,18 +292,6 @@ class AtomicPositions(IDInfo):
             if os.path.isfile(file_loc):
                 os.remove(file_loc)
         super().delete(*args, **kwargs)
-
-
-class MaterialProperty(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    property = models.ForeignKey(PropertyOld, on_delete=models.PROTECT)
-    value = models.CharField(max_length=500)
-
-    class Meta:
-        verbose_name_plural = 'material properties'
-
-    def __str__(self):
-        return str(self.system) + ' ' + str(self.property) + ': ' + self.value
 
 
 class BondAngle(IDInfo):

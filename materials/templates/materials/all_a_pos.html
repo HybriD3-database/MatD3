@@ -28,11 +28,6 @@
             <div class="col-md-6">
               <div class="card card-item">
                 <div class="card-header">
-                  {% if entry.contributor.user.get_username == user.username %}
-                    <a href="{% url "materials:update_a_pos" sys=entry.system.pk pk=entry.pk %}">
-                      <button type="button" class="btn btn-success" style="float: right;">Edit Entry</button>
-                    </a>
-                  {% endif %}
                   <h5>Entry #{{ forloop.counter }}</h5>
                 </div>
                 <div class='card-body'>

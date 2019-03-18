@@ -98,61 +98,6 @@ class AddSystem(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddExcitonEmission(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method',
-                  'comments', 'exciton_emission', 'source',
-                  'data_extraction_method')
-
-    class Meta:
-        model = models.ExcitonEmission
-        exclude = ('contributor', 'publication', 'system', 'plotted',
-                   'synthesis_method')
-        labels = {
-            'pl_file': 'PL file',
-            'exciton_emission': 'Exciton Emission Peak (nm)',
-            'phase': 'Crystal system',
-            'temperature': 'Temperature (K)'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
-class AddSynthesisMethod(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'comments', 'synthesis_method',
-                  'source', 'data_extraction_method', 'starting_materials',
-                  'remarks', 'product')
-    field_order = ('source', 'data_extraction_method', 'temperature', 'phase',
-                   'synthesis_method', 'starting_materials', 'remarks',
-                   'product', 'comments')
-
-    class Meta:
-        model = models.SynthesisMethodOld
-        exclude = ('contributor', 'publication', 'system', 'method',
-                   'specific_method')
-        labels = {
-            'syn_file': 'Synthesis Method File (optional)',
-            'synthesis_method': 'Synthesis Method',
-            'phase': 'Crystal system',
-            'temperature': 'Temperature (K)'
-        }
-        widgets = {
-            'synthesis_method': forms.Textarea(attrs={
-                'rows': 3,
-                'placeholder': 'e.g. expirimental, solution grown'}),
-            'starting_materials': forms.Textarea(attrs={'rows': 4}),
-            'remarks': forms.Textarea(attrs={'rows': 6}),
-            'product': forms.Textarea(attrs={'rows': 4})
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
 class AddBandStructure(forms.ModelForm):
     all_fields = ('temperature', 'phase', 'method', 'specific_method',
                   'comments', 'source', 'data_extraction_method', 'band_gap')
@@ -179,35 +124,6 @@ class AddBandStructure(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddAtomicPositions(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method',
-                  'comments', 'fhi_file', 'a', 'b', 'c', 'alpha', 'beta',
-                  'gamma', 'volume', 'Z', 'source', 'data_extraction_method')
-
-    class Meta:
-        model = models.AtomicPositions
-        exclude = ('contributor', 'publication', 'system', 'synthesis_method')
-        labels = {
-            'fhi_file': '"geometry.in" file',
-            'phase': 'Crystal system',
-            'a': 'a',
-            'b': 'b',
-            'c': 'c',
-            'alpha': 'α',
-            'beta': 'β',
-            'gamma': 'γ',
-            'temperature': 'Temperature (K)'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-            if(fieldname == 'fhi_file'):
-                self.fields[fieldname].widget.attrs['class'] = (
-                    'form-control-file')
-
-
 class AddBondAngle(forms.ModelForm):
     class Meta:
         model = models.BondAngle
@@ -218,29 +134,6 @@ class AddBondLength(forms.ModelForm):
     class Meta:
         model = models.BondLength
         fields = '__all__'
-
-
-class AddMaterialProperty(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method',
-                  'comments', 'source', 'data_extraction_method', 'property',
-                  'value')
-    field_order = ('source', 'data_extraction_method', 'temperature', 'phase',
-                   'method', 'specific_method', 'property', 'value',
-                   'comments')
-
-    class Meta:
-        model = models.MaterialProperty
-        exclude = ('contributor', 'publication', 'system')
-        labels = {
-            'phase': 'Crystal system',
-            'temperature': 'Temperature (K)',
-            'value': 'Value of Property'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
 class AddDataForm(forms.Form):
