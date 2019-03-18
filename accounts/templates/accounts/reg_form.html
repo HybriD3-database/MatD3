@@ -20,6 +20,7 @@
 {% endblock %}
 
 {% block script %}
+  {% load static %}
   <script src="{% static 'accounts/javascript/ajax_submit.js' %}"></script>
   <script>
    alert_submit($('#register'), $('#feedback'));

@@ -280,7 +280,8 @@ class AddDataForm(forms.Form):
         queryset=models.Property.objects.all().order_by('name'),
         widget=PropertySelect(attrs={'class': 'form-control'}),
         help_text='Define the primary property of interest (in a figure, this '
-        'typically denotes the y-axis).')
+        'typically denotes the y-axis). If the property of interest missing '
+        'here, add it under "Define new property".')
     primary_unit = ModelChoiceField(
         queryset=models.Unit.objects.all().order_by('label'),
         widget=forms.Select(attrs={'class': 'form-control',
@@ -288,8 +289,8 @@ class AddDataForm(forms.Form):
         help_text='Define the primary unit of interest (in a figure, this '
         'typically denotes the unit of the y-axis). For dimensionless '
         'physical properties, select "none". If the data is in arbitray '
-
-        'units, select "a.u." (note that this is different from "none").')
+        'units, select "a.u." (note that this is different from "none"). If '
+        'the unit of interest missing here, add it under "Define new unit".')
     secondary_property = ModelChoiceField(
         queryset=models.Property.objects.filter(
             require_input_files=False).order_by('name'),
@@ -297,13 +298,15 @@ class AddDataForm(forms.Form):
         help_text='Define the secondary property of interest (in a figure, '
         'this typically denotes the x-axis). When inserting values that have '
         'no direct dependence on a physical property (e.g., a list of phonon '
-        'energies), the secondary property may be left empty.')
+        'energies), the secondary property may be left empty. If the property '
+        'of interest missing here, add it under "Define new property".')
     secondary_unit = ModelChoiceField(
         queryset=models.Unit.objects.all().order_by('label'),
         widget=forms.Select(attrs={'class': 'form-control',
                                    'disabled': 'true'}),
         help_text='Define the secondry unit of interest (in a figure, this '
-        'typically denotes the unit of the x-axis).')
+        'typically denotes the unit of the x-axis). If the unit of interest '
+        'missing here, add it under "Define new unit".')
     extraction_method = CharField(
         model=models.Dataset, field='extraction_method',
         widget=forms.TextInput(attrs={'class': 'form-control'}),

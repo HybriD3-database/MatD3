@@ -1,520 +1,524 @@
-{% extends 'materials/template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-  <h4>Add Data</h4>
-{% endblock %}
-
-{% block mainbody %}
-  {% load materials_tags %}
-  {% if messages %}
-    {% for message in messages %}
-      <div class="d-flex">
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      </div>
-    {% endfor %}
-  {% endif %}
-  <ul class="nav nav-tabs" id="new-data-tab" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link active" id="data-tab" data-toggle="tab"
-         href="#results" role="tab">
-        Add new results
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="new-property-tab" data-toggle="tab"
-         href="#properties" role="tab">
-        Define new property
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="new-unit-tab" data-toggle="tab"
-         href="#units" role="tab">
-        Define new unit
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="new-unit-tab" data-toggle="tab"
-         href="#unsorted" role="tab">
-        Other
-      </a>
-    </li>
-  </ul>
-  <div class="tab-content" id="add-results-tab-content">
-    <!-- ADD NEW RESULTS -->
-    <div class="tab-pane show active" id="results" role="tabpanel">
-      <br>
-      <form method="post" action="{% url 'materials:submit_data' %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        <!-- GENERAL -->
-        <div class="card card-item">
-          <div class="card-header">
-            General
+{% block body %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Add Data</h4>
+    </div>
+    <div class="card-body">
+      {% load materials_tags %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="d-flex">
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
           </div>
-          <div class="card-body card-add-data">
-            <div class="form row">
-              <div class="col-md-2 col-form-label">
-                <label for="publication">Select publication</label>
-                <i class="fa fa-question-circle tooltip-container" style="margin-right:-50px">
-                  <span class="tooltiptext">Select publication where the data to be inserted is published.</span>
-                </i>
+        {% endfor %}
+      {% endif %}
+      <ul class="nav nav-tabs" id="new-data-tab" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="data-tab" data-toggle="tab"
+             href="#results" role="tab">
+            Add new results
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="new-property-tab" data-toggle="tab"
+             href="#properties" role="tab">
+            Define new property
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="new-unit-tab" data-toggle="tab"
+             href="#units" role="tab">
+            Define new unit
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="new-unit-tab" data-toggle="tab"
+             href="#unsorted" role="tab">
+            Other
+          </a>
+        </li>
+      </ul>
+      <div class="tab-content" id="add-results-tab-content">
+        <!-- ADD NEW RESULTS -->
+        <div class="tab-pane show active" id="results" role="tabpanel">
+          <br>
+          <form method="post" action="{% url 'materials:submit_data' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!-- GENERAL -->
+            <div class="card card-item">
+              <div class="card-header">
+                General
               </div>
-              <div class="col-md-7 mb-3">
-                <select name="publication" class="form-control" id="publication">
-                  {% for pub in publications %}
-                    <option value={{ pub.pk }}>
-                      {{ pub.year }}
-                      {% if pub.year %}-{% endif %}
-                      {{ pub.getAuthorsAsString }}
-                      {{ pub.journal }}
-                      <strong>{{ pub.vol }}</strong>{% if pub.vol and pub.pages_start %},{% endif %}
-                      {{ pub.pages_start }}
-                      {% if pub.title == "Unpublished" %}
-                        <i>unpublished</i>
-                      {% else %}
-                        "{{ pub.title }}"
-                      {% endif %}
-                    </option>
+              <div class="card-body card-add-data">
+                <div class="form row">
+                  <div class="col-md-2 col-form-label">
+                    <label for="publication">Select publication</label>
+                    <i class="fa fa-question-circle tooltip-container" style="margin-right:-50px">
+                      <span class="tooltiptext">Select publication where the data to be inserted is published.</span>
+                    </i>
+                  </div>
+                  <div class="col-md-7 mb-3">
+                    <select name="publication" class="form-control" id="publication">
+                      {% for pub in publications %}
+                        <option value={{ pub.pk }}>
+                          {{ pub.year }}
+                          {% if pub.year %}-{% endif %}
+                          {{ pub.getAuthorsAsString }}
+                          {{ pub.journal }}
+                          <strong>{{ pub.vol }}</strong>{% if pub.vol and pub.pages_start %},{% endif %}
+                          {{ pub.pages_start }}
+                          {% if pub.title == "Unpublished" %}
+                            <i>unpublished</i>
+                          {% else %}
+                            "{{ pub.title }}"
+                          {% endif %}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <input class="form-control" id="publication-search" type="text"
+                           placeholder="Search..">
+                  </div>
+                </div>
+                <div class="form row">
+                  <div class="col-md-2 col-form-label">
+                    <label for="system">Select system</label>
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
+                    </i>
+                  </div>
+                  <div class="col-md-7 mb-3">
+                    <select name="system" class="form-control" id="system">
+                      {% for sys in systems %}
+                        <option value={{ sys.pk }}>
+                          {{ sys }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <input class="form-control" id="system-search" type="text" placeholder="Search..">
+                  </div>
+                </div>
+                <div class="form row">
+                  <div class="col-md-2 col-form-label">
+                    {{ form.data_set_label.label_tag }}
+                    {{ form.data_set_label.help_text|tooltip }}
+                  </div>
+                  <div class="col-md-10">
+                    {{ form.data_set_label }}
+                  </div>
+                </div>
+                <hr>
+                <!-- Properties and units -->
+                <div class="row">
+                  <div class="col-md-4">
+                    {% include 'materials/input_field.html' with field=form.primary_property %}
+                  </div>
+                  <div class="col-md-2">
+                    {% include 'materials/input_field.html' with field=form.primary_unit %}
+                  </div>
+                  <div class="col-md-4">
+                    {% include 'materials/input_field.html' with field=form.secondary_property %}
+                  </div>
+                  <div class="col-md-2">
+                    {% include 'materials/input_field.html' with field=form.secondary_unit %}
+                  </div>
+                </div>
+                <hr>
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" class="form-check-input" name="dataset-visible"
+                         id="dataset-visible" checked="checked">
+                  <label class="form-check-label" for="dataset-visible">Visible to public</label>
+                  <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
+                    <span class="tooltiptext">Choose whether the data should be initially visible on the website. If not, only you can view the data. This setting can be easily toggled later.</span>
+                  </i>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" class="form-check-input" name="dataset-plotted"
+                         id="dataset-plotted">
+                  <label class="form-check-label" for="dataset-plotted">Plotted</label>
+                  <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
+                    <span class="tooltiptext">Choose whether the data is more suitably presented as a figure or as a table. Especially for a large amount of data points, a figure ("plotted") might make more sense. This setting can be easily toggled later.</span>
+                  </i>
+                </div>
+                <br>
+                <div class="row">
+                  <legend class="col-form-label col-sm-2">Origin of data:
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Select whether the origin of data is experimental or theoretical.</span>
+                    </i>
+                  </legend>
+                  <div class="form-check form-check-inline" style="margin-left:-20px">
+                    <input class="form-check-input" type="radio" id="is-experimental"
+                           name="is-experimental" value="true" checked>
+                    <label class="form-check-label" for="is-experimental">Experimental</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="is-theoretical"
+                           name="is-experimental" value="false" >
+                    <label class="form-check-label" for="is-theoretical">Theoretical</label>
+                  </div>
+                </div>
+                <div class="row">
+                  <legend class="col-form-label col-sm-4">Dimensionality of the system:
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Select the dimensionality of the system.</span>
+                    </i>
+                  </legend>
+                  <div class="form-check form-check-inline" style="margin-left:-75px">
+                    <input class="form-check-input" type="radio" id="is-3d-system"
+                           name="is-3d-system" value="true" checked>
+                    <label class="form-check-label" for="is-3d-system">3D</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="is-2d-system"
+                           name="is-3d-system" value="false">
+                    <label class="form-check-label" for="is-2d-system">2D</label>
+                  </div>
+                </div>
+                <div class="row">
+                  <legend class="col-form-label col-sm-2">Sample type:
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Select the type of the sample.</span>
+                    </i>
+                  </legend>
+                  {% for type in sample_types %}
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" id="is-{{ type.1 }}"
+                             name="sample-type" value="{{ type.0 }}"
+                             {% if forloop.first %}checked{% endif %}
+                             {% if forloop.first %}style="margin-left:-30px"{% endif %}>
+                      <label class="form-check-label" for="is-{{ type.1 }}">{{ type.1|capfirst }}</label>
+                    </div>
                   {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-3 mb-3">
-                <input class="form-control" id="publication-search" type="text"
-                       placeholder="Search..">
-              </div>
-            </div>
-            <div class="form row">
-              <div class="col-md-2 col-form-label">
-                <label for="system">Select system</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
-                </i>
-              </div>
-              <div class="col-md-7 mb-3">
-                <select name="system" class="form-control" id="system">
-                  {% for sys in systems %}
-                    <option value={{ sys.pk }}>
-                      {{ sys }}
-                    </option>
+                </div>
+                <div class="row">
+                  <legend class="col-form-label col-sm-2">Crystal system:
+                    <i class="fa fa-question-circle tooltip-container">
+                      <span class="tooltiptext">Select the crystal system.</span>
+                    </i>
+                  </legend>
+                  {% for sys in crystal_systems %}
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" id="is-{{ sys.1 }}"
+                             name="crystal-system" value="{{ sys.0 }}"
+                             {% if forloop.first %}checked{% endif %}
+                             {% if forloop.first %}style="margin-left:-15px"{% endif %}>
+                      <label class="form-check-label" for="is-{{ sys.1 }}">{{ sys.1|capfirst }}</label>
+                    </div>
                   {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-3 mb-3">
-                <input class="form-control" id="system-search" type="text" placeholder="Search..">
-              </div>
-            </div>
-            <div class="form row">
-              <div class="col-md-2 col-form-label">
-                {{ form.data_set_label.label_tag }}
-                {{ form.data_set_label.help_text|tooltip }}
-              </div>
-              <div class="col-md-10">
-                {{ form.data_set_label }}
+                </div>
+                <div class="form row">
+                  <div class="col-md-3 col-form-label">
+                    {{ form.extraction_method.label_tag }}
+                    {{ form.extraction_method.help_text|tooltip }}
+                  </div>
+                  <div class="col-md-9">
+                    {{ form.extraction_method }}
+                  </div>
+                </div>
               </div>
             </div>
-            <hr>
-            <!-- Properties and units -->
-            <div class="row">
-              <div class="col-md-4">
-                {% include 'materials/input_field.html' with field=form.primary_property %}
-              </div>
-              <div class="col-md-2">
-                {% include 'materials/input_field.html' with field=form.primary_unit %}
-              </div>
-              <div class="col-md-4">
-                {% include 'materials/input_field.html' with field=form.secondary_property %}
-              </div>
-              <div class="col-md-2">
-                {% include 'materials/input_field.html' with field=form.secondary_unit %}
-              </div>
-            </div>
-            <hr>
-            <div class="form-check form-check-inline">
-              <input type="checkbox" class="form-check-input" name="dataset-visible"
-                     id="dataset-visible" checked="checked">
-              <label class="form-check-label" for="dataset-visible">Visible to public</label>
-              <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
-                <span class="tooltiptext">Choose whether the data should be initially visible on the website. If not, only you can view the data. This setting can be easily toggled later.</span>
-              </i>
-            </div>
-            <div class="form-check form-check-inline">
-              <input type="checkbox" class="form-check-input" name="dataset-plotted"
-                     id="dataset-plotted">
-              <label class="form-check-label" for="dataset-plotted">Plotted</label>
-              <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
-                <span class="tooltiptext">Choose whether the data is more suitably presented as a figure or as a table. Especially for a large amount of data points, a figure ("plotted") might make more sense. This setting can be easily toggled later.</span>
-              </i>
-            </div>
+
             <br>
-            <div class="row">
-              <legend class="col-form-label col-sm-2">Origin of data:
+
+            <!-- SYNTHESIS METHOD -->
+            <div class="card card-item">
+              <button class="btn text-left" data-toggle="collapse" type="button"
+                      id="synthesis-button" data-target="#synthesis-body"
+                      style="background:#dce9ff">
+                Synthesis method (click to add)
+              </button>
+              <input type="hidden" id="with-synthesis-details" name="with-synthesis-details"
+                     value="false">
+              <div class="collapse" id="synthesis-body">
+                <div class="card-body card-add-data">
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      {% include 'materials/input_field.html' with field=form.starting_materials %}
+                    </div>
+                    <div class="form-group col-md-6">
+                      {% include 'materials/input_field.html' with field=form.product %}
+                    </div>
+                  </div>
+                  {% include 'materials/input_field.html' with field=form.synthesis_description %}
+                  {% include 'materials/input_field.html' with field=form.synthesis_comment %}
+                </div>
+              </div>
+            </div>
+
+            <br>
+
+            <!-- EXPERIMENTAL DETAILS -->
+            <div class="card card-item">
+              <button class="btn text-left" data-toggle="collapse" type="button"
+                      id="experimental-button" data-target="#experimental-body"
+                      style="background:#dce9ff">
+                Experimental details (click to add)
+              </button>
+              <input type="hidden" id="with-experimental-details" name="with-experimental-details"
+                     value="false">
+              <div class="collapse" id="experimental-body">
+                <div class="card-body card-add-data">
+                  <label for="experimental-method">Method</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Short name of the method used, e.g., "X-ray diffraction".</span>
+                  </i>
+                  <input class="form-control" id="experimental-method" name="experimental-method"
+                         type="text">
+                  <label for="experimental-description">Description</label>
+                  <i class="fa fa-question-circle tooltip-container">
+                    <span class="tooltiptext">Describe all experimental steps here.</span>
+                  </i>
+                  <textarea class="form-control" id="experimental-description"
+                            name="experimental-description" rows="3"></textarea>
+                  {% include 'materials/input_field.html' with field=form.experimental_comment %}
+                </div>
+              </div>
+            </div>
+
+            <br>
+
+            <!-- COMPUTATIONAL DETAILS -->
+            <div class="card card-item">
+              <button class="btn text-left" data-toggle="collapse" type="button"
+                      id="computational-button" data-target="#computational-body"
+                      style="background:#dce9ff">
+                Computational details (click to add)
+              </button>
+              <input type="hidden" id="with-computational-details" name="with-computational-details"
+                     value="false">
+              <div class="collapse" id="computational-body">
+                <div class="card-body card-add-data">
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="code-name">Code</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">Name of the code(s) used for calculations. It is recommended to also include other identifiers such as version number, branch name, or even the commit number if applicable.</span>
+                      </i>
+                      <input class="form-control" id="code-name" name="code-name" type="text"
+                             placeholder="Abinit, Quantum espresso..">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="level-of-theory">Level of theory</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">yet to come...</span>
+                      </i>
+                      <input class="form-control" id="level-of-theory"
+                             name="level-of-theory" type="text"
+                             placeholder="DFT, Hartree-Fock, tight-binding, empirical model..">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="xc-functional">Exchange-correlation functional</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">yet to come...</span>
+                      </i>
+                      <input class="form-control" id="xc-functional" name="xc-functional" type="text"
+                             placeholder="PBE, PW91..">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="k-grid">K-point grid</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">yet to come...</span>
+                      </i>
+                      <input class="form-control" id="k-grid" name="k-grid" type="text"
+                             placeholder="3x3x3, 4x5x4 (Monkhorst-Pack)..">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="relativity-level">Level of relativity</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">Specify the level of relativity. Note that this also includes the description of spin-orbit coupling!</span>
+                      </i>
+                      <input class="form-control" id="relativity-level" name="relativity-level"
+                             type="text" placeholder="non-relativistic, atomic ZORA with SOC, Koelling-Harmon..">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="basis-sets">Basis set definition</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">yet to come...</span>
+                      </i>
+                      <input class="form-control" id="basis-sets" name="basis-sets" type="text"
+                             placeholder="JTH PAW, TM PP with semicore..">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="numerical-accuracy">Numerical accuracy</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">Include all parameters here that describe the accuracy of the calculation (tolerance parameters for an SCF cycle, quality of integration grids, number of excited states included, ...).</span>
+                      </i>
+                      <input class="form-control" id="numerical-accuracy" name="numerical-accuracy"
+                             type="text"
+                             placeholder="SCF tol. 1 meV/atom, Lebedev grids for angular integration..">
+                    </div>
+                  </div>
+                  {% include 'materials/input_field.html' with field=form.computational_comment %}
+                </div>
+              </div>
+            </div>
+
+            <br>
+
+            <!-- DATA -->
+            <div class="card card-item">
+              <div class="card-header">
+                Data series #1
+              </div>
+              <div class="card-body card-add-data">
+                <div class="row">
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <label for="dataseries-label">Data series label:</label>
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">Description of the data series (optional). If this is the only series in the set (e.g., the only curve in a figure), providing just the data set label is probably sufficient.</span>
+                      </i>
+                      <input class="form-control" id="dataseries-label" name="dataseries-label">
+                    </div>
+                    <div id="fixed-properties">
+                    </div>
+                    <button type="button" id="add-fixed-property" class="btn btn-info">
+                      Add fixed property
+                    </button>
+                    <i class="fa fa-question-circle fa-2x tooltip-container">
+                      <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
+                    </i>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="main-data">Values
+                      <i class="fa fa-question-circle tooltip-container">
+                        <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
+                      </i>
+                    </label>
+                    <div class="float-right">
+                      <input type="file" id="input-data-files" name="input-data-files"
+                             class="inputfile" multiple>
+                      <label for="input-data-files"><i class="fa fa-upload" aria-hidden="true"></i>
+                        Import from file..</label>
+                    </div>
+                    <textarea class="form-control" id="main-data" name="main-data"
+                              placeholder="value_1 value_2 ..." style="height:80%"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <br>
+
+            <!-- ADDITIONAL DATA -->
+            <div class="card card-item">
+              <div class="card-header">
+                Additional data
+              </div>
+              <div class="card-body card-add-data">
+                <label for="uploaded-files">Upload files</label>
                 <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select whether the origin of data is experimental or theoretical.</span>
+                  <span class="tooltiptext">Upload files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...). Multiple files can be selected here.</span>
                 </i>
-              </legend>
-              <div class="form-check form-check-inline" style="margin-left:-20px">
-                <input class="form-check-input" type="radio" id="is-experimental"
-                       name="is-experimental" value="true" checked>
-                <label class="form-check-label" for="is-experimental">Experimental</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="is-theoretical"
-                       name="is-experimental" value="false" >
-                <label class="form-check-label" for="is-theoretical">Theoretical</label>
+                <input type="file" id="uploaded-files" name="uploaded-files" multiple>
               </div>
             </div>
-            <div class="row">
-              <legend class="col-form-label col-sm-4">Dimensionality of the system:
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select the dimensionality of the system.</span>
-                </i>
-              </legend>
-              <div class="form-check form-check-inline" style="margin-left:-75px">
-                <input class="form-check-input" type="radio" id="is-3d-system"
-                       name="is-3d-system" value="true" checked>
-                <label class="form-check-label" for="is-3d-system">3D</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="is-2d-system"
-                       name="is-3d-system" value="false">
-                <label class="form-check-label" for="is-2d-system">2D</label>
-              </div>
+
+            <br>
+
+            <div class="float-right">
+              <button type="submit" name="submit-results" class="btn btn-primary">
+                Submit
+              </button>
             </div>
-            <div class="row">
-              <legend class="col-form-label col-sm-2">Sample type:
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select the type of the sample.</span>
-                </i>
-              </legend>
-              {% for type in sample_types %}
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" id="is-{{ type.1 }}"
-                         name="sample-type" value="{{ type.0 }}"
-                         {% if forloop.first %}checked{% endif %}
-                         {% if forloop.first %}style="margin-left:-30px"{% endif %}>
-                  <label class="form-check-label" for="is-{{ type.1 }}">{{ type.1|capfirst }}</label>
+
+          </form>
+          <!-- to be copied -->
+          <div class="form-row fixed-property-template d-none">
+            <div class="col-md-4 mb-3">
+              <label for="fixed-property">Property</label>
+              <select class="form-control" id="fixed-property" name="fixed-property">
+                {% for property in properties %}
+                  <option>{{ property.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="fixed-unit">Unit</label>
+              <select class="form-control" id="fixed-unit" name="fixed-unit">
+                {% for unit in units %}
+                  <option>{{ unit.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="fixed-value">Fixed value</label>
+              <div class="input-group">
+                <input class="form-control" id="fixed-value" name="fixed-value" type="text"
+                       maxlength="20" required>
+                <div class="input-group-append">
+                  <button class="close-fixed-property btn btn-danger fa fa-times"
+                          type="button" ></button>
                 </div>
-              {% endfor %}
-            </div>
-            <div class="row">
-              <legend class="col-form-label col-sm-2">Crystal system:
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Select the crystal system.</span>
-                </i>
-              </legend>
-              {% for sys in crystal_systems %}
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" id="is-{{ sys.1 }}"
-                         name="crystal-system" value="{{ sys.0 }}"
-                         {% if forloop.first %}checked{% endif %}
-                         {% if forloop.first %}style="margin-left:-15px"{% endif %}>
-                  <label class="form-check-label" for="is-{{ sys.1 }}">{{ sys.1|capfirst }}</label>
-                </div>
-              {% endfor %}
-            </div>
-            <div class="form row">
-              <div class="col-md-3 col-form-label">
-                {{ form.extraction_method.label_tag }}
-                {{ form.extraction_method.help_text|tooltip }}
-              </div>
-              <div class="col-md-9">
-                {{ form.extraction_method }}
               </div>
             </div>
           </div>
+          <!-- end copy -->
         </div>
-
-        <br>
-
-        <!-- SYNTHESIS METHOD -->
-        <div class="card card-item">
-          <button class="btn text-left" data-toggle="collapse" type="button"
-                  id="synthesis-button" data-target="#synthesis-body"
-                  style="background:#dce9ff">
-            Synthesis method (click to add)
-          </button>
-          <input type="hidden" id="with-synthesis-details" name="with-synthesis-details"
-                 value="false">
-          <div class="collapse" id="synthesis-body">
-            <div class="card-body card-add-data">
-              <div class="form-row">
-                <div class="form-group col-md-6">
-                  {% include 'materials/input_field.html' with field=form.starting_materials %}
-                </div>
-                <div class="form-group col-md-6">
-                  {% include 'materials/input_field.html' with field=form.product %}
-                </div>
-              </div>
-              {% include 'materials/input_field.html' with field=form.synthesis_description %}
-              {% include 'materials/input_field.html' with field=form.synthesis_comment %}
-            </div>
+        <!-- ADD NEW PROPERTY -->
+        <div class="tab-pane" id="properties" role="tabpanel">
+          <br>
+          <form method="post" action="{% url 'materials:add_property' %}">
+            {% csrf_token %}
+            <label for="property-name">Property name: </label>
+            <input id="property-name" name="property-name" type="text" required>
+            <br>
+            <button type="submit" name="submit-property" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+        <!-- ADD NEW UNIT -->
+        <div class="tab-pane" id="units" role="tabpanel">
+          <br>
+          <form method="post" action="{% url 'materials:add_unit' %}">
+            {% csrf_token %}
+            <label for="unit-label">Unit label: </label>
+            <input id="unit-label" name="unit-label" type="text" required>
+            <br>
+            <button type="submit" name="submit-unit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+        <!-- UNSORTED -->
+        <div class="tab-pane" id="unsorted" role="tabpanel">
+          <br>
+          <div style="padding-bottom: 10px">
+            <label for="list">Select the type of data you wish to add:</label>
+          </div>
+          <div id="list" class="list-group">
+            <a href="{% url 'materials:add_a_pos'%}" class="list-group-item list-group-item-action">
+              Atomic Positions
+            </a>
+            <a href="{% url 'materials:add_synthesis'%}" class="list-group-item list-group-item-action">
+              Synthesis Method
+            </a>
+            <a href="{% url 'materials:add_exciton_emission'%}" class="list-group-item list-group-item-action">
+              Photoluminescence Data
+            </a>
+            <a href="{% url 'materials:add_band_structure'%}" class="list-group-item list-group-item-action">
+              Band Structure and/or Band Gap
+            </a>
+            <a href="{% url 'materials:add_material_property'%}" class="list-group-item list-group-item-action">
+              Other Material Property
+            </a>
+          </div>
+          <div style="padding-bottom:10px;padding-top:10px">
+            <label for="other-list">Other options:</label>
+          </div>
+          <div id="other-list" class="list-group">
+            <a href="{% url 'materials:add_publication'%}" class="list-group-item list-group-item-action">
+              Add Publication
+            </a>
+            <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
+              Add System
+            </a>
           </div>
         </div>
-
-        <br>
-
-        <!-- EXPERIMENTAL DETAILS -->
-        <div class="card card-item">
-          <button class="btn text-left" data-toggle="collapse" type="button"
-                  id="experimental-button" data-target="#experimental-body"
-                  style="background:#dce9ff">
-            Experimental details (click to add)
-          </button>
-          <input type="hidden" id="with-experimental-details" name="with-experimental-details"
-                 value="false">
-          <div class="collapse" id="experimental-body">
-            <div class="card-body card-add-data">
-              <label for="experimental-method">Method</label>
-              <i class="fa fa-question-circle tooltip-container">
-                <span class="tooltiptext">Short name of the method used, e.g., "X-ray diffraction".</span>
-              </i>
-              <input class="form-control" id="experimental-method" name="experimental-method"
-                     type="text">
-              <label for="experimental-description">Description</label>
-              <i class="fa fa-question-circle tooltip-container">
-                <span class="tooltiptext">Describe all experimental steps here.</span>
-              </i>
-              <textarea class="form-control" id="experimental-description"
-                        name="experimental-description" rows="3"></textarea>
-              {% include 'materials/input_field.html' with field=form.experimental_comment %}
-            </div>
-          </div>
-        </div>
-
-        <br>
-
-        <!-- COMPUTATIONAL DETAILS -->
-        <div class="card card-item">
-          <button class="btn text-left" data-toggle="collapse" type="button"
-                  id="computational-button" data-target="#computational-body"
-                  style="background:#dce9ff">
-            Computational details (click to add)
-          </button>
-          <input type="hidden" id="with-computational-details" name="with-computational-details"
-                 value="false">
-          <div class="collapse" id="computational-body">
-            <div class="card-body card-add-data">
-              <div class="form-row">
-                <div class="form-group col-md-6">
-                  <label for="code-name">Code</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Name of the code(s) used for calculations. It is recommended to also include other identifiers such as version number, branch name, or even the commit number if applicable.</span>
-                  </i>
-                  <input class="form-control" id="code-name" name="code-name" type="text"
-                         placeholder="Abinit, Quantum espresso..">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="level-of-theory">Level of theory</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">yet to come...</span>
-                  </i>
-                  <input class="form-control" id="level-of-theory"
-                         name="level-of-theory" type="text"
-                         placeholder="DFT, Hartree-Fock, tight-binding, empirical model..">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="xc-functional">Exchange-correlation functional</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">yet to come...</span>
-                  </i>
-                  <input class="form-control" id="xc-functional" name="xc-functional" type="text"
-                         placeholder="PBE, PW91..">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="k-grid">K-point grid</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">yet to come...</span>
-                  </i>
-                  <input class="form-control" id="k-grid" name="k-grid" type="text"
-                         placeholder="3x3x3, 4x5x4 (Monkhorst-Pack)..">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="relativity-level">Level of relativity</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Specify the level of relativity. Note that this also includes the description of spin-orbit coupling!</span>
-                  </i>
-                  <input class="form-control" id="relativity-level" name="relativity-level"
-                         type="text" placeholder="non-relativistic, atomic ZORA with SOC, Koelling-Harmon..">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="basis-sets">Basis set definition</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">yet to come...</span>
-                  </i>
-                  <input class="form-control" id="basis-sets" name="basis-sets" type="text"
-                         placeholder="JTH PAW, TM PP with semicore..">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="numerical-accuracy">Numerical accuracy</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Include all parameters here that describe the accuracy of the calculation (tolerance parameters for an SCF cycle, quality of integration grids, number of excited states included, ...).</span>
-                  </i>
-                  <input class="form-control" id="numerical-accuracy" name="numerical-accuracy"
-                         type="text"
-                         placeholder="SCF tol. 1 meV/atom, Lebedev grids for angular integration..">
-                </div>
-              </div>
-              {% include 'materials/input_field.html' with field=form.computational_comment %}
-            </div>
-          </div>
-        </div>
-
-        <br>
-
-        <!-- DATA -->
-        <div class="card card-item">
-          <div class="card-header">
-            Data series #1
-          </div>
-          <div class="card-body card-add-data">
-            <div class="row">
-              <div class="col-md-8">
-                <div class="form-group">
-                  <label for="dataseries-label">Data series label:</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Description of the data series (optional). If this is the only series in the set (e.g., the only curve in a figure), providing just the data set label is probably sufficient.</span>
-                  </i>
-                  <input class="form-control" id="dataseries-label" name="dataseries-label">
-                </div>
-                <div id="fixed-properties">
-                </div>
-                <button type="button" id="add-fixed-property" class="btn btn-info">
-                  Add fixed property
-                </button>
-                <i class="fa fa-question-circle fa-2x tooltip-container">
-                  <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
-                </i>
-              </div>
-              <div class="col-md-4">
-                <label for="main-data">Values
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
-                  </i>
-                </label>
-                <div class="float-right">
-                  <input type="file" id="input-data-files" name="input-data-files"
-                         class="inputfile" multiple>
-                  <label for="input-data-files"><i class="fa fa-upload" aria-hidden="true"></i>
-                    Import from file..</label>
-                </div>
-                <textarea class="form-control" id="main-data" name="main-data"
-                          placeholder="value_1 value_2 ..." style="height:80%"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <br>
-
-        <!-- ADDITIONAL DATA -->
-        <div class="card card-item">
-          <div class="card-header">
-            Additional data
-          </div>
-          <div class="card-body card-add-data">
-            <label for="uploaded-files">Upload files</label>
-            <i class="fa fa-question-circle tooltip-container">
-              <span class="tooltiptext">Upload files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...). Multiple files can be selected here.</span>
-            </i>
-            <input type="file" id="uploaded-files" name="uploaded-files" multiple>
-          </div>
-        </div>
-
-        <br>
-
-        <div class="float-right">
-          <button type="submit" name="submit-results" class="btn btn-primary">
-            Submit
-          </button>
-        </div>
-
-      </form>
-      <!-- to be copied -->
-      <div class="form-row fixed-property-template d-none">
-        <div class="col-md-4 mb-3">
-          <label for="fixed-property">Property</label>
-          <select class="form-control" id="fixed-property" name="fixed-property">
-            {% for property in properties %}
-              <option>{{ property.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-4 mb-3">
-          <label for="fixed-unit">Unit</label>
-          <select class="form-control" id="fixed-unit" name="fixed-unit">
-            {% for unit in units %}
-              <option>{{ unit.label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-4 mb-3">
-          <label for="fixed-value">Fixed value</label>
-          <div class="input-group">
-            <input class="form-control" id="fixed-value" name="fixed-value" type="text"
-                   maxlength="20" required>
-            <div class="input-group-append">
-              <button class="close-fixed-property btn btn-danger fa fa-times"
-                      type="button" ></button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- end copy -->
-    </div>
-    <!-- ADD NEW PROPERTY -->
-    <div class="tab-pane" id="properties" role="tabpanel">
-      <br>
-      <form method="post" action="{% url 'materials:add_property' %}">
-        {% csrf_token %}
-        <label for="property-name">Property name: </label>
-        <input id="property-name" name="property-name" type="text" required>
-        <br>
-        <button type="submit" name="submit-property" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-    <!-- ADD NEW UNIT -->
-    <div class="tab-pane" id="units" role="tabpanel">
-      <br>
-      <form method="post" action="{% url 'materials:add_unit' %}">
-        {% csrf_token %}
-        <label for="unit-label">Unit label: </label>
-        <input id="unit-label" name="unit-label" type="text" required>
-        <br>
-        <button type="submit" name="submit-unit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-    <!-- UNSORTED -->
-    <div class="tab-pane" id="unsorted" role="tabpanel">
-      <br>
-      <div style="padding-bottom: 10px">
-        <label for="list">Select the type of data you wish to add:</label>
-      </div>
-      <div id="list" class="list-group">
-        <a href="{% url 'materials:add_a_pos'%}" class="list-group-item list-group-item-action">
-          Atomic Positions
-        </a>
-        <a href="{% url 'materials:add_synthesis'%}" class="list-group-item list-group-item-action">
-          Synthesis Method
-        </a>
-        <a href="{% url 'materials:add_exciton_emission'%}" class="list-group-item list-group-item-action">
-          Photoluminescence Data
-        </a>
-        <a href="{% url 'materials:add_band_structure'%}" class="list-group-item list-group-item-action">
-          Band Structure and/or Band Gap
-        </a>
-        <a href="{% url 'materials:add_material_property'%}" class="list-group-item list-group-item-action">
-          Other Material Property
-        </a>
-      </div>
-      <div style="padding-bottom:10px;padding-top:10px">
-        <label for="other-list">Other options:</label>
-      </div>
-      <div id="other-list" class="list-group">
-        <a href="{% url 'materials:add_publication'%}" class="list-group-item list-group-item-action">
-          Add Publication
-        </a>
-        <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
-          Add System
-        </a>
       </div>
     </div>
   </div>

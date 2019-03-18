@@ -1,4 +1,4 @@
-<a href="{% url 'materials:toggle_plotted' system_pk=object.pk dataset_pk=dataset.pk %}">
+<a href="{% url 'materials:toggle_plotted' system_pk=system.pk dataset_pk=dataset.pk %}">
   <button type="button" class="btn btn-success">
     {% if dataset.plotted %}
       Show table
@@ -7,7 +7,7 @@
     {% endif %}
   </button>
 </a>
-<a href="{% url 'materials:publish_system' system_pk=object.pk dataset_pk=dataset.pk %}">
+<a href="{% url 'materials:publish_system' system_pk=system.pk dataset_pk=dataset.pk %}">
   <button type="button" class="btn btn-success">
     {% if dataset.visible %}
       Unpublish
@@ -17,7 +17,7 @@
   </button>
 </a>
 <button data-reverse-url=
-        "{% url 'materials:delete_dataset' system_pk=object.pk dataset_pk=dataset.pk %}"
+        "{% url 'materials:delete_dataset' system_pk=system.pk dataset_pk=dataset.pk %}"
         type="button" class="btn btn-danger delete_button">
   Delete
 </button>

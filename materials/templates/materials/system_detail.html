@@ -1,4 +1,8 @@
-{% extends 'materials/nav.html' %}
+<!--
+     List of data sets for a specific material.
+     Only the representative data sets corresponding to each property are shown.
+-->
+{% extends 'materials/base.html' %}
 
 {% block body %}
   {% load static %}
@@ -383,24 +387,13 @@
                       {% endif %}
                     </h5>
                     {% if user == dataset.created_by %}
-                      {% include 'materials/dataset_buttons.html' %}
+                      {% include 'materials/dataset_buttons.html' with system=object %}
                     {% endif %}
                   </div>
                   {% if not dataset.visible %}
                     </div>
                   {% endif %}
-                  <div class="card-body">
-                    {% include 'materials/dataset_main_data.html' %}
-                    {% include 'materials/dataset_system_description.html' %}
-                    {% include 'materials/dataset_fixed_parameters.html' %}
-                    {% include 'materials/dataset_synthesis_method.html' %}
-                    {% include 'materials/dataset_experimental_details.html' %}
-                    {% include 'materials/dataset_computational_details.html' %}
-                    {% include 'materials/dataset_reference.html' %}
-                    {% include 'materials/dataset_uploaded_files.html' %}
-                    {% include 'materials/dataset_meta.html' %}
-                    {% include 'materials/dataset_all_entries.html' %}
-                    <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
+                  {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
                   </div>
                 </div>
                 <br>
@@ -408,7 +401,6 @@
             {% endif %}
           {% endif %}
         {% endfor %}
-
         {% include "materials/license_note.html" %}
       </div>
     </div>
@@ -443,42 +435,5 @@
      });
     </script>
   {% endwith %}
-  <script src="{% static 'materials/javascript/plot_data.js' %}"></script>
-  <script>
-   {% for dataset in object.dataset_set.all %}
-   if (document.getElementById('figure_{{ dataset.pk }}')) {
-     {% with series=dataset.dataseries_set.all|first %}
-     data = [
-       {% for datapoint in series.datapoint_set.all %}
-       {x: {{ datapoint.numericalvalue_set.all.0.value }},
-        y: {{ datapoint.numericalvalue_set.all.1.value|default:0 }}},
-       {% endfor %}
-     ];
-     plot_data('figure_{{ dataset.pk }}', data,
-               '{{ dataset.secondary_property }}',
-               '{{ dataset.secondary_unit }}',
-               '{{ dataset.primary_property }}',
-               '{{ dataset.primary_unit }}',
-               '{{ series.label }}')
-     {% endwith %}
-   }
-   {% endfor %}
-  </script>
-  <script>
-   $('.delete_button').click(function() {
-     if (confirm('Are you sure you want to remove this data set from the database?')) {
-       window.open($(this).attr('data-reverse-url'), '_top');
-     }
-   });
-  </script>
-  <script>
-   /* Change "click to expand" to "click to hide" and vice versa */
-   $('.expand-hide-button').click(function() {
-     if ($(this).html().includes('expand)')) {
-       $(this).html($(this).html().split('expand)')[0] + 'hide)');
-     } else {
-       $(this).html($(this).html().split('hide)')[0] + 'expand)');
-     }
-   });
-  </script>
+  {% include 'materials/dataset_scripts.html' with datasets=object.dataset_set.all %}
 {% endblock %}
