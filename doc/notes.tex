@@ -385,4 +385,28 @@ All user information is stored in the \texttt{UserProfile} table.
   \end{itemize}
 \end{tcolorbox}
 
+\section{Coding rules}
+
+If you are unsure about any rule described in this section, see the source code for examples and clarification.
+
+\subsection{Python}
+
+\begin{itemize}
+\item This project follows the PEP 8 style guide. Use a text editor that highlights parts of the code that do not conform to PEP 8 or use an external tool for that. One such tool is flake8 (\texttt{pip install flake8}). You can test your code by running \texttt{flake8 file.py}.
+\end{itemize}
+
+\subsection{Imports}
+
+\begin{itemize}
+\item Group imports as follows: standard system libraries, Django libraries, local libraries. Separate the groups by blank lines.
+\item Within a group, sort the imports alphabetically. This also means that ``from \ldots'' should come before ``import \ldots''.
+\item Do not import multiple things on one line. For example, ``import os, sys'' should be split into two imports.
+\end{itemize}
+
+\subsection{Template tags}
+
+\begin{itemize}
+\item Leave one space around the opening and closing symbols of a construct (e.g., \verb+{{+, \verb+%}+, \ldots).
+\end{itemize}
+
 \end{document}
