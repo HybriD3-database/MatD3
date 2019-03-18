@@ -1332,7 +1332,8 @@ def submit_data(request):
     if dataset.primary_property and dataset.secondary_property:
         input_lines = request.POST['main-data'].split('\n')
         for line in input_lines:
-            if line.startswith('#') or not line:
+            print('this line', line)
+            if line.startswith('#') or not line or line == '\r':
                 continue
             x_value, y_value = line.split()
             datapoint = models.Datapoint(dataseries=dataseries)
