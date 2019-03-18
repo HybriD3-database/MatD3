@@ -1,20 +1,21 @@
-{% extends 'materials/template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-<h4>Update System: {{object.compound_name}}</h4>
-{% endblock %}
-
-
-{% block mainbody %}
-
-{% if user.is_superuser %}
-<form id="update-system" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-default">Save</button>
-</form>
-{% else %}
-You do not have the permissions to view this page.
-{% endif %}
-
+{% block body %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Update System: {{object.compound_name}}</h4>
+    </div>
+    <div class="card-body">
+      {% if user.is_superuser %}
+        <form id="update-system" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+      {% else %}
+        You do not have the permissions to view this page.
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

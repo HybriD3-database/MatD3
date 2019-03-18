@@ -1,27 +1,77 @@
-{% extends 'materials/add_entry_template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-  <h4>Add Band Structure</h4>
-{% endblock %}
 {% load static %}
 
-{% block form %}
-  <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
-    {% csrf_token %}
-    <div id="publication-search-result">
+{% block body %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Add Band Structure</h4>
     </div>
-    <div id="system-search-result">
+    <div class="card-body">
+      <form id="search-publication" method="post" action="{% url 'materials:search_publication' %}">
+        {% csrf_token %}
+        <label for="id_search_text">Search term:</label>
+        <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
+               placeholder="Search by publication title, journal name, or full name of author." required>
+        <p>
+          <button type="submit" class="btn btn-info">Search for publication</button>
+        </p>
+      </form>
+      <form id="search-system" name="search-system" method="post" action="{% url 'materials:search_system' %}">
+        {% csrf_token %}
+        <label for="id_search_text">Search term:</label>
+        <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
+               placeholder="Search by compound name or formula." required>
+        <p>
+          <button type="submit" class="btn btn-info">Search for system</button>
+        </p>
+      </form>
+
+      <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
+        {% csrf_token %}
+        <div id="publication-search-result">
+        </div>
+        <div id="system-search-result">
+        </div>
+        {{ band_structure_form.as_p }}
+        <p class="alert alert-info">
+          Please refer to the HybriD³ Band Structure description for file specifications:
+          <a class="alert-link" href="{% static 'materials/file_templates/band_structure_description.pdf'%}">Download Band Structure description</a>
+        </p>
+        <button type="submit" class="btn btn-primary">Submit new band structure</button>
+      </form>
+
+      <div id="feedback">
+      </div>
     </div>
-    {{ band_structure_form.as_p }}
-    <p class="alert alert-info">
-      Please refer to the HybriD³ Band Structure description for file specifications:
-      <a class="alert-link" href="{% static 'materials/file_templates/band_structure_description.pdf'%}">Download Band Structure description</a>
-    </p>
-    <button type="submit" class="btn btn-primary">Submit new band structure</button>
-  </form>
+  </div>
 {% endblock %}
 
-{% block ajaxscript %}
+{% block script %}
+  {% load static %}
+  <script type="text/javascript">
+   var params = [
+     {
+       name: "related_synthesis",
+       value: "{{ related_synthesis }}"
+     }
+   ];
+   $('#search-system').submit(function () {
+     $(this).append($.map(params, function (param) {
+       return   $('<input>', {
+         type: 'hidden',
+         name: param.name,
+         value: param.value
+       })
+     }))
+   });
+  </script>
+  <script src="{% static 'materials/javascript/ajax_form_submit.js' %}"></script>
+  <script type="text/javascript">
+   ajax_submit($('#search-publication'), $('#publication-search-result'));
+   ajax_submit($('#search-system'), $('#system-search-result'));
+  </script>
   <script type="text/javascript">
    alert_submit($('#add-band-structure'), $('#feedback'));
   </script>

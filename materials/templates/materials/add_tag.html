@@ -1,17 +1,21 @@
-{% extends 'materials/template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-  <h4>Add Tag</h4>
-{% endblock %}
-
-{% block mainbody %}
-  <form id="add-tag" method="post" action="/materials/add-tag">
-    {% csrf_token %}
-    {{ input_form.as_p }}
-    <button type="submit" class="btn btn-default">Add new tag</button>
-  </form>
-  {{ text }}
-  <div id="results">
+{% block body %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Add Tag</h4>
+    </div>
+    <div class="card-body">
+      <form id="add-tag" method="post" action="/materials/add-tag">
+        {% csrf_token %}
+        {{ input_form.as_p }}
+        <button type="submit" class="btn btn-default">Add new tag</button>
+      </form>
+      {{ text }}
+      <div id="results">
+      </div>
+    </div>
   </div>
 {% endblock %}
 

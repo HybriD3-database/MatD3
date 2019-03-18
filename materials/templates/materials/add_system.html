@@ -1,20 +1,24 @@
-{% extends 'materials/template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-  <h4>Add System</h4>
-{% endblock %}
-
-{% block mainbody %}
-  <form id="add-system" method="post" action="/materials/add-system">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="alert alert-warning" role="alert">
-      Can't find a tag?
-      <a class="alert-link" target="_blank" href="{% url 'materials:add_tag' %}">click here to add a tag</a>.
+{% block body %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Add System</h4>
     </div>
-    <button type="submit" class="btn btn-primary">Add new system</button>
-  </form>
-  <div id="results">
+    <div class="card-body">
+      <form id="add-system" method="post" action="/materials/add-system">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="alert alert-warning" role="alert">
+          Can't find a tag?
+          <a class="alert-link" target="_blank" href="{% url 'materials:add_tag' %}">click here to add a tag</a>.
+        </div>
+        <button type="submit" class="btn btn-primary">Add new system</button>
+      </form>
+      <div id="results">
+      </div>
+    </div>
   </div>
 {% endblock %}
 

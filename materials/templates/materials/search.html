@@ -1,35 +1,39 @@
-{% extends 'materials/template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-  <h5>Search for Materials</h5>
-{% endblock %}
-
-{% block mainbody %}
-  <form id="search-system" method="post">
-    {% csrf_token %}
-    <div class="form-group">
-      <label for="search_text">Search term: </label>
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <select id="search_term" name="search_term" class="selectpicker">
-            {% for search_term in search_terms %}
-              <option value="{{ search_term.0 }}">{{ search_term.1 }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <input id="search_text" class="form-control" type="text" name="search_text" required/>
-        <div class="input-group-append">
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-      </div>
-    </div>
-  </form>
-  <div class="alert alert-info" id="explanatory_text">
-    Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
-  </div>
+{% block body %}
   <br>
-  <ul id="results" class="list-group">
-  </ul>
+  <div class="card card-default">
+    <div class="card-header">
+      <h5>Search for Materials</h5>
+    </div>
+    <div class="card-body">
+      <form id="search-system" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="search_text">Search term: </label>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <select id="search_term" name="search_term" class="selectpicker">
+                {% for search_term in search_terms %}
+                  <option value="{{ search_term.0 }}">{{ search_term.1 }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <input id="search_text" class="form-control" type="text" name="search_text" required/>
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="alert alert-info" id="explanatory_text">
+        Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
+      </div>
+      <br>
+      <ul id="results" class="list-group">
+      </ul>
+    </div>
+  </div>
 {% endblock %}
 
 {% block script %}

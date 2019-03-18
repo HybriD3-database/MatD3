@@ -1,26 +1,29 @@
-{% extends 'materials/template.html' %}
+{% extends 'materials/base.html' %}
 
-{% block heading %}
-<h4>Heading Goes Here</h4>
-{% endblock %}
-
-{% block mainbody %}
-{% if object.contributor.user.get_username == user.username %}
-<form id="update-entry" method="post">
-    {% csrf_token %}
-    <div style="padding-bottom: 10px">
-      <label for="publication">Publication:</label>
-      <input type="text" name="publication" class="form-control" value="{{object.publication}}" readonly>
+{% block body %}
+  <br>
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Heading Goes Here</h4>
     </div>
-    {% block relatedEntries %}
-    {% endblock %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save</button>
-    {% block delete %}
-    {% endblock %}
-</form>
-{% else %}
-You must be the author of this entry to edit it. Please sign in.
-{% endif %}
-
+    <div class="card-body">
+      {% if object.contributor.user.get_username == user.username %}
+        <form id="update-entry" method="post">
+          {% csrf_token %}
+          <div style="padding-bottom: 10px">
+            <label for="publication">Publication:</label>
+            <input type="text" name="publication" class="form-control" value="{{object.publication}}" readonly>
+          </div>
+          {% block relatedEntries %}
+          {% endblock %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-success">Save</button>
+          {% block delete %}
+          {% endblock %}
+        </form>
+      {% else %}
+        You must be the author of this entry to edit it. Please sign in.
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}
