@@ -1428,7 +1428,7 @@ def toggle_dataset_plotted(request, system_pk, dataset_pk):
 
 
 def download_dataset_files(request, pk):
-    loc = os.path.join(settings.MEDIA_ROOT, f'input_data/dataset_{pk}')
+    loc = os.path.join(settings.MEDIA_ROOT, f'uploads/dataset_{pk}')
     files = os.listdir(loc)
     file_full_paths = [os.path.join(loc, f) for f in files]
     zip_dir = 'files'
@@ -1723,9 +1723,10 @@ def publication_data(request, pk):
             chart['properties'].append(dataset.primary_property.name)
         loc = os.path.join(settings.MEDIA_ROOT,
                            f'uploads/dataset_{dataset.pk}')
-        for file_ in os.listdir(loc):
-            chart['files'].append(settings.MEDIA_URL +
-                                  f'uploads/dataset_{dataset.pk}/{file_}')
+        if os.path.isdir(loc):
+            for file_ in os.listdir(loc):
+                chart['files'].append(settings.MEDIA_URL +
+                                      f'uploads/dataset_{dataset.pk}/{file_}')
         data['charts'].append(chart)
         dataset_counter += 1
     return JsonResponse(data)

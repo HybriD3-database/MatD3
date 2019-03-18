@@ -394,19 +394,23 @@ class Dataset(Base):
     representative = models.BooleanField(default=False)
 
     def delete(self, *args, **kwargs):
-        """Additionally remove any files uploaded by the user."""
+        """Additionally emove any files uploaded by the user."""
         if self.has_files:
             loc = os.path.join(settings.MEDIA_ROOT,
                                f'uploads/dataset_{self.pk}')
-            for file_ in os.listdir(loc):
-                logger.info(f'deleting input_files/dataset_{self.pk}/{file_}')
-            shutil.rmtree(loc)
+            if os.path.isdir(loc):
+                for file_ in os.listdir(loc):
+                    logger.info(
+                        f'deleting input_files/dataset_{self.pk}/{file_}')
+                shutil.rmtree(loc)
         if self.primary_property and self.primary_property.require_input_files:
             loc = os.path.join(settings.MEDIA_ROOT,
                                f'input_files/dataset_{self.pk}')
-            for file_ in os.listdir(loc):
-                logger.info(f'deleting input_files/dataset_{self.pk}/{file_}')
-            shutil.rmtree(loc)
+            if os.path.isdir(loc):
+                for file_ in os.listdir(loc):
+                    logger.info(
+                        f'deleting input_files/dataset_{self.pk}/{file_}')
+                shutil.rmtree(loc)
         super().delete(*args, **kwargs)
 
     def num_all_entries(self, *args, **kwargs):
