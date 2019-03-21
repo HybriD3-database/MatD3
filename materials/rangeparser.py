@@ -44,7 +44,7 @@ def parserange(rng):
             return 1
     else:
         # default inequality is '>'
-        print('Missing '&'')
+        print('Missing "&"')
         inequality = '>'
         if rng.find('<') != -1:
             inequality = '<'
