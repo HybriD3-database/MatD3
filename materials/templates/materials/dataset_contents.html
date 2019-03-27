@@ -1,8 +1,7 @@
 <!--
      Contents of class="card-body" corresponding to a data set. Not
-     all sections are included by default. That is, this file would
-     need to be included with the "with ..." syntax to include certain
-     parts.
+     all sections are included by default. This file would need to be
+     included with the "with ..." syntax to include certain parts.
 -->
 {% load materials_tags %}
 
@@ -249,7 +248,7 @@
   {% endif %}
 
   <!-- BUTTON FOR VIEWING ALL ENTRIES -->
-  {% if with_all_entries %}
+  {% if with_all_entries and dataset.primary_property.pk %}
     {% with dataset.num_all_entries as num %}
       {% if num > 1 %}
         <p class="text-center m-1">

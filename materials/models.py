@@ -78,7 +78,11 @@ class Publication(models.Model):
     doi_isbn = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.title
+        text = (f'{self.year} {"- " if self.year else ""} '
+                f'{self.getAuthorsAsString()} {self.journal} {self.vol} '
+                f'{"," if self.vol and self.pages_start else ""} '
+                f'{self.pages_start} "{self.title}"')
+        return text
 
     def getAuthorsAsString(self):
         names = ', '.join([f'{x.first_name[0]}. {x.last_name}' for
@@ -339,6 +343,10 @@ class Dataset(Base):
         (HEXAGONAL, 'hexagonal'),
         (CUBIC, 'cubic'),
     )
+    DIMENSIONALITIES = (
+        (3, 3),
+        (2, 2),
+    )
     label = models.TextField(max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     primary_property = models.ForeignKey(
@@ -357,7 +365,7 @@ class Dataset(Base):
     plotted = models.BooleanField()
     has_files = models.BooleanField()
     experimental = models.BooleanField()  # theoretical if false
-    dimensionality = models.PositiveSmallIntegerField(choices=((2, 2), (3, 3)))
+    dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
     extraction_method = models.CharField(max_length=100, null=True)

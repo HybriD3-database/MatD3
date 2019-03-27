@@ -45,7 +45,8 @@
         <!-- ADD NEW RESULTS -->
         <div class="tab-pane show active" id="results" role="tabpanel">
           <br>
-          <form method="post" action="{% url 'materials:submit_data' %}" enctype="multipart/form-data">
+          <form method="post" action="{% url 'materials:submit_data' %}"
+                enctype="multipart/form-data">
             {% csrf_token %}
             <!-- GENERAL -->
             <div class="card card-item">
@@ -53,173 +54,53 @@
                 General
               </div>
               <div class="card-body card-add-data">
-                <div class="form row">
-                  <div class="col-md-2 col-form-label">
-                    <label for="publication">Select publication</label>
-                    <i class="fa fa-question-circle tooltip-container" style="margin-right:-50px">
-                      <span class="tooltiptext">Select publication where the data to be inserted is published.</span>
-                    </i>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    {% include 'materials/input_field.html' with field=form.select_publication %}
                   </div>
-                  <div class="col-md-7 mb-3">
-                    <select name="publication" class="form-control" id="publication">
-                      {% for pub in publications %}
-                        <option value={{ pub.pk }}>
-                          {{ pub.year }}
-                          {% if pub.year %}-{% endif %}
-                          {{ pub.getAuthorsAsString }}
-                          {{ pub.journal }}
-                          <strong>{{ pub.vol }}</strong>{% if pub.vol and pub.pages_start %},{% endif %}
-                          {{ pub.pages_start }}
-                          {% if pub.title == "Unpublished" %}
-                            <i>unpublished</i>
-                          {% else %}
-                            "{{ pub.title }}"
-                          {% endif %}
-                        </option>
-                      {% endfor %}
+                  <div class="form-group col-md-6">
+                    {% include 'materials/input_field.html' with field=form.select_system %}
                     </select>
                   </div>
-                  <div class="col-md-3 mb-3">
-                    <input class="form-control" id="publication-search" type="text"
-                           placeholder="Search..">
+                  <div class="form-group col-md-6">
+                    {% include 'materials/input_field.html' with field=form.data_set_label %}
                   </div>
-                </div>
-                <div class="form row">
-                  <div class="col-md-2 col-form-label">
-                    <label for="system">Select system</label>
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Select the system that is associated with the inserted data.</span>
-                    </i>
+                  <div class="form-group col-md-6">
+                    {% include 'materials/input_field.html' with field=form.extraction_method %}
                   </div>
-                  <div class="col-md-7 mb-3">
-                    <select name="system" class="form-control" id="system">
-                      {% for sys in systems %}
-                        <option value={{ sys.pk }}>
-                          {{ sys }}
-                        </option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-3 mb-3">
-                    <input class="form-control" id="system-search" type="text" placeholder="Search..">
-                  </div>
-                </div>
-                <div class="form row">
-                  <div class="col-md-2 col-form-label">
-                    {{ form.data_set_label.label_tag }}
-                    {{ form.data_set_label.help_text|tooltip }}
-                  </div>
-                  <div class="col-md-10">
-                    {{ form.data_set_label }}
-                  </div>
-                </div>
-                <hr>
-                <!-- Properties and units -->
-                <div class="row">
-                  <div class="col-md-4">
+                  <div class="from-group col-md-4">
                     {% include 'materials/input_field.html' with field=form.primary_property %}
                   </div>
-                  <div class="col-md-2">
+                  <div class="from-group col-md-2">
                     {% include 'materials/input_field.html' with field=form.primary_unit %}
                   </div>
-                  <div class="col-md-4">
+                  <div class="from-group col-md-4">
                     {% include 'materials/input_field.html' with field=form.secondary_property %}
                   </div>
-                  <div class="col-md-2">
+                  <div class="from-group col-md-2">
                     {% include 'materials/input_field.html' with field=form.secondary_unit %}
                   </div>
                 </div>
                 <hr>
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" class="form-check-input" name="dataset-visible"
-                         id="dataset-visible" checked="checked">
-                  <label class="form-check-label" for="dataset-visible">Visible to public</label>
-                  <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
-                    <span class="tooltiptext">Choose whether the data should be initially visible on the website. If not, only you can view the data. This setting can be easily toggled later.</span>
-                  </i>
+                  {% include 'materials/input_field.html' with field=form.visible_to_public %}
                 </div>
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" class="form-check-input" name="dataset-plotted"
-                         id="dataset-plotted">
-                  <label class="form-check-label" for="dataset-plotted">Plotted</label>
-                  <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
-                    <span class="tooltiptext">Choose whether the data is more suitably presented as a figure or as a table. Especially for a large amount of data points, a figure ("plotted") might make more sense. This setting can be easily toggled later.</span>
-                  </i>
+                  {% include 'materials/input_field.html' with field=form.plotted %}
                 </div>
-                <br>
-                <div class="row">
-                  <legend class="col-form-label col-sm-2">Origin of data:
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Select whether the origin of data is experimental or theoretical.</span>
-                    </i>
-                  </legend>
-                  <div class="form-check form-check-inline" style="margin-left:-20px">
-                    <input class="form-check-input" type="radio" id="is-experimental"
-                           name="is-experimental" value="true" checked>
-                    <label class="form-check-label" for="is-experimental">Experimental</label>
+                <hr>
+                <div class="form-row">
+                  <div class="col-md-6">
+                    {% include 'materials/input_field.html' with field=form.origin_of_data %}
                   </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" id="is-theoretical"
-                           name="is-experimental" value="false" >
-                    <label class="form-check-label" for="is-theoretical">Theoretical</label>
+                  <div class="col-md-6">
+                    {% include 'materials/input_field.html' with field=form.dimensionality_of_the_system %}
                   </div>
-                </div>
-                <div class="row">
-                  <legend class="col-form-label col-sm-4">Dimensionality of the system:
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Select the dimensionality of the system.</span>
-                    </i>
-                  </legend>
-                  <div class="form-check form-check-inline" style="margin-left:-75px">
-                    <input class="form-check-input" type="radio" id="is-3d-system"
-                           name="is-3d-system" value="true" checked>
-                    <label class="form-check-label" for="is-3d-system">3D</label>
+                  <div class="col-md-6">
+                    {% include 'materials/input_field.html' with field=form.sample_type %}
                   </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" id="is-2d-system"
-                           name="is-3d-system" value="false">
-                    <label class="form-check-label" for="is-2d-system">2D</label>
-                  </div>
-                </div>
-                <div class="row">
-                  <legend class="col-form-label col-sm-2">Sample type:
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Select the type of the sample.</span>
-                    </i>
-                  </legend>
-                  {% for type in sample_types %}
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" id="is-{{ type.1 }}"
-                             name="sample-type" value="{{ type.0 }}"
-                             {% if forloop.first %}checked{% endif %}
-                             {% if forloop.first %}style="margin-left:-30px"{% endif %}>
-                      <label class="form-check-label" for="is-{{ type.1 }}">{{ type.1|capfirst }}</label>
-                    </div>
-                  {% endfor %}
-                </div>
-                <div class="row">
-                  <legend class="col-form-label col-sm-2">Crystal system:
-                    <i class="fa fa-question-circle tooltip-container">
-                      <span class="tooltiptext">Select the crystal system.</span>
-                    </i>
-                  </legend>
-                  {% for sys in crystal_systems %}
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" id="is-{{ sys.1 }}"
-                             name="crystal-system" value="{{ sys.0 }}"
-                             {% if forloop.first %}checked{% endif %}
-                             {% if forloop.first %}style="margin-left:-15px"{% endif %}>
-                      <label class="form-check-label" for="is-{{ sys.1 }}">{{ sys.1|capfirst }}</label>
-                    </div>
-                  {% endfor %}
-                </div>
-                <div class="form row">
-                  <div class="col-md-3 col-form-label">
-                    {{ form.extraction_method.label_tag }}
-                    {{ form.extraction_method.help_text|tooltip }}
-                  </div>
-                  <div class="col-md-9">
-                    {{ form.extraction_method }}
+                  <div class="col-md-6">
+                    {% include 'materials/input_field.html' with field=form.crystal_system %}
                   </div>
                 </div>
               </div>
@@ -234,8 +115,7 @@
                       style="background:#dce9ff">
                 Synthesis method (click to add)
               </button>
-              <input type="hidden" id="with-synthesis-details" name="with-synthesis-details"
-                     value="false">
+              {{ form.with_synthesis_details }}
               <div class="collapse" id="synthesis-body">
                 <div class="card-body card-add-data">
                   <div class="form-row">
@@ -246,8 +126,12 @@
                       {% include 'materials/input_field.html' with field=form.product %}
                     </div>
                   </div>
-                  {% include 'materials/input_field.html' with field=form.synthesis_description %}
-                  {% include 'materials/input_field.html' with field=form.synthesis_comment %}
+                  <div class="form-group">
+                    {% include 'materials/input_field.html' with field=form.synthesis_description %}
+                  </div>
+                  <div class="form-group">
+                    {% include 'materials/input_field.html' with field=form.synthesis_comment %}
+                  </div>
                 </div>
               </div>
             </div>
@@ -261,23 +145,18 @@
                       style="background:#dce9ff">
                 Experimental details (click to add)
               </button>
-              <input type="hidden" id="with-experimental-details" name="with-experimental-details"
-                     value="false">
+              {{ form.with_experimental_details }}
               <div class="collapse" id="experimental-body">
                 <div class="card-body card-add-data">
-                  <label for="experimental-method">Method</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Short name of the method used, e.g., "X-ray diffraction".</span>
-                  </i>
-                  <input class="form-control" id="experimental-method" name="experimental-method"
-                         type="text">
-                  <label for="experimental-description">Description</label>
-                  <i class="fa fa-question-circle tooltip-container">
-                    <span class="tooltiptext">Describe all experimental steps here.</span>
-                  </i>
-                  <textarea class="form-control" id="experimental-description"
-                            name="experimental-description" rows="3"></textarea>
-                  {% include 'materials/input_field.html' with field=form.experimental_comment %}
+                  <div class="form-group">
+                    {% include 'materials/input_field.html' with field=form.experimental_method %}
+                  </div>
+                  <div class="form-group">
+                    {% include 'materials/input_field.html' with field=form.experimental_description %}
+                  </div>
+                  <div class="form-group">
+                    {% include 'materials/input_field.html' with field=form.experimental_comment %}
+                  </div>
                 </div>
               </div>
             </div>
@@ -291,71 +170,35 @@
                       style="background:#dce9ff">
                 Computational details (click to add)
               </button>
-              <input type="hidden" id="with-computational-details" name="with-computational-details"
-                     value="false">
+              {{ form.with_computational_details }}
               <div class="collapse" id="computational-body">
                 <div class="card-body card-add-data">
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      <label for="code-name">Code</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">Name of the code(s) used for calculations. It is recommended to also include other identifiers such as version number, branch name, or even the commit number if applicable.</span>
-                      </i>
-                      <input class="form-control" id="code-name" name="code-name" type="text"
-                             placeholder="Abinit, Quantum espresso..">
+                      {% include 'materials/input_field.html' with field=form.code %}
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="level-of-theory">Level of theory</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">yet to come...</span>
-                      </i>
-                      <input class="form-control" id="level-of-theory"
-                             name="level-of-theory" type="text"
-                             placeholder="DFT, Hartree-Fock, tight-binding, empirical model..">
+                      {% include 'materials/input_field.html' with field=form.level_of_theory %}
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="xc-functional">Exchange-correlation functional</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">yet to come...</span>
-                      </i>
-                      <input class="form-control" id="xc-functional" name="xc-functional" type="text"
-                             placeholder="PBE, PW91..">
+                      {% include 'materials/input_field.html' with field=form.xc_functional %}
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="k-grid">K-point grid</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">yet to come...</span>
-                      </i>
-                      <input class="form-control" id="k-grid" name="k-grid" type="text"
-                             placeholder="3x3x3, 4x5x4 (Monkhorst-Pack)..">
+                      {% include 'materials/input_field.html' with field=form.k_point_grid %}
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="relativity-level">Level of relativity</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">Specify the level of relativity. Note that this also includes the description of spin-orbit coupling!</span>
-                      </i>
-                      <input class="form-control" id="relativity-level" name="relativity-level"
-                             type="text" placeholder="non-relativistic, atomic ZORA with SOC, Koelling-Harmon..">
+                      {% include 'materials/input_field.html' with field=form.level_of_relativity %}
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="basis-sets">Basis set definition</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">yet to come...</span>
-                      </i>
-                      <input class="form-control" id="basis-sets" name="basis-sets" type="text"
-                             placeholder="JTH PAW, TM PP with semicore..">
+                      {% include 'materials/input_field.html' with field=form.basis_set_definition %}
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="numerical-accuracy">Numerical accuracy</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">Include all parameters here that describe the accuracy of the calculation (tolerance parameters for an SCF cycle, quality of integration grids, number of excited states included, ...).</span>
-                      </i>
-                      <input class="form-control" id="numerical-accuracy" name="numerical-accuracy"
-                             type="text"
-                             placeholder="SCF tol. 1 meV/atom, Lebedev grids for angular integration..">
+                      {% include 'materials/input_field.html' with field=form.numerical_accuracy %}
                     </div>
                   </div>
-                  {% include 'materials/input_field.html' with field=form.computational_comment %}
+                  <div class="form-group">
+                    {% include 'materials/input_field.html' with field=form.computational_comment %}
+                  </div>
                 </div>
               </div>
             </div>
@@ -515,11 +358,25 @@
 {% block script %}
   {% load static %}
   <script src="{% static 'materials/javascript/ajax_csrf_setup.js' %}"></script>
-  <script src="{% static 'materials/javascript/filter_form.js' %}"></script>
+  <script src="{% static 'materials/javascript/selectize.js' %}"></script>
   <script>
-   /* Filter dropdown menus */
-   filter_form($('#publication-search'), $('#publication'));
-   filter_form($('#system-search'), $('#system'));
+   /* Use selectize on all dropdown menus */
+   {% for field in form.visible_fields %}
+   {% if field.field.widget.input_type == 'select' %}
+   $('#{{ field.id_for_label }}').selectize({
+     maxOptions: 500,
+     sortField: 'text',
+     {% if field.value %}
+     items: [{{ field.value }}],
+     {% endif %}
+     options: [
+       {% for choice in field.field.choices %}
+       {value: '{{ choice.0 }}', text: '{{ choice.1|escapejs }}'},
+       {% endfor %}
+     ],
+   });
+   {% endif %}
+   {% endfor %}
   </script>
   <script>
    /* Add a fixed property */
@@ -613,19 +470,19 @@
   <script>
    function toggleSectionInclusivity(button, hidden_field) {
      $(button).click(function() {
-       if ($(hidden_field).val() == 'true') {
-         $(hidden_field).val('false');
+       if ($(hidden_field).val() == 'True') {
+         $(hidden_field).val('False');
          $(button).css({'background': '#dce9ff'});
          $(button).html($(button).html().split('remove)')[0] + 'add)');
        } else {
-         $(hidden_field).val('true');
+         $(hidden_field).val('True');
          $(button).css({'background': '#f3ebff'});
          $(button).html($(button).html().split('add)')[0] + 'remove)');
        }
      });
    }
-   toggleSectionInclusivity('#synthesis-button', '#with-synthesis-details');
-   toggleSectionInclusivity('#experimental-button', '#with-experimental-details');
-   toggleSectionInclusivity('#computational-button', '#with-computational-details');
+   toggleSectionInclusivity('#synthesis-button', '#id_with_synthesis_details');
+   toggleSectionInclusivity('#experimental-button', '#id_with_experimental_details');
+   toggleSectionInclusivity('#computational-button', '#id_with_computational_details');
   </script>
 {% endblock %}

@@ -94,7 +94,7 @@ table.main-data {
     border-radius: 6px;
     padding: 5px;
     position: absolute;
-    z-index: 1;
+    z-index: 11;
 }
 
 .tooltip-container:hover .tooltiptext {

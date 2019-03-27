@@ -360,7 +360,6 @@ def all_entries(request, pk, data_type):
         'exciton_emission': models.ExcitonEmission,
         'synthesis': models.SynthesisMethodOld,
         'band_structure': models.BandStructure,
-        'material_prop': models.MaterialProperty
     }
     template_name = 'materials/all_%ss.html' % data_type
     compound_name = models.System.objects.get(pk=pk).compound_name
@@ -928,14 +927,8 @@ class AddBondLength(LoginRequiredMixin, generic.TemplateView):
 class AddDataView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_data.html'
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         return render(request, self.template_name, {
-            'publications': models.Publication.objects.all().order_by('year'),
-            'systems': models.System.objects.all(),
-            'properties': models.Property.objects.all(),
-            'units': models.Unit.objects.all(),
-            'sample_types': models.Dataset.SAMPLE_TYPES,
-            'crystal_systems': models.Dataset.CRYSTAL_SYSTEMS,
             'form': forms.AddDataForm(),
         })
 
@@ -1066,24 +1059,21 @@ def submit_data(request):
             numerical_value.value = float(y)
             numerical_value.value_type = models.NumericalValue.ACCURATE
             numerical_value.save(request.user)
-
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
-        messages.error(request, 'Recheck all fields')
-        return render(request, 'materials/add_data.html', {
-            'publications': models.Publication.objects.all().order_by('year'),
-            'systems': models.System.objects.all(),
-            'properties': models.Property.objects.all(),
-            'units': models.Unit.objects.all(),
-            'sample_types': models.Dataset.SAMPLE_TYPES,
-            'crystal_systems': models.Dataset.CRYSTAL_SYSTEMS,
-            'form': form,
-        })
+        # Show formatted field labels in the error message, not the
+        # dictionary keys
+        errors_save = form._errors.copy()
+        for field in form:
+            if field.name in form._errors:
+                form._errors[field.label] = form._errors.pop(field.name)
+        messages.error(request, form.errors)
+        form._errors = errors_save
+        return render(request, 'materials/add_data.html', {'form': form})
     # Create data set
     dataset = models.Dataset()
-    dataset.system = models.System.objects.get(pk=request.POST['system'])
-    dataset.reference = models.Publication.objects.get(
-        pk=request.POST['publication'])
+    dataset.system = form.cleaned_data['select_system']
+    dataset.reference = form.cleaned_data['select_publication']
     dataset.label = form.cleaned_data['data_set_label']
     if form.cleaned_data['primary_property']:
         dataset.primary_property = form.cleaned_data['primary_property']
@@ -1091,13 +1081,13 @@ def submit_data(request):
     if form.cleaned_data['secondary_property']:
         dataset.secondary_property = form.cleaned_data['secondary_property']
         dataset.secondary_unit = form.cleaned_data['secondary_unit']
-    dataset.visible = 'dataset-visible' in request.POST
-    dataset.plotted = 'dataset-plotted' in request.POST
-    dataset.experimental = request.POST['is-experimental'] == 'true'
-    dataset.dimensionality = (
-        3 if (request.POST['is-3d-system'] == 'true') else 2)
-    dataset.sample_type = int(request.POST['sample-type'])
-    dataset.crystal_system = int(request.POST['crystal-system'])
+    dataset.visible = form.cleaned_data['visible_to_public']
+    dataset.plotted = form.cleaned_data['plotted']
+    dataset.experimental = (
+        form.cleaned_data['origin_of_data'] == 'experimental')
+    dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
+    dataset.sample_type = form.cleaned_data['sample_type']
+    dataset.crystal_system = form.cleaned_data['crystal_system']
     dataset.has_files = 'uploaded-files' in request.FILES
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
@@ -1107,7 +1097,7 @@ def submit_data(request):
     dataset.save(request.user)
     logger.info(f'Create dataset #{dataset.pk}')
     # Synthesis method
-    if request.POST['with-synthesis-details'] == 'true':
+    if form.cleaned_data['with_synthesis_details']:
         synthesis = models.SynthesisMethod(dataset=dataset)
         synthesis.starting_materials = form.cleaned_data['starting_materials']
         synthesis.product = form.cleaned_data['product']
@@ -1116,23 +1106,26 @@ def submit_data(request):
         logger.info(f'Creating synthesis details #{synthesis.pk}')
         add_comment(synthesis, 'synthesis_comment', form)
     # Experimental details
-    if request.POST['with-experimental-details'] == 'true':
+    if form.cleaned_data['with_experimental_details']:
         experimental = models.ExperimentalDetails(dataset=dataset)
-        experimental.method = request.POST['experimental-method']
-        experimental.description = request.POST['experimental-description']
+        experimental.method = form.cleaned_data['experimental_method']
+        experimental.description = form.cleaned_data[
+            'experimental_description']
         experimental.save(request.user)
         logger.info(f'Creating experimental details #{experimental.pk}')
         add_comment(experimental, 'experimental_comment', form)
     # Computational details
-    if request.POST['with-computational-details'] == 'true':
+    if form.cleaned_data['with_computational_details']:
         computational = models.ComputationalDetails(dataset=dataset)
-        computational.code = request.POST['code-name']
-        computational.level_of_theory = request.POST['level-of-theory']
-        computational.xc_functional = request.POST['xc-functional']
-        computational.kgrid = request.POST['k-grid']
-        computational.relativity_level = request.POST['relativity-level']
-        computational.basis = request.POST['basis-sets']
-        computational.numerical_accuracy = request.POST['numerical-accuracy']
+        computational.code = form.cleaned_data['code']
+        computational.level_of_theory = form.cleaned_data['level_of_theory']
+        computational.xc_functional = form.cleaned_data['xc_functional']
+        computational.kgrid = form.cleaned_data['k_point_grid']
+        computational.relativity_level = form.cleaned_data[
+            'level_of_relativity']
+        computational.basis = form.cleaned_data['basis_set_definition']
+        computational.numerical_accuracy = form.cleaned_data[
+            'numerical_accuracy']
         computational.save(request.user)
         logger.info(f'Creating computational details #{computational.pk}')
         add_comment(computational, 'computational_comment', form)
@@ -1146,7 +1139,6 @@ def submit_data(request):
     if dataset.primary_property and dataset.secondary_property:
         input_lines = request.POST['main-data'].split('\n')
         for line in input_lines:
-            print('this line', line)
             if line.startswith('#') or not line or line == '\r':
                 continue
             x_value, y_value = line.split()

@@ -161,53 +161,108 @@ class AddDataForm(forms.Form):
 
     class ModelChoiceField(forms.ModelChoiceField):
         def __init__(self, *args, **kwargs):
-            super().__init__(empty_label='none', required=False,
+            super().__init__(empty_label=None, required=False,
                              *args, **kwargs)
 
     # General
+    select_publication = ModelChoiceField(
+        queryset=models.Publication.objects.all(),
+        widget=PropertySelect(attrs={'class': 'form-control'}),
+        help_text=''
+        'Select publication where the data to be inserted is published. If ')
+    select_system = forms.ModelChoiceField(
+        queryset=models.System.objects.all(),
+        widget=PropertySelect(attrs={'class': 'form-control'}),
+        help_text=''
+        'Select the system that is associated with the inserted data.')
     data_set_label = CharField(
         model=models.Dataset, field='label',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Description of the data set.')
-    primary_property = ModelChoiceField(
-        queryset=models.Property.objects.all().order_by('name'),
-        widget=PropertySelect(attrs={'class': 'form-control'}),
-        help_text='Define the primary property of interest (in a figure, this '
-        'typically denotes the y-axis). If the property of interest missing '
-        'here, add it under "Define new property".')
-    primary_unit = ModelChoiceField(
-        queryset=models.Unit.objects.all().order_by('label'),
-        widget=forms.Select(attrs={'class': 'form-control',
-                                   'disabled': 'true'}),
-        help_text='Define the primary unit of interest (in a figure, this '
-        'typically denotes the unit of the y-axis). For dimensionless '
-        'physical properties, select "none". If the data is in arbitray '
-        'units, select "a.u." (note that this is different from "none"). If '
-        'the unit of interest missing here, add it under "Define new unit".')
-    secondary_property = ModelChoiceField(
-        queryset=models.Property.objects.filter(
-            require_input_files=False).order_by('name'),
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        help_text='Define the secondary property of interest (in a figure, '
-        'this typically denotes the x-axis). When inserting values that have '
-        'no direct dependence on a physical property (e.g., a list of phonon '
-        'energies), the secondary property may be left empty. If the property '
-        'of interest missing here, add it under "Define new property".')
-    secondary_unit = ModelChoiceField(
-        queryset=models.Unit.objects.all().order_by('label'),
-        widget=forms.Select(attrs={'class': 'form-control',
-                                   'disabled': 'true'}),
-        help_text='Define the secondry unit of interest (in a figure, this '
-        'typically denotes the unit of the x-axis). If the unit of interest '
-        'missing here, add it under "Define new unit".')
     extraction_method = CharField(
         model=models.Dataset, field='extraction_method',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='How was the current data set obtained? For example, '
-        'manually extracted from a publication, from author, from another '
+        help_text=''
+        'How was the current data set obtained? For example, manually '
+        'extracted from a publication, from author, from another '
         'database, ...')
+    primary_property = ModelChoiceField(
+        queryset=models.Property.objects.all(),
+        widget=PropertySelect(attrs={'class': 'form-control'}),
+        help_text=''
+        'Define the primary property of interest (in a figure, this typically '
+        'denotes the y-axis). If the property of interest missing here, add '
+        'it under "Define new property".')
+    primary_unit = ModelChoiceField(
+        queryset=models.Unit.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control',
+                                   'disabled': 'true'}),
+        help_text=''
+        'Define the primary unit of interest (in a figure, this typically '
+        'denotes the unit of the y-axis). For dimensionless physical '
+        'properties, select "none". If the data is in arbitray units, select '
+        '"a.u." (note that this is different from "none"). If the unit of '
+        'interest missing here, add it under "Define new unit".')
+    secondary_property = ModelChoiceField(
+        queryset=models.Property.objects.filter(
+            require_input_files=False),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text=''
+        'Define the secondary property of interest (in a figure, this '
+        'typically denotes the x-axis). When inserting values that have no '
+        'direct dependence on a physical property (e.g., a list of phonon '
+        'energies), the secondary property may be left empty. If the property '
+        'of interest missing here, add it under "Define new property".')
+    secondary_unit = ModelChoiceField(
+        queryset=models.Unit.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control',
+                                   'disabled': 'true'}),
+        help_text=''
+        'Define the secondry unit of interest (in a figure, this typically '
+        'denotes the unit of the x-axis). If the unit of interest missing '
+        'here, add it under "Define new unit".')
+    visible_to_public = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        initial=True,
+        required=False,
+        help_text=''
+        'Choose whether the data should be initially visible on the website. '
+        'If not, only you can view the data. This setting can be easily '
+        'toggled later.')
+    plotted = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False,
+        help_text=''
+        'Choose whether the data is more suitably presented as a figure or as '
+        'a table. Especially for a large amount of data points, a figure '
+        '("plotted") might make more sense. This setting can be easily '
+        'toggled later.')
+    origin_of_data = forms.ChoiceField(
+        initial='experimental',
+        choices=(
+            ('experimental', 'experimental'), ('theoretical', 'theoretical')),
+        widget=forms.RadioSelect(),
+        help_text=''
+        'Select whether the origin of data is experimental or theoretical.')
+    dimensionality_of_the_system = forms.ChoiceField(
+        initial=models.Dataset.DIMENSIONALITIES[0],
+        choices=(models.Dataset.DIMENSIONALITIES),
+        widget=forms.RadioSelect(),
+        help_text='Select the dimensionality of the system.')
+    sample_type = forms.ChoiceField(
+        initial=models.Dataset.SAMPLE_TYPES[0],
+        choices=(models.Dataset.SAMPLE_TYPES),
+        widget=forms.RadioSelect(),
+        help_text='Select the type of the sample.')
+    crystal_system = forms.ChoiceField(
+        initial=models.Dataset.CRYSTAL_SYSTEMS[0],
+        choices=(models.Dataset.CRYSTAL_SYSTEMS),
+        widget=forms.RadioSelect(),
+        help_text='Select the crystal system.')
 
     # Synthesis
+    with_synthesis_details = forms.BooleanField(
+        required=False, initial=False, widget=forms.HiddenInput())
     starting_materials = CharField(
         model=models.SynthesisMethod, field='starting_materials',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -223,22 +278,104 @@ class AddDataForm(forms.Form):
     synthesis_comment = CharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Additional information not revelant or suitable for the '
-        'description part.')
+        help_text=''
+        'Additional information not revelant or suitable for the description '
+        'part.')
 
     # Experimental
+    with_experimental_details = forms.BooleanField(
+        required=False, initial=False, widget=forms.HiddenInput())
+    experimental_method = CharField(
+        label='Method',
+        model=models.ExperimentalDetails, field='method',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Short name of the method used, e.g., "X-ray diffraction".')
+    experimental_description = CharField(
+        label='Description',
+        model=models.ExperimentalDetails, field='description',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
+        help_text='Describe all experimental steps here.')
     experimental_comment = CharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Additional information not revelant or suitable for the '
-        'description part.')
+        help_text=''
+        'Additional information not revelant or suitable for the description '
+        'part.')
 
     # Computational
+    with_computational_details = forms.BooleanField(
+        required=False, initial=False, widget=forms.HiddenInput())
+    code = CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Abinit, Quantum espresso...',
+        }),
+        help_text=''
+        'Name of the code(s) used for calculations. It is recommended to also '
+        'include other identifiers such as version number, branch name, or '
+        'even the commit number if applicable.')
+    level_of_theory = CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder':
+            'DFT, Hartree-Fock, tight-binding, empirical model...',
+        }),
+        help_text=''
+        'yet to come...'
+    )
+    xc_functional = CharField(
+        label='Exchange-correlation functional',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'PBE, PW91...',
+        }),
+        help_text=''
+        'yet to come...'
+    )
+    k_point_grid = CharField(
+        label='K-point grid',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '3x3x3, 4x5x4 (Monkhorst-Pack)...',
+        }),
+        help_text=''
+        'yet to come...'
+    )
+    level_of_relativity = CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder':
+            'non-relativistic, atomic ZORA with SOC, Koelling-Harmon...',
+        }),
+        help_text=''
+        'Specify the level of relativity. Note that this also includes the '
+        'description of spin-orbit coupling!'
+    )
+    basis_set_definition = CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'JTH PAW, TM PP with semicore...',
+        }),
+        help_text=''
+        'yet to come...'
+    )
+    numerical_accuracy = CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder':
+            'SCF tol. 1 meV/atom, Lebedev grids for angular integration...',
+        }),
+        help_text=''
+        'Include all parameters here that describe the accuracy of the '
+        'calculation (tolerance parameters for an SCF cycle, quality of '
+        'integration grids, number of excited states included, ...).'
+    )
     computational_comment = CharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Additional information not revelant or suitable for the '
-        'description part.')
+        help_text=''
+        'Additional information not revelant or suitable for the description '
+        'part.')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
