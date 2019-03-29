@@ -230,19 +230,49 @@
                     </i>
                   </div>
                   <div class="col-md-4">
-                    <label for="main-data">Values
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
-                      </i>
-                    </label>
-                    <div class="float-right">
-                      <input type="file" id="input-data-files" name="input-data-files"
-                             class="inputfile" multiple>
-                      <label for="input-data-files"><i class="fa fa-upload" aria-hidden="true"></i>
-                        Import from file..</label>
+                    <div class="normal-input">
+                      <label for="main-data">Values
+                        <i class="fa fa-question-circle tooltip-container">
+                          <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
+                        </i>
+                      </label>
+                      <div class="float-right">
+                        <input type="file" id="input-data-file" class="inputfile">
+                        <label for="input-data-file"><i class="fa fa-upload" aria-hidden="true"></i>
+                          Import from file..</label>
+                      </div>
+                      <textarea class="form-control" id="main-data" name="main-data" rows="3"
+                                placeholder="value_1 value_2 ..."></textarea>
                     </div>
-                    <textarea class="form-control" id="main-data" name="main-data"
-                              placeholder="value_1 value_2 ..." style="height:80%"></textarea>
+                    <div class="lattice-parameter-input" hidden="true">
+                      <div class="form-group">
+                        {{ form.lattice_constant_a.label_tag }}
+                        {{ form.lattice_constant_a.help_text|tooltip }}
+                        <div class="float-right">
+                          <input type="file" id="input-lattice-parameters" class="inputfile">
+                          <label for="input-lattice-parameters"><i class="fa fa-upload" aria-hidden="true"></i>
+                            Import from file..</label>
+                        </div>
+                        <div class="input-group">
+                          {{ form.lattice_constant_a }}
+                          {{ form.lattice_constant_b }}
+                          {{ form.lattice_constant_c }}
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        {{ form.lattice_constant_alpha.label_tag }}
+                        <div class="input-group">
+                          {{ form.lattice_constant_alpha }}
+                          {{ form.lattice_constant_beta }}
+                          {{ form.lattice_constant_gamma }}
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        {{ form.atomic_coordinates.label_tag }}
+                        {{ form.atomic_coordinates.help_text|tooltip }}
+                        {{ form.atomic_coordinates }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -273,37 +303,6 @@
             </div>
 
           </form>
-          <!-- to be copied -->
-          <div class="form-row fixed-property-template d-none">
-            <div class="col-md-4 mb-3">
-              <label for="fixed-property">Property</label>
-              <select class="form-control" id="fixed-property" name="fixed-property">
-                {% for property in properties %}
-                  <option>{{ property.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="fixed-unit">Unit</label>
-              <select class="form-control" id="fixed-unit" name="fixed-unit">
-                {% for unit in units %}
-                  <option>{{ unit.label }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="fixed-value">Fixed value</label>
-              <div class="input-group">
-                <input class="form-control" id="fixed-value" name="fixed-value" type="text"
-                       maxlength="20" required>
-                <div class="input-group-append">
-                  <button class="close-fixed-property btn btn-danger fa fa-times"
-                          type="button" ></button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- end copy -->
         </div>
         <!-- ADD NEW PROPERTY -->
         <div class="tab-pane" id="properties" role="tabpanel">
@@ -378,6 +377,37 @@
    {% endif %}
    {% endfor %}
   </script>
+  <!-- fixed property template -->
+  <div class="form-row fixed-property-template d-none">
+    <div class="col-md-4 mb-3">
+      <label for="fixed-property">Property</label>
+      <select class="form-control" id="fixed-property" name="fixed-property">
+        {% for property in properties %}
+          <option>{{ property.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label for="fixed-unit">Unit</label>
+      <select class="form-control" id="fixed-unit" name="fixed-unit">
+        {% for unit in units %}
+          <option>{{ unit.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label for="fixed-value">Fixed value</label>
+      <div class="input-group">
+        <input class="form-control" id="fixed-value" name="fixed-value" type="text"
+               maxlength="20" required>
+        <div class="input-group-append">
+          <button class="close-fixed-property btn btn-danger fa fa-times"
+                  type="button" ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end template -->
   <script>
    /* Add a fixed property */
    var counter_fixed = 0;
@@ -443,31 +473,24 @@
   </script>
   <script>
    /* Autofill the main input data textarea */
-   $('#input-data-files').change(function() {
-     if ($('#id_primary_property').find(':selected').attr('require_input_files') == 'False') {
-       var form_data = new FormData();
-       form_data.append('file', this.files[0]);
-       $(this).val('');  /* Clear the file list */
-       $.ajax({
-         url: "{% url 'materials:autofill_input_data' %}",
-         type: 'POST',
-         processData: false,
-         contentType: false,
-         dataType: 'text',
-         data: form_data,
-         success: function(result) {
-           $('#main-data').html(result);
-         },
-         error: function(result) {
-           $('#main-data').html(result);
-         },
-       });
-     } else {
-       $('#main-data').html('');
-     }
+   $('#input-data-file').change(function() {
+     var form_data = new FormData();
+     form_data.append('file', this.files[0]);
+     $(this).val('');  /* Clear the file list */
+     $.ajax({
+       url: "{% url 'materials:autofill_input_data' %}",
+       type: 'POST',
+       processData: false,
+       contentType: false,
+       dataType: 'text',
+       data: form_data,
+       success: function(result) { $('#main-data').html(result); },
+       error:   function(result) { $('#main-data').html(result); },
+     });
    });
   </script>
   <script>
+   /* Collapsable sections of the input */
    function toggleSectionInclusivity(button, hidden_field) {
      $(button).click(function() {
        if ($(hidden_field).val() == 'True') {
@@ -484,5 +507,81 @@
    toggleSectionInclusivity('#synthesis-button', '#id_with_synthesis_details');
    toggleSectionInclusivity('#experimental-button', '#id_with_experimental_details');
    toggleSectionInclusivity('#computational-button', '#id_with_computational_details');
+  </script>
+  <script>
+   /* Lattice parameter specific */
+   function toggle_lattice_parameter_input() {
+     var is_lattice_parameter = $('#id_primary_property').find(':selected').text() == 'lattice parameter';
+     if (is_lattice_parameter) {
+       $('.lattice-parameter-input').attr('hidden', false);
+       $('.normal-input').hide();
+     } else {
+       $('.lattice-parameter-input').attr('hidden', true);
+       $('.normal-input').show();
+     }
+     /* Make lattice parameter related fields required only if this property has been selected */
+     $('input[type="number"').filter(function() {
+       return this.id.match(/lattice_constant_/);
+     }).prop('required', is_lattice_parameter);
+   }
+   $('#id_primary_property').change(function() {
+     toggle_lattice_parameter_input();
+   });
+   $(document).ready(function() {
+     if ($('#id_primary_property').find(':selected').text() == 'lattice parameter') {
+       toggle_lattice_parameter_input();
+     }
+   });
+   $('#input-lattice-parameters').change(function() {
+     var form_data = new FormData();
+     form_data.append('file', this.files[0]);
+     $(this).val('');  /* Clear the file list */
+     $.ajax({
+       url: "{% url 'materials:autofill_input_data' %}",
+       type: 'POST',
+       processData: false,
+       contentType: false,
+       dataType: 'text',
+       data: form_data,
+       success: function(result) {
+         /* Generate the lattice parameters (lattice constants and angles) from lattice vectors */
+         lines = result.split('\n');
+         lattice_vectors = [];
+         $('#id_atomic_coordinates').html('');
+         var regex = new RegExp('^ *lattice_vector\\s+(-?\\d+(?:\.\\d+)?)\\s+(-?\\d+(?:\.\\d+)?)\\s+(-?\\d+(?:\.\\d+)?)\\b');
+         var match_;
+         var i;
+         for (i = 0; i < lines.length; i++) {
+           match_ = lines[i].match(regex);
+           if (match_) {
+             lattice_vectors.push([match_[1], match_[2], match_[3]]);
+           } else {
+             $('#id_atomic_coordinates').append(lines[i]);
+           }
+         }
+         function norm(vector) {
+           return Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
+         }
+         function get_angle(v1, v2, norm1, norm2) {
+           return Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
+         }
+         a = norm(lattice_vectors[0]);
+         b = norm(lattice_vectors[1]);
+         c = norm(lattice_vectors[2]);
+         alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
+         beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
+         gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
+         $('#id_lattice_constant_a').val(a);
+         $('#id_lattice_constant_b').val(b);
+         $('#id_lattice_constant_c').val(c);
+         $('#id_lattice_constant_alpha').val(alpha);
+         $('#id_lattice_constant_beta').val(beta);
+         $('#id_lattice_constant_gamma').val(gamma);
+       },
+       error: function(result) {
+         $('#id_atomic_coordinates').html(result);
+       },
+     });
+   });
   </script>
 {% endblock %}

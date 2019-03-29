@@ -51,14 +51,27 @@ body {
     background-color: #f0f0f0;
 }
 
-table.atomic-positions {
+.table-lattice-constants {
+    align: center;
+    margin: 10px auto;
     font-size: 16px;
     font-weight: bold;
+    text-align: right;
 }
 
-table.atomic-positions td {
-    border: none;
-    padding: 1px;
+.table-lattice-constants td {
+    padding: 2px 5px;
+}
+
+.table-atomic-positions {
+    align: center;
+    margin: 10px auto;
+    text-align: right;
+    padding: 0px 5px;
+}
+
+.table-atomic-positions td {
+    padding: 0px 5px;
 }
 
 table.main-data {
@@ -123,4 +136,14 @@ table.main-data {
 
 .inputfile + label:hover {
     background-color: #007bdd;
+}
+
+/* Hide input type="number" up/down arrows (spinners). */
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
 }

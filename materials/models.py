@@ -25,11 +25,10 @@ class Base(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, user=None, *args, **kwargs):
-        if user:
-            self.created_by = user
-            self.updated_by = user
-        super().save(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'created_by' in kwargs and 'updated_by' not in kwargs:
+            self.updated_by = self.created_by
 
 
 class Property(Base):
@@ -391,14 +390,17 @@ class Dataset(Base):
                 shutil.rmtree(loc)
         super().delete(*args, **kwargs)
 
-    def num_all_entries(self, *args, **kwargs):
-        return len(Dataset.objects.filter(
-            system=self.system).filter(primary_property=self.primary_property))
+    def num_all_entries(self):
+        return Dataset.objects.filter(system=self.system).filter(
+            primary_property=self.primary_property).count()
 
 
 class Dataseries(Base):
     label = models.CharField(max_length=100, null=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+
+    def get_atomic_coordinates(self):
+        return self.datapoint_set.all()[6:]
 
 
 class Datapoint(Base):
@@ -419,7 +421,8 @@ class NumericalValueBase(Base):
         (ERROR, 'error'),
     )
     value = models.FloatField()
-    value_type = models.PositiveSmallIntegerField(choices=VALUE_TYPES)
+    value_type = models.PositiveSmallIntegerField(
+        default=ACCURATE, choices=VALUE_TYPES)
 
     class Meta:
         abstract = True
@@ -433,12 +436,15 @@ class NumericalValue(NumericalValueBase):
         (SECONDARY, 'secondary'),
     )
     datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
-    qualifier = models.PositiveSmallIntegerField(choices=QUALIFIER_TYPES)
+    qualifier = models.PositiveSmallIntegerField(
+        default=PRIMARY, choices=QUALIFIER_TYPES)
+    counter = models.PositiveSmallIntegerField(default=0)
 
 
 class DatapointSymbol(Base):
     datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
     symbol = models.CharField(max_length=10)
+    counter = models.PositiveSmallIntegerField(default=0)
 
 
 class NumericalValueFixed(NumericalValueBase):

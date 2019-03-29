@@ -935,22 +935,20 @@ class AddDataView(LoginRequiredMixin, generic.TemplateView):
 
 @login_required
 def add_property(request):
-    prop = models.Property()
-    prop.name = request.POST['property-name']
-    prop.save(request.user)
+    name = request.POST['property-name']
+    models.Property.objects.create(created_by=request.user, name=name)
     messages.success(request,
-                     f'New property "{prop.name}" successfully added to '
+                     f'New property "{name}" successfully added to '
                      'the database!')
     return redirect(reverse('materials:add_data'))
 
 
 @login_required
 def add_unit(request):
-    unit = models.Unit()
-    unit.label = request.POST['unit-label']
-    unit.save(request.user)
+    label = request.POST['unit-label']
+    models.Unit.objects.create(created_by=request.user, label=label)
     messages.success(request,
-                     f'New unit "{unit.label}" successfully added to '
+                     f'New unit "{label}" successfully added to '
                      'the database!')
     return redirect(reverse('materials:add_data'))
 
@@ -959,6 +957,13 @@ def add_unit(request):
 def submit_data(request):
     """Primary function for submitting data from the user."""
     def clean_value(value):
+        """Return value as float and determine its type.
+
+        The value is first stripped of markers such as '<', which are
+        used to determine its type. If the type is ERROR, the error
+        value is also returned.
+
+        """
         error = None
         if re.match(r'[-\d]', value):
             value_type = models.NumericalValue.ACCURATE
@@ -983,33 +988,33 @@ def submit_data(request):
             value, error = value.split('±')
         return float(value), value_type, error
 
-    def insert_numerical_value(datapoint, value, is_primary):
+    def insert_numerical_value(datapoint, value, is_secondary=False):
         """Clean and insert numerical value into database.
 
         datapoint: models.Datapoint
             data point for which the numerical value is entered
-        value : string
+        value: string
             numerical value
-        is_primary : boolean
-            whether the numerical value is of primary of secondary
+        is_secondary: boolean
+            whether the numerical value is of secondary or primary
             type
 
         """
-        numerical_value = models.NumericalValue(datapoint=datapoint)
-        if is_primary:
-            numerical_value.qualifier = models.NumericalValue.PRIMARY
-        else:
+        numerical_value = models.NumericalValue(created_by=request.user,
+                                                datapoint=datapoint)
+        if is_secondary:
             numerical_value.qualifier = models.NumericalValue.SECONDARY
         value, value_type, error = clean_value(value)
         numerical_value.value = value
         numerical_value.value_type = value_type
         if error:
-            error_value = models.NumericalValue(datapoint=datapoint)
+            error_value = models.NumericalValue(created_by=request.user,
+                                                datapoint=datapoint)
             error_value.qualifier = numerical_value.qualifier
             error_value.value_type = models.NumericalValue.ERROR
             error_value.value = float(error)
-            error_value.save(request.user)
-        numerical_value.save(request.user)
+            error_value.save()
+        numerical_value.save()
 
     def add_comment(model, label, form):
         """Shortcut for conditionally attaching comments to a model instance.
@@ -1020,45 +1025,11 @@ def submit_data(request):
 
         """
         if label in form.cleaned_data:
-            model.comment_set.create(text=form.cleaned_data[label],
-                                     created_by=request.user,
-                                     updated_by=request.user)
+            model.comment_set.create(created_by=request.user,
+                                     text=form.cleaned_data[label])
             logger.info(f'Creating {label} comment '
                         f'#{model.comment_set.all()[0].pk}')
 
-    def extract_lattice_parameters(dataseries):
-        """Extract lattice parameters from input file."""
-        def get_angle(v1, v2, norm1, norm2):
-            return numpy.arccos(numpy.dot(v1, v2)/norm1/norm2)*360/2/numpy.pi
-        content = UploadedFile(request.FILES.getlist(
-            'input-data-files')[0]).read().decode('utf-8')
-        lattice_vectors = []
-        for line in content.split('\n'):
-            m = re.match(r' *lattice_vector' + 3*r'\s+(-?\d+(?:\.\d+)?)' +
-                         r'\b', line)
-            if m:
-                lattice_vectors.append([float(m.group(1)), float(m.group(2)),
-                                        float(m.group(3))])
-                if len(lattice_vectors) == 3:
-                    break
-        a = numpy.linalg.norm(lattice_vectors[0])
-        b = numpy.linalg.norm(lattice_vectors[1])
-        c = numpy.linalg.norm(lattice_vectors[2])
-        alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c)
-        beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c)
-        gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b)
-        for x, y in (('a', a), ('α', alpha), ('b', b), ('β', beta), ('c', c),
-                     ('γ', gamma)):
-            datapoint = models.Datapoint(dataseries=dataseries)
-            datapoint.save(request.user)
-            symbol = models.DatapointSymbol(datapoint=datapoint)
-            symbol.symbol = x
-            symbol.save(request.user)
-            numerical_value = models.NumericalValue(datapoint=datapoint)
-            numerical_value.qualifier = models.NumericalValue.PRIMARY
-            numerical_value.value = float(y)
-            numerical_value.value_type = models.NumericalValue.ACCURATE
-            numerical_value.save(request.user)
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
         # Show formatted field labels in the error message, not the
@@ -1071,7 +1042,7 @@ def submit_data(request):
         form._errors = errors_save
         return render(request, 'materials/add_data.html', {'form': form})
     # Create data set
-    dataset = models.Dataset()
+    dataset = models.Dataset(created_by=request.user)
     dataset.system = form.cleaned_data['select_system']
     dataset.reference = form.cleaned_data['select_publication']
     dataset.label = form.cleaned_data['data_set_label']
@@ -1094,29 +1065,32 @@ def submit_data(request):
     dataset.representative = not bool(models.Dataset.objects.filter(
         system=dataset.system).filter(
             primary_property=dataset.primary_property))
-    dataset.save(request.user)
+    dataset.save()
     logger.info(f'Create dataset #{dataset.pk}')
     # Synthesis method
     if form.cleaned_data['with_synthesis_details']:
-        synthesis = models.SynthesisMethod(dataset=dataset)
+        synthesis = models.SynthesisMethod(created_by=request.user,
+                                           dataset=dataset)
         synthesis.starting_materials = form.cleaned_data['starting_materials']
         synthesis.product = form.cleaned_data['product']
         synthesis.description = form.cleaned_data['synthesis_description']
-        synthesis.save(request.user)
+        synthesis.save()
         logger.info(f'Creating synthesis details #{synthesis.pk}')
         add_comment(synthesis, 'synthesis_comment', form)
     # Experimental details
     if form.cleaned_data['with_experimental_details']:
-        experimental = models.ExperimentalDetails(dataset=dataset)
+        experimental = models.ExperimentalDetails(created_by=request.user,
+                                                  dataset=dataset)
         experimental.method = form.cleaned_data['experimental_method']
         experimental.description = form.cleaned_data[
             'experimental_description']
-        experimental.save(request.user)
+        experimental.save()
         logger.info(f'Creating experimental details #{experimental.pk}')
         add_comment(experimental, 'experimental_comment', form)
     # Computational details
     if form.cleaned_data['with_computational_details']:
-        computational = models.ComputationalDetails(dataset=dataset)
+        computational = models.ComputationalDetails(created_by=request.user,
+                                                    dataset=dataset)
         computational.code = form.cleaned_data['code']
         computational.level_of_theory = form.cleaned_data['level_of_theory']
         computational.xc_functional = form.cleaned_data['xc_functional']
@@ -1126,38 +1100,67 @@ def submit_data(request):
         computational.basis = form.cleaned_data['basis_set_definition']
         computational.numerical_accuracy = form.cleaned_data[
             'numerical_accuracy']
-        computational.save(request.user)
+        computational.save()
         logger.info(f'Creating computational details #{computational.pk}')
         add_comment(computational, 'computational_comment', form)
     # Create data series
-    dataseries = models.Dataseries(dataset=dataset)
+    dataseries = models.Dataseries(created_by=request.user, dataset=dataset)
     if 'dataseries-label' in request.POST:
         dataseries.label = request.POST['dataseries-label']
-    dataseries.save(request.user)
-    # Read in main data
-    input_lines = None
-    if dataset.primary_property and dataset.secondary_property:
-        input_lines = request.POST['main-data'].split('\n')
-        for line in input_lines:
+    dataseries.save()
+    # Read in main data. Go through exceptional cases first. Some
+    # properties such as "lattice parameter" require special
+    # treatment.
+    if dataset.primary_property.require_input_files:
+        pass
+    elif dataset.primary_property.name == 'lattice parameter':
+        for symbol, key in (('a', 'a'), ('α', 'alpha'), ('b', 'b'),
+                            ('β', 'beta'), ('c', 'c'), ('γ', 'gamma')):
+            datapoint = models.Datapoint.objects.create(
+                created_by=request.user, dataseries=dataseries)
+            datapoint.datapointsymbol_set.create(created_by=request.user,
+                                                 symbol=symbol)
+            datapoint.numericalvalue_set.create(
+                created_by=request.user,
+                value=form.cleaned_data['lattice_constant_' + key])
+        for line in form.cleaned_data['atomic_coordinates'].split('\n'):
+            m = re.match(r'(atom|atom_frac)\s+' + 3*r'(-?\d+(?:\.\d+)?)\s+' +
+                         r'(\w+)\b', line)
+            if m:
+                coord_type, *coords, element = m.groups()
+                datapoint = models.Datapoint.objects.create(
+                    created_by=request.user, dataseries=dataseries)
+                datapoint.datapointsymbol_set.create(
+                    created_by=request.user, symbol=coord_type, counter=0)
+                datapoint.datapointsymbol_set.create(
+                    created_by=request.user, symbol=element, counter=1)
+                for i_coord, coord in enumerate(coords):
+                    datapoint.numericalvalue_set.create(
+                        created_by=request.user,
+                        value=float(coord),
+                        counter=i_coord)
+            elif line:
+                print(line)
+                messages.error(request, f'Error on line: {line}')
+                dataset.delete()
+                return render(request, 'materials/add_data.html',
+                              {'form': form})
+    elif dataset.primary_property and dataset.secondary_property:
+        for line in request.POST['main-data'].split('\n'):
             if line.startswith('#') or not line or line == '\r':
                 continue
             x_value, y_value = line.split()
-            datapoint = models.Datapoint(dataseries=dataseries)
-            datapoint.save(request.user)
-            insert_numerical_value(datapoint, x_value, False)
-            insert_numerical_value(datapoint, y_value, True)
-    elif (dataset.primary_property and
-          not dataset.primary_property.require_input_files):
-        input_lines = request.POST['main-data'].split()
-        for value in input_lines:
+            datapoint = models.Datapoint.objects.create(
+                created_by=request.user, dataseries=dataseries)
+            insert_numerical_value(datapoint, x_value, is_secondary=True)
+            insert_numerical_value(datapoint, y_value)
+    elif dataset.primary_property:
+        for value in request.POST['main-data'].split():
             if value.startswith('#') or not value:
                 continue
-            datapoint = models.Datapoint(dataseries=dataseries)
-            datapoint.save(request.user)
-            insert_numerical_value(datapoint, value, True)
-    elif (dataset.primary_property and
-          dataset.primary_property.name == 'atomic coordinates'):
-        extract_lattice_parameters(dataseries)
+            datapoint = models.Datapoint.objects.create(
+                created_by=request.user, dataseries=dataseries)
+            insert_numerical_value(datapoint, value)
     # Fixed properties
     fixed_ids = []
     for key in request.POST:
@@ -1165,7 +1168,8 @@ def submit_data(request):
             fixed_ids.append(key.split('fixed-property')[1])
     fixed_properties = []
     for fixed_id in fixed_ids:
-        fixed_value = models.NumericalValueFixed(dataseries=dataseries)
+        fixed_value = models.NumericalValueFixed(created_by=request.user,
+                                                 dataseries=dataseries)
         fixed_value.physical_property = models.Property.objects.get(
             name=request.POST[f'fixed-property{fixed_id}'])
         if fixed_value.physical_property not in fixed_properties:
@@ -1182,13 +1186,14 @@ def submit_data(request):
         fixed_value.value = value
         fixed_value.value_type = value_type
         if error:
-            error_value = models.NumericalValueFixed(dataseries=dataseries)
+            error_value = models.NumericalValueFixed(created_by=request.user,
+                                                     dataseries=dataseries)
             error_value.physical_property = fixed_value.physical_property
             error_value.unit = fixed_value.unit
             error_value.value_type = models.NumericalValueFixed.ERROR
             error_value.value = float(error)
-            error_value.save(request.user)
-        fixed_value.save(request.user)
+            error_value.save()
+        fixed_value.save()
     # Input files
     if (
             dataset.primary_property and
@@ -1207,10 +1212,13 @@ def submit_data(request):
             logger.info(f'uploading uploads/dataset_{dataset.pk}/{file_}')
     # If all went well, let the user know how much data was
     # successfully added
-    if input_lines:
+    n_data_points = 0
+    for series in dataset.dataseries_set.all():
+        n_data_points += series.datapoint_set.all().count()
+    if n_data_points > 0:
         messages.success(request,
-                         f'{len(input_lines)} new data point'
-                         f'{"s" if len(input_lines) != 1 else ""} '
+                         f'{n_data_points} new data point'
+                         f'{"s" if n_data_points != 1 else ""} '
                          'successfully added to the database!')
     else:
         messages.success(request,
@@ -1222,7 +1230,7 @@ def submit_data(request):
 def toggle_dataset_visibility(request, system_pk, dataset_pk):
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.visible = not dataset.visible
-    dataset.save(request.user)
+    dataset.save()
     return redirect(reverse('materials:materials_system', args=(system_pk,)))
 
 
@@ -1230,7 +1238,7 @@ def toggle_dataset_visibility(request, system_pk, dataset_pk):
 def toggle_dataset_plotted(request, system_pk, dataset_pk):
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.plotted = not dataset.plotted
-    dataset.save(request.user)
+    dataset.save()
     return redirect(reverse('materials:materials_system', args=(system_pk,)))
 
 
@@ -1372,14 +1380,16 @@ def dataset_data(request, pk):
     """Return the data set as a text file."""
     dataset = models.Dataset.objects.get(pk=pk)
     dataseries = dataset.dataseries_set.all()[0]
-    datapoints = dataseries.datapoint_set.all()
     text = ''
-    for i_dp, datapoint in enumerate(datapoints):
-        x_value = datapoint.numericalvalue_set.get(
-            qualifier=models.NumericalValue.SECONDARY)
-        y_value = datapoint.numericalvalue_set.get(
-            qualifier=models.NumericalValue.PRIMARY)
-        text += f'{x_value.value} {y_value.value}\n'
+    x_value = ''
+    y_value = ''
+    for datapoint in dataseries.datapoint_set.all():
+        for value in datapoint.numericalvalue_set.all():
+            if value.qualifier == models.NumericalValue.SECONDARY:
+                x_value = value.value
+            elif value.qualifier == models.NumericalValue.PRIMARY:
+                y_value = value.value
+        text += f'{x_value} {y_value}\n'
     return HttpResponse(text, content_type='text/plain')
 
 
@@ -1477,3 +1487,16 @@ class PropertyAllEntriesView(generic.ListView):
         return models.Dataset.objects.filter(
             system__pk=self.kwargs['system_pk']).filter(
                 primary_property__pk=self.kwargs['prop_pk'])
+
+
+def data_for_chart(request, pk):
+    data = []
+    dataseries = models.Dataset.objects.get(pk=pk).dataseries_set.first()
+    for datapoint in dataseries.datapoint_set.all():
+        data.append({})
+        for value in datapoint.numericalvalue_set.all():
+            if value.qualifier == models.NumericalValue.SECONDARY:
+                data[-1]['x'] = value.value
+            else:
+                data[-1]['y'] = value.value
+    return JsonResponse(data, safe=False)

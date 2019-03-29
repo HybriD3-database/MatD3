@@ -5,28 +5,16 @@
 <script>
  {% for dataset in datasets %}
  if (document.getElementById('figure_{{ dataset.pk }}')) {
-   {% with series=dataset.dataseries_set.all|first %}
-   data = [
-     {% for datapoint in series.datapoint_set.all %}
-     {
-       {% for value in datapoint.numericalvalue_set.all %}
-       {% if value.qualifier == 1 %}
-       x: {{ value.value }}
-       {% else %}
-       y: {{ value.value }}
-       {% endif %}
-       ,
-       {% endfor %}
-     },
-     {% endfor %}
-   ];
-   plot_data('figure_{{ dataset.pk }}', data,
-             '{{ dataset.secondary_property }}',
-             '{{ dataset.secondary_unit }}',
-             '{{ dataset.primary_property }}',
-             '{{ dataset.primary_unit }}',
-             '{{ series.label }}');
-   {% endwith %}
+   $.getJSON("{% url 'materials:data_for_chart' pk=dataset.pk %}", function(data) {
+     {% with series=dataset.dataseries_set.all|first %}
+     plot_data('figure_{{ dataset.pk }}', data,
+               '{{ dataset.secondary_property }}',
+               '{{ dataset.secondary_unit }}',
+               '{{ dataset.primary_property }}',
+               '{{ dataset.primary_unit }}',
+               '{{ series.label }}');
+     {% endwith %}
+   });
  }
  {% endfor %}
 </script>

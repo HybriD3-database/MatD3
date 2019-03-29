@@ -61,6 +61,8 @@ urlpatterns = [
          name='autofill_input_data'),
     path('<int:system_pk>/property-all-entries/<int:prop_pk>',
          views.PropertyAllEntriesView.as_view(), name='property_all_entries'),
+    path('data-for-chart/<int:pk>', views.data_for_chart,
+         name='data_for_chart'),
     re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
             name='all_entries'),
 ]

@@ -8,19 +8,49 @@
 <div class="card-body">
   <!-- MAIN DATA -->
   <h5>{{ dataset.label }}</h5>
-  {% if dataset.primary_property.name == 'atomic coordinates' or dataset.primary_property.name == 'lattice parameter'%}
-    <!-- Atomic coordinates require special treatment -->
+  {% if dataset.primary_property.name == 'lattice parameter'%}
+    <!-- Lattice parameters coordinates require special treatment -->
     {% with series=dataset.dataseries_set.all|first %}
-      {% if series.datapoint_set.all %}
-        <table class="table atomic-positions">
-          {% for datapoint in series.datapoint_set.all %}
+      <!-- Lattice constants -->
+      <table class="table-lattice-constants">
+        {% for datapoint in series.datapoint_set.all %}
+          {% if datapoint.numericalvalue_set.all.count == 1  %}
             {% cycle '<tr>' '' %}
-            <td>{{ datapoint.datapointsymbol_set.all.0.symbol }}: </td>
-            <td>{{ datapoint.numericalvalue_set.all.0.value|floatformat:4 }}
-              {% cycle 'Å' '&deg;' %}</td>
+            <td {% cycle '' 'style="padding:2px 20px"' %}>
+              {{ datapoint.datapointsymbol_set.all.0.symbol }}:
+            </td>
+            <td>
+              {{ datapoint.numericalvalue_set.all.0.value|floatformat:4 }}
+              {% cycle dataset.primary_unit '&deg;' %}</td>
             {% cycle '' '</tr>' %}
-          {% endfor %}
-        </table>
+          {% endif %}
+        {% endfor %}
+      </table>
+      <!-- Atomic coordinates -->
+      {% if series.datapoint_set.all.count > 6 %}
+        <div class="text-center">
+          <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
+                  data-target="#atomic-coordinates-body-{{ dataset.pk }}">
+            Atomic coordinates (click to expand)
+          </button>
+        </div>
+        <div class="collapse" id="atomic-coordinates-body-{{ dataset.pk }}">
+          <table class="table-atomic-positions">
+            {% for datapoint in series.get_atomic_coordinates %}
+                <tr>
+                  {% for symbol in datapoint.datapointsymbol_set.all %}
+                    {% if symbol.counter == 1 %}
+                      <td style="text-align:left">{{ symbol.symbol }} </td>
+                    {% endif %}
+                  {% endfor %}
+                  <td>{{ datapoint.numericalvalue_set.all.0.value|floatformat:4 }}</td>
+                  <td>{{ datapoint.numericalvalue_set.all.1.value|floatformat:4 }}</td>
+                  <td>{{ datapoint.numericalvalue_set.all.2.value|floatformat:4 }}</td>
+                </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <br>
       {% endif %}
     {% endwith %}
   {% elif dataset.plotted %}
@@ -30,7 +60,7 @@
     <!-- Tabulated data -->
     {% with series=dataset.dataseries_set.all|first %}
       {% if series.datapoint_set.all %}
-        <table class="table main-data">
+        <table class="table table-sm main-data">
           <thead>
             <tr>
               {% if dataset.primary_property %}
@@ -55,17 +85,6 @@
         </table>
       {% endif %}
     {% endwith %}
-  {% endif %}
-
-  {% if dataset.primary_property.require_input_files %}
-    <p class="text-center">
-      <a href="{% url "materials:download_input_files" pk=dataset.pk %}">
-        <button type="button" class="btn btn-primary">
-          <span class="fa fa-download" aria-hidden="true"></span>
-          {{ dataset.primary_property.name }}
-        </button>
-      </a>
-    </p>
   {% endif %}
 
   <!-- SYSTEM DESCRIPTION -->

@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.safestring import mark_safe
 
 from materials import models
 
@@ -171,6 +172,7 @@ class AddDataForm(forms.Form):
         help_text=''
         'Select publication where the data to be inserted is published. If ')
     select_system = forms.ModelChoiceField(
+        empty_label=None,
         queryset=models.System.objects.all(),
         widget=PropertySelect(attrs={'class': 'form-control'}),
         help_text=''
@@ -321,8 +323,7 @@ class AddDataForm(forms.Form):
             'DFT, Hartree-Fock, tight-binding, empirical model...',
         }),
         help_text=''
-        'yet to come...'
-    )
+        'yet to come...')
     xc_functional = CharField(
         label='Exchange-correlation functional',
         widget=forms.TextInput(attrs={
@@ -330,8 +331,7 @@ class AddDataForm(forms.Form):
             'placeholder': 'PBE, PW91...',
         }),
         help_text=''
-        'yet to come...'
-    )
+        'yet to come...')
     k_point_grid = CharField(
         label='K-point grid',
         widget=forms.TextInput(attrs={
@@ -339,8 +339,7 @@ class AddDataForm(forms.Form):
             'placeholder': '3x3x3, 4x5x4 (Monkhorst-Pack)...',
         }),
         help_text=''
-        'yet to come...'
-    )
+        'yet to come...')
     level_of_relativity = CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
@@ -349,16 +348,14 @@ class AddDataForm(forms.Form):
         }),
         help_text=''
         'Specify the level of relativity. Note that this also includes the '
-        'description of spin-orbit coupling!'
-    )
+        'description of spin-orbit coupling!')
     basis_set_definition = CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'JTH PAW, TM PP with semicore...',
         }),
         help_text=''
-        'yet to come...'
-    )
+        'yet to come...')
     numerical_accuracy = CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
@@ -368,14 +365,61 @@ class AddDataForm(forms.Form):
         help_text=''
         'Include all parameters here that describe the accuracy of the '
         'calculation (tolerance parameters for an SCF cycle, quality of '
-        'integration grids, number of excited states included, ...).'
-    )
+        'integration grids, number of excited states included, ...).')
     computational_comment = CharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
         'Additional information not revelant or suitable for the description '
         'part.')
+
+    # Data series
+    lattice_constant_a = forms.FloatField(
+        label='Lattice constants',
+        required=False,
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'a'}),
+        help_text=''
+        'Units of lattice constants are given by "Primary unit" above.')
+    lattice_constant_b = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'b'})
+    )
+    lattice_constant_c = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'c'})
+    )
+    lattice_constant_alpha = forms.FloatField(
+        label='Angles (deg)',
+        required=False,
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'α'})
+    )
+    lattice_constant_beta = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'β'})
+        )
+    lattice_constant_gamma = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'γ'})
+    )
+    placeholder_ = 'atom &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;element&gt;&#10;...'
+    atomic_coordinates = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={'class': 'form-control', 'rows': '3',
+                   'placeholder': mark_safe(placeholder_)}),
+        help_text=''
+        'Enter a list of atomic coordinates (optional). The format has one '
+        'line per atom. Each line starts with "atom" (absolute coordinates) '
+        'or "atom_frac" (fractional coordinates), followed by three numbers '
+        'for the coordinate, followed by the element name. For the case of '
+        'absolute coordinates ("atom"), the units are given by "Primary unit" '
+        'above. Note: to resize this box, drag from the corner.')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
