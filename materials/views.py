@@ -1333,7 +1333,7 @@ def dataset_image(request, pk):
     """Return a png image of the data set."""
     from matplotlib import pyplot
     dataset = models.Dataset.objects.get(pk=pk)
-    dataseries = dataset.dataseries_set.all()[0]
+    dataseries = dataset.dataseries_set.first()
     datapoints = dataseries.datapoint_set.all()
     x_values = numpy.zeros(len(datapoints))
     y_values = numpy.zeros(len(datapoints))
@@ -1361,7 +1361,7 @@ def dataset_image(request, pk):
 def dataset_data(request, pk):
     """Return the data set as a text file."""
     dataset = models.Dataset.objects.get(pk=pk)
-    dataseries = dataset.dataseries_set.all()[0]
+    dataseries = dataset.dataseries_set.first()
     text = ''
     x_value = ''
     y_value = ''
@@ -1472,13 +1472,34 @@ class PropertyAllEntriesView(generic.ListView):
 
 
 def data_for_chart(request, pk):
-    data = []
-    dataseries = models.Dataset.objects.get(pk=pk).dataseries_set.first()
+    response = {}
+    dataset = models.Dataset.objects.get(pk=pk)
+    response['primary-property'] = dataset.primary_property.name
+    response['primary-unit'] = dataset.primary_unit.label
+    response['secondary-property'] = dataset.secondary_property.name
+    response['secondary-unit'] = dataset.secondary_unit.label
+    response['data'] = []
+    dataseries = dataset.dataseries_set.first()
+    response['series-label'] = dataseries.label
     for datapoint in dataseries.datapoint_set.all():
-        data.append({})
+        response['data'].append({})
         for value in datapoint.numericalvalue_set.all():
             if value.qualifier == models.NumericalValue.SECONDARY:
-                data[-1]['x'] = value.value
+                response['data'][-1]['x'] = value.value
             else:
-                data[-1]['y'] = value.value
+                response['data'][-1]['y'] = value.value
+    return JsonResponse(response)
+
+
+def get_atomic_coordinates(request, pk):
+    data = {}
+    series = models.Dataset.objects.get(pk=pk).dataseries_set.first()
+    symbols = models.DatapointSymbol.objects.filter(
+        datapoint__dataseries=series).filter(counter=1).order_by(
+            'datapoint_id').values_list('symbol', flat=True)[6:]
+    values = models.NumericalValue.objects.filter(
+        datapoint__dataseries=series).order_by(
+            'counter', 'datapoint_id').values_list('value', flat=True)[6:]
+    N = symbols.count()
+    data = list(zip(symbols, values[:N], values[N+1:2*N], values[2*N+1:3*N]))
     return JsonResponse(data, safe=False)

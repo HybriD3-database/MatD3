@@ -1,7 +1,7 @@
 <!--
      Contents of class="card-body" corresponding to a data set. Not
-     all sections are included by default. This file would need to be
-     included with the "with ..." syntax to include certain parts.
+     all sections are included by default. This file should be
+     included using the "with ..." syntax to include certain parts.
 -->
 {% load materials_tags %}
 
@@ -9,24 +9,18 @@
   <!-- MAIN DATA -->
   <h5>{{ dataset.label }}</h5>
   {% if dataset.primary_property.name == 'lattice parameter'%}
-    <!-- Lattice parameters coordinates require special treatment -->
-    {% with series=dataset.dataseries_set.all|first %}
+    <!-- Lattice parameters require special treatment -->
+    {% with series=dataset.dataseries_set.first %}
       <!-- Lattice constants -->
       <table class="table-lattice-constants">
-        {% for datapoint in series.datapoint_set.all %}
-          {% if datapoint.numericalvalue_set.all.count == 1  %}
-            {% cycle '<tr>' '' %}
-            <td {% cycle '' 'style="padding:2px 20px"' %}>
-              {{ datapoint.datapointsymbol_set.all.0.symbol }}:
-            </td>
-            <td>
-              {{ datapoint.numericalvalue_set.all.0.value|floatformat:4 }}
-              {% cycle dataset.primary_unit '&deg;' %}</td>
-            {% cycle '' '</tr>' %}
-          {% endif %}
+        {% for symbol, value in series.get_lattice_constants %}
+          {% cycle '<tr>' '' %}
+          <td {% cycle '' 'style="padding:2px 20px"' %}>{{ symbol }}:</td>
+          <td>{{ value|floatformat:4 }} {% cycle dataset.primary_unit '&deg;' %}</td>
+          {% cycle '' '</tr>' %}
         {% endfor %}
       </table>
-      <!-- Atomic coordinates -->
+      <!-- Atomic coordinates (optional) -->
       {% if series.datapoint_set.all.count > 6 %}
         <div class="text-center">
           <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
@@ -34,22 +28,7 @@
             Atomic coordinates (click to expand)
           </button>
         </div>
-        <div class="collapse" id="atomic-coordinates-body-{{ dataset.pk }}">
-          <table class="table-atomic-positions">
-            {% for datapoint in series.get_atomic_coordinates %}
-                <tr>
-                  {% for symbol in datapoint.datapointsymbol_set.all %}
-                    {% if symbol.counter == 1 %}
-                      <td style="text-align:left">{{ symbol.symbol }} </td>
-                    {% endif %}
-                  {% endfor %}
-                  <td>{{ datapoint.numericalvalue_set.all.0.value|floatformat:4 }}</td>
-                  <td>{{ datapoint.numericalvalue_set.all.1.value|floatformat:4 }}</td>
-                  <td>{{ datapoint.numericalvalue_set.all.2.value|floatformat:4 }}</td>
-                </tr>
-            {% endfor %}
-          </table>
-        </div>
+        <div class="collapse" id="atomic-coordinates-body-{{ dataset.pk }}"></div>
         <br>
       {% endif %}
     {% endwith %}
@@ -58,7 +37,7 @@
     <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
   {% else %}
     <!-- Tabulated data -->
-    {% with series=dataset.dataseries_set.all|first %}
+    {% with series=dataset.dataseries_set.first %}
       {% if series.datapoint_set.all %}
         <table class="table table-sm main-data">
           <thead>
@@ -100,7 +79,7 @@
   </div>
 
   <!-- FIXED PARAMETERS -->
-  {% with series=dataset.dataseries_set.all|first %}
+  {% with series=dataset.dataseries_set.first %}
     {% if series.numericalvaluefixed_set.all %}
       <div class="card">
         <div class="card-header">
@@ -126,7 +105,7 @@
       </button>
       <div class="collapse" id="synthesis-body-{{ dataset.pk }}">
         <div class="card-body">
-          {% with dataset.synthesismethod_set.all|first as synthesis %}
+          {% with dataset.synthesismethod_set.first as synthesis %}
             {% if synthesis.starting_materials %}
               <p>Starting materials: {{ synthesis.starting_materials }}</p>
             {% endif %}
@@ -137,7 +116,7 @@
               <p>Description: {{ synthesis.description }}</p>
             {% endif %}
             {% if synthesis.comment_set %}
-              <p><i>Comment: {{ synthesis.comment_set.all|first }}</i></p>
+              <p><i>Comment: {{ synthesis.comment_set.first }}</i></p>
             {% endif %}
           {% endwith %}
         </div>
@@ -155,7 +134,7 @@
       </button>
       <div class="collapse" id="experimental-body-{{ dataset.pk }}">
         <div class="card-body">
-          {% with dataset.experimentaldetails_set.all|first as exp %}
+          {% with dataset.experimentaldetails_set.first as exp %}
             {% if exp.method %}
               <p>Method: {{ exp.method }}</p>
             {% endif %}
@@ -163,7 +142,7 @@
               <p>Description: {{ exp.description }}</p>
             {% endif %}
             {% if exp.comment_set %}
-              <p><i>Comment: {{ exp.comment_set.all|first }}</i></p>
+              <p><i>Comment: {{ exp.comment_set.first }}</i></p>
             {% endif %}
           {% endwith %}
         </div>
@@ -181,7 +160,7 @@
       </button>
       <div class="collapse" id="computational-body-{{ dataset.pk }}">
         <div class="card-body">
-          {% with dataset.computationaldetails_set.all|first as comp %}
+          {% with dataset.computationaldetails_set.first as comp %}
             {% if comp.code %}
               <p>Code: {{ comp.code }}</p>
             {% endif %}
@@ -205,7 +184,7 @@
               <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
             {% endif %}
             {% if comp.comment_set %}
-              <p><i>Comment: {{ comp.comment_set.all|first }}</i></p>
+              <p><i>Comment: {{ comp.comment_set.first }}</i></p>
             {% endif %}
           {% endwith %}
         </div>

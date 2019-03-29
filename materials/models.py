@@ -386,8 +386,15 @@ class Dataseries(Base):
     label = models.CharField(max_length=100, null=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
 
-    def get_atomic_coordinates(self):
-        return self.datapoint_set.all()[6:]
+    def get_lattice_constants(self):
+        """Return three lattice constants and angles."""
+        symbols = DatapointSymbol.objects.filter(
+            datapoint__dataseries=self).order_by('datapoint_id').values_list(
+                'symbol', flat=True)[:6]
+        values = NumericalValue.objects.filter(
+            datapoint__dataseries=self).order_by('datapoint_id').values_list(
+                'value', flat=True)[:6]
+        return zip(symbols, values)
 
 
 class Datapoint(Base):

@@ -26,7 +26,7 @@
             <div class="card-header">
               <h5>Molecular Model</h5>
             </div>
-            {% with object.atomicpositions_set.all|first as entry %}
+            {% with object.atomicpositions_set.first as entry %}
               <div class="card-body">
                 {% if entry.fhi_file %}
                   <div id="jmol"></div>
@@ -44,7 +44,7 @@
             <div class="card-header">
               <h5>Atomic Positions</h5>
             </div>
-            {% with object.atomicpositions_set.all|first as entry %}
+            {% with object.atomicpositions_set.first as entry %}
               <div class="card-body">
                 {% if entry %}
                   <table class="table atomic-positions">
@@ -113,7 +113,7 @@
               <h5>Synthesis Methods</h5>
             </div>
             <div class="card-body">
-              {% with entry=object.synthesismethodold_set.all|first %}
+              {% with entry=object.synthesismethodold_set.first %}
                 {% if entry %}
                   {% if entry.synthesis_method %}
                     <div style="margin-left: 20px; text-indent: -20px;">
@@ -186,7 +186,7 @@
 
         <div class="col-md-6">
           <div class="card card-item">
-            {% with entry=object.excitonemission_set.all|first %}
+            {% with entry=object.excitonemission_set.first %}
               <div class="card-header">
                 <h5>Photoluminescence emission spectra</h5>
               </div>
@@ -249,7 +249,7 @@
 
         <div class="col-md-6">
           <div class="card card-item">
-            {% with entry=object.bandstructure_set.all|first %}
+            {% with entry=object.bandstructure_set.first %}
               <div class="card-header">
                 <h5>Band Structures</h5>
               </div>
@@ -378,12 +378,12 @@
 {% endblock %}
 
 {% block script %}
-  {% with entry=object.excitonemission_set.all|first %}
+  {% with entry=object.excitonemission_set.first %}
     <script type="text/javascript">
      $('#pl-graph').load("../media/uploads/{{ entry.phase}}_{{object.organic}}_{{object.inorganic }}_pl.html");
     </script>
   {% endwith %}
-  {% with entry=object.bandstructure_set.all|first %}
+  {% with entry=object.bandstructure_set.first %}
     <script type="text/javascript">
      var imglinkfull = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_full.png';
      var imglinkmini = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_min.png';
@@ -391,7 +391,7 @@
      $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
     </script>
   {% endwith %}
-  {% with entry=object.atomicpositions_set.all|first %}
+  {% with entry=object.atomicpositions_set.first %}
     <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
     <script>
      $(document).ready(function() {
