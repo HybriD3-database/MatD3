@@ -321,10 +321,12 @@ class Dataset(Base):
     SINGLE_CRYSTAL = 0
     POWDER = 1
     FILM = 2
+    UNKNOWN = 3
     SAMPLE_TYPES = (
         (SINGLE_CRYSTAL, 'single crystal'),
         (POWDER, 'powder'),
         (FILM, 'film'),
+        (UNKNOWN, 'unknown'),
     )
     TRICLINIC = 0
     MONOCLINIC = 1
@@ -333,6 +335,7 @@ class Dataset(Base):
     TRIGONAL = 4
     HEXAGONAL = 5
     CUBIC = 6
+    UNKNOWN_SYSTEM = 7
     CRYSTAL_SYSTEMS = (
         (TRICLINIC, 'triclinic'),
         (MONOCLINIC, 'monoclinic'),
@@ -341,6 +344,7 @@ class Dataset(Base):
         (TRIGONAL, 'trigonal'),
         (HEXAGONAL, 'hexagonal'),
         (CUBIC, 'cubic'),
+        (UNKNOWN_SYSTEM, 'unknown'),
     )
     DIMENSIONALITIES = (
         (3, 3),
@@ -359,7 +363,8 @@ class Dataset(Base):
     secondary_unit = models.ForeignKey(
         Unit, null=True, on_delete=models.PROTECT,
         related_name='secondary_unit')
-    reference = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    reference = models.ForeignKey(Publication, null=True,
+                                  on_delete=models.PROTECT)
     visible = models.BooleanField()
     plotted = models.BooleanField()
     has_files = models.BooleanField()
