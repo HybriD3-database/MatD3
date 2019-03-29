@@ -906,24 +906,6 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddBondLength(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/form.html'
-
-    def get(self, request):
-        form = forms.AddBondLength()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = forms.AddBondLength(request.POST)
-        if form.is_valid():
-            form.save()
-            text = form.cleaned_data['email']
-
-        args = {'form': form, 'text': text}
-
-        return render(request, self.template_name, args)
-
-
 class AddDataView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_data.html'
 

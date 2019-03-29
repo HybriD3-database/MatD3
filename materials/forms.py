@@ -125,18 +125,6 @@ class AddBandStructure(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddBondAngle(forms.ModelForm):
-    class Meta:
-        model = models.BondAngle
-        fields = '__all__'
-
-
-class AddBondLength(forms.ModelForm):
-    class Meta:
-        model = models.BondLength
-        fields = '__all__'
-
-
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
     class CharField(forms.CharField):

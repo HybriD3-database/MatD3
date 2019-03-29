@@ -297,24 +297,6 @@ class AtomicPositions(IDInfo):
         super().delete(*args, **kwargs)
 
 
-class BondAngle(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    hmh_angle = models.CharField(max_length=100, blank=True)
-    mhm_angle = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return self.hmh_angle + ' ' + self.mhm_angle
-
-
-class BondLength(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    hmh_length = models.CharField(max_length=100, blank=True)
-    mhm_length = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return self.hmh_length + ' ' + self.mhm_length
-
-
 class Dataset(Base):
     # Files associated with each dataset are uploaded in
     # media/uploads/dataset_{{ pk }}
