@@ -362,37 +362,37 @@ class AddDataForm(forms.Form):
         'part.')
 
     # Data series
-    lattice_constant_a = forms.FloatField(
+    lattice_constant_a = forms.CharField(
         label='Lattice constants',
         required=False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'a'}),
         help_text=''
         'Units of lattice constants are given by "Primary unit" above.')
-    lattice_constant_b = forms.FloatField(
+    lattice_constant_b = forms.CharField(
         required=False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'b'})
     )
-    lattice_constant_c = forms.FloatField(
+    lattice_constant_c = forms.CharField(
         required=False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'c'})
     )
-    lattice_constant_alpha = forms.FloatField(
+    lattice_constant_alpha = forms.CharField(
         label='Angles (deg)',
         required=False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'α'})
     )
-    lattice_constant_beta = forms.FloatField(
+    lattice_constant_beta = forms.CharField(
         required=False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'β'})
         )
-    lattice_constant_gamma = forms.FloatField(
+    lattice_constant_gamma = forms.CharField(
         required=False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'γ'})
     )
     placeholder_ = 'atom &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;element&gt;&#10;...'

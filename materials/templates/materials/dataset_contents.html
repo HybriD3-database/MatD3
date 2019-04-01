@@ -13,11 +13,12 @@
     {% with series=dataset.dataseries_set.first %}
       <!-- Lattice constants -->
       <table class="table-lattice-constants">
-        {% for symbol, value in series.get_lattice_constants %}
-          {% cycle '<tr>' '' %}
-          <td {% cycle '' 'style="padding:2px 20px"' %}>{{ symbol }}:</td>
-          <td>{{ value|floatformat:4 }} {% cycle dataset.primary_unit '&deg;' %}</td>
-          {% cycle '' '</tr>' %}
+        {% for symbol, value, unit, error in series.get_lattice_constants %}
+          <tr>
+          <td>{{ symbol }}:</td>
+          <td>{{ value }}{{ unit }}</td>
+          {% if error %}<td>(±{{ error }}{{ unit }})</td>{% endif %}
+          </tr>
         {% endfor %}
       </table>
       <!-- Atomic coordinates (optional) -->

@@ -1098,15 +1098,14 @@ def submit_data(request):
     if dataset.primary_property.require_input_files:
         pass
     elif dataset.primary_property.name == 'lattice parameter':
-        for symbol, key in (('a', 'a'), ('α', 'alpha'), ('b', 'b'),
-                            ('β', 'beta'), ('c', 'c'), ('γ', 'gamma')):
+        for symbol, key in (('a', 'a'), ('b', 'b'), ('c', 'c'),
+                            ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
             datapoint = models.Datapoint.objects.create(
                 created_by=request.user, dataseries=dataseries)
             datapoint.datapointsymbol_set.create(created_by=request.user,
                                                  symbol=symbol)
-            datapoint.numericalvalue_set.create(
-                created_by=request.user,
-                value=form.cleaned_data['lattice_constant_' + key])
+            insert_numerical_value(
+                datapoint, form.cleaned_data['lattice_constant_' + key])
         for line in form.cleaned_data['atomic_coordinates'].split('\n'):
             m = re.match(r'(atom|atom_frac)\s+' + 3*r'(-?\d+(?:\.\d+)?)\s+' +
                          r'(\w+)\b', line)
@@ -1494,14 +1493,24 @@ def data_for_chart(request, pk):
 
 
 def get_atomic_coordinates(request, pk):
+    """Get atomic coordinates from the lattice parameter list.
+
+    The first six entries of the "lattice parameter" property are the
+    lattice constants and angles. These need to be skipped when
+    fetching for the atomic coordinates.
+
+    """
     data = {}
     series = models.Dataset.objects.get(pk=pk).dataseries_set.first()
+    # Here counter=1 filters out the first six entries
     symbols = models.DatapointSymbol.objects.filter(
         datapoint__dataseries=series).filter(counter=1).order_by(
-            'datapoint_id').values_list('symbol', flat=True)[6:]
+            'datapoint_id').values_list('symbol', flat=True)
+    first_value_id = series.datapoint_set.first().pk
     values = models.NumericalValue.objects.filter(
+        datapoint__pk__gte=first_value_id+6).filter(
         datapoint__dataseries=series).order_by(
-            'counter', 'datapoint_id').values_list('value', flat=True)[6:]
+            'counter', 'datapoint_id').values_list('value', flat=True)
     N = symbols.count()
-    data = list(zip(symbols, values[:N], values[N+1:2*N], values[2*N+1:3*N]))
+    data = list(zip(symbols, values[:N], values[N:2*N], values[2*N:3*N]))
     return JsonResponse(data, safe=False)

@@ -1,3 +1,4 @@
+from itertools import zip_longest
 import logging
 import os
 import shutil
@@ -387,14 +388,41 @@ class Dataseries(Base):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
 
     def get_lattice_constants(self):
-        """Return three lattice constants and angles."""
+        """Return three lattice constants and angles.
+
+        Special care is required for any error values attached to the
+        data points.
+
+        """
         symbols = DatapointSymbol.objects.filter(
             datapoint__dataseries=self).order_by('datapoint_id').values_list(
                 'symbol', flat=True)[:6]
-        values = NumericalValue.objects.filter(
-            datapoint__dataseries=self).order_by('datapoint_id').values_list(
-                'value', flat=True)[:6]
-        return zip(symbols, values)
+        first_value_id = self.datapoint_set.first().pk
+        values_float = NumericalValue.objects.filter(
+            datapoint__pk__gte=first_value_id).filter(
+                datapoint__pk__lt=first_value_id+6).order_by(
+                    'datapoint_id', 'value_type').values_list(
+                    'value', 'datapoint_id', 'value_type')
+        units = 3*[f' {self.dataset.primary_unit.label}'] + 3*['°']
+        values = []
+        errors = []
+        for value in values_float:
+            if value[2] == NumericalValue.ERROR:
+                has_error = True
+                break
+        else:
+            has_error = False
+        for value in values_float:
+            value_type = value[2]
+            if not has_error or value_type != NumericalValue.ERROR:
+                values.append(f'{NumericalValue.VALUE_TYPES[value_type][1]}'
+                              f'{value[0]:.6f}')
+            if has_error:
+                if value_type == NumericalValue.ERROR:
+                    errors[-1] = f'{value[0]:.6f}'
+                else:
+                    errors.append('')
+        return zip_longest(symbols, values, units, errors)
 
 
 class Datapoint(Base):
@@ -408,10 +436,10 @@ class NumericalValueBase(Base):
     UPPER_BOUND = 3
     ERROR = 4
     VALUE_TYPES = (
-        (ACCURATE, 'accurate'),
-        (APPROXIMATE, 'approximate'),
-        (LOWER_BOUND, 'lower_bound'),
-        (UPPER_BOUND, 'upper_bound'),
+        (ACCURATE, ''),
+        (APPROXIMATE, '≈'),
+        (LOWER_BOUND, '>'),
+        (UPPER_BOUND, '<'),
         (ERROR, 'error'),
     )
     value = models.FloatField()
