@@ -959,6 +959,8 @@ def submit_data(request):
             value_type = models.NumericalValue.APPROXIMATE
             value = value[1:]
         if '(' in value:
+            if '(0' in value:
+                value = re.sub(r'\(0+', '(', value)
             left_paren_start = value.find('(')
             right_paren_start = value.find(')')
             error = value[left_paren_start+1:right_paren_start]
