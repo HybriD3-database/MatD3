@@ -420,7 +420,10 @@ class Dataseries(Base):
                 datapoint__pk__lt=first_value_id+6).order_by(
                     'datapoint_id', 'value_type').values_list(
                     'value', 'datapoint_id', 'value_type')
-        units = 3*[f' {self.dataset.primary_unit.label}'] + 3*['°']
+        if self.dataset.primary_unit:
+            units = 3*[f' {self.dataset.primary_unit.label}'] + 3*['°']
+        else:
+            units = 3*[' '] + 3*['°']
         values = []
         errors = []
         for value in values_float:
