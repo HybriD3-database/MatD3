@@ -435,27 +435,6 @@
    {% endfor %}
   </script>
   <script>
-   /* Depending on whether the property is none, set visibility of the
-      unit and #main-data placeholder */
-   function toggleUnitVisibility(property, unit) {
-     $(property).change(function() {
-       if ($(property + ' option:selected').attr('value') == "") {
-         $(unit).prop('disabled', true);
-         if (property == '#id_secondary_property') {
-           $('#main-data').attr('placeholder', 'value_1 value_2 ...');
-         }
-       } else {
-         $(unit).prop('disabled', false);
-         if (property == '#id_secondary_property') {
-           $('#main-data').attr('placeholder', 'x1 y1\nx2 y2\n...');
-         }
-       }
-     });
-   }
-   toggleUnitVisibility('#id_secondary_property', '#id_secondary_unit');
-   toggleUnitVisibility('#id_primary_property', '#id_primary_unit');
-  </script>
-  <script>
    /* Properties that require input files */
    var saved_main_data_placeholder = '';
    $('#id_primary_property').change(function() {
