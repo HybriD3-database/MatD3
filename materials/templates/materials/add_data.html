@@ -352,54 +352,21 @@
       </div>
     </div>
   </div>
-{% endblock %}
 
-{% block script %}
-  {% load static %}
-  <script src="{% static 'materials/javascript/ajax_csrf_setup.js' %}"></script>
-  <script src="{% static 'materials/javascript/selectize.js' %}"></script>
-  <script>
-   /* Use selectize on all dropdown menus */
-   {% for field in form.visible_fields %}
-   {% if field.field.widget.input_type == 'select' %}
-   $('#{{ field.id_for_label }}').selectize({
-     maxOptions: 500,
-     sortField: 'text',
-     {% if field.value %}
-     items: [{{ field.value }}],
-     {% endif %}
-     options: [
-       {% for choice in field.field.choices %}
-       {value: '{{ choice.0 }}', text: '{{ choice.1|escapejs }}'},
-       {% endfor %}
-     ],
-   });
-   {% endif %}
-   {% endfor %}
-  </script>
   <!-- fixed property template -->
   <div class="form-row fixed-property-template d-none">
     <div class="col-md-4 mb-3">
-      <label for="fixed-property">Property</label>
-      <select class="form-control" id="fixed-property" name="fixed-property">
-        {% for property in properties %}
-          <option>{{ property.name }}</option>
-        {% endfor %}
-      </select>
+      <label for="fixed_property">Property</label>
+      <select id="fixed_property" name="fixed_property" placeholder="--none--"></select>
     </div>
     <div class="col-md-4 mb-3">
-      <label for="fixed-unit">Unit</label>
-      <select class="form-control" id="fixed-unit" name="fixed-unit">
-        {% for unit in units %}
-          <option>{{ unit.label }}</option>
-        {% endfor %}
-      </select>
+      <label for="fixed_unit">Unit</label>
+      <select id="fixed_unit" name="fixed_unit" placeholder="--none--"></select>
     </div>
     <div class="col-md-4 mb-3">
-      <label for="fixed-value">Fixed value</label>
+      <label for="fixed_value">Fixed value</label>
       <div class="input-group">
-        <input class="form-control" id="fixed-value" name="fixed-value" type="text"
-               maxlength="20" required>
+        <input class="form-control" name="fixed_value" type="text" maxlength="50" required>
         <div class="input-group-append">
           <button class="close-fixed-property btn btn-danger fa fa-times"
                   type="button" ></button>
@@ -408,23 +375,64 @@
     </div>
   </div>
   <!-- end template -->
+{% endblock %}
+
+{% block script %}
+  {% load static %}
+  <script src="{% static 'materials/javascript/ajax_csrf_setup.js' %}"></script>
+  <script src="{% static 'materials/javascript/selectize.js' %}"></script>
   <script>
+   /* All dropdown menus are filled with data from a JSON request */
+   function fill_selectize(name, id, initial_value) {
+     $.getJSON('/materials/get-dropdown-options/' + name, function(options) {
+       $(id).selectize({
+         maxOptions: 500,
+         sortField: 'text',
+         items: [initial_value],
+         options: options,
+       });
+     });
+   }
+  </script>
+  <script>
+   /* Use selectize on all dropdown menus */
+   {% for field in form.visible_fields %}
+   {% if field.field.widget.input_type == 'select' %}
+   fill_selectize('{{ field.name }}', '#{{ field.id_for_label }}', {{ field.value|default_if_none:'' }});
+   {% endif %}
+   {% endfor %}
+  </script>
+  <script>
+   /* Create a new set of fixed property fields */
+   function add_fixed_property(counter, prop_initial='', unit_initial='', value_initial='') {
+     var el = $('.fixed-property-template').clone(true);
+     var name;
+     el.removeClass('d-none');
+     el.removeClass('fixed-property-template');
+     name = 'fixed_property_' + counter;
+     el.find('[name="fixed_property"]').attr({'id': name, 'name': name});
+     fill_selectize('property', '#'+name, prop_initial);
+     name = 'fixed_unit_' + counter;
+     el.find('[name="fixed_unit"]').attr({'id': name, 'name': name});
+     fill_selectize('unit', '#'+name, unit_initial);
+     name = 'fixed_value_' + counter;
+     el.find('[name="fixed_value"]').attr({'name': name, 'value': value_initial});
+     $('#fixed-properties').append(el);
+   }
    /* Add a fixed property */
    var counter_fixed = 0;
    $('#add-fixed-property').click(function(){
-     var el = $('.fixed-property-template').clone(true);
-     el.removeClass('d-none');
-     el.removeClass('fixed-property-template');
-     el.find('[name="fixed-property"]').attr('name', 'fixed-property' + counter_fixed);
-     el.find('[name="fixed-unit"]').attr('name', 'fixed-unit' + counter_fixed);
-     el.find('[name="fixed-value"]').attr('name', 'fixed-value' + counter_fixed);
-     $('#fixed-properties').append(el);
-     counter_fixed = counter_fixed + 1
+     add_fixed_property(counter_fixed);
+     counter_fixed++;
    });
    /* Remove a fixed property */
    $('.close-fixed-property').click(function(){
      $(this).parents('.form-row').remove();
    });
+   /* Prefill from a previous instance of the form */
+   {% for name_counter, prop, unit, value in form.get_fixed_properties %}
+   add_fixed_property({{ name_counter }}, '{{ prop }}', '{{ unit }}', '{{ value }}');
+   {% endfor %}
   </script>
   <script>
    /* Depending on whether the property is none, set visibility of the

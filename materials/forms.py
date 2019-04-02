@@ -136,33 +136,16 @@ class AddDataForm(forms.Form):
             super().__init__(required=False, max_length=max_length,
                              *args, **kwargs)
 
-    class PropertySelect(forms.Select):
-        """Include require_input_files for each option."""
-        def create_option(self, name, value, label, selected, index,
-                          subindex=None, attrs=None):
-            options = super().create_option(name, value, label, selected,
-                                            index, subindex=None, attrs=None)
-            if isinstance(value, int):
-                options['attrs']['require_input_files'] = str(
-                    models.Property.objects.get(
-                        pk=int(value)).require_input_files)
-            return options
-
-    class ModelChoiceField(forms.ModelChoiceField):
-        def __init__(self, *args, **kwargs):
-            super().__init__(empty_label=None, required=False,
-                             *args, **kwargs)
-
     # General
-    select_publication = ModelChoiceField(
+    select_publication = forms.ModelChoiceField(
         queryset=models.Publication.objects.all(),
-        widget=PropertySelect(attrs={'class': 'form-control'}),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Select publication where the data to be inserted is published. If ')
     select_system = forms.ModelChoiceField(
-        empty_label=None,
         queryset=models.System.objects.all(),
-        widget=PropertySelect(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Select the system that is associated with the inserted data.')
     data_set_label = CharField(
@@ -176,15 +159,17 @@ class AddDataForm(forms.Form):
         'How was the current data set obtained? For example, manually '
         'extracted from a publication, from author, from another '
         'database, ...')
-    primary_property = ModelChoiceField(
+    primary_property = forms.ModelChoiceField(
         queryset=models.Property.objects.all(),
-        widget=PropertySelect(attrs={'class': 'form-control'}),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Define the primary property of interest (in a figure, this typically '
         'denotes the y-axis). If the property of interest missing here, add '
         'it under "Define new property".')
-    primary_unit = ModelChoiceField(
+    primary_unit = forms.ModelChoiceField(
         queryset=models.Unit.objects.all(),
+        required=False,
         widget=forms.Select(attrs={'class': 'form-control',
                                    'disabled': 'true'}),
         help_text=''
@@ -193,9 +178,9 @@ class AddDataForm(forms.Form):
         'properties, select "none". If the data is in arbitray units, select '
         '"a.u." (note that this is different from "none"). If the unit of '
         'interest missing here, add it under "Define new unit".')
-    secondary_property = ModelChoiceField(
-        queryset=models.Property.objects.filter(
-            require_input_files=False),
+    secondary_property = forms.ModelChoiceField(
+        queryset=models.Property.objects.all(),
+        required=False,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Define the secondary property of interest (in a figure, this '
@@ -203,8 +188,9 @@ class AddDataForm(forms.Form):
         'direct dependence on a physical property (e.g., a list of phonon '
         'energies), the secondary property may be left empty. If the property '
         'of interest missing here, add it under "Define new property".')
-    secondary_unit = ModelChoiceField(
+    secondary_unit = forms.ModelChoiceField(
         queryset=models.Unit.objects.all(),
+        required=False,
         widget=forms.Select(attrs={'class': 'form-control',
                                    'disabled': 'true'}),
         help_text=''
@@ -362,6 +348,8 @@ class AddDataForm(forms.Form):
         'part.')
 
     # Data series
+
+    # Exceptions
     lattice_constant_a = forms.CharField(
         label='Lattice constants',
         required=False,
@@ -410,5 +398,35 @@ class AddDataForm(forms.Form):
         'above. Note: to resize this box, drag from the corner.')
 
     def __init__(self, *args, **kwargs):
+        """Dynamically add fixed properties."""
         super().__init__(*args, **kwargs)
         self.label_suffix = ''
+        if args:
+            for key, value in args[0].items():
+                if key.startswith('fixed_property_'):
+                    self.fields[key] = forms.ModelChoiceField(
+                        queryset=models.Property.objects.all(), initial=value)
+                elif key.startswith('fixed_unit_'):
+                    self.fields[key] = forms.ModelChoiceField(
+                        queryset=models.Unit.objects.all(),
+                        initial=value, required=False)
+                elif key.startswith('fixed_value_'):
+                    self.fields[key] = forms.CharField(initial=value)
+
+    def get_fixed_properties(self):
+        """Return a list of fixed properties and their current values.
+
+        Instead of an actual list of properties, only the number that
+        is in the field's name is returned. This function is relevant
+        for reusing the form.
+
+        """
+        results = []
+        for field in self.fields:
+            if field.startswith('fixed_property_'):
+                counter = field.split('fixed_property_')[1]
+                results.append([counter,
+                                self.fields[field].initial,
+                                self.fields['fixed_unit_' + counter].initial,
+                                self.fields['fixed_value_' + counter].initial])
+        return results

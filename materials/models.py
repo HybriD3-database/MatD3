@@ -387,6 +387,23 @@ class Dataseries(Base):
     label = models.CharField(max_length=100, null=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
 
+    def get_fixed_values(self):
+        """Return all fixed properties for the given series."""
+        values = self.numericalvaluefixed_set.all()
+        output = []
+        for value in values:
+            if value.value_type != NumericalValue.ERROR:
+                output.append([
+                    value.physical_property.name,
+                    f'{NumericalValue.VALUE_TYPES[value.value_type][1]}'
+                    f'{value.value}',
+                    value.unit.label
+                ])
+            else:
+                output[-1][1] += f'(±{value.value})'
+                del value
+        return output
+
     def get_lattice_constants(self):
         """Return three lattice constants and angles.
 
@@ -445,6 +462,7 @@ class NumericalValueBase(Base):
     value = models.FloatField()
     value_type = models.PositiveSmallIntegerField(
         default=ACCURATE, choices=VALUE_TYPES)
+    counter = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -460,7 +478,6 @@ class NumericalValue(NumericalValueBase):
     datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
     qualifier = models.PositiveSmallIntegerField(
         default=PRIMARY, choices=QUALIFIER_TYPES)
-    counter = models.PositiveSmallIntegerField(default=0)
 
 
 class DatapointSymbol(Base):

@@ -65,6 +65,8 @@ urlpatterns = [
          name='data_for_chart'),
     path('get-atomic-coordinates/<int:pk>', views.get_atomic_coordinates,
          name='get_atomic_coordinates'),
+    path('get-dropdown-options/<str:name>', views.get_dropdown_options,
+         name='get_dropdown_options'),
     re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
             name='all_entries'),
 ]

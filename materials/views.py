@@ -1145,38 +1145,32 @@ def submit_data(request):
                 created_by=request.user, dataseries=dataseries)
             insert_numerical_value(datapoint, value)
     # Fixed properties
-    fixed_ids = []
-    for key in request.POST:
-        if key.startswith('fixed-property'):
-            fixed_ids.append(key.split('fixed-property')[1])
-    fixed_properties = []
-    for fixed_id in fixed_ids:
-        fixed_value = models.NumericalValueFixed(created_by=request.user,
-                                                 dataseries=dataseries)
-        fixed_value.physical_property = models.Property.objects.get(
-            name=request.POST[f'fixed-property{fixed_id}'])
-        if fixed_value.physical_property not in fixed_properties:
-            fixed_properties.append(fixed_value.physical_property)
-        else:
-            messages.error(request,
-                           'All fixed properties must be of different type: '
-                           f'{fixed_value.physical_property}')
-            return redirect(reverse('materials:add_data'))
-        fixed_value.unit = models.Unit.objects.get(
-            label=request.POST[f'fixed-unit{fixed_id}'])
-        value, value_type, error = clean_value(
-            request.POST[f'fixed-value{fixed_id}'])
-        fixed_value.value = value
-        fixed_value.value_type = value_type
-        if error:
-            error_value = models.NumericalValueFixed(created_by=request.user,
-                                                     dataseries=dataseries)
-            error_value.physical_property = fixed_value.physical_property
-            error_value.unit = fixed_value.unit
-            error_value.value_type = models.NumericalValueFixed.ERROR
-            error_value.value = float(error)
-            error_value.save()
-        fixed_value.save()
+    counter = 0
+    for key in form.cleaned_data:
+        if key.startswith('fixed_property_'):
+            suffix = key.split('fixed_property_')[1]
+            fixed_value = models.NumericalValueFixed(created_by=request.user,
+                                                     dataseries=dataseries,
+                                                     counter=counter)
+            fixed_value.physical_property = (
+                form.cleaned_data['fixed_property_' + suffix])
+            fixed_value.unit = form.cleaned_data['fixed_unit_' + suffix]
+            value, value_type, error = clean_value(
+                form.cleaned_data['fixed_value_' + suffix])
+            fixed_value.value = value
+            fixed_value.value_type = value_type
+            fixed_value.save()
+            if error:
+                error_value = models.NumericalValueFixed(
+                    created_by=request.user,
+                    dataseries=dataseries,
+                    counter=counter)
+                error_value.physical_property = fixed_value.physical_property
+                error_value.unit = fixed_value.unit
+                error_value.value_type = models.NumericalValueFixed.ERROR
+                error_value.value = float(error)
+                error_value.save()
+            counter += 1
     # Input files
     if (
             dataset.primary_property and
@@ -1513,4 +1507,19 @@ def get_atomic_coordinates(request, pk):
             'counter', 'datapoint_id').values_list('value', flat=True)
     N = symbols.count()
     data = list(zip(symbols, values[:N], values[N:2*N], values[2*N:3*N]))
+    return JsonResponse(data, safe=False)
+
+
+def get_dropdown_options(request, name):
+    """Return a list of options for Selectize."""
+    model_types = {
+        'publication': models.Publication,
+        'system': models.System,
+        'property': models.Property,
+        'unit': models.Unit,
+    }
+    model = re.sub(r'^.*(publication|system|property|unit).*$', r'\1', name)
+    data = []
+    for obj in model_types[model].objects.all():
+        data.append({'value': obj.pk, 'text': str(obj)})
     return JsonResponse(data, safe=False)
