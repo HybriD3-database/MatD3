@@ -165,38 +165,35 @@ class AddDataForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Define the primary property of interest (in a figure, this typically '
-        'denotes the y-axis). If the property of interest missing here, add '
-        'it under "Define new property".')
+        'denotes the y-axis). If the property of interest is missing here, '
+        'add it under "Define new property".')
     primary_unit = forms.ModelChoiceField(
         queryset=models.Unit.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control',
                                    'disabled': 'true'}),
         help_text=''
-        'Define the primary unit of interest (in a figure, this typically '
-        'denotes the unit of the y-axis). For dimensionless physical '
-        'properties, select "none". If the data is in arbitray units, select '
-        '"a.u." (note that this is different from "none"). If the unit of '
-        'interest missing here, add it under "Define new unit".')
+        'Define the primary unit of interest. For dimensionless physical '
+        'properties, leave empty. If the data is in arbitray units, select '
+        '"a.u." (note that this is different from empty). If the unit of '
+        'interest is missing here, add it under "Define new unit".')
     secondary_property = forms.ModelChoiceField(
         queryset=models.Property.objects.all(),
         required=False,
+        label='Secondary property (x-axis)',
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Define the secondary property of interest (in a figure, this '
-        'typically denotes the x-axis). When inserting values that have no '
-        'direct dependence on a physical property (e.g., a list of phonon '
-        'energies), the secondary property may be left empty. If the property '
-        'of interest missing here, add it under "Define new property".')
+        'typically denotes the x-axis). If the property of interest is '
+        'missing here, add it under "Define new property".')
     secondary_unit = forms.ModelChoiceField(
         queryset=models.Unit.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control',
                                    'disabled': 'true'}),
         help_text=''
-        'Define the secondry unit of interest (in a figure, this typically '
-        'denotes the unit of the x-axis). If the unit of interest missing '
-        'here, add it under "Define new unit".')
+        'Define the secondary unit of interest. If the unit of interest '
+        'missing here, add it under "Define new unit".')
     visible_to_public = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         initial=True,
@@ -205,6 +202,13 @@ class AddDataForm(forms.Form):
         'Choose whether the data should be initially visible on the website. '
         'If not, only you can view the data. This setting can be easily '
         'toggled later.')
+    two_axes = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        initial=False,
+        required=False,
+        help_text=''
+        'Select this if your data has independent (x) and dependent (y) '
+        'variables.')
     plotted = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         required=False,

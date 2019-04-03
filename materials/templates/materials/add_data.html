@@ -86,6 +86,9 @@
                   {% include 'materials/input_field.html' with field=form.visible_to_public %}
                 </div>
                 <div class="form-check form-check-inline">
+                  {% include 'materials/input_field.html' with field=form.two_axes %}
+                </div>
+                <div class="form-check form-check-inline">
                   {% include 'materials/input_field.html' with field=form.plotted %}
                 </div>
                 <hr>
@@ -391,6 +394,11 @@
          items: [initial_value],
          options: options,
        });
+       /* Some events can only be triggered once certain dropdowns have loaded */
+       if (id === '#id_primary_property') {
+         $('#id_primary_property').trigger('change');
+         $('#id_two_axes').trigger('change');
+       }
      });
    }
   </script>
@@ -441,7 +449,7 @@
      primary_unit = $(this).parent().next();
      secondary_property = primary_unit.next();
      secondary_unit = secondary_property.next();
-     if ($(this).find(':selected').attr('require_input_files') == 'True') {
+     if ($(this).find(':selected').attr('require_input_files') === 'True') {
        primary_unit.hide();
        secondary_property.hide();
        secondary_unit.hide();
@@ -480,7 +488,7 @@
    /* Collapsable sections of the input */
    function toggleSectionInclusivity(button, hidden_field) {
      $(button).click(function() {
-       if ($(hidden_field).val() == 'True') {
+       if ($(hidden_field).val() === 'True') {
          $(hidden_field).val('False');
          $(button).css({'background': '#dce9ff'});
          $(button).html($(button).html().split('remove)')[0] + 'add)');
@@ -496,28 +504,39 @@
    toggleSectionInclusivity('#computational-button', '#id_with_computational_details');
   </script>
   <script>
+   $('#id_two_axes').change(function(event, force_hide=false) {
+     if ($(this).is(':checked') && !force_hide &&
+         $('#id_primary_property').find(':selected').text() !== 'lattice parameter') {
+       $('#id_secondary_property').parent().show();
+       $('#id_secondary_unit').parent().show();
+       $('label[for="id_primary_property-selectized"]').html('Primary property (y-axis)');
+       $('#main-data').attr('placeholder', 'x1 y1\nx2 y2\n...');
+     } else {
+       $('#id_secondary_property').parent().hide();
+       $('#id_secondary_unit').parent().hide();
+       $('label[for="id_primary_property-selectized"]').html('Primary property');
+       $('#main-data').attr('placeholder', 'value_1 value_2 ...');
+     }
+   });
+  </script>
+  <script>
    /* Lattice parameter specific */
-   function toggle_lattice_parameter_input() {
-     var is_lattice_parameter = $('#id_primary_property').find(':selected').text() == 'lattice parameter';
+   $('#id_primary_property').change(function() {
+     var is_lattice_parameter =
+       $('#id_primary_property').find(':selected').text() === 'lattice parameter';
      if (is_lattice_parameter) {
        $('.lattice-parameter-input').attr('hidden', false);
        $('.normal-input').hide();
+       $('#id_two_axes').trigger('change', force_hide=true);
      } else {
        $('.lattice-parameter-input').attr('hidden', true);
        $('.normal-input').show();
+       $('#id_two_axes').trigger('change');
      }
      /* Make lattice parameter related fields required only if this property has been selected */
-     $('input[type="number"').filter(function() {
+     $('input[type="text"').filter(function() {
        return this.id.match(/lattice_constant_/);
      }).prop('required', is_lattice_parameter);
-   }
-   $('#id_primary_property').change(function() {
-     toggle_lattice_parameter_input();
-   });
-   $(document).ready(function() {
-     if ($('#id_primary_property').find(':selected').text() == 'lattice parameter') {
-       toggle_lattice_parameter_input();
-     }
    });
    $('#input-lattice-parameters').change(function() {
      var form_data = new FormData();

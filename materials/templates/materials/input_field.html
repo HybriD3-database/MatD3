@@ -31,7 +31,7 @@
     <span class="alert alert-danger">{{ field.errors.as_text }}</span>
   {% endif %}
   {% if field.field.widget.input_type == 'select' %}
-    <select id="{{ field.id_for_label }}" name="{{ field.name }}" placeholder="--none--">
+    <select id="{{ field.id_for_label }}" name="{{ field.name }}" placeholder="--none--" hidden>
     </select>
   {% else %}
     {{ field }}
