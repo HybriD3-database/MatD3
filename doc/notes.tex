@@ -253,16 +253,16 @@ The table of systems includes, among other things, fields for the organic and in
   \end{itemize}
 \end{tcolorbox}
 
-Authors and publications are stored in the following tables.
+Authors and references are stored in the following tables.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Author(Base)]
   \begin{itemize}
   \item \texttt{first\_name}
   \item \texttt{last\_name}
   \item \texttt{institution}
-  \item \texttt{publication} --- ManyToMany field that maps authors to publications. This should be removed! Create a foreign key in \texttt{Publication} instead.
+  \item \texttt{reference} --- ManyToMany field that maps authors to references. This should be removed! Create a foreign key in \texttt{Reference} instead.
   \end{itemize}
 \end{tcolorbox}
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Publication(Base)]
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Reference(Base)]
   \begin{itemize}
   \item \texttt{author\_count} --- number of authors
   \item \texttt{title}
@@ -275,7 +275,7 @@ Authors and publications are stored in the following tables.
   \end{itemize}
 \end{tcolorbox}
 
-All experimental and theoretical results are contained in data sets. A data set typically refers to a single value, table, or figure found in a publication. The quantity of primary interest is called the ``primary property''. For example, if the band gap depends on temperature, then the band gap and temperature would be the ``primary'' and ``secondary'' properties, respectively (think of these as y- and x-values in a plot).
+All experimental and theoretical results are contained in data sets. A data set typically refers to a single value, table, or figure found in a reference. The quantity of primary interest is called the ``primary property''. For example, if the band gap depends on temperature, then the band gap and temperature would be the ``primary'' and ``secondary'' properties, respectively (think of these as y- and x-values in a plot).
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Dataset(Base)]
   \begin{itemize}
   \item \texttt{label} --- description of the data set
@@ -284,7 +284,7 @@ All experimental and theoretical results are contained in data sets. A data set 
   \item \texttt{primary\_unit} --- reference to the primary key of Unit
   \item \texttt{secondary\_property} --- reference to the primary key of Property
   \item \texttt{secondary\_unit} --- reference to the primary key of Unit
-  \item \texttt{reference} --- reference to the primary key of Publication
+  \item \texttt{reference} --- reference to the primary key of Reference
   \item \texttt{visible} --- whether the data is visible on the website
   \item \texttt{plotted} --- whether data is plotted by default
   \item \texttt{has\_files} --- whether the data set comes with additional files. This field is a boolean only. If true, the actual files are stored at \verb+MEDIA_ROOT/uploads/dataset_#+, where \verb+#+ is the data set ID

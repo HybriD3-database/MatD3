@@ -67,7 +67,7 @@ def syn_file_name(instance, filename):
     return os.path.join('uploads', filename)
 
 
-class Publication(models.Model):
+class Reference(models.Model):
     author_count = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=1000)
     journal = models.CharField(max_length=500, blank=True)
@@ -99,7 +99,7 @@ class Author(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     institution = models.CharField(max_length=100, blank=True)
-    publication = models.ManyToManyField(Publication)
+    reference = models.ManyToManyField(Reference)
 
     def __str__(self):
         value = (self.first_name + ' ' + self.last_name + ', ' +
@@ -149,7 +149,7 @@ class System(models.Model):
         for dataType in [self.atomicpositions_set, self.synthesismethodold_set,
                          self.excitonemission_set, self.bandstructure_set]:
             for data in dataType.all():
-                for author in data.publication.author_set.all():
+                for author in data.reference.author_set.all():
                     if author not in L:  # don't add duplicate authors
                         L.append(author)
 
@@ -178,7 +178,7 @@ class SpecificMethod(models.Model):
 
 
 class IDInfo(models.Model):
-    publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    reference = models.ForeignKey(Reference, on_delete=models.PROTECT)
     source = models.CharField(max_length=500)
     data_extraction_method = models.CharField(max_length=500)
     contributor = models.ForeignKey('accounts.UserProfile',
@@ -192,7 +192,7 @@ class IDInfo(models.Model):
     last_update = models.DateField(auto_now=True)
 
     def getAuthors(self):
-        return self.publication.getAuthors()
+        return self.reference.getAuthors()
 
 
 class SynthesisMethodOld(IDInfo):
@@ -346,7 +346,7 @@ class Dataset(Base):
     secondary_unit = models.ForeignKey(
         Unit, null=True, on_delete=models.PROTECT,
         related_name='secondary_unit')
-    reference = models.ForeignKey(Publication, null=True,
+    reference = models.ForeignKey(Reference, null=True,
                                   on_delete=models.PROTECT)
     visible = models.BooleanField()
     plotted = models.BooleanField()

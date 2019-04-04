@@ -59,8 +59,8 @@
                   <strong>Temperature:</strong> {{entry.temperature}}K <br>
                 {% endif %}
                 <strong>Method:</strong> {{entry.method}} <br>
-                {% if entry.publication.doi_isbn %}
-                  <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+                {% if entry.reference.doi_isbn %}
+                  <strong>Reference:</strong> {{entry.reference.doi_isbn}} <br>
                 {% endif %}
                 <strong>Source:</strong> {{entry.source}} <br>
                 <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
@@ -76,10 +76,10 @@
                 Atomic Positions
               </button>
             </a>
-            {% with entry.publication.author_set.all as authors %}
+            {% with entry.reference.author_set.all as authors %}
               <button type="button" class="btn btn-warning" data-toggle="popover"
                       title="Reference information" data-trigger="focus" html="true"
-                      data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
+                      data-content="{% include 'materials/reference_format.html' with ref=entry.reference %}">
                 <span class="fa fa-book" aria-hidden="true"></span>
                 Reference
               </button>
@@ -128,8 +128,8 @@
                 {% if entry.method %}
                   <strong>Method:</strong> {{entry.method}} <br> <!--maybe this field should be left out-->
                 {% endif %}
-                {% if entry.publication.doi_isbn %}
-                  <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+                {% if entry.reference.doi_isbn %}
+                  <strong>Reference:</strong> {{entry.reference.doi_isbn}} <br>
                 {% endif %}
                 <strong>Source:</strong> {{entry.source}} <br>
                 <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
@@ -143,10 +143,10 @@
                     <span class="fa fa-download" aria-hidden="true"></span>
                     Synthesis Method
                   </button>
-                </a>{% with entry.publication.author_set.all as authors %}
+                </a>{% with entry.reference.author_set.all as authors %}
                   <button type="button" class="btn btn-warning" data-toggle="popover"
                           data-trigger="focus" title="Reference information"
-                          data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
+                          data-content="{% include 'materials/reference_format.html' with ref=entry.reference %}">
                     <span class="fa fa-book" aria-hidden="true"></span>
                     Reference
                   </button>
@@ -189,8 +189,8 @@
               {% endif %}
               <strong>Crystal system:</strong> {{entry.phase}} <br>
               <strong>Method:</strong> {{entry.method}} <br>
-              {% if entry.publication.doi_isbn %}
-                <strong>Publication:</strong> {{entry.publication.doi_isbn}} <br>
+              {% if entry.reference.doi_isbn %}
+                <strong>Reference:</strong> {{entry.reference.doi_isbn}} <br>
               {% endif %}
               <strong>Source:</strong> {{entry.source}} <br>
               <strong>Data extraction:</strong> {{entry.data_extraction_method}} <br>
@@ -205,10 +205,10 @@
                   Exciton Emission Peak
                 </button>
               </a>
-              {% with entry.publication.author_set.all as authors %}
+              {% with entry.reference.author_set.all as authors %}
                 <button type="button" class="btn btn-warning" data-toggle="popover"
                         data-trigger="focus" title="Reference information"
-                        data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
+                        data-content="{% include 'materials/reference_format.html' with ref=entry.reference %}">
                   <span class="fa fa-book" aria-hidden="true"></span>
                   Reference
                 </button>
@@ -291,10 +291,10 @@
                   </button>
                 </a>
               {% endif %}
-              {% with entry.publication.author_set.all as authors %}
+              {% with entry.reference.author_set.all as authors %}
                 <button type="button" class="btn btn-warning" data-toggle="popover"
                         data-trigger="focus" title="Reference information"
-                        data-content="{% include 'materials/reference_format.html' with ref=entry.publication %}">
+                        data-content="{% include 'materials/reference_format.html' with ref=entry.reference %}">
                   <span class="fa fa-book" aria-hidden="true"></span>
                   Reference
                 </button>
@@ -347,7 +347,7 @@
 
 {% block script %}
   <script type="text/javascript">
-   var citation = "{{entry.publication.doi_isbn}}";
+   var citation = "{{entry.reference.doi_isbn}}";
    $('[data-toggle="popover"]').popover({placement: "top", html:true});
   </script>
   <!-- could potentially change to server served -->

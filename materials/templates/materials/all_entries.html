@@ -56,8 +56,8 @@
                     {% endif %}
                     <div style="margin-left: 20px; text-indent: -20px;">
                       {% with entry.getAuthors as authors %}
-                        <strong>Publication:</strong>
-                        {% include 'materials/reference_format.html' with ref=entry.publication %}
+                        <strong>Reference:</strong>
+                        {% include 'materials/reference_format.html' with ref=entry.reference %}
                       {% endwith %}
                     </div>
                     {% if entry.source %}

@@ -11,8 +11,8 @@
         <form id="update-entry" method="post">
           {% csrf_token %}
           <div style="padding-bottom: 10px">
-            <label for="publication">Publication:</label>
-            <input type="text" name="publication" class="form-control" value="{{object.publication}}" readonly>
+            <label for="reference">Reference:</label>
+            <input type="text" name="reference" class="form-control" value="{{object.reference}}" readonly>
           </div>
           {% block relatedEntries %}
           {% endblock %}

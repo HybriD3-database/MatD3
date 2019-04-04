@@ -71,7 +71,7 @@ def data_dl(request, data_type, pk, bandgap=False):
         response.write(str(obj.temperature + ' K'))
         response.write(str('\n#Phase: '))
         response.write(str(obj.phase.phase))
-        authors = obj.publication.author_set.all()
+        authors = obj.reference.author_set.all()
         response.write(str('\n#Authors ('+str(authors.count())+'): '))
         for author in authors:
             response.write('\n    ')
@@ -79,10 +79,10 @@ def data_dl(request, data_type, pk, bandgap=False):
             response.write(author.last_name)
             response.write(', ' + author.institution)
         response.write(str('\n#Journal: '))
-        response.write(str(obj.publication.journal))
+        response.write(str(obj.reference.journal))
         response.write(str('\n#Source: '))
-        if obj.publication.doi_isbn:
-            response.write(str(obj.publication.doi_isbn))
+        if obj.reference.doi_isbn:
+            response.write(str(obj.reference.doi_isbn))
         else:
             response.write(str('N/A'))
 
@@ -149,15 +149,15 @@ def data_dl(request, data_type, pk, bandgap=False):
             meta_file.write(str('\n#Phase: '))
             meta_file.write(str(obj.phase.phase))
             meta_file.write(str('\n#Authors: '))
-            for author in obj.publication.author_set.all():
+            for author in obj.reference.author_set.all():
                 meta_file.write('\n    ')
                 meta_file.write(author.first_name + ' ')
                 meta_file.write(author.last_name)
                 meta_file.write(', ' + author.institution)
             meta_file.write(str('\n#Journal: '))
-            meta_file.write(str(obj.publication.journal))
+            meta_file.write(str(obj.reference.journal))
             meta_file.write(str('\n#Source: '))
-            meta_file.write(str(obj.publication.doi_isbn))
+            meta_file.write(str(obj.reference.doi_isbn))
             meta_file.write(str('\n#Exciton Emission Peak: '))
             meta_file.write(str(obj.excitonemission))
         pl_file_csv = os.path.join(dir_in_str, file_name_prefix + '.csv')
@@ -200,15 +200,15 @@ def data_dl(request, data_type, pk, bandgap=False):
         response.write(str('\n#Phase: '))
         response.write(str(obj.phase.phase))
         response.write(str('\n#Authors: '))
-        for author in obj.publication.author_set.all():
+        for author in obj.reference.author_set.all():
             response.write('\n    ')
             response.write(author.first_name + ' ')
             response.write(author.last_name)
             response.write(', ' + author.institution)
         response.write(str('\n#Journal: '))
-        response.write(str(obj.publication.journal))
+        response.write(str(obj.reference.journal))
         response.write(str('\n#Source: '))
-        response.write(str(obj.publication.doi_isbn))
+        response.write(str(obj.reference.doi_isbn))
         if obj.synthesis_method:
             response.write(str('\n#Synthesis Method: '))
             response.write(str(obj.synthesis_method))
@@ -259,15 +259,15 @@ def data_dl(request, data_type, pk, bandgap=False):
             meta_file.write('\n#Phase: ')
             meta_file.write(str(obj.phase.phase))
             meta_file.write(str('\n#Authors: '))
-            for author in obj.publication.author_set.all():
+            for author in obj.reference.author_set.all():
                 meta_file.write('\n    ')
                 meta_file.write(author.first_name + ' ')
                 meta_file.write(author.last_name)
                 meta_file.write(', ' + author.institution)
             meta_file.write('\n#Journal: ')
-            meta_file.write(str(obj.publication.journal))
+            meta_file.write(str(obj.reference.journal))
             meta_file.write('\n#Source: ')
-            meta_file.write(str(obj.publication.doi_isbn))
+            meta_file.write(str(obj.reference.doi_isbn))
         bs_full = os.path.join(dir_in_str, file_name_prefix + '_full.png')
         bs_mini = os.path.join(dir_in_str, file_name_prefix + '_min.png')
         filenames = []
@@ -376,13 +376,13 @@ def getAuthorSearchResult(search_text):
     keyWords = search_text.split()
     results = models.System.objects.\
         filter(functools.reduce(operator.or_, (
-            Q(atomicpositions__publication__author__last_name__icontains=x) for
+            Q(atomicpositions__reference__author__last_name__icontains=x) for
             x in keyWords)) | functools.reduce(operator.or_, (
-                Q(synthesismethodold__publication__author__last_name__icontains=x)
+                Q(synthesismethodold__reference__author__last_name__icontains=x)
                 for x in keyWords)) | functools.reduce(operator.or_, (
-                        Q(excitonemission__publication__author__last_name__icontains=x)
+                        Q(excitonemission__reference__author__last_name__icontains=x)
                         for x in keyWords)) | functools.reduce(operator.or_, (
-                                Q(bandstructure__publication__author__last_name__icontains=x)
+                                Q(bandstructure__reference__author__last_name__icontains=x)
                                 for x in keyWords))
          ).distinct()
     return results
@@ -516,11 +516,11 @@ def makeCorrections(form):
 
 
 class AddPubView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_publication.html'
+    template_name = 'materials/add_reference.html'
 
     def get(self, request):
         search_form = forms.SearchForm()
-        pub_form = forms.AddPublication()
+        pub_form = forms.AddReference()
         return render(request, self.template_name, {
             'search_form': search_form,
             'pub_form': pub_form,
@@ -542,20 +542,20 @@ class AddPubView(LoginRequiredMixin, generic.TemplateView):
         # institution
         assert(len(authors_info) % 3 == 0)
         author_count = len(authors_info) // 3
-        pub_form = forms.AddPublication(request.POST)
+        pub_form = forms.AddReference(request.POST)
         if pub_form.is_valid():
             form = pub_form.save(commit=False)
             doi_isbn = pub_form.cleaned_data['doi_isbn']
             # check if doi_isbn is unique/valid, except when field is empty
             if len(doi_isbn) == 0 or len(
-                    models.Publication.objects.filter(doi_isbn=doi_isbn)) == 0:
+                    models.Reference.objects.filter(doi_isbn=doi_isbn)) == 0:
                 form.author_count = author_count
                 form.save()
                 newPub = form
                 text = 'Save success!'
                 feedback = 'success'
             else:
-                text = 'Failed to submit, publication is already in database.'
+                text = 'Failed to submit, reference is already in database.'
                 feedback = 'failure'
         else:
             text = 'Failed to submit, please fix the errors, and try again.'
@@ -563,7 +563,7 @@ class AddPubView(LoginRequiredMixin, generic.TemplateView):
         if feedback == 'failure':
             return JsonResponse({'feedback': feedback, 'text': text})
         # create and save new author objects, linking them to the
-        # saved publication
+        # saved reference
         for i in range(author_count):  # for each author
             data = {}
             data['first_name'] = authors_info['form-%d-first_name' % i]
@@ -576,7 +576,7 @@ class AddPubView(LoginRequiredMixin, generic.TemplateView):
                             institution__iexact=data['institution']))
             if preexistingAuthors.count() > 0:
                 # use the prexisting author object
-                preexistingAuthors[0].publication.add(newPub)
+                preexistingAuthors[0].reference.add(newPub)
             else:  # this is a new author, so create a new object
                 author_form = forms.AddAuthor(data)
                 if(not author_form.is_valid()):
@@ -586,7 +586,7 @@ class AddPubView(LoginRequiredMixin, generic.TemplateView):
                     break
                 else:  # author_form is valid
                     form = author_form.save()
-                    form.publication.add(newPub)
+                    form.reference.add(newPub)
                     form.save()
                     text = 'Save success!'
                     feedback = 'success'
@@ -611,14 +611,14 @@ class SearchPubView(generic.TemplateView):
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
             author_search = (
-                models.Publication.objects.filter(
+                models.Reference.objects.filter(
                     Q(author__first_name__icontains=search_text) |
                     Q(author__last_name__icontains=search_text) |
                     Q(author__institution__icontains=search_text)).distinct())
             if len(author_search) > 0:
                 search_result = author_search
             else:
-                search_result = models.Publication.objects.filter(
+                search_result = models.Reference.objects.filter(
                     Q(title__icontains=search_text) |
                     Q(journal__icontains=search_text)
                 )
@@ -626,8 +626,8 @@ class SearchPubView(generic.TemplateView):
                       {'search_result': search_result})
 
 
-class AddAuthorsToPublicationView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_authors_to_publication.html'
+class AddAuthorsToReferenceView(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'materials/add_authors_to_reference.html'
 
     def post(self, request):
         author_count = request.POST['author_count']
@@ -639,13 +639,13 @@ class AddAuthorsToPublicationView(LoginRequiredMixin, generic.TemplateView):
 
 
 class SearchAuthorView(generic.TemplateView):
-    """This is for add publication page"""
-    # template_name = 'materials/add_publication.html'
+    """This is for add reference page"""
+    # template_name = 'materials/add_reference.html'
     template_name = 'materials/dropdown_list_author.html'
 
     def post(self, request):
         search_form = forms.SearchForm(request.POST)
-        # pub_form = forms.AddPublication()
+        # pub_form = forms.AddReference()
         search_text = ''
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
@@ -846,7 +846,7 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
         form = forms.AddBandStructure(request.POST, request.FILES)
         if form.is_valid():
             new_form = form.save(commit=False)
-            pub_pk = request.POST.get('publication')
+            pub_pk = request.POST.get('reference')
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
             try:
@@ -856,7 +856,7 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
             if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.publication = models.Publication.objects.get(pk=pub_pk)
+                new_form.reference = models.Reference.objects.get(pk=pub_pk)
                 new_form.system = models.System.objects.get(pk=sys_pk)
                 # text += 'Settings ready. '
                 if request.user.is_authenticated:
@@ -1028,7 +1028,7 @@ def submit_data(request):
     # Create data set
     dataset = models.Dataset(created_by=request.user)
     dataset.system = form.cleaned_data['select_system']
-    dataset.reference = form.cleaned_data['select_publication']
+    dataset.reference = form.cleaned_data['select_reference']
     dataset.label = form.cleaned_data['data_set_label']
     if form.cleaned_data['primary_property']:
         dataset.primary_property = form.cleaned_data['primary_property']
@@ -1265,8 +1265,8 @@ class SystemDetailView(generic.DetailView):
     model = models.System
 
 
-class PublicationDetailView(generic.DetailView):
-    model = models.Publication
+class ReferenceDetailView(generic.DetailView):
+    model = models.Reference
 
 
 class SpecificSystemView(generic.TemplateView):
@@ -1370,7 +1370,7 @@ def dataset_data(request, pk):
     return HttpResponse(text, content_type='text/plain')
 
 
-def publication_data(request, pk):
+def reference_data(request, pk):
     """Return a key-value representation of the data set.
 
     The representation conforms to the one used in Qresp
@@ -1393,22 +1393,22 @@ def publication_data(request, pk):
         'serverPath': request.get_host(),
         'timeStamp': datetime.datetime.now()
     }
-    publication = models.Publication.objects.get(pk=pk)
+    reference = models.Reference.objects.get(pk=pk)
     data['reference'] = {}
     data['reference']['journal'] = {
-        'abbrevName': publication.journal,
-        'fullName': publication.journal,
+        'abbrevName': reference.journal,
+        'fullName': reference.journal,
         'kind': 'journal',
-        'page': publication.pages_start,
+        'page': reference.pages_start,
         'publishedAbstract': '',
         'publishedDate': '',
         'receivedDate': '',
-        'title': publication.title,
-        'volume': publication.vol,
-        'year': publication.year,
+        'title': reference.title,
+        'volume': reference.vol,
+        'year': reference.year,
     }
     data['reference']['authors'] = []
-    for author in publication.author_set.all():
+    for author in reference.author_set.all():
         data['reference']['authors'].append({
             'firstname': author.first_name,
             'lastname': author.last_name,
@@ -1417,7 +1417,7 @@ def publication_data(request, pk):
     data['PIs'].append({'firstname': '', 'lastname': ''})
     data['collections'] = []
     data['collections'].append('')
-    datasets = publication.dataset_set.all()
+    datasets = reference.dataset_set.all()
     data['charts'] = []
     dataset_counter = 1
     for dataset in datasets:
@@ -1513,12 +1513,12 @@ def get_atomic_coordinates(request, pk):
 def get_dropdown_options(request, name):
     """Return a list of options for Selectize."""
     model_types = {
-        'publication': models.Publication,
+        'reference': models.Reference,
         'system': models.System,
         'property': models.Property,
         'unit': models.Unit,
     }
-    model = re.sub(r'^.*(publication|system|property|unit).*$', r'\1', name)
+    model = re.sub(r'^.*(reference|system|property|unit).*$', r'\1', name)
     data = []
     for obj in model_types[model].objects.all():
         data.append({'value': obj.pk, 'text': str(obj)})

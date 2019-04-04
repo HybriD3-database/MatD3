@@ -56,7 +56,7 @@
               <div class="card-body card-add-data">
                 <div class="form-row">
                   <div class="form-group col-md-6">
-                    {% include 'materials/input_field.html' with field=form.select_publication %}
+                    {% include 'materials/input_field.html' with field=form.select_reference %}
                   </div>
                   <div class="form-group col-md-6">
                     {% include 'materials/input_field.html' with field=form.select_system %}
@@ -344,8 +344,8 @@
             <label for="other-list">Other options:</label>
           </div>
           <div id="other-list" class="list-group">
-            <a href="{% url 'materials:add_publication'%}" class="list-group-item list-group-item-action">
-              Add Publication
+            <a href="{% url 'materials:add_reference'%}" class="list-group-item list-group-item-action">
+              Add Reference
             </a>
             <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
               Add System

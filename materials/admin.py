@@ -9,7 +9,7 @@ class BandStructureAdmin(admin.ModelAdmin):
 
 admin.site.register(models.System)
 admin.site.register(models.AtomicPositions)
-admin.site.register(models.Publication)
+admin.site.register(models.Reference)
 admin.site.register(models.Author)
 admin.site.register(models.Phase)
 admin.site.register(models.ExcitonEmission)

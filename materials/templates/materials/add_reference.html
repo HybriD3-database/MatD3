@@ -4,24 +4,24 @@
   <br>
   <div class="card card-default">
     <div class="card-header">
-      <h4>Add Publication</h4>
+      <h4>Add Reference</h4>
     </div>
     <div class="card-body">
       <form id="author-count" method="post" action="{% url 'materials:author_count' %}">
         {% csrf_token %}
         <label for="id_author_count">Number of authors:</label>
-        <input type="number" name="author_count" autofocus="true" class="form-control" id="id_author_count" min="1" max="50" placeholder="Please enter the number of authors associated with this publication" required>
+        <input type="number" name="author_count" autofocus="true" class="form-control" id="id_author_count" min="1" max="50" placeholder="Please enter the number of authors associated with this reference" required>
         <button type="submit" class="btn btn-info">Enter</button>
       </form>
 
-      <form id="add-publication" method="post" action="{% url 'materials:add_publication' %}" class="form-group invisible">
+      <form id="add-reference" method="post" action="{% url 'materials:add_reference' %}" class="form-group invisible">
         {% csrf_token %}
         <p>
           <div id="entered-authors">
           </div>
         </p>
         {{ pub_form.as_p }}
-        <button type="submit" class="btn btn-info">Submit new publication</button>
+        <button type="submit" class="btn btn-info">Submit new reference</button>
       </form>
       {{text}}
       <div id="feedback">
@@ -36,9 +36,9 @@
   <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
   <script>
    $('#author-count').submit(function() {
-     $('#add-publication').removeClass('invisible');
+     $('#add-reference').removeClass('invisible');
    });
    ajax_submit($('#author-count'), $('#entered-authors'));
-   alert_submit($('#add-publication'), $('#feedback'));
+   alert_submit($('#add-reference'), $('#feedback'));
   </script>
 {% endblock %}

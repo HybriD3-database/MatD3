@@ -66,8 +66,8 @@
                     <strong>Temperature:</strong> {{ entry.temperature }}K <br>
                   {% endif %}
                   <strong>Method:</strong> {{ entry.method }} <br>
-                  {% if entry.publication.doi_isbn %}
-                    <strong>Publication:</strong> {{ entry.publication.doi_isbn }} <br>
+                  {% if entry.reference.doi_isbn %}
+                    <strong>Reference:</strong> {{ entry.reference.doi_isbn }} <br>
                   {% endif %}
                   <strong>Source:</strong> {{ entry.source }} <br>
                   <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
@@ -76,14 +76,14 @@
                       <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
-                  {% with entry.publication.author_set.all as authors %}
+                  {% with entry.reference.author_set.all as authors %}
                     <button type="button" class="btn btn-primary" data-toggle="collapse"
                             data-target="#reference1">
                       <span class="fa fa-book" aria-hidden="true"></span>
                       Reference
                     </button>
                     <div id="reference1" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=entry.publication %}
+                      {% include 'materials/reference_format.html' with ref=entry.reference %}
                     </div>
                     <br>
                   {% endwith %}
@@ -142,8 +142,8 @@
                   {% if entry.method %}
                     <strong>Method:</strong> {{ entry.method }} <br> <!--maybe this field should be left out-->
                   {% endif %}
-                  {% if entry.publication.doi_isbn %}
-                    <strong>Publication:</strong> {{ entry.publication.doi_isbn }} <br>
+                  {% if entry.reference.doi_isbn %}
+                    <strong>Reference:</strong> {{ entry.reference.doi_isbn }} <br>
                   {% endif %}
                   <strong>Source:</strong> {{ entry.source }} <br>
                   <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
@@ -152,14 +152,14 @@
                       <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
-                  {% with entry.publication.author_set.all as authors %}
+                  {% with entry.reference.author_set.all as authors %}
                     <button type="button" class="btn btn-primary" data-toggle="collapse"
                             data-target="#reference2">
                       <span class="fa fa-book" aria-hidden="true"></span>
                       Reference
                     </button>
                     <div id="reference2" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=entry.publication %}
+                      {% include 'materials/reference_format.html' with ref=entry.reference %}
                     </div>
                     <br>
                   {% endwith %}
@@ -205,8 +205,8 @@
                   {% endif %}
                   <strong>Crystal system:</strong> {{ entry.phase }} <br>
                   <strong>Method:</strong> {{ entry.method }} <br>
-                  {% if entry.publication.doi_isbn %}
-                    <strong>Publication:</strong> {{ entry.publication.doi_isbn }} <br>
+                  {% if entry.reference.doi_isbn %}
+                    <strong>Reference:</strong> {{ entry.reference.doi_isbn }} <br>
                   {% endif %}
                   <strong>Source:</strong> {{ entry.source }} <br>
                   <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
@@ -215,14 +215,14 @@
                       <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
-                  {% with entry.publication.author_set.all as authors %}
+                  {% with entry.reference.author_set.all as authors %}
                     <button type="button" class="btn btn-primary" data-toggle="collapse"
                             data-target="#reference3">
                       <span class="fa fa-book" aria-hidden="true"></span>
                       Reference
                     </button>
                     <div id="reference3" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=entry.publication %}
+                      {% include 'materials/reference_format.html' with ref=entry.reference %}
                     </div>
                     <br>
                   {% endwith %}
@@ -299,14 +299,14 @@
                       <strong>Comments:</strong> {{ entry.comments }}
                     </div>
                   {% endif %}
-                  {% with entry.publication.author_set.all as authors %}
+                  {% with entry.reference.author_set.all as authors %}
                     <button type="button" class="btn btn-primary" data-toggle="collapse"
                             data-target="#reference4">
                       <span class="fa fa-book" aria-hidden="true"></span>
                       Reference
                     </button>
                     <div id="reference4" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=entry.publication %}
+                      {% include 'materials/reference_format.html' with ref=entry.reference %}
                     </div>
                     <br>
                   {% endwith %}

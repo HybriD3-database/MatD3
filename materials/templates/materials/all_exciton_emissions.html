@@ -36,8 +36,8 @@
           <div>
             <b>Product:</b> {{ syn.product|truncatechars:50 }}
           </div>
-        {% endif %}<b>Publication:</b>
-                  {% include 'materials/reference_format.html' with ref=entry.publication %}'>
+        {% endif %}<b>Reference:</b>
+                  {% include 'materials/reference_format.html' with ref=entry.reference %}'>
       <span class="fa fa-book" aria-hidden="true"></span>
         Synthesis Method
     </button>

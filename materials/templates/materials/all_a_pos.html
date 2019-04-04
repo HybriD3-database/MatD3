@@ -64,8 +64,8 @@
                     {% endif %}
                     {% with entry.getAuthors as authors %}
                       <div style="margin-left: 20px; text-indent: -20px;">
-                        <strong>Publication:</strong>
-                        {% include 'materials/reference_format.html' with ref=entry.publication %}
+                        <strong>Reference:</strong>
+                        {% include 'materials/reference_format.html' with ref=entry.reference %}
                       </div>
                     {% endwith %}
                     {% if entry.source %}
@@ -114,7 +114,7 @@
                                           <div>
                                           <b>Product:</b> {{ syn.product|truncatechars:50 }}
                                           </div>
-                                          {% endif %}<b>Publication:</b>{% include "materials/reference_format.html" %}'>
+                                          {% endif %}<b>Reference:</b>{% include "materials/reference_format.html" %}'>
                               <span class="fa fa-book" aria-hidden="true"></span>
                               Synthesis Method
                             </button>

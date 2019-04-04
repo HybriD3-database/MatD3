@@ -17,8 +17,8 @@ class AddAuthor(forms.ModelForm):
 
     class Meta:
         model = models.Author
-        fields = ('first_name', 'last_name', 'institution', 'publication')
-        exclude = ('publication',)
+        fields = ('first_name', 'last_name', 'institution', 'reference')
+        exclude = ('reference',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,12 +39,12 @@ class AddTag(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddPublication(forms.ModelForm):
+class AddReference(forms.ModelForm):
     all_fields = ('title', 'journal', 'vol', 'pages_start', 'pages_end',
                   'year', 'doi_isbn')
 
     class Meta:
-        model = models.Publication
+        model = models.Reference
         exclude = ('author',
                    'author_count')
         labels = {
@@ -111,7 +111,7 @@ class AddBandStructure(forms.ModelForm):
 
     class Meta:
         model = models.BandStructure
-        exclude = ('contributor', 'publication', 'system', 'folder_location',
+        exclude = ('contributor', 'reference', 'system', 'folder_location',
                    'plotted', 'synthesis_method')
         labels = {
             'phase': 'Crystal system',
@@ -137,8 +137,8 @@ class AddDataForm(forms.Form):
                              *args, **kwargs)
 
     # General
-    select_publication = forms.ModelChoiceField(
-        queryset=models.Publication.objects.all(),
+    select_reference = forms.ModelChoiceField(
+        queryset=models.Reference.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''

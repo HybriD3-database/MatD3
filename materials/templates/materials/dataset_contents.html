@@ -204,7 +204,7 @@
           {% include 'materials/reference_format.html' with ref=dataset.reference %}
         </div>
         <p class="text-center">
-          <a href="{% url 'materials:publication' pk=dataset.reference.pk %}">
+          <a href="{% url 'materials:reference' pk=dataset.reference.pk %}">
             <button class="btn btn-primary">All data for this reference</button>
           </a>
         </p>

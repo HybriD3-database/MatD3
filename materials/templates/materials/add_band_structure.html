@@ -9,13 +9,13 @@
       <h4>Add Band Structure</h4>
     </div>
     <div class="card-body">
-      <form id="search-publication" method="post" action="{% url 'materials:search_publication' %}">
+      <form id="search-reference" method="post" action="{% url 'materials:search_reference' %}">
         {% csrf_token %}
         <label for="id_search_text">Search term:</label>
         <input type="text" name="search_text" class="form-control" id="id_search_text" maxlength="100"
-               placeholder="Search by publication title, journal name, or full name of author." required>
+               placeholder="Search by reference title, journal name, or full name of author." required>
         <p>
-          <button type="submit" class="btn btn-info">Search for publication</button>
+          <button type="submit" class="btn btn-info">Search for reference</button>
         </p>
       </form>
       <form id="search-system" name="search-system" method="post" action="{% url 'materials:search_system' %}">
@@ -30,7 +30,7 @@
 
       <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
         {% csrf_token %}
-        <div id="publication-search-result">
+        <div id="reference-search-result">
         </div>
         <div id="system-search-result">
         </div>
@@ -69,7 +69,7 @@
   </script>
   <script src="{% static 'materials/javascript/ajax_submit.js' %}"></script>
   <script type="text/javascript">
-   ajax_submit($('#search-publication'), $('#publication-search-result'));
+   ajax_submit($('#search-reference'), $('#reference-search-result'));
    ajax_submit($('#search-system'), $('#system-search-result'));
   </script>
   <script type="text/javascript">
