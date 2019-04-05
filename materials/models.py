@@ -98,7 +98,7 @@ class Reference(models.Model):
 class Author(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    institution = models.CharField(max_length=100, blank=True)
+    institution = models.CharField(max_length=600, blank=True)
     reference = models.ManyToManyField(Reference)
 
     def __str__(self):
