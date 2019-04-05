@@ -123,7 +123,7 @@ class System(models.Model):
     """Contains meta data for investigated system."""
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
-    group = models.CharField(max_length=100)  # aka Alternate names
+    group = models.CharField(max_length=100, blank=True)  # aka Alternate names
     organic = models.CharField(max_length=100)
     inorganic = models.CharField(max_length=100)
     last_update = models.DateField(auto_now=True)
