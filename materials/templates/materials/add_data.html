@@ -60,7 +60,6 @@
                   </div>
                   <div class="form-group col-md-6">
                     {% include 'materials/input_field.html' with field=form.select_system %}
-                    </select>
                   </div>
                   <div class="form-group col-md-6">
                     {% include 'materials/input_field.html' with field=form.data_set_label %}
@@ -211,73 +210,30 @@
             <!-- DATA -->
             <div class="card card-item">
               <div class="card-header">
-                Data series #1
+                Data set
               </div>
               <div class="card-body card-add-data">
                 <div class="row">
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <label for="dataseries-label">Data series label:</label>
-                      <i class="fa fa-question-circle tooltip-container">
-                        <span class="tooltiptext">Description of the data series (optional). If this is the only series in the set (e.g., the only curve in a figure), providing just the data set label is probably sufficient.</span>
+                  <div class="col-md-12">
+                    <div class="form-inline">
+                      <div class="form-group">
+                        {{ form.number_of_data_series.label_tag }}
+                        <div style="margin-left:3px">
+                          {{ form.number_of_data_series.help_text|tooltip }}
+                        </div>
+                        {{ form.number_of_data_series }}
+                      </div>
+                      <input type="file" id="import-all-data" class="inputfile">
+                      <label for="import-all-data"><i class="fa fa-upload" aria-hidden="true"></i>
+                        Import all from file...</label>
+                      <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
+                        <span class="tooltiptext">Select to import all data (all series) from a single file. Use the ampersand ("&") as a delimiter between different data series.</span>
                       </i>
-                      <input class="form-control" id="dataseries-label" name="dataseries-label">
-                    </div>
-                    <div id="fixed-properties">
-                    </div>
-                    <button type="button" id="add-fixed-property" class="btn btn-info">
-                      Add fixed property
-                    </button>
-                    <i class="fa fa-question-circle fa-2x tooltip-container">
-                      <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
-                    </i>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="normal-input">
-                      <label for="main-data">Values
-                        <i class="fa fa-question-circle tooltip-container">
-                          <span class="tooltiptext">Insert data points here. These may be a single value, a series of values, or a series of value pairs. The latter applies when there are both primary and secondary properties, in which case the first column has values of the secondary property (x-values) and the second column corresponds to the primary property (y-values). Note: to resize this box, drag from the corner.</span>
-                        </i>
-                      </label>
-                      <div class="float-right">
-                        <input type="file" id="input-data-file" class="inputfile">
-                        <label for="input-data-file"><i class="fa fa-upload" aria-hidden="true"></i>
-                          Import from file..</label>
-                      </div>
-                      <textarea class="form-control" id="main-data" name="main-data" rows="3"
-                                placeholder="value_1 value_2 ..."></textarea>
-                    </div>
-                    <div class="lattice-parameter-input" hidden="true">
-                      <div class="form-group">
-                        {{ form.lattice_constant_a.label_tag }}
-                        {{ form.lattice_constant_a.help_text|tooltip }}
-                        <div class="float-right">
-                          <input type="file" id="input-lattice-parameters" class="inputfile">
-                          <label for="input-lattice-parameters"><i class="fa fa-upload" aria-hidden="true"></i>
-                            Import from file..</label>
-                        </div>
-                        <div class="input-group">
-                          {{ form.lattice_constant_a }}
-                          {{ form.lattice_constant_b }}
-                          {{ form.lattice_constant_c }}
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        {{ form.lattice_constant_alpha.label_tag }}
-                        <div class="input-group">
-                          {{ form.lattice_constant_alpha }}
-                          {{ form.lattice_constant_beta }}
-                          {{ form.lattice_constant_gamma }}
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        {{ form.atomic_coordinates.label_tag }}
-                        {{ form.atomic_coordinates.help_text|tooltip }}
-                        {{ form.atomic_coordinates }}
-                      </div>
                     </div>
                   </div>
                 </div>
+                <br>
+                <div id="data-series"></div>
               </div>
             </div>
 
@@ -356,6 +312,86 @@
     </div>
   </div>
 
+  <!-- data series template -->
+  <div class="data-series-template d-none">
+    <br>
+    <div class="card card-series">
+      <div class="card-header">this one</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="row">
+              <div class="col-md-7">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">{{ form.series_label.label }}</span>
+                  </div>
+                  {{ form.series_label }}
+                  <i class="fa fa-question-circle fa-2x tooltip-container" style="margin:3px">
+                    <span class="tooltiptext">{{ form.series_label.help_text }}</span>
+                  </i>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <button type="button" class="btn btn-info add-fixed-property"
+                        style="margin-bottom:15px">
+                  Add fixed property
+                </button>
+                <i class="fa fa-question-circle fa-2x tooltip-container">
+                  <span class="tooltiptext">Click to define a property that was fixed during the experiment or calculation. For example, if a series of band gaps was measured as a function of pressure and temperature was kept constant for the whole series, the temperature value may be inserted here.</span>
+                </i>
+              </div>
+            </div>
+            <div id="fixed-properties"></div>
+          </div>
+          <div class="col-md-4">
+            <div class="normal-input">
+              {{ form.series_datapoints.label_tag }}
+              {{ form.series_datapoints.help_text|tooltip }}
+              <div class="float-right">
+                <input type="file" id="import-data-file" class="inputfile import-data-file">
+                <label for="import-data-file"><i class="fa fa-upload" aria-hidden="true"></i>
+                  Import from file...</label>
+              </div>
+              {{ form.series_datapoints }}
+            </div>
+            <div class="lattice-parameter-input" hidden="true">
+              <div class="form-group">
+                {{ form.lattice_constant_a.label_tag }}
+                {{ form.lattice_constant_a.help_text|tooltip }}
+                <div class="float-right">
+                  <input type="file" id="import-lattice-parameters"
+                         class="inputfile import-lattice-parameters">
+                  <label for="import-lattice-parameters"><i class="fa fa-upload" aria-hidden="true"></i>
+                    Import from file...</label>
+                </div>
+                <div class="input-group">
+                  {{ form.lattice_constant_a }}
+                  {{ form.lattice_constant_b }}
+                  {{ form.lattice_constant_c }}
+                </div>
+              </div>
+              <div class="form-group">
+                {{ form.lattice_constant_alpha.label_tag }}
+                <div class="input-group">
+                  {{ form.lattice_constant_alpha }}
+                  {{ form.lattice_constant_beta }}
+                  {{ form.lattice_constant_gamma }}
+                </div>
+              </div>
+              <div class="form-group">
+                {{ form.atomic_coordinates.label_tag }}
+                {{ form.atomic_coordinates.help_text|tooltip }}
+                {{ form.atomic_coordinates }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end template -->
+
   <!-- fixed property template -->
   <div class="form-row fixed-property-template d-none">
     <div class="col-md-4 mb-3">
@@ -385,7 +421,7 @@
   <script src="{% static 'materials/javascript/ajax_csrf_setup.js' %}"></script>
   <script src="{% static 'materials/javascript/selectize.js' %}"></script>
   <script>
-   /* All dropdown menus are filled with data from a JSON request */
+   // All dropdown menus are filled with data from a JSON request
    function fill_selectize(name, id, initial_value) {
      $.getJSON('/materials/get-dropdown-options/' + name, function(options) {
        $(id).selectize({
@@ -394,7 +430,7 @@
          items: [initial_value],
          options: options,
        });
-       /* Some events can only be triggered once certain dropdowns have loaded */
+       // Some events can only be triggered once certain dropdowns have loaded
        if (id === '#id_primary_property') {
          $('#id_primary_property').trigger('change');
          $('#id_two_axes').trigger('change');
@@ -403,7 +439,7 @@
    }
   </script>
   <script>
-   /* Use selectize on all dropdown menus */
+   // Use selectize on all dropdown menus
    {% for field in form.visible_fields %}
    {% if field.field.widget.input_type == 'select' %}
    fill_selectize('{{ field.name }}', '#{{ field.id_for_label }}', {{ field.value|default_if_none:'' }});
@@ -411,39 +447,87 @@
    {% endfor %}
   </script>
   <script>
-   /* Create a new set of fixed property fields */
-   function add_fixed_property(counter, prop_initial='', unit_initial='', value_initial='') {
-     var el = $('.fixed-property-template').clone(true);
-     var name;
+   // Create a new data series
+   function add_series(i_series) {
+     // The name and id of each input is appended by _<i_series>
+     var el = $('.data-series-template').clone(true);
+     el.removeClass('data-series-template');
      el.removeClass('d-none');
-     el.removeClass('fixed-property-template');
-     name = 'fixed_property_' + counter;
-     el.find('[name="fixed_property"]').attr({'id': name, 'name': name});
-     fill_selectize('property', '#'+name, prop_initial);
-     name = 'fixed_unit_' + counter;
-     el.find('[name="fixed_unit"]').attr({'id': name, 'name': name});
-     fill_selectize('unit', '#'+name, unit_initial);
-     name = 'fixed_value_' + counter;
-     el.find('[name="fixed_value"]').attr({'name': name, 'value': value_initial});
-     $('#fixed-properties').append(el);
+     el.find('.card-header').html('Series #' + i_series);
+     el.find('input, textarea').each(function() {
+       $(this).attr({'id': $(this).attr('id') + '_' + i_series,
+                     'name': $(this).attr('name') + '_' + i_series});
+     });
+     el.find('label').each(function() {
+       $(this).attr('for', $(this).attr('for') + '_' + i_series);
+     });
+     el.find('.add-fixed-property').attr({'id': 'add-fixed-property-' + i_series});
+     el.find('#fixed-properties').attr('id', 'fixed-properties-' + i_series);
+     $('#data-series').append(el);
    }
-   /* Add a fixed property */
-   var counter_fixed = 0;
-   $('#add-fixed-property').click(function(){
-     add_fixed_property(counter_fixed);
-     counter_fixed++;
-   });
-   /* Remove a fixed property */
-   $('.close-fixed-property').click(function(){
-     $(this).parents('.form-row').remove();
-   });
-   /* Prefill from a previous instance of the form */
-   {% for name_counter, prop, unit, value in form.get_fixed_properties %}
-   add_fixed_property({{ name_counter }}, '{{ prop }}', '{{ unit }}', '{{ value }}');
+   $('#id_number_of_data_series').change(function() {
+     n_series_current = $('#data-series').children().length;
+     n_series_requested = $(this).val();
+     n_to_add = n_series_requested - n_series_current;
+     var i;
+     if (n_to_add > 0) {
+       for (i = 1; i <= n_to_add; i++) {
+         add_series(n_series_current+i);
+       }
+     }
+     if (n_to_add < 0) {
+       for (i = n_to_add; i < 0; i++) {
+         $('#data-series').children().last().remove();
+       }
+     }
+     $('#data-series').children().first().find('.series-label-class').prop(
+       'disabled', n_series_requested == 1);
+     $('#import-all-data').prop('disabled', n_series_requested == 0);
+   }).trigger('change');
+   // Prefill from a previous instance of the form
+   {% for name_counter, label, values in form.get_series %}
+   $('#series_label_{{ name_counter }}').val('{{ label|escapejs }}');
+   $('#series_data_{{ name_counter }}').val('{{ values|escapejs }}');
    {% endfor %}
   </script>
   <script>
-   /* Properties that require input files */
+   // Create a new set of fixed property fields
+   function add_fixed_property(series, counter, prop_initial='', unit_initial='',
+                               value_initial='') {
+     var el = $('.fixed-property-template').clone(true);
+     var suffix = series + '_' + counter;
+     var name;
+     el.removeClass('d-none');
+     el.removeClass('fixed-property-template');
+     name = 'fixed_property_' + suffix;
+     el.find('[name="fixed_property"]').attr({'id': name, 'name': name});
+     fill_selectize('property', '#'+name, prop_initial);
+     name = 'fixed_unit_' + suffix;
+     el.find('[name="fixed_unit"]').attr({'id': name, 'name': name});
+     fill_selectize('unit', '#'+name, unit_initial);
+     name = 'fixed_value_' + suffix;
+     el.find('[name="fixed_value"]').attr({'name': name, 'value': value_initial});
+     $('#fixed-properties-' + series).append(el);
+   }
+   // Add a fixed property
+   var counter_fixed = 0;
+   $('.add-fixed-property').click(function(){
+     var series = $(this).attr('id').split('add-fixed-property-')[1];
+     add_fixed_property(series, counter_fixed);
+     counter_fixed++;
+   });
+   // Remove a fixed property
+   $('.close-fixed-property').click(function(){
+     $(this).parents('.form-row').remove();
+   });
+   // Prefill from a previous instance of the form
+   {% for series_counter, name_counter, prop, unit, value in form.get_fixed_properties %}
+   add_fixed_property({{ series_counter }}, {{ name_counter }},
+                      '{{ prop|escapejs }}', '{{ unit|escapejs }}', '{{ value|escapejs }}');
+   {% endfor %}
+  </script>
+  <script>
+   // Properties that require input files
    var saved_main_data_placeholder = '';
    $('#id_primary_property').change(function() {
      primary_unit = $(this).parent().next();
@@ -453,25 +537,26 @@
        primary_unit.hide();
        secondary_property.hide();
        secondary_unit.hide();
-       $('#main-data').prop('disabled', true);
-       saved_main_data_placeholder = $('#main-data').attr('placeholder');
-       $('#main-data').attr('placeholder', '...');
+       $('.series-datapoints').prop('disabled', true);
+       saved_main_data_placeholder = $('.series-datapoints').attr('placeholder');
+       $('.series-datapoints').attr('placeholder', '...');
      } else if (saved_main_data_placeholder) {
        primary_unit.show();
        secondary_property.show();
        secondary_unit.show();
-       $('#main-data').prop('disabled', false);
-       $('#main-data').attr('placeholder', saved_main_data_placeholder);
+       $('.series-datapoints').prop('disabled', false);
+       $('.series-datapoints').attr('placeholder', saved_main_data_placeholder);
        saved_main_data_placeholder = '';
      }
    });
   </script>
   <script>
-   /* Autofill the main input data textarea */
-   $('#input-data-file').change(function() {
+   // Autofill the main input data textarea
+   function autofill_data(el) {
+     var i_series = $(el).attr('id').split('import-data-file_')[1];
      var form_data = new FormData();
-     form_data.append('file', this.files[0]);
-     $(this).val('');  /* Clear the file list */
+     form_data.append('file', el.files[0]);
+     $(el).val('');  // Clear the file list
      $.ajax({
        url: "{% url 'materials:autofill_input_data' %}",
        type: 'POST',
@@ -479,13 +564,37 @@
        contentType: false,
        dataType: 'text',
        data: form_data,
-       success: function(result) { $('#main-data').html(result); },
-       error:   function(result) { $('#main-data').html(result); },
+       success: function(result) {
+         result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+         var data = result.split(/&/);
+         if (i_series) {
+           $('#id_series_datapoints_' + i_series).html(result);
+         } else { // fill globally
+           var i;
+           for (i = 1; i <= $('#id_number_of_data_series').val(); i++) {
+             $('#id_series_datapoints_' + i).html(data[i-1].replace(/^\n/, ''));
+           }
+         }
+       },
+       error: function(result) {
+         if (!i_series) i_series = 1;
+         $('#id_series_datapoints_' + i_series).html(result);
+       },
      });
+   }
+   $('.import-data-file').change(function() {
+     autofill_data(this);
+   });
+   $('#import-all-data').change(function() {
+     if ($('#id_primary_property').find(':selected').text() === 'lattice parameter') {
+       import_lattice_parameters(this);
+     } else {
+       autofill_data(this);
+     }
    });
   </script>
   <script>
-   /* Collapsable sections of the input */
+   // Collapsable sections of the input
    function toggleSectionInclusivity(button, hidden_field) {
      $(button).click(function() {
        if ($(hidden_field).val() === 'True') {
@@ -505,43 +614,46 @@
   </script>
   <script>
    $('#id_two_axes').change(function(event, force_hide=false) {
-     if ($(this).is(':checked') && !force_hide &&
-         $('#id_primary_property').find(':selected').text() !== 'lattice parameter') {
+     if ($(this).is(':checked') && !force_hide) {
        $('#id_secondary_property').parent().show();
        $('#id_secondary_unit').parent().show();
        $('label[for="id_primary_property-selectized"]').html('Primary property (y-axis)');
-       $('#main-data').attr('placeholder', 'x1 y1\nx2 y2\n...');
+       $('.series-datapoints').attr('placeholder', 'x1 y1\nx2 y2\n...');
      } else {
        $('#id_secondary_property').parent().hide();
        $('#id_secondary_unit').parent().hide();
        $('label[for="id_primary_property-selectized"]').html('Primary property');
-       $('#main-data').attr('placeholder', 'value_1 value_2 ...');
+       $('.series-datapoints').attr('placeholder', 'value_1 value_2 ...');
      }
    });
   </script>
   <script>
-   /* Lattice parameter specific */
+   // Lattice parameter specific
    $('#id_primary_property').change(function() {
      var is_lattice_parameter =
        $('#id_primary_property').find(':selected').text() === 'lattice parameter';
      if (is_lattice_parameter) {
        $('.lattice-parameter-input').attr('hidden', false);
        $('.normal-input').hide();
-       $('#id_two_axes').trigger('change', force_hide=true);
+       $('#id_two_axes').trigger('change', force_hide=true).prop('disabled', true);
      } else {
        $('.lattice-parameter-input').attr('hidden', true);
        $('.normal-input').show();
-       $('#id_two_axes').trigger('change');
+       $('#id_two_axes').trigger('change').prop('disabled', false);
      }
-     /* Make lattice parameter related fields required only if this property has been selected */
-     $('input[type="text"').filter(function() {
-       return this.id.match(/lattice_constant_/);
-     }).prop('required', is_lattice_parameter);
+     // Make lattice parameter related fields required only if this property has been selected
+     $('input[name^="lattice_constant_"]').each(function() {
+       $(this).prop('required', is_lattice_parameter);
+     });
+     $('textarea[name^="series_datapoints_"]').each(function() {
+       $(this).prop('required', !is_lattice_parameter);
+     });
    });
-   $('#input-lattice-parameters').change(function() {
+   function import_lattice_parameters(el) {
+     var i_series = $(el).attr('id').split('import-lattice-parameters_')[1];
      var form_data = new FormData();
-     form_data.append('file', this.files[0]);
-     $(this).val('');  /* Clear the file list */
+     form_data.append('file', el.files[0]);
+     $(el).val('');  // Clear the file list
      $.ajax({
        url: "{% url 'materials:autofill_input_data' %}",
        type: 'POST',
@@ -549,45 +661,90 @@
        contentType: false,
        dataType: 'text',
        data: form_data,
-       success: function(result) {
-         /* Generate the lattice parameters (lattice constants and angles) from lattice vectors */
-         lines = result.split('\n');
-         lattice_vectors = [];
-         $('#id_atomic_coordinates').html('');
-         var regex = new RegExp('^ *lattice_vector\\s+(-?\\d+(?:\.\\d+)?)\\s+(-?\\d+(?:\.\\d+)?)\\s+(-?\\d+(?:\.\\d+)?)\\b');
-         var match_;
-         var i;
-         for (i = 0; i < lines.length; i++) {
-           match_ = lines[i].match(regex);
-           if (match_) {
-             lattice_vectors.push([match_[1], match_[2], match_[3]]);
+       success: function(response) {
+         var a, b, c, alpha, beta, gamma;
+         function process_batch(input_data, dest_suffix) {
+           lines = input_data.split('\n');
+           if (input_data.match(/^ *lattice_vector/)) {
+             // Generate the lattice parameters (lattice constants and angles)
+             // from lattice vectors
+             lattice_vectors = [];
+             var regex = /^ *lattice_vector\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\b/;
+             var match_;
+             var i;
+             for (i = 0; i < lines.length; i++) {
+               match_ = lines[i].match(regex);
+               if (match_) {
+                 lattice_vectors.push([match_[1], match_[2], match_[3]]);
+               }
+             }
+             function norm(vector) {
+               return Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
+             }
+             function get_angle(v1, v2, norm1, norm2) {
+               return Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
+             }
+             a = norm(lattice_vectors[0]);
+             b = norm(lattice_vectors[1]);
+             c = norm(lattice_vectors[2]);
+             alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
+             beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
+             gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
            } else {
-             $('#id_atomic_coordinates').append(lines[i]);
+             // Read the lattice parameters directly from an input file
+             var nr_reg = /\b([a-z]+)\s+(-?(?:\d+(?:\.\d+)?|\.\d+)(?:\(\d+(?:\.\d+)?\)|\b))/g;
+             var matches = [];
+             while (matches = nr_reg.exec(input_data)) {
+               switch(matches[1]) {
+                 case 'a': a = matches[2]; break;
+                 case 'b': b = matches[2]; break;
+                 case 'c': c = matches[2]; break;
+                 case 'alpha': alpha = matches[2]; break;
+                 case 'beta': beta = matches[2]; break;
+                 case 'gamma': gamma = matches[2]; break;
+               }
+             }
+             input_data = '';
+           }
+           $('#id_lattice_constant_a_' + dest_suffix).val(a);
+           $('#id_lattice_constant_b_' + dest_suffix).val(b);
+           $('#id_lattice_constant_c_' + dest_suffix).val(c);
+           $('#id_lattice_constant_alpha_' + dest_suffix).val(alpha);
+           $('#id_lattice_constant_beta_' + dest_suffix).val(beta);
+           $('#id_lattice_constant_gamma_' + dest_suffix).val(gamma);
+           $('#id_atomic_coordinates_' + dest_suffix).html(input_data);
+         }
+         if (i_series) {
+           process_batch(response, i_series);
+         } else {
+           response = response.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+           var data = response.split('&');
+           var i;
+           for (i = 0; i < data.length; i++) {
+             if (data[i]) {
+               process_batch(data[i].replace(/^\n/, ''), i+1);
+             }
            }
          }
-         function norm(vector) {
-           return Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
-         }
-         function get_angle(v1, v2, norm1, norm2) {
-           return Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
-         }
-         a = norm(lattice_vectors[0]);
-         b = norm(lattice_vectors[1]);
-         c = norm(lattice_vectors[2]);
-         alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
-         beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
-         gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
-         $('#id_lattice_constant_a').val(a);
-         $('#id_lattice_constant_b').val(b);
-         $('#id_lattice_constant_c').val(c);
-         $('#id_lattice_constant_alpha').val(alpha);
-         $('#id_lattice_constant_beta').val(beta);
-         $('#id_lattice_constant_gamma').val(gamma);
        },
-       error: function(result) {
-         $('#id_atomic_coordinates').html(result);
+       error: function(response) {
+         if (!i_series) i_series = 1;
+         $('#id_atomic_coordinates_' + i_series).html(response);
        },
      });
+   }
+   $('.import-lattice-parameters').change(function() {
+     import_lattice_parameters(this);
    });
+   // Prefill from a previous instance of the form
+   {% for series_counter, a, b, c, alpha, beta, gamma, coordinates in form.get_lattice_parameters %}
+   $('#id_lattice_constant_a_{{ series_counter }}').val('{{ a|escapejs }}');
+   $('#id_lattice_constant_b_{{ series_counter }}').val('{{ b|escapejs }}');
+   $('#id_lattice_constant_c_{{ series_counter }}').val('{{ c|escapejs }}');
+   $('#id_lattice_constant_alpha_{{ series_counter }}').val('{{ alpha|escapejs }}');
+   $('#id_lattice_constant_beta_{{ series_counter }}').val('{{ beta|escapejs }}');
+   $('#id_lattice_constant_gamma_{{ series_counter }}').val('{{ gamma|escapejs }}');
+   $('#id_atomic_coordinates_{{ series_counter }}').val('{{ coordinates|escapejs }}');
+   {% endfor %}
   </script>
 {% endblock %}

@@ -1030,12 +1030,10 @@ def submit_data(request):
     dataset.system = form.cleaned_data['select_system']
     dataset.reference = form.cleaned_data['select_reference']
     dataset.label = form.cleaned_data['data_set_label']
-    if form.cleaned_data['primary_property']:
-        dataset.primary_property = form.cleaned_data['primary_property']
-        dataset.primary_unit = form.cleaned_data['primary_unit']
-    if form.cleaned_data['secondary_property']:
-        dataset.secondary_property = form.cleaned_data['secondary_property']
-        dataset.secondary_unit = form.cleaned_data['secondary_unit']
+    dataset.primary_property = form.cleaned_data['primary_property']
+    dataset.primary_unit = form.cleaned_data['primary_unit']
+    dataset.secondary_property = form.cleaned_data['secondary_property']
+    dataset.secondary_unit = form.cleaned_data['secondary_unit']
     dataset.visible = form.cleaned_data['visible_to_public']
     dataset.plotted = form.cleaned_data['plotted']
     dataset.experimental = (
@@ -1087,99 +1085,127 @@ def submit_data(request):
         computational.save()
         logger.info(f'Creating computational details #{computational.pk}')
         add_comment(computational, 'computational_comment', form)
-    # Create data series
-    dataseries = models.Dataseries(created_by=request.user, dataset=dataset)
-    if 'dataseries-label' in request.POST:
-        dataseries.label = request.POST['dataseries-label']
-    dataseries.save()
-    # Read in main data. Go through exceptional cases first. Some
-    # properties such as "lattice parameter" require special
-    # treatment.
-    if dataset.primary_property.require_input_files:
-        pass
-    elif dataset.primary_property.name == 'lattice parameter':
-        for symbol, key in (('a', 'a'), ('b', 'b'), ('c', 'c'),
-                            ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
-            datapoint = models.Datapoint.objects.create(
-                created_by=request.user, dataseries=dataseries)
-            datapoint.datapointsymbol_set.create(created_by=request.user,
-                                                 symbol=symbol)
-            insert_numerical_value(
-                datapoint, form.cleaned_data['lattice_constant_' + key])
-        for line in form.cleaned_data['atomic_coordinates'].split('\n'):
-            m = re.match(r'(atom|atom_frac)\s+' + 3*r'(-?\d+(?:\.\d+)?)\s+' +
-                         r'(\w+)\b', line)
-            if m:
-                coord_type, *coords, element = m.groups()
+    for i_series in range(1,
+                          int(form.cleaned_data['number_of_data_series']) + 1):
+        # Create data series
+        dataseries = models.Dataseries(created_by=request.user,
+                                       dataset=dataset)
+        if 'series_label_' + str(i_series) in form.cleaned_data:
+            dataseries.label = form.cleaned_data[
+                'series_label_' + str(i_series)]
+        dataseries.save()
+        # Read in main data. Go through exceptional cases first. Some
+        # properties such as "lattice parameter" require special
+        # treatment.
+        if dataset.primary_property.require_input_files:
+            pass
+        elif dataset.primary_property.name == 'lattice parameter':
+            for symbol, key in (('a', 'a'), ('b', 'b'), ('c', 'c'),
+                                ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
                 datapoint = models.Datapoint.objects.create(
                     created_by=request.user, dataseries=dataseries)
-                datapoint.datapointsymbol_set.create(
-                    created_by=request.user, symbol=coord_type, counter=0)
-                datapoint.datapointsymbol_set.create(
-                    created_by=request.user, symbol=element, counter=1)
-                for i_coord, coord in enumerate(coords):
-                    datapoint.numericalvalue_set.create(
-                        created_by=request.user,
-                        value=float(coord),
-                        counter=i_coord)
-            elif line:
-                print(line)
-                messages.error(request, f'Error on line: {line}')
-                dataset.delete()
-                return render(request, 'materials/add_data.html',
-                              {'form': form})
-    elif dataset.primary_property and dataset.secondary_property:
-        for line in request.POST['main-data'].split('\n'):
-            if line.startswith('#') or not line or line == '\r':
-                continue
-            x_value, y_value = line.split()
-            datapoint = models.Datapoint.objects.create(
-                created_by=request.user, dataseries=dataseries)
-            insert_numerical_value(datapoint, x_value, is_secondary=True)
-            insert_numerical_value(datapoint, y_value)
-    elif dataset.primary_property:
-        for value in request.POST['main-data'].split():
-            if value.startswith('#') or not value:
-                continue
-            datapoint = models.Datapoint.objects.create(
-                created_by=request.user, dataseries=dataseries)
-            insert_numerical_value(datapoint, value)
-    # Fixed properties
-    counter = 0
-    for key in form.cleaned_data:
-        if key.startswith('fixed_property_'):
-            suffix = key.split('fixed_property_')[1]
-            fixed_value = models.NumericalValueFixed(created_by=request.user,
-                                                     dataseries=dataseries,
-                                                     counter=counter)
-            fixed_value.physical_property = (
-                form.cleaned_data['fixed_property_' + suffix])
-            fixed_value.unit = form.cleaned_data['fixed_unit_' + suffix]
-            value, value_type, error = clean_value(
-                form.cleaned_data['fixed_value_' + suffix])
-            fixed_value.value = value
-            fixed_value.value_type = value_type
-            fixed_value.save()
-            if error:
-                error_value = models.NumericalValueFixed(
+                datapoint.datapointsymbol_set.create(created_by=request.user,
+                                                     symbol=symbol)
+                name = 'lattice_constant_' + key + '_' + str(i_series)
+                insert_numerical_value(datapoint, form.cleaned_data[name])
+            for line in form.cleaned_data[
+                    'atomic_coordinates_' + str(i_series)].split('\n'):
+                if line == '' or line.startswith('#'):
+                    continue
+                try:
+                    if line.startswith('lattice_vector'):
+                        m = re.match(r'\s*lattice_vector' +
+                                     3*r'\s+(-?\d+(?:\.\d+)?)' + r'\b', line)
+                        coords = m.groups()
+                        datapoint = models.Datapoint.objects.create(
+                            created_by=request.user, dataseries=dataseries)
+                        for i_coord, coord in enumerate(coords):
+                            datapoint.numericalvalue_set.create(
+                                created_by=request.user,
+                                value=float(coord),
+                                counter=i_coord)
+                    else:
+                        m = re.match(
+                            r'\s*(atom|atom_frac)\s+' +
+                            3*r'(-?\d+(?:\.\d+)?)\s+' + r'(\w+)\b', line)
+                        coord_type, *coords, element = m.groups()
+                        datapoint = models.Datapoint.objects.create(
+                            created_by=request.user, dataseries=dataseries)
+                        datapoint.datapointsymbol_set.create(
+                            created_by=request.user,
+                            symbol=coord_type,
+                            counter=0)
+                        datapoint.datapointsymbol_set.create(
+                            created_by=request.user, symbol=element, counter=1)
+                        for i_coord, coord in enumerate(coords):
+                            datapoint.numericalvalue_set.create(
+                                created_by=request.user,
+                                value=float(coord),
+                                counter=i_coord)
+                except AttributeError:
+                    messages.error(request,
+                                   'Could not process input for '
+                                   f'atomic coordinates: {line}')
+                    dataset.delete()
+                    return render(request, 'materials/add_data.html',
+                                  {'form': form})
+        elif form.cleaned_data['two_axes']:
+            for line in form.cleaned_data[
+                    'series_datapoints_' + str(i_series)].split('\n'):
+                if line.startswith('#') or not line or line == '\r':
+                    continue
+                x_value, y_value = line.split()
+                datapoint = models.Datapoint.objects.create(
+                    created_by=request.user, dataseries=dataseries)
+                insert_numerical_value(datapoint, x_value, is_secondary=True)
+                insert_numerical_value(datapoint, y_value)
+        else:
+            for value in form.cleaned_data[
+                    'series_datapoints_' + str(i_series)].split():
+                if value.startswith('#') or not value:
+                    continue
+                datapoint = models.Datapoint.objects.create(
+                    created_by=request.user, dataseries=dataseries)
+                insert_numerical_value(datapoint, value)
+        # Fixed properties
+        counter = 0
+        for key in form.cleaned_data:
+            if key.startswith('fixed_property_' + str(i_series) + '_'):
+                suffix = key.split('fixed_property_')[1]
+                fixed_value = models.NumericalValueFixed(
                     created_by=request.user,
                     dataseries=dataseries,
                     counter=counter)
-                error_value.physical_property = fixed_value.physical_property
-                error_value.unit = fixed_value.unit
-                error_value.value_type = models.NumericalValueFixed.ERROR
-                error_value.value = float(error)
-                error_value.save()
-            counter += 1
-    # Input files
-    if (
-            dataset.primary_property and
-            dataset.primary_property.require_input_files):
-        fs = FileSystemStorage(os.path.join(
-            settings.MEDIA_ROOT, f'input_files/dataset_{dataset.pk}'))
-        for file_ in request.FILES.getlist('input-data-files'):
-            fs.save(file_.name, file_)
-            logger.info(f'uploading input_files/dataset_{dataset.pk}/{file_}')
+                fixed_value.physical_property = (
+                    form.cleaned_data['fixed_property_' + suffix])
+                fixed_value.unit = form.cleaned_data['fixed_unit_' + suffix]
+                value, value_type, error = clean_value(
+                    form.cleaned_data['fixed_value_' + suffix])
+                fixed_value.value = value
+                fixed_value.value_type = value_type
+                fixed_value.save()
+                if error:
+                    error_value = models.NumericalValueFixed(
+                        created_by=request.user,
+                        dataseries=dataseries,
+                        counter=counter)
+                    error_value.physical_property = (
+                        fixed_value.physical_property)
+                    error_value.unit = fixed_value.unit
+                    error_value.value_type = models.NumericalValueFixed.ERROR
+                    error_value.value = float(error)
+                    error_value.save()
+                counter += 1
+        # Input files
+        if (
+                dataset.primary_property and
+                dataset.primary_property.require_input_files):
+            fs = FileSystemStorage(os.path.join(
+                settings.MEDIA_ROOT, f'input_files/dataset_{dataset.pk}'))
+            for file_ in request.FILES.getlist('input-data-files'):
+                fs.save(file_.name, file_)
+                logger.info(
+                    f'uploading input_files/dataset_{dataset.pk}/{file_}')
     # Additional files
     if dataset.has_files:
         fs = FileSystemStorage(os.path.join(settings.MEDIA_ROOT,
@@ -1447,7 +1473,7 @@ def reference_data(request, pk):
 
 
 def autofill_input_data(request):
-    """Process an AJAX request to autofill the main data textarea."""
+    """Process an AJAX request to autofill the data textareas."""
     content = UploadedFile(request.FILES['file']).read().decode('utf-8')
     output = io.StringIO()
     for line in content.split('\n'):
@@ -1486,6 +1512,24 @@ def data_for_chart(request, pk):
     return JsonResponse(response)
 
 
+def get_series_values(request, pk):
+    """Return numerical values of a series as a formatted list."""
+    values = models.NumericalValue.objects.filter(
+        datapoint__dataseries__pk=pk).order_by('qualifier', 'datapoint__pk')
+    if values.last().qualifier == models.NumericalValue.SECONDARY:
+        y_limit = int(len(values)/2)
+        x_limit = len(values)
+    else:
+        y_limit = len(values)
+        x_limit = 0
+    response = []
+    for i in range(y_limit):
+        response.append({'y': str(values[i].value)})
+    for i in range(y_limit, x_limit):
+        response[i-y_limit]['x'] = str(values[i].value)
+    return JsonResponse(response, safe=False)
+
+
 def get_atomic_coordinates(request, pk):
     """Get atomic coordinates from the lattice parameter list.
 
@@ -1495,19 +1539,25 @@ def get_atomic_coordinates(request, pk):
 
     """
     data = {}
-    series = models.Dataset.objects.get(pk=pk).dataseries_set.first()
+    series = models.Dataseries.objects.get(pk=pk)
+    vectors = models.NumericalValue.objects.filter(
+        datapoint__dataseries=series).filter(
+           datapoint__datapointsymbol__isnull=True).order_by(
+               'datapoint_id', 'counter').values_list('value', flat=True)
+    data['vectors'] = [list(vectors[:3]), list(vectors[3:6]),
+                       list(vectors[6:9])]
     # Here counter=1 filters out the first six entries
     symbols = models.DatapointSymbol.objects.filter(
         datapoint__dataseries=series).filter(counter=1).order_by(
             'datapoint_id').values_list('symbol', flat=True)
-    first_value_id = series.datapoint_set.first().pk
-    values = models.NumericalValue.objects.filter(
-        datapoint__pk__gte=first_value_id+6).filter(
-        datapoint__dataseries=series).order_by(
-            'counter', 'datapoint_id').values_list('value', flat=True)
+    coords = models.NumericalValue.objects.filter(
+        datapoint__dataseries=series).filter(
+            datapoint__datapointsymbol__counter=1).order_by(
+                'counter', 'datapoint_id').values_list('value', flat=True)
     N = symbols.count()
-    data = list(zip(symbols, values[:N], values[N:2*N], values[2*N:3*N]))
-    return JsonResponse(data, safe=False)
+    data['coordinates'] = list(
+        zip(symbols, coords[:N], coords[N:2*N], coords[2*N:3*N]))
+    return JsonResponse(data)
 
 
 def get_dropdown_options(request, name):

@@ -145,6 +145,7 @@ class AddDataForm(forms.Form):
         'Select publication where the data to be inserted is published. If ')
     select_system = forms.ModelChoiceField(
         queryset=models.System.objects.all(),
+        required=True,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Select the system that is associated with the inserted data.')
@@ -246,7 +247,7 @@ class AddDataForm(forms.Form):
     starting_materials = CharField(
         model=models.SynthesisMethod, field='starting_materials',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Specify starting materials.')
+        help_text='Specify the starting materials.')
     product = CharField(
         model=models.SynthesisMethod, field='product',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -352,7 +353,38 @@ class AddDataForm(forms.Form):
         'part.')
 
     # Data series
-
+    number_of_data_series = forms.CharField(
+        initial=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control mx-sm-3',
+                                        'min': '0',
+                                        'style': 'width:8em'}),
+        help_text=''
+        'Enter the number of data subgroups. For each subgroup, one or more '
+        'properties or some other aspect of the experiment/calculation are '
+        'typically fixed (see the help text for "Add fixed property"). In '
+        'case of a figure, each curve is typically considered a separate data '
+        'series.')
+    series_label = CharField(
+        label='Label',
+        model=models.Dataseries, field='label',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control series-label-class'}),
+        help_text=''
+        'Short description of the data series (optional). In a figure, this '
+        'information is typically shown in the legend. Not applicable with '
+        'only one series in the data set.')
+    series_datapoints = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={'class': 'form-control series-datapoints', 'rows': '3',
+                   'placeholder': 'value_1 value_2 ...'}),
+        help_text=''
+        'Insert data points here. These may be a single value, a series of '
+        'values, or a series of value pairs. The latter applies when there '
+        'are both primary and secondary properties, in which case the first '
+        'column has values of the secondary property (x-values) and the '
+        'second column corresponds to the primary property (y-values). Note: '
+        'to resize this box, drag from the corner.')
     # Exceptions
     lattice_constant_a = forms.CharField(
         label='Lattice constants',
@@ -360,7 +392,12 @@ class AddDataForm(forms.Form):
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'a'}),
         help_text=''
-        'Units of lattice constants are given by "Primary unit" above.')
+        'Units of lattice constants are given by "Primary unit" above. When '
+        'importing from file, two formats are allowed. In the first format, '
+        'include "a", "b", "c", "alpha", "beta", and "gamma" followed by '
+        'their respective values. This can be either on one line or on '
+        'separate lines (e.g., "a val1 b val2 ..."). For the second format, '
+        'see the help text of "Atomic coordinates" below.')
     lattice_constant_b = forms.CharField(
         required=False,
         widget=forms.TextInput(
@@ -387,27 +424,37 @@ class AddDataForm(forms.Form):
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'γ'})
     )
-    placeholder_ = 'atom &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;element&gt;&#10;...'
+    placeholder_ = (
+        'lattice_vector &lt;x&gt; &lt;y&gt; &lt;z&gt;&#10;...&#10;'
+        'atom &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;element&gt;&#10;...')
     atomic_coordinates = forms.CharField(
         required=False,
         widget=forms.Textarea(
             attrs={'class': 'form-control', 'rows': '3',
                    'placeholder': mark_safe(placeholder_)}),
         help_text=''
-        'Enter a list of atomic coordinates (optional). The format has one '
-        'line per atom. Each line starts with "atom" (absolute coordinates) '
-        'or "atom_frac" (fractional coordinates), followed by three numbers '
-        'for the coordinate, followed by the element name. For the case of '
+        'Enter a list of lattice vectors and atomic coordinates (optional). '
+        'Each of the three lattice vectors starts with the word '
+        '"lattice_vector" followed by three coordinates. Each line for the '
+        'atomic coordinates starts with "atom" (absolute coordinates) or '
+        '"atom_frac" (fractional coordinates), followed by three numbers for '
+        'the coordinate, followed by the element name. For the case of '
         'absolute coordinates ("atom"), the units are given by "Primary unit" '
         'above. Note: to resize this box, drag from the corner.')
 
     def __init__(self, *args, **kwargs):
-        """Dynamically add fixed properties."""
+        """Dynamically add series and fixed properties."""
         super().__init__(*args, **kwargs)
         self.label_suffix = ''
         if args:
             for key, value in args[0].items():
-                if key.startswith('fixed_property_'):
+                if key.startswith('series_datapoints_'):
+                    self.fields[key] = forms.CharField(
+                        required=False, widget=forms.Textarea, initial=value)
+                elif key.startswith('series_label_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
+                elif key.startswith('fixed_property_'):
                     self.fields[key] = forms.ModelChoiceField(
                         queryset=models.Property.objects.all(), initial=value)
                 elif key.startswith('fixed_unit_'):
@@ -416,21 +463,52 @@ class AddDataForm(forms.Form):
                         initial=value, required=False)
                 elif key.startswith('fixed_value_'):
                     self.fields[key] = forms.CharField(initial=value)
+                elif key.startswith('lattice_constant_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
+                elif key.startswith('atomic_coordinates_'):
+                    self.fields[key] = forms.CharField(
+                        required=False, widget=forms.Textarea, initial=value)
+
+    def get_series(self):
+        """Return a list of initial values for data series."""
+        results = []
+        for field in self.fields:
+            if field.startswith('series_datapoints_'):
+                counter = field.split('series_datapoints_')[1]
+                if 'series_label_' + counter in self.fields:
+                    label = self.fields['series_label_' + counter].initial
+                else:
+                    label = ''
+                results.append([counter, label, self.fields[field].initial])
+        return results
 
     def get_fixed_properties(self):
-        """Return a list of fixed properties and their current values.
-
-        Instead of an actual list of properties, only the number that
-        is in the field's name is returned. This function is relevant
-        for reusing the form.
-
-        """
+        """Return a list of fixed properties and their current values."""
         results = []
         for field in self.fields:
             if field.startswith('fixed_property_'):
-                counter = field.split('fixed_property_')[1]
-                results.append([counter,
+                suffix = field.split('fixed_property_')[1]
+                series, counter = suffix.split('_')
+                results.append([series, counter,
                                 self.fields[field].initial,
-                                self.fields['fixed_unit_' + counter].initial,
-                                self.fields['fixed_value_' + counter].initial])
+                                self.fields['fixed_unit_' + suffix].initial,
+                                self.fields['fixed_value_' + suffix].initial])
+        return results
+
+    def get_lattice_parameters(self):
+        results = []
+        for field in self.fields:
+            if field.startswith('lattice_constant_a_'):
+                series = field.split('lattice_constant_a_')[1]
+                results.append([
+                    series,
+                    self.fields['lattice_constant_a_' + series].initial,
+                    self.fields['lattice_constant_b_' + series].initial,
+                    self.fields['lattice_constant_c_' + series].initial,
+                    self.fields['lattice_constant_alpha_' + series].initial,
+                    self.fields['lattice_constant_beta_' + series].initial,
+                    self.fields['lattice_constant_gamma_' + series].initial,
+                    self.fields['atomic_coordinates_' + series].initial,
+                ])
         return results

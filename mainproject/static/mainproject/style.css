@@ -51,6 +51,18 @@ body {
     background-color: #f0f0f0;
 }
 
+.card-series {
+    box-shadow: 4px 4px 8px 1px #bbb;
+}
+
+.card-series > .card-header {
+    background-color: #e9fbfe;
+}
+
+.card-series > .card-body {
+    background-color: #f6f6f6;
+}
+
 .table-lattice-constants {
     align: center;
     margin: 10px auto;
@@ -76,6 +88,10 @@ body {
 
 table.main-data {
     font-size: 14px;
+}
+
+.table-sm td, .table-sm th {
+    padding: 0;
 }
 
 .details {

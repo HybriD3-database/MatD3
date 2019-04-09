@@ -67,6 +67,8 @@ urlpatterns = [
          name='get_atomic_coordinates'),
     path('get-dropdown-options/<str:name>', views.get_dropdown_options,
          name='get_dropdown_options'),
+    path('get-series-values/<int:pk>', views.get_series_values,
+         name='get_series_values'),
     re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
             name='all_entries'),
 ]
