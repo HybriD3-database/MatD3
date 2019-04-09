@@ -486,8 +486,8 @@
    }).trigger('change');
    // Prefill from a previous instance of the form
    {% for name_counter, label, values in form.get_series %}
-   $('#series_label_{{ name_counter }}').val('{{ label|escapejs }}');
-   $('#series_data_{{ name_counter }}').val('{{ values|escapejs }}');
+   $('#id_series_label_{{ name_counter }}').val('{{ label|escapejs }}');
+   $('#id_series_datapoints_{{ name_counter }}').val('{{ values|escapejs }}');
    {% endfor %}
   </script>
   <script>

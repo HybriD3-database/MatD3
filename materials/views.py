@@ -1493,22 +1493,19 @@ class PropertyAllEntriesView(generic.ListView):
 
 
 def data_for_chart(request, pk):
-    response = {}
     dataset = models.Dataset.objects.get(pk=pk)
-    response['primary-property'] = dataset.primary_property.name
-    response['primary-unit'] = dataset.primary_unit.label
-    response['secondary-property'] = dataset.secondary_property.name
-    response['secondary-unit'] = dataset.secondary_unit.label
-    response['data'] = []
+    response = {'primary-property': dataset.primary_property.name,
+                'primary-unit': dataset.primary_unit.label,
+                'secondary-property': dataset.secondary_property.name,
+                'secondary-unit': dataset.secondary_unit.label,
+                'data': []}
     dataseries = dataset.dataseries_set.first()
     response['series-label'] = dataseries.label
-    for datapoint in dataseries.datapoint_set.all():
-        response['data'].append({})
-        for value in datapoint.numericalvalue_set.all():
-            if value.qualifier == models.NumericalValue.SECONDARY:
-                response['data'][-1]['x'] = value.value
-            else:
-                response['data'][-1]['y'] = value.value
+    values = models.NumericalValue.objects.filter(
+        datapoint__dataseries=dataseries).order_by(
+            'value_type', 'datapoint_id').values_list('value', flat=True)
+    for i in range(0, len(values), 2):
+        response['data'].append({'x': values[i], 'y': values[i+1]})
     return JsonResponse(response)
 
 
@@ -1538,14 +1535,13 @@ def get_atomic_coordinates(request, pk):
     fetching for the atomic coordinates.
 
     """
-    data = {}
     series = models.Dataseries.objects.get(pk=pk)
     vectors = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
            datapoint__datapointsymbol__isnull=True).order_by(
                'datapoint_id', 'counter').values_list('value', flat=True)
-    data['vectors'] = [list(vectors[:3]), list(vectors[3:6]),
-                       list(vectors[6:9])]
+    data = {'vectors':
+            [list(vectors[:3]), list(vectors[3:6]), list(vectors[6:9])]}
     # Here counter=1 filters out the first six entries
     symbols = models.DatapointSymbol.objects.filter(
         datapoint__dataseries=series).filter(counter=1).order_by(
