@@ -204,7 +204,7 @@
   {% endif %}
 
   <!-- REFERENCE -->
-  {% if with_reference %}
+  {% if with_reference and dataset.reference %}
     <div class="card">
       <button class="btn text-left expand-hide-button" data-toggle="collapse"
               data-target="#reference-body-{{ dataset.pk }}">
