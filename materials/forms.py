@@ -142,7 +142,8 @@ class AddDataForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
-        'Select publication where the data to be inserted is published. If ')
+        'Select the reference that is associated with the inserted data. If '
+        'the data is unpublished or no reference is applicable, leave empty.')
     select_system = forms.ModelChoiceField(
         queryset=models.System.objects.all(),
         required=True,
@@ -152,7 +153,9 @@ class AddDataForm(forms.Form):
     data_set_label = CharField(
         model=models.Dataset, field='label',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Description of the data set.')
+        help_text=''
+        'Main description of the data set. This can include an explanation of '
+        'the significance of the results.')
     extraction_method = CharField(
         model=models.Dataset, field='extraction_method',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -302,7 +305,10 @@ class AddDataForm(forms.Form):
             'DFT, Hartree-Fock, tight-binding, empirical model...',
         }),
         help_text=''
-        'yet to come...')
+        'Level of theory summarizes the collection of physical approximations '
+        'used in the calculation. It gives an overall picture of the physics '
+        'involved. Finer details of the level of theory such as the level of '
+        'relativity should be filled separately.')
     xc_functional = CharField(
         label='Exchange-correlation functional',
         widget=forms.TextInput(attrs={
@@ -310,7 +316,8 @@ class AddDataForm(forms.Form):
             'placeholder': 'PBE, PW91...',
         }),
         help_text=''
-        'yet to come...')
+        'Level of approximation used to treat the electron-electron '
+        'interaction.')
     k_point_grid = CharField(
         label='K-point grid',
         widget=forms.TextInput(attrs={
@@ -318,7 +325,7 @@ class AddDataForm(forms.Form):
             'placeholder': '3x3x3, 4x5x4 (Monkhorst-Pack)...',
         }),
         help_text=''
-        'yet to come...')
+        'Details of the k-point mesh.')
     level_of_relativity = CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
@@ -334,7 +341,9 @@ class AddDataForm(forms.Form):
             'placeholder': 'JTH PAW, TM PP with semicore...',
         }),
         help_text=''
-        'yet to come...')
+        'Details of the basis set or of the algorithms directly related to '
+        'the basis set. For example, in case of a plane wave calculation, '
+        'also include details of the pseudopotential here if applicable.')
     numerical_accuracy = CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
