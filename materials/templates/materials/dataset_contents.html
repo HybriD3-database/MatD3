@@ -68,6 +68,7 @@
         <div class="card-body">
           <table class="table table-sm">
             <thead>
+              <tr>
               {% if dataset.secondary_property %}
                 <th>
                   {{ dataset.secondary_property }}{% if dataset.secondary_unit %},
@@ -78,6 +79,7 @@
                 {{ dataset.primary_property }}{% if dataset.primary_unit %},
                 {{ dataset.primary_unit }}{% endif %}
               </th>
+              </tr>
             </thead>
             <tbody class="tabulated-data" id="table-{{ series.pk }}"></tbody>
           </table>

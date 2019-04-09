@@ -1513,6 +1513,8 @@ def get_series_values(request, pk):
     """Return numerical values of a series as a formatted list."""
     values = models.NumericalValue.objects.filter(
         datapoint__dataseries__pk=pk).order_by('qualifier', 'datapoint__pk')
+    if not values:
+        return JsonResponse({})
     if values.last().qualifier == models.NumericalValue.SECONDARY:
         y_limit = int(len(values)/2)
         x_limit = len(values)
