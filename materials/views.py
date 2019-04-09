@@ -1230,19 +1230,19 @@ def submit_data(request):
 
 
 @dataset_author_check
-def toggle_dataset_visibility(request, system_pk, dataset_pk):
+def toggle_dataset_visibility(request, system_pk, dataset_pk, return_path):
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.visible = not dataset.visible
     dataset.save()
-    return redirect(reverse('materials:materials_system', args=(system_pk,)))
+    return redirect(return_path)
 
 
 @dataset_author_check
-def toggle_dataset_plotted(request, system_pk, dataset_pk):
+def toggle_dataset_plotted(request, system_pk, dataset_pk, return_path):
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.plotted = not dataset.plotted
     dataset.save()
-    return redirect(reverse('materials:materials_system', args=(system_pk,)))
+    return redirect(return_path)
 
 
 def download_dataset_files(request, pk):
@@ -1280,11 +1280,11 @@ def download_input_files(request, pk):
 
 
 @dataset_author_check
-def delete_dataset_and_files(request, system_pk, dataset_pk):
+def delete_dataset_and_files(request, system_pk, dataset_pk, return_path):
     """Delete current data set and all associated files."""
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.delete()
-    return redirect(reverse('materials:materials_system', args=(system_pk,)))
+    return redirect(return_path)
 
 
 class SystemDetailView(generic.DetailView):
