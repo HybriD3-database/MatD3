@@ -427,13 +427,11 @@ class NumericalValueBase(Base):
     APPROXIMATE = 1
     LOWER_BOUND = 2
     UPPER_BOUND = 3
-    ERROR = 4
     VALUE_TYPES = (
         (ACCURATE, ''),
         (APPROXIMATE, '≈'),
         (LOWER_BOUND, '>'),
         (UPPER_BOUND, '<'),
-        (ERROR, 'error'),
     )
     value = models.FloatField()
     value_type = models.PositiveSmallIntegerField(
