@@ -215,7 +215,7 @@ A good place to get started and learn more about Django is the official Django t
 
 This section provides an overview of the Django models used in this project. The presentation focuses on how the models are defined in the Python source code and not the actual SQL tables. For example, even though fields such as the primary key are not listed in the following, it is understood that these are automatically created for the SQL tables.
 
-Most tables inherit from a base table which records the history of how each entry is created/updated. Since direct polymorphism is not supported in relational databases, what Django does is to explicitly copy these fields to any child models.
+Most tables inherit from a base table which records the history of how each entry is created/updated. Since actualy polymorphism is not supported in relational databases, Django explicitly copies these fields to any child models.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Base]
   \begin{itemize}
   \item \texttt{created} --- date the entry was created
@@ -287,7 +287,7 @@ All experimental and theoretical results are contained in data sets. A data set 
   \item \texttt{reference} --- reference to the primary key of Reference
   \item \texttt{visible} --- whether the data is visible on the website
   \item \texttt{plotted} --- whether data is plotted by default
-  \item \texttt{has\_files} --- whether the data set comes with additional files. This field is a boolean only. If true, the actual files are stored at \verb+MEDIA_ROOT/uploads/dataset_#+, where \verb+#+ is the data set ID
+  \item \texttt{has\_files} --- whether the data set comes with additional files. This is a boolean type field. If true, the actual files are stored at \verb+MEDIA_ROOT/uploads/dataset_#+, where \verb+#+ is the data set ID
   \item \texttt{experimental} --- whether the data is of experimental origin (theoretical if false)
   \item \texttt{dimensionality} --- 2D, 3D, \ldots
   \item \texttt{sample\_type} --- single crystal, powder, \ldots
@@ -297,7 +297,7 @@ All experimental and theoretical results are contained in data sets. A data set 
   \end{itemize}
 \end{tcolorbox}
 
-A data set consists of one or more data series. If the data set describes, for example, the dielectric function measured at different temperatures, then each curve corresponding to a specific temperature would be a series in the data set. In most cases, a data set consists of just one series.
+A data set consists of one or more data series. If the data set describes, for example, the dielectric function measured at different temperatures, then each curve corresponding to a specific temperature would be a series in the data set.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Dataseries(Base)]
   \begin{itemize}
   \item \texttt{dataset} --- reference to the primary key of Dataset
@@ -305,7 +305,7 @@ A data set consists of one or more data series. If the data set describes, for e
   \end{itemize}
 \end{tcolorbox}
 
-A data series consists of one or more data points. When describing a single value such as the band gap of a material with no additional dependencies, the whole data set would consist of one series with one data point with one numerical value.
+A data series consists of one or more data points. When describing a single value such as the band gap of a material with no additional dependencies, the whole data set would consist of one series with only one data point with one numerical value.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Datapoint(Base)]
   \begin{itemize}
   \item \texttt{dataseries} --- reference to the primary key of Dataseries
@@ -316,14 +316,22 @@ Finally, the actual data is stored in the \texttt{NumericalValue} table.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValue(Base)]
   \begin{itemize}
   \item \texttt{datapoint} --- reference to the primary key of Datapoint
-  \item \texttt{unit} --- reference to the primary key of Unit
   \item \texttt{qualifier} --- ``primary'', ``secondary''
-  \item \texttt{value} --- floating point number
   \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
+  \item \texttt{value} --- floating point number
+  \item \texttt{counter} --- counts the number of values attached to a given data point.
   \end{itemize}
 \end{tcolorbox}
 
-A separate table is used for values that are fixed for the whole data set or series. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Whether the value is fixed at the data set or series level depends on whether the \texttt{dataset} or \texttt{dataseries} field is non-null.
+Any errors (uncertainties) associated with a numerical value are stored in a separate table. In the code, the errors are then retrieved from the database by querying for numerical values with the \verb+select_related('error')+ function and checking if a value has an associated error (\verb+if hasattr(value, 'error')+).
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Error(Base)]
+  \begin{itemize}
+  \item \texttt{numerical\_value} --- reference to the primary key of NumericalValue
+  \item \texttt{value} --- floating point number
+  \end{itemize}
+\end{tcolorbox}
+
+A separate table is used for values that are fixed for the whole data set or series. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Whether the value is fixed at the data set or series level depends on whether the \texttt{dataset} or \texttt{dataseries} field is non-null. Also, unlike regular numerical values, the fixed values are far lesser in number that we can attach the errors directly to the values without a performance penalty.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValueFixed(Base)]
   \begin{itemize}
   \item \texttt{dataset} --- reference to the primary key of Dataset
@@ -332,6 +340,7 @@ A separate table is used for values that are fixed for the whole data set or ser
   \item \texttt{unit} --- reference to the primary key of Unit
   \item \texttt{value} --- floating point number
   \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
+  \item \texttt{error} --- floating point number (optional)
   \end{itemize}
 \end{tcolorbox}
 
@@ -372,7 +381,7 @@ Similarly, in case of a theoretical study, the computational details are recorde
   \item \texttt{xc\_functional}
   \item \texttt{kgrid}
   \item \texttt{relativity\_level}
-  \item \texttt{basis\_set}
+  \item \texttt{basis\_set\_definition}
   \item \texttt{numerical\_accuracy}
   \end{itemize}
 \end{tcolorbox}

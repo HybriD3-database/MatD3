@@ -392,57 +392,30 @@ class Dataseries(Base):
         values = self.numericalvaluefixed_set.all()
         output = []
         for value in values:
-            if value.value_type != NumericalValue.ERROR:
-                output.append([
-                    value.physical_property.name,
-                    f'{NumericalValue.VALUE_TYPES[value.value_type][1]}'
-                    f'{value.value}',
-                    value.unit.label
-                ])
-            else:
-                output[-1][1] += f'(±{value.value})'
-                del value
+            value_str = value.formatted()
+            output.append([
+                value.physical_property.name, value_str, value.unit.label])
         return output
 
     def get_lattice_constants(self):
-        """Return three lattice constants and angles.
-
-        Special care is required for any error values attached to the
-        data points.
-
-        """
+        """Return three lattice constants and angles."""
         symbols = DatapointSymbol.objects.filter(
-            datapoint__dataseries=self).order_by('datapoint_id').values_list(
-                'symbol', flat=True)[:6]
-        first_value_id = self.datapoint_set.first().pk
+            datapoint__dataseries=self).annotate(
+                num=models.Count('datapoint__numericalvalue')).filter(
+                    num=1).order_by('datapoint_id').values_list(
+                        'symbol', flat=True)
         values_float = NumericalValue.objects.filter(
-            datapoint__pk__gte=first_value_id).filter(
-                datapoint__pk__lt=first_value_id+6).order_by(
-                    'datapoint_id', 'value_type').values_list(
-                    'value', 'datapoint_id', 'value_type')
+            datapoint__dataseries=self).annotate(
+                num=models.Count('datapoint__numericalvalue')).filter(
+                    num=1).select_related('error').order_by('datapoint_id')
         if self.dataset.primary_unit:
             units = 3*[f' {self.dataset.primary_unit.label}'] + 3*['°']
         else:
             units = 3*[' '] + 3*['°']
         values = []
-        errors = []
         for value in values_float:
-            if value[2] == NumericalValue.ERROR:
-                has_error = True
-                break
-        else:
-            has_error = False
-        for value in values_float:
-            value_type = value[2]
-            if not has_error or value_type != NumericalValue.ERROR:
-                values.append(f'{NumericalValue.VALUE_TYPES[value_type][1]}'
-                              f'{value[0]:.6f}')
-            if has_error:
-                if value_type == NumericalValue.ERROR:
-                    errors[-1] = f'{value[0]:.6f}'
-                else:
-                    errors.append('')
-        return zip_longest(symbols, values, units, errors)
+            values.append(value.formatted('.6f'))
+        return zip(symbols, values, units)
 
 
 class Datapoint(Base):
@@ -482,6 +455,18 @@ class NumericalValue(NumericalValueBase):
     qualifier = models.PositiveSmallIntegerField(
         default=PRIMARY, choices=QUALIFIER_TYPES)
 
+    def formatted(self, F=''):
+        """Return the value as a polished string.
+
+        In particular, the value type and an error, if present, are
+        attached to the value, e.g., ">12.3 (±0.4)".
+
+        """
+        value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value:{F}}'
+        if hasattr(self, 'error'):
+            value_str += f' (±{self.error.value:{F}})'
+        return value_str
+
 
 class DatapointSymbol(Base):
     datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
@@ -495,6 +480,14 @@ class NumericalValueFixed(NumericalValueBase):
     dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE)
     dataseries = models.ForeignKey(Dataseries, null=True,
                                    on_delete=models.CASCADE)
+    error = models.FloatField(null=True)
+
+    def formatted(self):
+        """Same as with NumericalValue but error is a class member."""
+        value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value}'
+        if self.error:
+            value_str += f' (±{self.error})'
+        return value_str
 
 
 class ComputationalDetails(Base):
@@ -532,3 +525,10 @@ class Comment(Base):
 
     def __str__(self):
         return self.text
+
+
+class Error(Base):
+    """Store the error (or uncertainty) of each value separately."""
+    numerical_value = models.OneToOneField(NumericalValue,
+                                           on_delete=models.CASCADE)
+    value = models.FloatField()

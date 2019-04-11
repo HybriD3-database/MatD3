@@ -991,14 +991,11 @@ def submit_data(request):
         value, value_type, error = clean_value(value)
         numerical_value.value = value
         numerical_value.value_type = value_type
-        if error:
-            error_value = models.NumericalValue(created_by=request.user,
-                                                datapoint=datapoint)
-            error_value.qualifier = numerical_value.qualifier
-            error_value.value_type = models.NumericalValue.ERROR
-            error_value.value = float(error)
-            error_value.save()
         numerical_value.save()
+        if error:
+            models.Error.objects.create(created_by=request.user,
+                                        numerical_value=numerical_value,
+                                        value=float(error))
 
     def add_comment(model, label, form):
         """Shortcut for conditionally attaching comments to a model instance.
@@ -1183,18 +1180,9 @@ def submit_data(request):
                     form.cleaned_data['fixed_value_' + suffix])
                 fixed_value.value = value
                 fixed_value.value_type = value_type
-                fixed_value.save()
                 if error:
-                    error_value = models.NumericalValueFixed(
-                        created_by=request.user,
-                        dataseries=dataseries,
-                        counter=counter)
-                    error_value.physical_property = (
-                        fixed_value.physical_property)
-                    error_value.unit = fixed_value.unit
-                    error_value.value_type = models.NumericalValueFixed.ERROR
-                    error_value.value = float(error)
-                    error_value.save()
+                    fixed_value.error = error
+                fixed_value.save()
                 counter += 1
         # Input files
         if (
@@ -1510,22 +1498,20 @@ def data_for_chart(request, pk):
 
 
 def get_series_values(request, pk):
-    """Return numerical values of a series as a formatted list."""
+    """Return the numerical values of a series as a formatted list."""
     values = models.NumericalValue.objects.filter(
-        datapoint__dataseries__pk=pk).order_by('qualifier', 'datapoint__pk')
-    if not values:
-        return JsonResponse({})
+        datapoint__dataseries__pk=pk).select_related(
+            'error').order_by('qualifier', 'datapoint__pk')
+    total_len = len(values)
+    y_len = total_len
+    # With both x- and y-values, the y-values make up half the list.
     if values.last().qualifier == models.NumericalValue.SECONDARY:
-        y_limit = int(len(values)/2)
-        x_limit = len(values)
-    else:
-        y_limit = len(values)
-        x_limit = 0
+        y_len = int(y_len/2)
     response = []
-    for i in range(y_limit):
-        response.append({'y': str(values[i].value)})
-    for i in range(y_limit, x_limit):
-        response[i-y_limit]['x'] = str(values[i].value)
+    for i in range(y_len):
+        response.append({'y': values[i].formatted()})
+    for i in range(y_len, total_len):
+        response[i-y_len]['x'] = values[i].formatted()
     return JsonResponse(response, safe=False)
 
 
