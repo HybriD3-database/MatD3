@@ -1101,8 +1101,8 @@ def submit_data(request):
                                 ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
                 datapoint = models.Datapoint.objects.create(
                     created_by=request.user, dataseries=dataseries)
-                datapoint.datapointsymbol_set.create(created_by=request.user,
-                                                     symbol=symbol)
+                datapoint.symbol_set.create(created_by=request.user,
+                                            value=symbol)
                 name = 'lattice_constant_' + key + '_' + str(i_series)
                 insert_numerical_value(datapoint, form.cleaned_data[name])
             for line in form.cleaned_data[
@@ -1128,12 +1128,11 @@ def submit_data(request):
                         coord_type, *coords, element = m.groups()
                         datapoint = models.Datapoint.objects.create(
                             created_by=request.user, dataseries=dataseries)
-                        datapoint.datapointsymbol_set.create(
-                            created_by=request.user,
-                            symbol=coord_type,
-                            counter=0)
-                        datapoint.datapointsymbol_set.create(
-                            created_by=request.user, symbol=element, counter=1)
+                        datapoint.symbol_set.create(created_by=request.user,
+                                                    value=coord_type,
+                                                    counter=0)
+                        datapoint.symbol_set.create(
+                            created_by=request.user, value=element, counter=1)
                         for i_coord, coord in enumerate(coords):
                             datapoint.numericalvalue_set.create(
                                 created_by=request.user,
@@ -1526,17 +1525,17 @@ def get_atomic_coordinates(request, pk):
     series = models.Dataseries.objects.get(pk=pk)
     vectors = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
-           datapoint__datapointsymbol__isnull=True).order_by(
+           datapoint__symbol__isnull=True).order_by(
                'datapoint_id', 'counter').values_list('value', flat=True)
     data = {'vectors':
             [list(vectors[:3]), list(vectors[3:6]), list(vectors[6:9])]}
     # Here counter=1 filters out the first six entries
-    symbols = models.DatapointSymbol.objects.filter(
+    symbols = models.Symbol.objects.filter(
         datapoint__dataseries=series).filter(counter=1).order_by(
-            'datapoint_id').values_list('symbol', flat=True)
+            'datapoint_id').values_list('value', flat=True)
     coords = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
-            datapoint__datapointsymbol__counter=1).order_by(
+            datapoint__symbol__counter=1).order_by(
                 'counter', 'datapoint_id').values_list('value', flat=True)
     N = symbols.count()
     data['coordinates'] = list(

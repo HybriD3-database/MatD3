@@ -399,11 +399,9 @@ class Dataseries(Base):
 
     def get_lattice_constants(self):
         """Return three lattice constants and angles."""
-        symbols = DatapointSymbol.objects.filter(
-            datapoint__dataseries=self).annotate(
-                num=models.Count('datapoint__numericalvalue')).filter(
-                    num=1).order_by('datapoint_id').values_list(
-                        'symbol', flat=True)
+        symbols = Symbol.objects.filter(datapoint__dataseries=self).annotate(
+            num=models.Count('datapoint__numericalvalue')).filter(
+                num=1).order_by('datapoint_id').values_list('value', flat=True)
         values_float = NumericalValue.objects.filter(
             datapoint__dataseries=self).annotate(
                 num=models.Count('datapoint__numericalvalue')).filter(
@@ -466,9 +464,15 @@ class NumericalValue(NumericalValueBase):
         return value_str
 
 
-class DatapointSymbol(Base):
+class Symbol(Base):
+    """Data point information not storable as floats.
+
+    This includes for example k-point coordinates such as "X" or the
+    component of a tensor such as "c111".
+
+    """
     datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
-    symbol = models.CharField(max_length=10)
+    value = models.CharField(max_length=10)
     counter = models.PositiveSmallIntegerField(default=0)
 
 

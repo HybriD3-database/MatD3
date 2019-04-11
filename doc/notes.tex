@@ -319,7 +319,7 @@ Finally, the actual data is stored in the \texttt{NumericalValue} table.
   \item \texttt{qualifier} --- ``primary'', ``secondary''
   \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
   \item \texttt{value} --- floating point number
-  \item \texttt{counter} --- counts the number of values attached to a given data point.
+  \item \texttt{counter} --- counts the number of values attached to a given data point
   \end{itemize}
 \end{tcolorbox}
 
@@ -344,11 +344,12 @@ A separate table is used for values that are fixed for the whole data set or ser
   \end{itemize}
 \end{tcolorbox}
 
-If the dependence of the primary property is on something that cannot be stored as a floating point number, it is stored in the \texttt{DatapointSymbol} table. Example: the user enters band gap values a function of phase. The phases are then stored as strings in the following table.
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=DatapointSymbol(Base)]
+If the dependence of the primary property is on something that cannot be stored as a floating point number, it is stored in the \texttt{Symbol} table. Example: the user enters band gap values a function of phase. The phases are then stored as strings in the following table.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Symbol(Base)]
   \begin{itemize}
   \item \texttt{datapoint} --- reference to the primary key of Datapoint
-  \item \texttt{symbol} --- a string
+  \item \texttt{value} --- a string
+  \item \texttt{counter} --- counts the number of symbols attached to a given data point
   \end{itemize}
 \end{tcolorbox}
 
