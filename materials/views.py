@@ -966,7 +966,7 @@ def submit_data(request):
             error = value[left_paren_start+1:right_paren_start]
             if '.' not in error and left_paren_start > len(error):
                 error = re.sub('[1-9]', '0',
-                               value[:left_paren_start-1]) + error
+                               value[:left_paren_start-len(error)]) + error
             value = value[:left_paren_start]
         elif '±' in value:
             value, error = value.split('±')
