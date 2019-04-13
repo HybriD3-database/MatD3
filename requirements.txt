@@ -10,3 +10,4 @@ scipy==1.2.1
 six==1.11.0
 sentry-sdk==0.7.3
 raven==6.10.0
+python-decouple==3.1

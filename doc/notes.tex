@@ -71,27 +71,16 @@ to record the new list of requirements. Since this will overwrite the current re
 
 \section{Development notes}
 
-The most important configuration file for the project is \texttt{settings.py} located under \texttt{mainproject}. It is set up specifically for the server where HybriD$^3$ is currently hosted (\texttt{materials.hybrid3.duke.edu}) and needs to be modified for your local development. Since that file is under version control and meant for production use only, it is better to create a separate file for any local development and not modify the main settings file.
+The most important configuration file for the project is \texttt{settings.py} located under \texttt{mainproject}. This file would need to be reviewed and edited for each instance of the server. Most settings in it are already at reasonable (or correct) values and those that are most likely to be edited are stored in a separate file called \texttt{.env} in the root directory. This file is part the Python Decouple tool, which allows you to organize the project's settings without having to edit the version controlled main settings file and, most importantly, for keeping secrets out of version control. The \texttt{settings.py} and \texttt{.env} pair is in a way analogous to the \texttt{.gitignore} and \texttt{.git/info/exclude} pair. Each value in \texttt{settings.py} that is set using the \texttt{config} function should have a corresponding entry in \texttt{.env}, unless you are happy with the default value. An example \texttt{.env} might look something like this:
+\begin{lstlisting}
+SECRET_KEY=<key>
+ALLOWED_HOSTS=.host1.com, .host2.com
+EMAIL_HOST=smtp.sendgrid.net
+EMAIL_HOST_USER=hybrid3
+EMAIL_HOST_PASSWORD=<password>
+\end{lstlisting}
+where \texttt{<key>} and \texttt{<password>} would need to be replaced by their actual values.
 
-You may start, e.g., by creating \verb+mainproject/settings_local.py+ with the following contents:
-\lstset{language=Python}
-\begin{lstlisting}
-from .settings import *
-DEBUG = True
-SECRET_KEY = 'GF#QhIU%}4;auyFdIr]6>$_~|=."9qB%[Oj;.<^$IkNAgp0E{d'
-ALLOWED_HOSTS += ['localhost']
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-\end{lstlisting}
-Most settings are imported from the main settings file unmodified and only things that you want to change are recorded in the local file. Note that this is a rare exception for using \verb+import *+, which is otherwise considered poor style and in violation with the PEP 8 guidelines. In order to start the development server, the environment variable \verb+DJANGO_SETTINGS_MODULE+ has to point to the dotted path of the local settings file:
-\lstset{language=Bash}
-\begin{lstlisting}
-  export DJANGO_SETTINGS_MODULE=mainproject.settings_local
-\end{lstlisting}
 When this is set up, start the server with
 \begin{lstlisting}
   ./manage.py runserver

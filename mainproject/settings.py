@@ -1,25 +1,19 @@
 """Django settings for HybriD3.
 
 """
-
+from decouple import config
+from decouple import Csv
 import os
 import raven
 import socket
 
 from django.contrib.messages import constants as messages
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-try:
-    with open('/etc/hybrid3_database_django.key', 'r') as f:
-        SECRET_KEY = f.read()
-except Exception:
-    pass
-
-DEBUG = False
-
-ALLOWED_HOSTS = ['vwb3-web-02.egr.duke.edu', 'materials.hybrid3.duke.edu']
+SECRET_KEY = config(
+    'SECRET_KEY', default='GF#QhIU%}4;auyFdIr]6>$_~|=."9qB%[Oj;.<^$IkNAgp0E{d')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 
 # Application definition
 
@@ -71,8 +65,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'materials',
-        'USER': 'xd24',
-        'PASSWORD': '',
+        'USER': config('DB_USER', default=''),
+        'PASSWORD': config('DB_PASSWORD', default=''),
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -135,13 +129,10 @@ ACCOUNT_ACTIVATION_DAYS = 7
 # Email settings
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.office365.com'
+EMAIL_HOST = config('EMAIL_HOST', default='')
 EMAIL_PORT = 587
-EMAIL_HOST_USER = os.environ.get('HYBRID3_EMAIL_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('HYBRID3_EMAIL_PASSWORD', '')
-EMAIL_HOST_USER = 'XXXXXXX'
-EMAIL_HOST_PASSWORD = 'XXXXXXX'
-DEFAULT_FROM_EMAIL = 'HybriD3 materials database <hybrid3project@duke.edu>'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = True
 
 # Messages framework
