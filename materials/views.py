@@ -1475,9 +1475,9 @@ def data_for_chart(request, pk):
     response['series-label'] = dataseries.label
     values = models.NumericalValue.objects.filter(
         datapoint__dataseries=dataseries).order_by(
-            'value_type', 'datapoint_id').values_list('value', flat=True)
+            'datapoint_id', 'qualifier').values_list('value', flat=True)
     for i in range(0, len(values), 2):
-        response['data'].append({'x': values[i], 'y': values[i+1]})
+        response['data'].append({'y': values[i], 'x': values[i+1]})
     return JsonResponse(response)
 
 
