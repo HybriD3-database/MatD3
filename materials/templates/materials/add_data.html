@@ -651,7 +651,15 @@
          var a, b, c, alpha, beta, gamma;
          function process_batch(input_data, dest_suffix) {
            lines = input_data.split('\n');
-           if (input_data.match(/^ *lattice_vector/)) {
+           var i;
+           var jmol_format = false;
+           for (i = 0; i < lines.length; i++) {
+             if (lines[i].match(/^ *lattice_vector/)) {
+               jmol_format = true;
+               break;
+             }
+           }
+           if (jmol_format) {
              // Generate the lattice parameters (lattice constants and angles)
              // from lattice vectors
              lattice_vectors = [];
@@ -698,7 +706,7 @@
            $('#id_lattice_constant_alpha_' + dest_suffix).val(alpha);
            $('#id_lattice_constant_beta_' + dest_suffix).val(beta);
            $('#id_lattice_constant_gamma_' + dest_suffix).val(gamma);
-           $('#id_atomic_coordinates_' + dest_suffix).html(input_data);
+           $('#id_atomic_coordinates_' + dest_suffix).val(input_data);
          }
          if (i_series) {
            process_batch(response, i_series);

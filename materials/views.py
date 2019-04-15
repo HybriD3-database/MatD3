@@ -1108,8 +1108,6 @@ def submit_data(request):
                 insert_numerical_value(datapoint, form.cleaned_data[name])
             for line in form.cleaned_data[
                     'atomic_coordinates_' + str(i_series)].split('\n'):
-                if line == '' or line.startswith('#'):
-                    continue
                 try:
                     if line.startswith('lattice_vector'):
                         m = re.match(r'\s*lattice_vector' +
@@ -1117,15 +1115,11 @@ def submit_data(request):
                         coords = m.groups()
                         datapoint = models.Datapoint.objects.create(
                             created_by=request.user, dataseries=dataseries)
-                        for i_coord, coord in enumerate(coords):
-                            datapoint.numericalvalue_set.create(
-                                created_by=request.user,
-                                value=float(coord),
-                                counter=i_coord)
                     else:
                         m = re.match(
                             r'\s*(atom|atom_frac)\s+' +
-                            3*r'(-?\d+(?:\.\d+)?)\s+' + r'(\w+)\b', line)
+                            3*r'(-?\d+(?:\.\d+)?(?:\(\d+\))?)\s+' +
+                            r'(\w+)\b', line)
                         coord_type, *coords, element = m.groups()
                         datapoint = models.Datapoint.objects.create(
                             created_by=request.user, dataseries=dataseries)
@@ -1134,18 +1128,28 @@ def submit_data(request):
                                                     counter=0)
                         datapoint.symbol_set.create(
                             created_by=request.user, value=element, counter=1)
-                        for i_coord, coord in enumerate(coords):
-                            datapoint.numericalvalue_set.create(
+                    for i_coord, coord in enumerate(coords):
+                        numerical_value = models.NumericalValue(
+                            created_by=request.user, datapoint=datapoint)
+                        value, value_type, error = clean_value(coord)
+                        numerical_value.value = value
+                        numerical_value.counter = i_coord
+                        numerical_value.value_type = value_type
+                        numerical_value.save()
+                        if error:
+                            models.Error.objects.create(
                                 created_by=request.user,
-                                value=float(coord),
-                                counter=i_coord)
+                                numerical_value=numerical_value,
+                                value=float(error))
                 except AttributeError:
-                    messages.error(request,
-                                   'Could not process input for '
-                                   f'atomic coordinates: {line}')
-                    dataset.delete()
-                    return render(request, 'materials/add_data.html',
-                                  {'form': form})
+                    # Skip comments and empty lines
+                    if not re.match(r'(?:\r?$|#|//)', line):
+                        messages.error(request,
+                                       'Could not process input for '
+                                       f'atomic coordinates: {line}')
+                        dataset.delete()
+                        return render(request, 'materials/add_data.html',
+                                      {'form': form})
         elif form.cleaned_data['two_axes']:
             for line in form.cleaned_data[
                     'series_datapoints_' + str(i_series)].split('\n'):
