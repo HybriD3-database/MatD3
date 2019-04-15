@@ -1042,6 +1042,7 @@ def submit_data(request):
     dataset.representative = not bool(models.Dataset.objects.filter(
         system=dataset.system).filter(
             primary_property=dataset.primary_property))
+    dataset.has_files = False
     dataset.save()
     logger.info(f'Create dataset #{dataset.pk}')
     # Uploaded files
