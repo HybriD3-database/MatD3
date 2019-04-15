@@ -1519,11 +1519,16 @@ def get_atomic_coordinates(request, pk):
             'datapoint_id').values_list('value', flat=True)
     coords = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
-            datapoint__symbol__counter=1).order_by(
-                'counter', 'datapoint_id').values_list('value', flat=True)
-    N = symbols.count()
-    data['coordinates'] = list(
-        zip(symbols, coords[:N], coords[N:2*N], coords[2*N:3*N]))
+            datapoint__symbol__counter=1).select_related('error').order_by(
+                'counter', 'datapoint_id')
+    data['coordinates'] = []
+    N = int(len(coords)/3)
+    for symbol, coord_x, coord_y, coord_z in zip(
+            symbols, coords[:N], coords[N:2*N], coords[2*N:3*N]):
+        data['coordinates'].append((symbol,
+                                    coord_x.formatted(),
+                                    coord_y.formatted(),
+                                    coord_z.formatted()))
     return JsonResponse(data)
 
 
