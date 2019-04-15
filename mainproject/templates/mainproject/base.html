@@ -23,6 +23,14 @@
     {% block navbar %}
     {% endblock %}
     <div class="container">
+      <br>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="d-flex">
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          </div>
+        {% endfor %}
+      {% endif %}
       {% block body %}
       {% endblock %}
     </div>
