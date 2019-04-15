@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import UploadedFile
+from django.db import transaction
 from django.db.models import Q
 from django.forms import formset_factory
 from django.http import HttpResponse
@@ -935,14 +936,15 @@ def add_unit(request):
 
 
 @login_required
+@transaction.atomic
 def submit_data(request):
     """Primary function for submitting data from the user."""
     def clean_value(value):
         """Return value as float and determine its type.
 
         The value is first stripped of markers such as '<', which are
-        used to determine its type. If the type is ERROR, the error
-        value is also returned.
+        used to determine its type. If the value contains an error (or
+        uncertainty), the error is also returned.
 
         """
         error = None
@@ -971,30 +973,72 @@ def submit_data(request):
             value, error = value.split('±')
         return float(value), value_type, error
 
-    def insert_numerical_value(datapoint, value, is_secondary=False):
-        """Clean and insert numerical value into database.
+    def add_numerical_value(numerical_values, errors, value,
+                            is_secondary=False, counter=0):
+        """Clean and add a numerical value to a list.
 
-        datapoint: models.Datapoint
-            data point for which the numerical value is entered
+        numerical_values: list
+            list that contains numerical values that will be created
+            by a bulk_create once the list is complete
+        error: list
+            same as numerical_values but for errors
         value: string
-            numerical value
+            numerical value to be processed and added to the list
         is_secondary: boolean
             whether the numerical value is of secondary or primary
             type
+        counter: int
+            numerical value counter
 
         """
-        numerical_value = models.NumericalValue(created_by=request.user,
-                                                datapoint=datapoint)
+        numerical_value = models.NumericalValue(created_by=request.user)
         if is_secondary:
             numerical_value.qualifier = models.NumericalValue.SECONDARY
+        if counter > 0:
+            numerical_value.counter = counter
         value, value_type, error = clean_value(value)
         numerical_value.value = value
         numerical_value.value_type = value_type
-        numerical_value.save()
-        if error:
-            models.Error.objects.create(created_by=request.user,
-                                        numerical_value=numerical_value,
-                                        value=float(error))
+        numerical_values.append(numerical_value)
+        errors.append(error)
+
+    def add_datapoint_ids(values, step):
+        """Set datapoint_id for all elements in an array.
+
+        The data points must already have been created using
+        bulk_create. Now, fetch the ids of the latest data points and
+        manually attach them to each element in "values". After this
+        is done, bulk_create may be called on "values".
+
+        The step argument tells how many numerical values are
+        associated with each data point.
+
+        """
+        n_datapoints = int(len(values)/step)
+        pks = list(models.Datapoint.objects.all().order_by(
+            '-pk')[:n_datapoints].values_list('pk', flat=True))
+        for i_pk, pk in enumerate(reversed(pks)):
+            for i_step in range(step):
+                values[step*i_pk+i_step].datapoint_id = pk
+
+    def generate_numerical_value_ids(array):
+        """Set numerical_value_id for all elements in array.
+
+        This is similar to add_datapoint_ids, except the structure of
+        the array is different. Some or all elements in the array may
+        be None. Filter out non-None elements and return an array that
+        may be given as argument to bulk_create.
+
+        """
+        pks = list(models.NumericalValue.objects.all().order_by(
+            '-pk')[:len(array)].values_list('pk', flat=True))
+        filtered_list = []
+        for i, pk in enumerate(reversed(pks)):
+            if array[i]:
+                filtered_list.append(models.Error(created_by=request.user,
+                                                  numerical_value_id=pk,
+                                                  value=array[i]))
+        return filtered_list
 
     def add_comment(model, label, form):
         """Shortcut for conditionally attaching comments to a model instance.
@@ -1084,6 +1128,14 @@ def submit_data(request):
         computational.save()
         logger.info(f'Creating computational details #{computational.pk}')
         add_comment(computational, 'computational_comment', form)
+    # For best performance, the main data should be inserted with
+    # calls to bulk_create. The following work arrays are are
+    # populated with data during the loop over series and then
+    # inserted into the database after the main loop.
+    datapoints = []
+    symbols = []
+    numerical_values = []
+    errors = []
     for i_series in range(1,
                           int(form.cleaned_data['number_of_data_series']) + 1):
         # Create data series
@@ -1093,9 +1145,8 @@ def submit_data(request):
             dataseries.label = form.cleaned_data[
                 'series_label_' + str(i_series)]
         dataseries.save()
-        # Read in main data. Go through exceptional cases first. Some
-        # properties such as "lattice parameter" require special
-        # treatment.
+        # Go through exceptional cases first. Some properties such as
+        # "lattice parameter" require special treatment.
         if dataset.primary_property.require_input_files:
             pass
         elif dataset.primary_property.name == 'lattice parameter':
@@ -1106,7 +1157,18 @@ def submit_data(request):
                 datapoint.symbol_set.create(created_by=request.user,
                                             value=symbol)
                 name = 'lattice_constant_' + key + '_' + str(i_series)
-                insert_numerical_value(datapoint, form.cleaned_data[name])
+                value, value_type, error = clean_value(form.cleaned_data[name])
+                models.NumericalValue.objects.create(created_by=request.user,
+                                                     datapoint=datapoint,
+                                                     value_type=value_type,
+                                                     value=value)
+                if error:
+                    models.Error.objects.create(
+                        created_by=request.user,
+                        numerical_value=models.NumericalValue.objects.last(),
+                        value=float(error))
+            lattice_vectors = []
+            lattice_errors = []  # dummy
             for line in form.cleaned_data[
                     'atomic_coordinates_' + str(i_series)].split('\n'):
                 try:
@@ -1114,34 +1176,28 @@ def submit_data(request):
                         m = re.match(r'\s*lattice_vector' +
                                      3*r'\s+(-?\d+(?:\.\d+)?)' + r'\b', line)
                         coords = m.groups()
-                        datapoint = models.Datapoint.objects.create(
+                        models.Datapoint.objects.create(
                             created_by=request.user, dataseries=dataseries)
+                        for i_coord, coord in enumerate(coords):
+                            add_numerical_value(lattice_vectors,
+                                                lattice_errors,
+                                                coord,
+                                                counter=i_coord)
                     else:
                         m = re.match(
                             r'\s*(atom|atom_frac)\s+' +
                             3*r'(-?\d+(?:\.\d+)?(?:\(\d+\))?)\s+' +
                             r'(\w+)\b', line)
                         coord_type, *coords, element = m.groups()
-                        datapoint = models.Datapoint.objects.create(
-                            created_by=request.user, dataseries=dataseries)
-                        datapoint.symbol_set.create(created_by=request.user,
-                                                    value=coord_type,
-                                                    counter=0)
-                        datapoint.symbol_set.create(
-                            created_by=request.user, value=element, counter=1)
-                    for i_coord, coord in enumerate(coords):
-                        numerical_value = models.NumericalValue(
-                            created_by=request.user, datapoint=datapoint)
-                        value, value_type, error = clean_value(coord)
-                        numerical_value.value = value
-                        numerical_value.counter = i_coord
-                        numerical_value.value_type = value_type
-                        numerical_value.save()
-                        if error:
-                            models.Error.objects.create(
-                                created_by=request.user,
-                                numerical_value=numerical_value,
-                                value=float(error))
+                        datapoints.append(models.Datapoint(
+                            created_by=request.user, dataseries=dataseries))
+                        symbols.append(models.Symbol(created_by=request.user,
+                                                     value=coord_type))
+                        symbols.append(models.Symbol(created_by=request.user,
+                                                     value=element, counter=1))
+                        for i_coord, coord in enumerate(coords):
+                            add_numerical_value(numerical_values, errors,
+                                                coord, counter=i_coord)
                 except AttributeError:
                     # Skip comments and empty lines
                     if not re.match(r'(?:\r?$|#|//)', line):
@@ -1151,24 +1207,27 @@ def submit_data(request):
                         dataset.delete()
                         return render(request, 'materials/add_data.html',
                                       {'form': form})
+            add_datapoint_ids(lattice_vectors, 3)
+            models.NumericalValue.objects.bulk_create(lattice_vectors)
         elif form.cleaned_data['two_axes']:
             for line in form.cleaned_data[
                     'series_datapoints_' + str(i_series)].split('\n'):
                 if line.startswith('#') or not line or line == '\r':
                     continue
                 x_value, y_value = line.split()
-                datapoint = models.Datapoint.objects.create(
-                    created_by=request.user, dataseries=dataseries)
-                insert_numerical_value(datapoint, x_value, is_secondary=True)
-                insert_numerical_value(datapoint, y_value)
+                datapoints.append(models.Datapoint(
+                    created_by=request.user, dataseries=dataseries))
+                add_numerical_value(numerical_values, errors, x_value,
+                                    is_secondary=True)
+                add_numerical_value(numerical_values, errors, y_value)
         else:
             for value in form.cleaned_data[
                     'series_datapoints_' + str(i_series)].split():
                 if value.startswith('#') or not value:
                     continue
-                datapoint = models.Datapoint.objects.create(
-                    created_by=request.user, dataseries=dataseries)
-                insert_numerical_value(datapoint, value)
+                datapoints.append(models.Datapoint(
+                    created_by=request.user, dataseries=dataseries))
+                add_numerical_value(numerical_values, errors, value)
         # Fixed properties
         counter = 0
         for key in form.cleaned_data:
@@ -1189,6 +1248,14 @@ def submit_data(request):
                     fixed_value.error = error
                 fixed_value.save()
                 counter += 1
+    # Insert the main data into the database
+    models.Datapoint.objects.bulk_create(datapoints)
+    add_datapoint_ids(numerical_values,
+                      int(len(numerical_values)/len(datapoints)))
+    models.NumericalValue.objects.bulk_create(numerical_values)
+    models.Error.objects.bulk_create(generate_numerical_value_ids(errors))
+    add_datapoint_ids(symbols, int(len(symbols)/len(datapoints)))
+    models.Symbol.objects.bulk_create(symbols)
     # If all went well, let the user know how much data was
     # successfully added
     n_data_points = 0
