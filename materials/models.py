@@ -1,4 +1,3 @@
-from itertools import zip_longest
 import logging
 import os
 import shutil
@@ -359,23 +358,10 @@ class Dataset(Base):
     representative = models.BooleanField(default=False)
 
     def delete(self, *args, **kwargs):
-        """Additionally emove any files uploaded by the user."""
-        if self.has_files:
-            loc = os.path.join(settings.MEDIA_ROOT,
-                               f'uploads/dataset_{self.pk}')
-            if os.path.isdir(loc):
-                for file_ in os.listdir(loc):
-                    logger.info(
-                        f'deleting input_files/dataset_{self.pk}/{file_}')
-                shutil.rmtree(loc)
-        if self.primary_property and self.primary_property.require_input_files:
-            loc = os.path.join(settings.MEDIA_ROOT,
-                               f'input_files/dataset_{self.pk}')
-            if os.path.isdir(loc):
-                for file_ in os.listdir(loc):
-                    logger.info(
-                        f'deleting input_files/dataset_{self.pk}/{file_}')
-                shutil.rmtree(loc)
+        """Additionally remove any files uploaded by the user."""
+        if self.files.exists():
+            shutil.rmtree(
+                os.path.dirname(self.files.first().dataset_file.path))
         super().delete(*args, **kwargs)
 
     def num_all_entries(self):
@@ -534,3 +520,13 @@ class Error(Base):
     numerical_value = models.OneToOneField(NumericalValue,
                                            on_delete=models.CASCADE)
     value = models.FloatField()
+
+
+def dataset_file_path(instance, filename):
+    return os.path.join('uploads', f'dataset_{instance.dataset.pk}', filename)
+
+
+class DatasetFile(Base):
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
+                                related_name='files')
+    dataset_file = models.FileField(upload_to=dataset_file_path)

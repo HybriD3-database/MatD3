@@ -13,7 +13,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 from django.forms import formset_factory
@@ -1038,7 +1037,6 @@ def submit_data(request):
     dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
     dataset.sample_type = form.cleaned_data['sample_type']
     dataset.crystal_system = form.cleaned_data['crystal_system']
-    dataset.has_files = 'uploaded-files' in request.FILES
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
     dataset.representative = not bool(models.Dataset.objects.filter(
@@ -1046,6 +1044,9 @@ def submit_data(request):
             primary_property=dataset.primary_property))
     dataset.save()
     logger.info(f'Create dataset #{dataset.pk}')
+    # Uploaded files
+    for f in request.FILES.getlist('uploaded_files'):
+        dataset.files.create(created_by=request.user, dataset_file=f)
     # Synthesis method
     if form.cleaned_data['with_synthesis_details']:
         synthesis = models.SynthesisMethod(created_by=request.user,
@@ -1183,23 +1184,6 @@ def submit_data(request):
                     fixed_value.error = error
                 fixed_value.save()
                 counter += 1
-        # Input files
-        if (
-                dataset.primary_property and
-                dataset.primary_property.require_input_files):
-            fs = FileSystemStorage(os.path.join(
-                settings.MEDIA_ROOT, f'input_files/dataset_{dataset.pk}'))
-            for file_ in request.FILES.getlist('input-data-files'):
-                fs.save(file_.name, file_)
-                logger.info(
-                    f'uploading input_files/dataset_{dataset.pk}/{file_}')
-    # Additional files
-    if dataset.has_files:
-        fs = FileSystemStorage(os.path.join(settings.MEDIA_ROOT,
-                                            f'uploads/dataset_{dataset.pk}'))
-        for file_ in request.FILES.getlist('uploaded-files'):
-            fs.save(file_.name, file_)
-            logger.info(f'uploading uploads/dataset_{dataset.pk}/{file_}')
     # If all went well, let the user know how much data was
     # successfully added
     n_data_points = 0
@@ -1233,19 +1217,15 @@ def toggle_dataset_plotted(request, system_pk, dataset_pk, return_path):
 
 
 def download_dataset_files(request, pk):
-    loc = os.path.join(settings.MEDIA_ROOT, f'uploads/dataset_{pk}')
-    files = os.listdir(loc)
-    file_full_paths = [os.path.join(loc, f) for f in files]
-    zip_dir = 'files'
-    zip_filename = 'files.zip'
+    dataset = models.Dataset.objects.get(pk=pk)
     in_memory_object = io.BytesIO()
     zf = zipfile.ZipFile(in_memory_object, 'w')
-    for file_path, file_name in zip(file_full_paths, files):
-        zf.write(file_path, os.path.join(zip_dir, file_name))
+    for file_ in (f.dataset_file.path for f in dataset.files.all()):
+        zf.write(file_, os.path.join('files', os.path.basename(file_)))
     zf.close()
     response = HttpResponse(in_memory_object.getvalue(),
                             content_type='application/x-zip-compressed')
-    response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+    response['Content-Disposition'] = f'attachment; filename=files.zip'
     return response
 
 

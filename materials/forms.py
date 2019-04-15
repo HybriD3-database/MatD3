@@ -451,6 +451,15 @@ class AddDataForm(forms.Form):
         'absolute coordinates ("atom"), the units are given by "Primary unit" '
         'above. Note: to resize this box, drag from the corner.')
 
+    # Uploads
+    uploaded_files = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        help_text=''
+        'Upload files containing anything that is relevant to the current '
+        'data set (input files to a calculation, image of the sample, ...). '
+        'Multiple files can be selected here.')
+
     def __init__(self, *args, **kwargs):
         """Dynamically add series and fixed properties."""
         super().__init__(*args, **kwargs)

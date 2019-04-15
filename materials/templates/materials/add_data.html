@@ -245,11 +245,7 @@
                 Additional data
               </div>
               <div class="card-body card-add-data">
-                <label for="uploaded-files">Upload files</label>
-                <i class="fa fa-question-circle tooltip-container">
-                  <span class="tooltiptext">Upload files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...). Multiple files can be selected here.</span>
-                </i>
-                <input type="file" id="uploaded-files" name="uploaded-files" multiple>
+                {% include 'materials/input_field.html' with field=form.uploaded_files %}
               </div>
             </div>
 
@@ -380,9 +376,7 @@
                 </div>
               </div>
               <div class="form-group">
-                {{ form.atomic_coordinates.label_tag }}
-                {{ form.atomic_coordinates.help_text|tooltip }}
-                {{ form.atomic_coordinates }}
+                {% include 'materials/input_field.html' with field=form.atomic_coordinates %}
               </div>
             </div>
           </div>

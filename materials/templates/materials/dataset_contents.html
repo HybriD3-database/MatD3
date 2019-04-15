@@ -239,7 +239,7 @@
   </div>
 
   <!-- UPLOADED FILES -->
-  {% if dataset.has_files %}
+  {% if dataset.files.exists %}
     <br>
     <p>
       <a href="{% url "materials:download_dataset_files" pk=dataset.pk %}">

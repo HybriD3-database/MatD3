@@ -276,7 +276,6 @@ All experimental and theoretical results are contained in data sets. A data set 
   \item \texttt{reference} --- reference to the primary key of Reference
   \item \texttt{visible} --- whether the data is visible on the website
   \item \texttt{plotted} --- whether data is plotted by default
-  \item \texttt{has\_files} --- whether the data set comes with additional files. This is a boolean type field. If true, the actual files are stored at \verb+MEDIA_ROOT/uploads/dataset_#+, where \verb+#+ is the data set ID
   \item \texttt{experimental} --- whether the data is of experimental origin (theoretical if false)
   \item \texttt{dimensionality} --- 2D, 3D, \ldots
   \item \texttt{sample\_type} --- single crystal, powder, \ldots
@@ -376,10 +375,26 @@ Similarly, in case of a theoretical study, the computational details are recorde
   \end{itemize}
 \end{tcolorbox}
 
+If a numerical value comes with an error or uncertainty (experimental or theoretical), then this value is stored separately.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Error(Base)]
+  \begin{itemize}
+  \item \texttt{numerical\_value} --- reference to the primary key of NumericalValue
+  \item \texttt{value} --- floating point number
+  \end{itemize}
+\end{tcolorbox}
+
+User uploaded files are stored in \texttt{DatasetFile}.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=DatasetFile(Base)]
+  \begin{itemize}
+  \item \texttt{dataset} --- reference to the primary key of Dataset
+  \item \texttt{dataset\_file} --- a file upload field
+  \end{itemize}
+\end{tcolorbox}
+
 Band structures are treated differently from other physical properties. We specify only the reference to a data set and location of the data, which is currently stored in a text format on the hard drive.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=BandStructure(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{dataset} --- reference to the primary key of Dataset
   \item \texttt{folder\_location}
   \end{itemize}
 \end{tcolorbox}
