@@ -1014,6 +1014,8 @@ def submit_data(request):
         associated with each data point.
 
         """
+        if step == 0:
+            return
         n_datapoints = int(len(values)/step)
         pks = list(models.Datapoint.objects.all().order_by(
             '-pk')[:n_datapoints].values_list('pk', flat=True))
