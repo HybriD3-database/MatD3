@@ -345,8 +345,8 @@ class Dataset(Base):
     secondary_unit = models.ForeignKey(
         Unit, null=True, on_delete=models.PROTECT,
         related_name='secondary_unit')
-    reference = models.ForeignKey(Reference, null=True,
-                                  on_delete=models.PROTECT)
+    reference = models.ForeignKey(
+        Reference, null=True, on_delete=models.PROTECT)
     visible = models.BooleanField()
     plotted = models.BooleanField()
     has_files = models.BooleanField()
@@ -354,7 +354,7 @@ class Dataset(Base):
     dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
-    extraction_method = models.CharField(max_length=100, null=True)
+    extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
 
     def delete(self, *args, **kwargs):
@@ -370,7 +370,7 @@ class Dataset(Base):
 
 
 class Dataseries(Base):
-    label = models.CharField(max_length=100, null=True)
+    label = models.CharField(max_length=100, blank=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
 
     def get_fixed_values(self):
@@ -487,38 +487,38 @@ class NumericalValueFixed(NumericalValueBase):
 class ComputationalDetails(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='computational')
-    code = models.CharField(max_length=40)
-    level_of_theory = models.CharField(max_length=50)
-    xc_functional = models.CharField(max_length=50)
-    kgrid = models.CharField(max_length=40)
-    relativity_level = models.CharField(max_length=40)
-    basis = models.CharField(max_length=100)
-    numerical_accuracy = models.CharField(max_length=500)
+    code = models.TextField()
+    level_of_theory = models.TextField()
+    xc_functional = models.TextField()
+    kgrid = models.TextField()
+    relativity_level = models.TextField()
+    basis = models.TextField()
+    numerical_accuracy = models.TextField()
 
 
 class ExperimentalDetails(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='experimental')
-    method = models.CharField(max_length=100)
-    description = models.TextField(max_length=1000)
+    method = models.TextField()
+    description = models.TextField(blank=True)
 
 
 class SynthesisMethod(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='synthesis')
-    starting_materials = models.TextField(max_length=1000, blank=True)
-    product = models.TextField(max_length=1000, blank=True)
-    description = models.TextField(max_length=1000, blank=True)
+    starting_materials = models.TextField(blank=True)
+    product = models.TextField(blank=True)
+    description = models.TextField(blank=True)
 
 
 class Comment(Base):
+    synthesis_method = models.OneToOneField(
+        SynthesisMethod, null=True, on_delete=models.CASCADE)
     computational_details = models.OneToOneField(
         ComputationalDetails, null=True, on_delete=models.CASCADE)
     experimental_details = models.OneToOneField(
         ExperimentalDetails, null=True, on_delete=models.CASCADE)
-    synthesis_method = models.OneToOneField(
-        SynthesisMethod, null=True, on_delete=models.CASCADE)
-    text = models.TextField(max_length=500)
+    text = models.TextField()
 
     def __str__(self):
         return self.text
