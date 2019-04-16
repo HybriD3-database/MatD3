@@ -517,8 +517,8 @@ class Comment(Base):
 
 class Error(Base):
     """Store the error (or uncertainty) of each value separately."""
-    numerical_value = models.OneToOneField(NumericalValue,
-                                           on_delete=models.CASCADE)
+    numerical_value = models.OneToOneField(
+        NumericalValue, on_delete=models.CASCADE, primary_key=True)
     value = models.FloatField()
 
 
