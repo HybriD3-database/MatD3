@@ -1078,8 +1078,8 @@ def submit_data(request):
     dataset.secondary_unit = form.cleaned_data['secondary_unit']
     dataset.visible = form.cleaned_data['visible_to_public']
     dataset.plotted = form.cleaned_data['plotted']
-    dataset.experimental = (
-        form.cleaned_data['origin_of_data'] == 'experimental')
+    dataset.is_experimental = (
+        form.cleaned_data['origin_of_data'] == 'is_experimental')
     dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
     dataset.sample_type = form.cleaned_data['sample_type']
     dataset.crystal_system = form.cleaned_data['crystal_system']

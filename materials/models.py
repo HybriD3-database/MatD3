@@ -350,7 +350,7 @@ class Dataset(Base):
     visible = models.BooleanField()
     plotted = models.BooleanField()
     has_files = models.BooleanField()
-    experimental = models.BooleanField()  # theoretical if false
+    is_experimental = models.BooleanField()  # theoretical if false
     dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)

@@ -222,9 +222,11 @@ class AddDataForm(forms.Form):
         '("plotted") might make more sense. This setting can be easily '
         'toggled later.')
     origin_of_data = forms.ChoiceField(
-        initial='experimental',
+        initial='is_experimental',
         choices=(
-            ('experimental', 'experimental'), ('theoretical', 'theoretical')),
+            ('is_experimental', 'experimental'),
+            ('is_theoretical', 'theoretical'),
+        ),
         widget=forms.RadioSelect(),
         help_text=''
         'Select whether the origin of data is experimental or theoretical.')
