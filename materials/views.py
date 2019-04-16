@@ -1042,20 +1042,6 @@ def submit_data(request):
                                                   value=array[i]))
         return filtered_list
 
-    def add_comment(model, label, form):
-        """Shortcut for conditionally attaching comments to a model instance.
-
-        The purpose of this shortcut is to avoid checking the presence
-        of a particular type of comment in form and the created_by and
-        updated_by fields with every call.
-
-        """
-        if label in form.cleaned_data:
-            model.comment_set.create(created_by=request.user,
-                                     text=form.cleaned_data[label])
-            logger.info(f'Creating {label} comment '
-                        f'#{model.comment_set.all()[0].pk}')
-
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
         # Show formatted field labels in the error message, not the
@@ -1103,7 +1089,11 @@ def submit_data(request):
         synthesis.description = form.cleaned_data['synthesis_description']
         synthesis.save()
         logger.info(f'Creating synthesis details #{synthesis.pk}')
-        add_comment(synthesis, 'synthesis_comment', form)
+        if form.cleaned_data['synthesis_comment']:
+            models.Comment.objects.create(
+                synthesis_method=synthesis,
+                created_by=request.user,
+                text=form.cleaned_data['synthesis_comment'])
     # Experimental details
     if form.cleaned_data['with_experimental_details']:
         experimental = models.ExperimentalDetails(created_by=request.user,
@@ -1113,7 +1103,11 @@ def submit_data(request):
             'experimental_description']
         experimental.save()
         logger.info(f'Creating experimental details #{experimental.pk}')
-        add_comment(experimental, 'experimental_comment', form)
+        if form.cleaned_data['experimental_comment']:
+            models.Comment.objects.create(
+                experimental_details=experimental,
+                created_by=request.user,
+                text=form.cleaned_data['experimental_comment'])
     # Computational details
     if form.cleaned_data['with_computational_details']:
         computational = models.ComputationalDetails(created_by=request.user,
@@ -1129,7 +1123,11 @@ def submit_data(request):
             'numerical_accuracy']
         computational.save()
         logger.info(f'Creating computational details #{computational.pk}')
-        add_comment(computational, 'computational_comment', form)
+        if form.cleaned_data['computational_comment']:
+            models.Comment.objects.create(
+                computational_details=computational,
+                created_by=request.user,
+                text=form.cleaned_data['computational_comment'])
     # For best performance, the main data should be inserted with
     # calls to bulk_create. The following work arrays are are
     # populated with data during the loop over series and then
@@ -1156,8 +1154,7 @@ def submit_data(request):
                                 ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
                 datapoint = models.Datapoint.objects.create(
                     created_by=request.user, dataseries=dataseries)
-                datapoint.symbol_set.create(created_by=request.user,
-                                            value=symbol)
+                datapoint.symbols.create(created_by=request.user, value=symbol)
                 name = 'lattice_constant_' + key + '_' + str(i_series)
                 value, value_type, error = clean_value(form.cleaned_data[name])
                 models.NumericalValue.objects.create(created_by=request.user,
@@ -1262,7 +1259,7 @@ def submit_data(request):
     # successfully added
     n_data_points = 0
     for series in dataset.dataseries_set.all():
-        n_data_points += series.datapoint_set.all().count()
+        n_data_points += series.datapoints.all().count()
     if n_data_points > 0:
         messages.success(request,
                          f'{n_data_points} new data point'
@@ -1396,15 +1393,14 @@ def dataset_image(request, pk):
     from matplotlib import pyplot
     dataset = models.Dataset.objects.get(pk=pk)
     dataseries = dataset.dataseries_set.first()
-    datapoints = dataseries.datapoint_set.all()
+    datapoints = dataseries.datapoints.all()
     x_values = numpy.zeros(len(datapoints))
     y_values = numpy.zeros(len(datapoints))
     for i_dp, datapoint in enumerate(datapoints):
-        x_value = datapoint.numericalvalue_set.get(
+        x_value = datapoint.values.get(
             qualifier=models.NumericalValue.SECONDARY)
         x_values[i_dp] = x_value.value
-        y_value = datapoint.numericalvalue_set.get(
-            qualifier=models.NumericalValue.PRIMARY)
+        y_value = datapoint.values.get(qualifier=models.NumericalValue.PRIMARY)
         y_values[i_dp] = y_value.value
     pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3)
     pyplot.title(dataset.label)
@@ -1427,8 +1423,8 @@ def dataset_data(request, pk):
     text = ''
     x_value = ''
     y_value = ''
-    for datapoint in dataseries.datapoint_set.all():
-        for value in datapoint.numericalvalue_set.all():
+    for datapoint in dataseries.datapoints.all():
+        for value in datapoint.values.all():
             if value.qualifier == models.NumericalValue.SECONDARY:
                 x_value = value.value
             elif value.qualifier == models.NumericalValue.PRIMARY:
@@ -1579,7 +1575,7 @@ def get_atomic_coordinates(request, pk):
     series = models.Dataseries.objects.get(pk=pk)
     vectors = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
-           datapoint__symbol__isnull=True).order_by(
+           datapoint__symbols__isnull=True).order_by(
                'datapoint_id', 'counter').values_list('value', flat=True)
     data = {'vectors':
             [list(vectors[:3]), list(vectors[3:6]), list(vectors[6:9])]}
@@ -1589,7 +1585,7 @@ def get_atomic_coordinates(request, pk):
             'datapoint_id').values_list('value', flat=True)
     coords = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
-            datapoint__symbol__counter=1).select_related('error').order_by(
+            datapoint__symbols__counter=1).select_related('error').order_by(
                 'counter', 'datapoint_id')
     data['coordinates'] = []
     N = int(len(coords)/3)

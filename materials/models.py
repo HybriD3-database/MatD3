@@ -375,7 +375,7 @@ class Dataseries(Base):
 
     def get_fixed_values(self):
         """Return all fixed properties for the given series."""
-        values = self.numericalvaluefixed_set.all()
+        values = self.fixed_values.all()
         output = []
         for value in values:
             value_str = value.formatted()
@@ -386,11 +386,11 @@ class Dataseries(Base):
     def get_lattice_constants(self):
         """Return three lattice constants and angles."""
         symbols = Symbol.objects.filter(datapoint__dataseries=self).annotate(
-            num=models.Count('datapoint__numericalvalue')).filter(
-                num=1).order_by('datapoint_id').values_list('value', flat=True)
+            num=models.Count('datapoint__values')).filter(num=1).order_by(
+                'datapoint_id').values_list('value', flat=True)
         values_float = NumericalValue.objects.filter(
             datapoint__dataseries=self).annotate(
-                num=models.Count('datapoint__numericalvalue')).filter(
+                num=models.Count('datapoint__values')).filter(
                     num=1).select_related('error').order_by('datapoint_id')
         if self.dataset.primary_unit:
             units = 3*[f' {self.dataset.primary_unit.label}'] + 3*['°']
@@ -403,7 +403,8 @@ class Dataseries(Base):
 
 
 class Datapoint(Base):
-    dataseries = models.ForeignKey(Dataseries, on_delete=models.CASCADE)
+    dataseries = models.ForeignKey(Dataseries, on_delete=models.CASCADE,
+                                   related_name='datapoints')
 
 
 class NumericalValueBase(Base):
@@ -433,7 +434,8 @@ class NumericalValue(NumericalValueBase):
         (PRIMARY, 'primary'),
         (SECONDARY, 'secondary'),
     )
-    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
+    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE,
+                                  related_name='values')
     qualifier = models.PositiveSmallIntegerField(
         default=PRIMARY, choices=QUALIFIER_TYPES)
 
@@ -453,11 +455,12 @@ class NumericalValue(NumericalValueBase):
 class Symbol(Base):
     """Data point information not storable as floats.
 
-    This includes for example k-point coordinates such as "X" or the
+    This includes, for example, k-point coordinates such as "X" or the
     component of a tensor such as "c111".
 
     """
-    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE)
+    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE,
+                                  related_name='symbols')
     value = models.CharField(max_length=10)
     counter = models.PositiveSmallIntegerField(default=0)
 
@@ -465,13 +468,16 @@ class Symbol(Base):
 class NumericalValueFixed(NumericalValueBase):
     physical_property = models.ForeignKey(Property, on_delete=models.PROTECT)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-    dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE)
-    dataseries = models.ForeignKey(Dataseries, null=True,
-                                   on_delete=models.CASCADE)
+    dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE,
+                                related_name='fixed_values')
+    dataseries = models.ForeignKey(Dataseries,
+                                   null=True,
+                                   on_delete=models.CASCADE,
+                                   related_name='fixed_values')
     error = models.FloatField(null=True)
 
     def formatted(self):
-        """Same as with NumericalValue but error is a class member."""
+        """Same as for NumericalValue but error is now a class member."""
         value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value}'
         if self.error:
             value_str += f' (±{self.error})'
@@ -479,7 +485,8 @@ class NumericalValueFixed(NumericalValueBase):
 
 
 class ComputationalDetails(Base):
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(
+        Dataset, on_delete=models.CASCADE, related_name='computational')
     code = models.CharField(max_length=40)
     level_of_theory = models.CharField(max_length=50)
     xc_functional = models.CharField(max_length=50)
@@ -490,25 +497,27 @@ class ComputationalDetails(Base):
 
 
 class ExperimentalDetails(Base):
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(
+        Dataset, on_delete=models.CASCADE, related_name='experimental')
     method = models.CharField(max_length=100)
     description = models.TextField(max_length=1000)
 
 
 class SynthesisMethod(Base):
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(
+        Dataset, on_delete=models.CASCADE, related_name='synthesis')
     starting_materials = models.TextField(max_length=1000, blank=True)
     product = models.TextField(max_length=1000, blank=True)
     description = models.TextField(max_length=1000, blank=True)
 
 
 class Comment(Base):
-    computational_details = models.ForeignKey(ComputationalDetails, null=True,
-                                              on_delete=models.CASCADE)
-    experimental_details = models.ForeignKey(ExperimentalDetails, null=True,
-                                             on_delete=models.CASCADE)
-    synthesis_method = models.ForeignKey(SynthesisMethod, null=True,
-                                         on_delete=models.CASCADE)
+    computational_details = models.OneToOneField(
+        ComputationalDetails, null=True, on_delete=models.CASCADE)
+    experimental_details = models.OneToOneField(
+        ExperimentalDetails, null=True, on_delete=models.CASCADE)
+    synthesis_method = models.OneToOneField(
+        SynthesisMethod, null=True, on_delete=models.CASCADE)
     text = models.TextField(max_length=500)
 
     def __str__(self):

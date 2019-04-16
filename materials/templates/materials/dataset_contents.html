@@ -27,7 +27,7 @@
             {% endfor %}
           </table>
           <!-- Atomic coordinates (optional) -->
-          {% if series.datapoint_set.all.count > 6 %}
+          {% if series.datapoints.all.count > 6 %}
             <div class="text-center">
               <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
                       data-target="#atomic-coordinates-body-{{ series.pk }}">
@@ -36,7 +36,7 @@
             </div>
             <div class="collapse" id="atomic-coordinates-body-{{ series.pk }}"></div>
           {% endif %}
-          {% if series.numericalvaluefixed_set.first %}
+          {% if series.fixed_values.exists %}
             Fixed parameters:
             <ul style="margin-bottom:0;">
               {% for property, value, unit in series.get_fixed_values %}
@@ -79,7 +79,7 @@
             </thead>
             <tbody class="tabulated-data" id="table-{{ series.pk }}"></tbody>
           </table>
-          {% if series.numericalvaluefixed_set.first %}
+          {% if series.fixed_values.exists %}
             Fixed parameters:
             <ul style="margin-bottom:0;">
               {% for property, value, unit in series.get_fixed_values %}
@@ -105,7 +105,7 @@
   </div>
 
   <!-- SYNTHESIS METHOD -->
-  {% if dataset.synthesismethod_set.all %}
+  {% if dataset.synthesis.exists %}
     <div class="card">
       <button class="btn text-left expand-hide-button"
               data-toggle="collapse"
@@ -114,7 +114,7 @@
       </button>
       <div class="collapse" id="synthesis-body-{{ dataset.pk }}">
         <div class="card-body">
-          {% with dataset.synthesismethod_set.first as synthesis %}
+          {% with dataset.synthesis.first as synthesis %}
             {% if synthesis.starting_materials %}
               <p>Starting materials: {{ synthesis.starting_materials }}</p>
             {% endif %}
@@ -124,8 +124,8 @@
             {% if synthesis.description %}
               <p>Description: {{ synthesis.description }}</p>
             {% endif %}
-            {% if synthesis.comment_set %}
-              <p><i>Comment: {{ synthesis.comment_set.first }}</i></p>
+            {% if synthesis.comment %}
+              <p><i>Comment: {{ synthesis.comment }}</i></p>
             {% endif %}
           {% endwith %}
         </div>
@@ -134,7 +134,7 @@
   {% endif %}
 
   <!-- EXPERIMENTAL DETAILS -->
-  {% if dataset.experimentaldetails_set.all %}
+  {% if dataset.experimental.exists %}
     <div class="card">
       <button class="btn text-left expand-hide-button"
               data-toggle="collapse"
@@ -143,15 +143,15 @@
       </button>
       <div class="collapse" id="experimental-body-{{ dataset.pk }}">
         <div class="card-body">
-          {% with dataset.experimentaldetails_set.first as exp %}
+          {% with dataset.experimental.first as exp %}
             {% if exp.method %}
               <p>Method: {{ exp.method }}</p>
             {% endif %}
             {% if exp.description %}
               <p>Description: {{ exp.description }}</p>
             {% endif %}
-            {% if exp.comment_set %}
-              <p><i>Comment: {{ exp.comment_set.first }}</i></p>
+            {% if exp.comment %}
+              <p><i>Comment: {{ exp.comment }}</i></p>
             {% endif %}
           {% endwith %}
         </div>
@@ -160,7 +160,7 @@
   {% endif %}
 
   <!-- COMPUTATIONAL DETAILS -->
-  {% if dataset.computationaldetails_set.all %}
+  {% if dataset.computational.exists %}
     <div class="card">
       <button class="btn text-left expand-hide-button"
               data-toggle="collapse"
@@ -169,7 +169,7 @@
       </button>
       <div class="collapse" id="computational-body-{{ dataset.pk }}">
         <div class="card-body">
-          {% with dataset.computationaldetails_set.first as comp %}
+          {% with dataset.computational.first as comp %}
             {% if comp.code %}
               <p>Code: {{ comp.code }}</p>
             {% endif %}
@@ -192,8 +192,8 @@
             {% if comp.numerical_accuracy %}
               <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
             {% endif %}
-            {% if comp.comment_set %}
-              <p><i>Comment: {{ comp.comment_set.first }}</i></p>
+            {% if comp.comment %}
+              <p><i>Comment: {{ comp.comment }}</i></p>
             {% endif %}
           {% endwith %}
         </div>

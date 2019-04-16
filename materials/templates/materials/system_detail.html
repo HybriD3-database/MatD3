@@ -350,7 +350,7 @@
                   {% endif %}
                   <div class="card-header">
                     <h5>{{ dataset.primary_property|capfirst }}
-                      {% if dataset.experimental %}
+                      {% if dataset.is_experimental %}
                         (experimental)
                       {% else %}
                         (theoretical)
