@@ -304,7 +304,7 @@
   <div class="data-series-template d-none">
     <br>
     <div class="card card-series">
-      <div class="card-header">this one</div>
+      <div class="card-header"></div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-8">
@@ -678,6 +678,9 @@
              function get_angle(v1, v2, norm1, norm2) {
                return Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
              }
+             if (lattice_vectors.length < 3) {
+               throw 'Unable to read in three lattice vectors!';
+             }
              a = norm(lattice_vectors[0]);
              b = norm(lattice_vectors[1]);
              c = norm(lattice_vectors[2]);
@@ -708,17 +711,20 @@
            $('#id_lattice_constant_gamma_' + dest_suffix).val(gamma);
            $('#id_atomic_coordinates_' + dest_suffix).val(input_data);
          }
-         if (i_series) {
-           process_batch(response, i_series);
-         } else {
-           response = response.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-           var data = response.split('&');
-           var i;
-           for (i = 0; i < data.length; i++) {
-             if (data[i]) {
-               process_batch(data[i].replace(/^\n/, ''), i+1);
+         try {
+           if (i_series) {
+             process_batch(response, i_series);
+           } else {
+             response = response.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+             var data = response.split('&');
+             for (var i = 0; i < data.length; i++) {
+               if (data[i]) {
+                 process_batch(data[i].replace(/^\n/, ''), i+1);
+               }
              }
            }
+         } catch(e) {
+           $('#id_atomic_coordinates_1').val(e);
          }
        },
        error: function(response) {
