@@ -144,12 +144,9 @@ MESSAGE_TAGS = {
 # Logging
 
 RAVEN_CONFIG = {
-    'dsn': 'https://768890a8001b4782bd27155f351fdea6:817997aed0d1430282276964afbe22bc@sentry.io/1395175',
+    'dsn': config('RAVEN_DSN', default=''),
     'release': raven.fetch_git_sha(BASE_DIR),
 }
-# Disable Sentry for development
-if socket.gethostname() not in ALLOWED_HOSTS:
-    RAVEN_CONFIG['dsn'] = ''
 
 LOGGING = {
     'version': 1,
