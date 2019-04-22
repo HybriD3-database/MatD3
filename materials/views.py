@@ -1002,7 +1002,7 @@ def submit_data(request):
         numerical_values.append(numerical_value)
         errors.append(error)
 
-    def add_datapoint_ids(values, step):
+    def add_datapoint_ids(values, n_values, n_datapoints):
         """Set datapoint_id for all elements in an array.
 
         The data points must already have been created using
@@ -1010,12 +1010,13 @@ def submit_data(request):
         manually attach them to each element in "values". After this
         is done, bulk_create may be called on "values".
 
-        The step argument tells how many numerical values are
-        associated with each data point.
+        The number of values and datapoints are necessary to determine
+        how many values are associated with each data point.
 
         """
-        if step == 0:
+        if n_values == 0:
             return
+        step = int(n_values/n_datapoints)
         n_datapoints = int(len(values)/step)
         pks = list(models.Datapoint.objects.all().order_by(
             '-pk')[:n_datapoints].values_list('pk', flat=True))
@@ -1206,7 +1207,7 @@ def submit_data(request):
                         dataset.delete()
                         return render(request, 'materials/add_data.html',
                                       {'form': form})
-            add_datapoint_ids(lattice_vectors, 3)
+            add_datapoint_ids(lattice_vectors, 9, 3)
             models.NumericalValue.objects.bulk_create(lattice_vectors)
         elif form.cleaned_data['two_axes']:
             for line in form.cleaned_data[
@@ -1249,11 +1250,10 @@ def submit_data(request):
                 counter += 1
     # Insert the main data into the database
     models.Datapoint.objects.bulk_create(datapoints)
-    add_datapoint_ids(numerical_values,
-                      int(len(numerical_values)/len(datapoints)))
+    add_datapoint_ids(numerical_values, len(numerical_values), len(datapoints))
     models.NumericalValue.objects.bulk_create(numerical_values)
     models.Error.objects.bulk_create(generate_numerical_value_ids(errors))
-    add_datapoint_ids(symbols, int(len(symbols)/len(datapoints)))
+    add_datapoint_ids(symbols, len(symbols), len(datapoints))
     models.Symbol.objects.bulk_create(symbols)
     # If all went well, let the user know how much data was
     # successfully added
