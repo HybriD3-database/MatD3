@@ -268,8 +268,6 @@ class BandStructure(IDInfo):
 
 
 class Dataset(Base):
-    # Files associated with each dataset are uploaded in
-    # media/uploads/dataset_{{ pk }}
     SINGLE_CRYSTAL = 0
     POWDER = 1
     FILM = 2
@@ -319,7 +317,6 @@ class Dataset(Base):
         Reference, null=True, on_delete=models.PROTECT)
     visible = models.BooleanField()
     plotted = models.BooleanField()
-    has_files = models.BooleanField()
     is_experimental = models.BooleanField()  # theoretical if false
     dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
