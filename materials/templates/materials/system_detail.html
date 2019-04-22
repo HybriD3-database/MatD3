@@ -23,17 +23,11 @@
         <div class="col-md-6">
           <div class="card card-item">
             <div class="card-header">
-              <h5>Molecular Model</h5>
+              <h5>Unit cell</h5>
             </div>
-            {% with object.atomicpositions_set.first as entry %}
-              <div class="card-body">
-                {% if entry.fhi_file %}
-                  <div id="jmol"></div>
-                {% else %}
-                  <h3>Atomic Positions file unavailable</h3>
-                {% endif %}
-              </div>
-            {% endwith %}
+            <div class="card-body">
+              <div id="jmol"></div>
+            </div>
           </div>
           <br>
         </div>
@@ -390,19 +384,21 @@
      $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
     </script>
   {% endwith %}
-  {% with entry=object.atomicpositions_set.first %}
-    <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
-    <script>
-     $(document).ready(function() {
-       $('#jmol').html(
-         Jmol.getAppletHtml("jmolApplet0", {
-           script: "load /media/uploads/{{ entry.phase}}_{{object.organic}}_{{object.inorganic }}_apos.in",
-           j2sPath: "{% static 'jsmol/j2s' %}",
-           height: 450,
-           width: 500,
-         }));
-     });
-    </script>
-  {% endwith %}
+  <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
+  <script>
+   $.get("{% url 'materials:get_jsmol_input' pk=object.pk %}", function(response) {
+     if (response) {
+       $('#jmol').html(Jmol.getAppletHtml('jmol', {
+         script: response,
+         j2sPath: "{% static 'jsmol/j2s' %}",
+         height: 450,
+         width: 500,
+       }));
+     } else {
+       var parent = document.getElementById('jmol').parentNode.parentNode.parentNode;
+       parent.parentNode.removeChild(parent);
+     }
+   });
+  </script>
   {% include 'materials/dataset_scripts.html' with datasets=object.dataset_set.all %}
 {% endblock %}

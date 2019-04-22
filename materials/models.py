@@ -386,7 +386,7 @@ class Dataseries(Base):
     def get_lattice_constants(self):
         """Return three lattice constants and angles."""
         symbols = Symbol.objects.filter(datapoint__dataseries=self).annotate(
-            num=models.Count('datapoint__values')).filter(num=1).order_by(
+            num=models.Count('datapoint__symbols')).filter(num=1).order_by(
                 'datapoint_id').values_list('value', flat=True)
         values_float = NumericalValue.objects.filter(
             datapoint__dataseries=self).annotate(
@@ -398,7 +398,7 @@ class Dataseries(Base):
             units = 3*[' '] + 3*['°']
         values = []
         for value in values_float:
-            values.append(value.formatted('.6f'))
+            values.append(value.formatted('.10g'))
         return zip(symbols, values, units)
 
 

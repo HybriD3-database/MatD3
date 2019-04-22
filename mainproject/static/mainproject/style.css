@@ -75,14 +75,14 @@ body {
     padding: 2px 5px;
 }
 
-.table-atomic-positions {
+.table-lattice-parameters {
     align: center;
     margin: 10px auto;
     text-align: right;
     padding: 0px 5px;
 }
 
-.table-atomic-positions td {
+.table-lattice-parameters td {
     padding: 0px 5px;
 }
 

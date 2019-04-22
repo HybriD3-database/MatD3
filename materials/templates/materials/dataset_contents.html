@@ -30,11 +30,11 @@
           {% if series.datapoints.all.count > 6 %}
             <div class="text-center">
               <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
-                      data-target="#atomic-coordinates-body-{{ series.pk }}">
+                      data-target="#lattice-parameters-body-{{ series.pk }}">
                 Atomic coordinates (click to expand)
               </button>
             </div>
-            <div class="collapse" id="atomic-coordinates-body-{{ series.pk }}"></div>
+            <div class="collapse" id="lattice-parameters-body-{{ series.pk }}"></div>
           {% endif %}
           {% if series.fixed_values.exists %}
             Fixed parameters:
@@ -65,16 +65,16 @@
           <table class="table table-sm">
             <thead>
               <tr>
-              {% if dataset.secondary_property %}
+                {% if dataset.secondary_property %}
+                  <th>
+                    {{ dataset.secondary_property }}{% if dataset.secondary_unit %},
+                    {{ dataset.secondary_unit }}{% endif %}
+                  </th>
+                {% endif %}
                 <th>
-                  {{ dataset.secondary_property }}{% if dataset.secondary_unit %},
-                  {{ dataset.secondary_unit }}{% endif %}
+                  {{ dataset.primary_property }}{% if dataset.primary_unit %},
+                  {{ dataset.primary_unit }}{% endif %}
                 </th>
-              {% endif %}
-              <th>
-                {{ dataset.primary_property }}{% if dataset.primary_unit %},
-                {{ dataset.primary_unit }}{% endif %}
-              </th>
               </tr>
             </thead>
             <tbody class="tabulated-data" id="table-{{ series.pk }}"></tbody>

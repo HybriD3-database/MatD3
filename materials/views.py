@@ -1564,21 +1564,23 @@ def get_series_values(request, pk):
     return JsonResponse(response, safe=False)
 
 
-def get_atomic_coordinates(request, pk):
+def lattice_parameters_as_json(pk):
     """Get atomic coordinates from the lattice parameter list.
 
     The first six entries of the "lattice parameter" property are the
     lattice constants and angles. These need to be skipped when
-    fetching for the atomic coordinates.
+    fetching for the lattice vectors and atomic coordinates.
 
     """
     series = models.Dataseries.objects.get(pk=pk)
     vectors = models.NumericalValue.objects.filter(
         datapoint__dataseries=series).filter(
            datapoint__symbols__isnull=True).order_by(
-               'datapoint_id', 'counter').values_list('value', flat=True)
+               'datapoint_id', 'counter')
     data = {'vectors':
-            [list(vectors[:3]), list(vectors[3:6]), list(vectors[6:9])]}
+            [[x.formatted('.10g') for x in vectors[:3]],
+             [x.formatted('.10g') for x in vectors[3:6]],
+             [x.formatted('.10g') for x in vectors[6:9]]]}
     # Here counter=1 filters out the first six entries
     symbols = models.Symbol.objects.filter(
         datapoint__dataseries=series).filter(counter=1).order_by(
@@ -1587,15 +1589,73 @@ def get_atomic_coordinates(request, pk):
         datapoint__dataseries=series).filter(
             datapoint__symbols__counter=1).select_related('error').order_by(
                 'counter', 'datapoint_id')
+    tmp = models.Symbol.objects.filter(
+        datapoint__dataseries=series).annotate(
+            num=models.models.Count('datapoint__symbols')).filter(
+                num=2).first()
+    if tmp:
+        data['coord-type'] = tmp.value
     data['coordinates'] = []
     N = int(len(coords)/3)
     for symbol, coord_x, coord_y, coord_z in zip(
             symbols, coords[:N], coords[N:2*N], coords[2*N:3*N]):
         data['coordinates'].append((symbol,
-                                    coord_x.formatted(),
-                                    coord_y.formatted(),
-                                    coord_z.formatted()))
-    return JsonResponse(data)
+                                    coord_x.formatted('.10g'),
+                                    coord_y.formatted('.10g'),
+                                    coord_z.formatted('.10g')))
+    return data
+
+
+def get_lattice_parameters(request, pk):
+    return JsonResponse(lattice_parameters_as_json(pk))
+
+
+def get_jsmol_input(request, pk):
+    """Return a statement to be executed by JSmol.
+
+    Go through the lattice parameter data sets of the given
+    system. Pick the first data set where the lattice vectors and
+    atomic coordinates are present and can be converted to
+    floats. Construct the "load data ..." inline statement suitable
+    for JSmol. If there are no lattice parameter data or none of the
+    data sets are usable (some lattice parameters or atomic
+    coordinates missing or not valid numbers) return an empty
+    response.
+
+    """
+    system = models.System.objects.get(pk=pk)
+    for dataset in system.dataset_set.filter(
+            primary_property__name='lattice parameter'):
+        data = lattice_parameters_as_json(dataset.dataseries_set.first().pk)
+        lattice_vectors = []
+        try:
+            for vector in data['vectors']:
+                lattice_vectors.append([float(x) for x in vector])
+            if len(lattice_vectors) == 3:
+                coord_type = data['coord-type']
+                response = io.StringIO()
+                response.write("load data 'model'|#AIMS|")
+                if coord_type == 'atom_frac':
+                    for symbol, *coords in data['coordinates']:
+                        coords_f = [float(x) for x in coords]
+                        x, y, z = [
+                            sum([coords_f[i_dir]*lattice_vectors[i_dir][comp]
+                                 for i_dir in range(3)]) for comp in range(3)]
+                        response.write(f'atom {x} {y} {z} {symbol}|')
+                else:
+                    for symbol, coord_x, coord_y, coord_z in data[
+                            'coordinates']:
+                        response.write(
+                            f'atom {coord_x} {coord_y} {coord_z} {symbol}|')
+                response.write("end 'model' unitcell [")
+                for x, y, z in data['vectors']:
+                    response.write(f' {x} {y} {z}')
+                response.write(']')
+                print(response.getvalue())
+                return HttpResponse(response.getvalue())
+        except (KeyError, ValueError):
+            pass
+    return HttpResponse()
 
 
 def get_dropdown_options(request, name):
