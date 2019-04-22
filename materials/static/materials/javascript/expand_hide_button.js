@@ -1,8 +1,11 @@
 /* Change "click to expand" to "click to hide" and vice versa */
-$('.expand-hide-button').click(function() {
-  if ($(this).html().includes('expand)')) {
-    $(this).html($(this).html().split('expand)')[0] + 'hide)');
-  } else {
-    $(this).html($(this).html().split('hide)')[0] + 'expand)');
-  }
+Array.from(document.getElementsByClassName('expand-hide-button')).forEach(function(element) {
+  element.addEventListener('click', function() {
+    var text = this.innerText;
+    if (text.includes('expand)')) {
+      this.innerText = text.split('expand)')[0] + 'hide)';
+    } else {
+      this.innerText = text.split('hide)')[0] + 'expand)';
+    }
+  });
 });

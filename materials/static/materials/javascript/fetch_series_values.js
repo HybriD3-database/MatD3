@@ -1,11 +1,9 @@
-$('tbody[class="tabulated-data"]').each(function() {
-  var table_body_id = $(this).attr('id');
-  var series_pk = table_body_id.split('-')[1];
+Array.from(document.querySelectorAll('tbody[class="tabulated-data"]')).forEach(function(table_body) {
+  var series_pk = table_body.id.split('-')[1];
   $.getJSON('/materials/get-series-values/' + series_pk, function(data) {
     var table = document.createElement('table');
     var fragment = document.createDocumentFragment();
-    var i;
-    for (i=0; i<data.length; i++) {
+    for (var i=0; i<data.length; i++) {
       var tr = document.createElement('tr');
       var td = document.createElement('td');
       if ('x' in data[i]) {
@@ -17,6 +15,6 @@ $('tbody[class="tabulated-data"]').each(function() {
       tr.appendChild(td);
       fragment.appendChild(tr);
     }
-    $('#' + table_body_id).html(fragment);
+    table_body.append(fragment);
   });
 });

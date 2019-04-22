@@ -35,8 +35,8 @@ function plot_data(element, data, x_property, x_unit, y_property, y_unit, series
   });
 }
 
-$('canvas').each(function() {
-  var plot_id = $(this).attr('id');
+Array.from(document.getElementsByTagName('canvas')).forEach(function(element) {
+  var plot_id = element.id;
   var plot_pk = plot_id.split('_')[1];
   $.getJSON('/materials/data-for-chart/' + plot_pk, function(response) {
     plot_data(plot_id, response['data'],
