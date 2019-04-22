@@ -67,6 +67,7 @@ urlpatterns = [
          name='get_series_values'),
     path('get-jsmol-input/<int:pk>', views.get_jsmol_input,
          name="get_jsmol_input"),
+    path('report-issue', views.report_issue, name="report_issue"),
     re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
             name='all_entries'),
 ]

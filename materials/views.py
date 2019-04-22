@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import UploadedFile
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Q
 from django.forms import formset_factory
@@ -1575,3 +1576,26 @@ def get_dropdown_options(request, name):
     for obj in model_types[model].objects.all():
         data.append({'value': obj.pk, 'text': str(obj)})
     return JsonResponse(data, safe=False)
+
+
+def report_issue(request):
+    pk = request.POST['pk']
+    description = request.POST['description']
+    user = request.user
+    if user.is_authenticated:
+        body = (f'Description:\n\n<blockquote>{description}</blockquote>'
+                'This report was issued by the user '
+                f'{user.username} ({user.email})')
+        send_mail(
+            f'Issue report about dataset {pk}',
+            '',
+            'report@hybrid3',
+            ['raullaasner@gmail.com'],
+            fail_silently=False,
+            html_message=body,
+        )
+        messages.success(request, 'Your report has been registered.')
+    else:
+        messages.error(request,
+                       'You must be logged in to perform this action.')
+    return redirect(request.POST['return-path'])

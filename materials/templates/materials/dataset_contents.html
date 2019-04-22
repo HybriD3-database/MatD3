@@ -267,5 +267,37 @@
     {% endwith %}
   {% endif %}
 
-  <div class="text-center"><strong>Dataset ID: {{ dataset.pk }}</strong></div>
+  <div class="text-center" style="margin-top:10px">
+    <strong style="margin-right:10px">Dataset ID: {{ dataset.pk }}</strong>
+    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
+            data-target="#issue-report-{{ dataset.pk }}">
+      Report an issue
+    </button>
+    <i class="fa fa-question-circle tooltip-container">
+      <span class="tooltiptext">Did you find any mistakes or inconsistencies about this data set? If so, send us a note and we'll have a look at it and send you a reply. Thanks!</span>
+    </i>
+  </div>
+
+  <div class="collapse issue-report" id="issue-report-{{ dataset.pk }}">
+    <form method="post" action="{% url 'materials:report_issue' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="issue-report-contents-{{ dataset.pk }}">Description</label>
+        {% if user.is_authenticated %}
+          <textarea class="form-control" id="issue-report-contents-{{ dataset.pk }}"
+                    name="description" required
+                    placeholder="Anything you would like to draw our attention to"></textarea>
+        {% else %}
+          <textarea class="form-control" id="issue-report-contents-{{ dataset.pk }}"
+                    name="description" required disabled
+                    placeholder="You must be logged in to perform this action."></textarea>
+        {% endif %}
+      </div>
+      <input type="hidden" name="pk" value="{{ dataset.pk }}">
+      <input type="hidden" name="return-path" value="{{ request.path }}">
+      {% if user.is_authenticated %}
+        <button type="submit" class="btn btn-primary btn-sm"">Submit</button>
+      {% endif %}
+    </form>
+  </div>
 </div>
