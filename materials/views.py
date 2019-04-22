@@ -1556,7 +1556,6 @@ def get_jsmol_input(request, pk):
                 for x, y, z in data['vectors']:
                     response.write(f' {x} {y} {z}')
                 response.write(']')
-                print(response.getvalue())
                 return HttpResponse(response.getvalue())
         except (KeyError, ValueError):
             pass
