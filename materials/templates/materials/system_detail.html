@@ -32,75 +32,38 @@
           <br>
         </div>
 
-        <div class="col-md-6">
-          <div class="card card-item">
-            <div class="card-header">
-              <h5>Atomic Positions</h5>
-            </div>
-            {% with object.atomicpositions_set.first as entry %}
-              <div class="card-body">
-                {% if entry %}
-                  <table class="table atomic-positions">
-                    <tr>
-                      <td>a: {{ entry.a }} &#8491;</td>
-                      <td>&alpha;: {{ entry.alpha }}&deg;</td>
-                    </tr>
-                    <tr>
-                      <td>b: {{ entry.b }} &#8491;</td>
-                      <td>&beta;: {{ entry.beta }}&deg;</td>
-                    </tr>
-                    <tr>
-                      <td>c: {{ entry.c }} &#8491;</td>
-                      <td>&gamma;: {{ entry.gamma }}&deg;</td>
-                    </tr>
-                  </table>
-                  <strong>Crystal system:</strong> {{ entry.phase }} <br>
-                  {% if entry.temperature %}
-                    <strong>Temperature:</strong> {{ entry.temperature }}K <br>
+        {% for dataset in object.dataset_set.all %}
+          {% if dataset.representative %}
+            {% if user == dataset.created_by or dataset.visible %}
+              <div class="col-md-6">
+                <div class="card card-item">
+                  {% if not dataset.visible %}
+                    <div style="background:#fadb9b">
                   {% endif %}
-                  <strong>Method:</strong> {{ entry.method }} <br>
-                  {% if entry.reference.doi_isbn %}
-                    <strong>Reference:</strong> {{ entry.reference.doi_isbn }} <br>
-                  {% endif %}
-                  <strong>Source:</strong> {{ entry.source }} <br>
-                  <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
-                  {% if entry.comments %}
-                    <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Comments:</strong> {{ entry.comments }}
+                  <div class="card-header">
+                    <h5>{{ dataset.primary_property|capfirst }}
+                      {% if dataset.is_experimental %}
+                        (experimental)
+                      {% else %}
+                        (theoretical)
+                      {% endif %}
+                    </h5>
+                    {% if user == dataset.created_by %}
+                      {% include 'materials/dataset_buttons.html' with system=object %}
+                    {% endif %}
+                  </div>
+                  {% if not dataset.visible %}
                     </div>
                   {% endif %}
-                  {% with entry.reference.author_set.all as authors %}
-                    <button type="button" class="btn btn-primary" data-toggle="collapse"
-                            data-target="#reference1">
-                      <span class="fa fa-book" aria-hidden="true"></span>
-                      Reference
-                    </button>
-                    <div id="reference1" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=entry.reference %}
-                    </div>
-                    <br>
-                  {% endwith %}
-                  <a href="{% url "materials:data_dl" data_type="atomic_positions" pk=entry.pk %}">
-                    <button type="button" class="btn btn-primary">
-                      <span class="fa fa-download" aria-hidden="true"></span>
-                      Atomic Positions
-                    </button>
-                  </a>
-                  <a href="{% url "materials:all_a_pos" pk=object.pk %}">
-                    <button type="button" class="btn btn-info">
-                      <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{ object.atomicpositions_set.all|length }})
-                    </button>
-                  </a>
-                {% else %}
-                  <h3>No data available</h3>
-                {% endif %}
+                  {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
+                </div>
+                <br>
               </div>
-            {% endwith %}
-            <br>
-          </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 
-          <br>
+        <div class="col-md-6">
           <div class="card card-item">
             <div class="card-header">
               <h5>Synthesis Methods</h5>
@@ -334,36 +297,6 @@
           <br>
         </div>
 
-        {% for dataset in object.dataset_set.all %}
-          {% if dataset.representative %}
-            {% if user == dataset.created_by or dataset.visible %}
-              <div class="col-md-6">
-                <div class="card card-item">
-                  {% if not dataset.visible %}
-                    <div style="background:#fadb9b">
-                  {% endif %}
-                  <div class="card-header">
-                    <h5>{{ dataset.primary_property|capfirst }}
-                      {% if dataset.is_experimental %}
-                        (experimental)
-                      {% else %}
-                        (theoretical)
-                      {% endif %}
-                    </h5>
-                    {% if user == dataset.created_by %}
-                      {% include 'materials/dataset_buttons.html' with system=object %}
-                    {% endif %}
-                  </div>
-                  {% if not dataset.visible %}
-                    </div>
-                  {% endif %}
-                  {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
-                </div>
-                <br>
-              </div>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
         {% include "materials/license_note.html" %}
       </div>
     </div>

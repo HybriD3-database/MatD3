@@ -267,36 +267,6 @@ class BandStructure(IDInfo):
         super().delete(*args, **kwargs)
 
 
-class AtomicPositions(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    a = models.CharField(max_length=50)
-    b = models.CharField(max_length=50)
-    c = models.CharField(max_length=50)
-    alpha = models.CharField(max_length=50)
-    beta = models.CharField(max_length=50)
-    gamma = models.CharField(max_length=50)
-    volume = models.CharField(max_length=50, blank=True)
-    Z = models.CharField(max_length=50, blank=True)
-    fhi_file = models.FileField(upload_to=file_name, blank=True)
-    synthesis_method = models.ForeignKey(SynthesisMethodOld,
-                                         on_delete=models.PROTECT, null=True,
-                                         blank=True)
-
-    class Meta:
-        verbose_name_plural = 'atomic positions'
-
-    def __str__(self):
-        return self.phase.phase + ' ' + self.system.formula
-
-    def delete(self, *args, **kwargs):
-        if(self.fhi_file):
-            file_loc = os.path.join(settings.MEDIA_ROOT, 'uploads',
-                                    str(self.fhi_file).split('/')[1])
-            if os.path.isfile(file_loc):
-                os.remove(file_loc)
-        super().delete(*args, **kwargs)
-
-
 class Dataset(Base):
     # Files associated with each dataset are uploaded in
     # media/uploads/dataset_{{ pk }}

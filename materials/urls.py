@@ -8,9 +8,6 @@ urlpatterns = [
     path('', views.SearchFormView.as_view(), name='materials_home'),
     path('<int:pk>', views.SystemDetailView.as_view(),
          name='materials_system'),
-    re_path(r'^(?P<pk>\d+)_(?P<pk_aa>\d+)_(?P<pk_syn>\d+)_(?P<pk_ee>\d+)_'
-            r'(?P<pk_bs>\d+)$', views.SpecificSystemView.as_view(),
-            name='specific_materials_system'),
     path('<int:sys>/update-band-structure/<int:pk>',
          views.BandStructureUpdateView.as_view(),
          name='update_band_structure'),
@@ -27,7 +24,6 @@ urlpatterns = [
          name='download_input_files'),
     path('<int:system_pk>/delete-dataset/<int:dataset_pk>/<path:return_path>',
          views.delete_dataset_and_files, name='delete_dataset'),
-    path('<int:pk>/all-a-pos', views.all_a_pos, name='all_a_pos'),
     path('add-pub', views.AddPubView.as_view(), name='add_reference'),
     path('search-pub', views.SearchPubView.as_view(),
          name='search_reference'),

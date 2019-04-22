@@ -62,11 +62,10 @@ def data_dl(request, data_type, pk, bandgap=False):
         bandgap = True
 
     def write_headers():
-        if data_type not in ['all_atomic_positions']:
-            if not bandgap:
-                response.write(str('#HybriD³ Materials Database\n'))
-            response.write(str('\n#System: '))
-            response.write(str(p_obj.compound_name))
+        if not bandgap:
+            response.write(str('#HybriD³ Materials Database\n'))
+        response.write(str('\n#System: '))
+        response.write(str(p_obj.compound_name))
         response.write(str('\n#Temperature: '))
         response.write(str(obj.temperature + ' K'))
         response.write(str('\n#Phase: '))
@@ -101,38 +100,7 @@ def data_dl(request, data_type, pk, bandgap=False):
         response.write(obj.gamma)
         response.write('\n\n')
 
-    if data_type == 'atomic_positions':
-        obj = models.AtomicPositions.objects.get(pk=pk)
-        p_obj = models.System.objects.get(atomicpositions=obj)
-        write_headers()
-        write_a_pos()
-        fileloc = (settings.MEDIA_ROOT + '/uploads/%s_%s_%s_apos.in' %
-                   (obj.phase, p_obj.organic, p_obj.inorganic))
-        if(os.path.isfile(fileloc)):
-            with open(fileloc, encoding='utf-8', mode='r+') as f:
-                lines = f.read().splitlines()
-                for line in lines:
-                    response.write(line + '\n')
-        else:
-            response.write('#-Atomic Positions input file not available-')
-        response['Content-Disposition'] = (
-            'attachment; filename=%s_%s_%s_%s.in' % (
-                obj.phase, p_obj.organic, p_obj.inorganic, data_type))
-    elif data_type == 'all_atomic_positions':  # all the a_pos entries
-        p_obj = models.System.objects.get(pk=pk)
-        response.write(str('#HybriD³ Materials Database\n\n'))
-        name = p_obj.compound_name
-        response.write(str('#'*(len(name)+22) + '\n'))
-        response.write(str('#####  System: '))
-        response.write(str(name))
-        response.write(str('  #####\n#' + '#'*(len(name)+22) + '\n'))
-        for obj in p_obj.atomicpositions_set.all():
-            write_headers()
-            write_a_pos()
-        response['Content-Disposition'] = (
-            'attachment; filename=%s_%s_%s_%s.in' % (obj.phase, p_obj.organic,
-                                                     p_obj.inorganic, 'ALL'))
-    elif data_type == 'exciton_emission':
+    if data_type == 'exciton_emission':
         obj = models.ExcitonEmission.objects.get(pk=pk)
         p_obj = models.System.objects.get(excitonemission=obj)
         file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
@@ -327,36 +295,8 @@ def data_dl(request, data_type, pk, bandgap=False):
     return response
 
 
-def all_a_pos(request, pk):
-    """Defines views for each specific entry type."""
-    def sortEntries(entry):
-        """Sort by temperature, but temperature is a charFields"""
-        try:
-            return int(entry.temperature)
-        except Exception:
-            # temperature field contains something other than digits (e.g. N/A)
-            temp = ''
-            for c in entry.temperature:
-                if c.isdigit():
-                    temp += c
-                else:
-                    if temp != '':
-                        return int(temp)
-            # no temperature, so make this entry last
-            return 9999999
-
-    template_name = 'materials/all_a_pos.html'
-    obj = models.System.objects.get(pk=pk)
-    compound_name = models.System.objects.get(pk=pk).compound_name
-    obj = obj.atomicpositions_set.all()
-    obj = sorted(obj, key=sortEntries)
-    return render(request, template_name,
-                  {'object': obj, 'compound_name': compound_name, 'key': pk})
-
-
 def all_entries(request, pk, data_type):
     str_to_model = {
-        'atomic_positions': models.AtomicPositions,
         'exciton_emission': models.ExcitonEmission,
         'synthesis': models.SynthesisMethodOld,
         'band_structure': models.BandStructure,
@@ -376,15 +316,12 @@ def getAuthorSearchResult(search_text):
     keyWords = search_text.split()
     results = models.System.objects.\
         filter(functools.reduce(operator.or_, (
-            Q(atomicpositions__reference__author__last_name__icontains=x) for
-            x in keyWords)) | functools.reduce(operator.or_, (
-                Q(synthesismethodold__reference__author__last_name__icontains=x)
-                for x in keyWords)) | functools.reduce(operator.or_, (
-                        Q(excitonemission__reference__author__last_name__icontains=x)
-                        for x in keyWords)) | functools.reduce(operator.or_, (
-                                Q(bandstructure__reference__author__last_name__icontains=x)
-                                for x in keyWords))
-         ).distinct()
+            Q(synthesismethodold__reference__author__last_name__icontains=x)
+            for x in keyWords)) | functools.reduce(operator.or_, (Q(
+                    excitonemission__reference__author__last_name__icontains=x
+            ) for x in keyWords)) | functools.reduce(operator.or_, (Q(
+                bandstructure__reference__author__last_name__icontains=x
+            ) for x in keyWords))).distinct()
     return results
 
 
@@ -481,11 +418,7 @@ class SearchFormView(generic.TemplateView):
                                 ee.system.synthesismethodold_set.first().pk)
                         else:
                             system_info['syn_pk'] = 0
-                        if ee.system.atomicpositions_set.count() > 0:
-                            system_info['apos_pk'] = (
-                                ee.system.atomicpositions_set.first().pk)
-                        else:
-                            system_info['apos_pk'] = 0
+                        system_info['apos_pk'] = 0
                         if ee.system.bandstructure_set.count() > 0:
                             system_info['bs_pk'] = (
                                 ee.system.bandstructure_set.first().pk)
@@ -1331,34 +1264,6 @@ class SystemDetailView(generic.DetailView):
 
 class ReferenceDetailView(generic.DetailView):
     model = models.Reference
-
-
-class SpecificSystemView(generic.TemplateView):
-    template_name = 'materials/system_specific.html'
-
-    def get(self, request, pk, pk_aa, pk_syn, pk_ee, pk_bs):
-        system = models.System.objects.get(pk=pk)
-        exciton_emission = system.excitonemission_set.get(pk=pk_ee)
-        if system.synthesismethodold_set.count() > 0:
-            synthesis = system.synthesismethodold_set.get(pk=pk_syn)
-        else:
-            synthesis = None
-        if system.atomicpositions_set.count() > 0:
-            atomic_positions = system.atomicpositions_set.get(pk=pk_aa)
-        else:
-            atomic_positions = None
-        if system.bandstructure_set.count() > 0:
-            band_structure = system.bandstructure_set.get(pk=pk_bs)
-        else:
-            band_structure = None
-        args = {
-            'system': system,
-            'atomic_positions': atomic_positions,
-            'synthesis': synthesis,
-            'exciton_emission': exciton_emission,
-            'band_structure': band_structure
-        }
-        return render(request, self.template_name, args)
 
 
 class SystemUpdateView(generic.UpdateView):
