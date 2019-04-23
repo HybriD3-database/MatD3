@@ -16,7 +16,7 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  <h5><a href="{% url 'materials:materials_system' pk=dataset.system.pk %}">
+                  <h5><a href="{% url 'materials:system' pk=dataset.system.pk %}">
                     {{ dataset.system.compound_name }}</a>: {{ dataset.primary_property }}
                     {% if dataset.is_experimental %}
                       (experimental)

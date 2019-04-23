@@ -2,12 +2,10 @@ from django.urls import path
 from django.urls import re_path
 from materials import views
 
-
 app_name = 'materials'
 urlpatterns = [
     path('', views.SearchFormView.as_view(), name='materials_home'),
-    path('<int:pk>', views.SystemDetailView.as_view(),
-         name='materials_system'),
+    path('<int:pk>', views.SystemView.as_view(), name='system'),
     path('<int:sys>/update-band-structure/<int:pk>',
          views.BandStructureUpdateView.as_view(),
          name='update_band_structure'),

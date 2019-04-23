@@ -38,12 +38,12 @@
       <tbody>
         {% for system in systems %}
           <tr>
-            <td><a href="/materials/{{ system.pk }}">{{ system.compound_name }}</a></td>
-            <td><a href="/materials/{{ system.pk }}">{{ system.formula }}</a></td>
+            <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.compound_name }}</a></td>
+            <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.formula }}</a></td>
             <td>
               <ul style="padding: 0px; list-style-type: none" id="authors-list">
                 {% for name in system.listAlternateNames %}
-                  <li><a href="/materials/{{ system.pk }}">{{ name }}</a></li>
+                  <li><a href="{% url 'materials:system' pk=system.pk %}">{{ name }}</a></li>
                 {% endfor %}
               </ul>
             </td>

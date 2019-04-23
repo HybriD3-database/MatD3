@@ -16,7 +16,11 @@ from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import UploadedFile
 from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import BooleanField
+from django.db.models import Case
 from django.db.models import Q
+from django.db.models import Value
+from django.db.models import When
 from django.forms import formset_factory
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -31,7 +35,6 @@ from mainproject import settings
 from materials import forms
 from materials import models
 import materials.rangeparser
-
 
 matplotlib.use('Agg')
 logger = logging.getLogger(__name__)
@@ -55,293 +58,30 @@ def dataset_author_check(view):
     return wrap
 
 
-def data_dl(request, data_type, pk, bandgap=False):
-    """Download a specific entry type"""
-    response = HttpResponse(content_type='text/fhi-aims')
-    if data_type == 'band_gap':
-        data_type = 'band_structure'
-        bandgap = True
+class SystemView(generic.ListView):
+    template_name = 'materials/system.html'
 
-    def write_headers():
-        if not bandgap:
-            response.write(str('#HybriD³ Materials Database\n'))
-        response.write(str('\n#System: '))
-        response.write(str(p_obj.compound_name))
-        response.write(str('\n#Temperature: '))
-        response.write(str(obj.temperature + ' K'))
-        response.write(str('\n#Phase: '))
-        response.write(str(obj.phase.phase))
-        authors = obj.reference.author_set.all()
-        response.write(str('\n#Authors ('+str(authors.count())+'): '))
-        for author in authors:
-            response.write('\n    ')
-            response.write(author.first_name + ' ')
-            response.write(author.last_name)
-            response.write(', ' + author.institution)
-        response.write(str('\n#Journal: '))
-        response.write(str(obj.reference.journal))
-        response.write(str('\n#Source: '))
-        if obj.reference.doi_isbn:
-            response.write(str(obj.reference.doi_isbn))
-        else:
-            response.write(str('N/A'))
-
-    def write_a_pos():
-        response.write('\n#a: ')
-        response.write(obj.a)
-        response.write('\n#b: ')
-        response.write(obj.b)
-        response.write('\n#c: ')
-        response.write(obj.c)
-        response.write('\n#alpha: ')
-        response.write(obj.alpha)
-        response.write('\n#beta: ')
-        response.write(obj.beta)
-        response.write('\n#gamma: ')
-        response.write(obj.gamma)
-        response.write('\n\n')
-
-    if data_type == 'exciton_emission':
-        obj = models.ExcitonEmission.objects.get(pk=pk)
-        p_obj = models.System.objects.get(excitonemission=obj)
-        file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
-                                            p_obj.inorganic)
-        dir_in_str = os.path.join(settings.MEDIA_ROOT, 'uploads')
-        meta_filename = file_name_prefix + '.txt'
-        meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
-            meta_file.write(str('#HybriD³ Materials Database\n'))
-            meta_file.write(str('\n#System: '))
-            meta_file.write(str(p_obj.compound_name))
-            meta_file.write(str('\n#Temperature: '))
-            meta_file.write(str(obj.temperature))
-            meta_file.write(str('\n#Phase: '))
-            meta_file.write(str(obj.phase.phase))
-            meta_file.write(str('\n#Authors: '))
-            for author in obj.reference.author_set.all():
-                meta_file.write('\n    ')
-                meta_file.write(author.first_name + ' ')
-                meta_file.write(author.last_name)
-                meta_file.write(', ' + author.institution)
-            meta_file.write(str('\n#Journal: '))
-            meta_file.write(str(obj.reference.journal))
-            meta_file.write(str('\n#Source: '))
-            meta_file.write(str(obj.reference.doi_isbn))
-            meta_file.write(str('\n#Exciton Emission Peak: '))
-            meta_file.write(str(obj.excitonemission))
-        pl_file_csv = os.path.join(dir_in_str, file_name_prefix + '.csv')
-        pl_file_html = os.path.join(dir_in_str, file_name_prefix + '.html')
-        filenames = []
-        filenames.append(meta_filepath)
-        filenames.append(pl_file_csv)
-        filenames.append(pl_file_html)
-
-        zip_dir = file_name_prefix
-        zip_filename = '%s.zip' % zip_dir
-        # change response type and content deposition type
-        string = io.BytesIO()
-        zf = zipfile.ZipFile(string, 'w')
-
-        for fpath in filenames:
-            # Calculate path for file in zip
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(),
-                                content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           zip_filename)
-    elif data_type == 'synthesis':
-        obj = models.SynthesisMethodOld.objects.get(pk=pk)
-        p_obj = models.System.objects.get(synthesismethodold=obj)
-        file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
-                                             p_obj.inorganic)
-        meta_filename = file_name_prefix + '.txt'
-        response = HttpResponse(content_type='text/plain')
-        response.write(str('#HybriD³ Materials Database\n'))
-        response.write(str('\n#System: '))
-        response.write(str(p_obj.compound_name))
-        response.write(str('\n#Temperature: '))
-        response.write(str(obj.temperature))
-        response.write(str('\n#Phase: '))
-        response.write(str(obj.phase.phase))
-        response.write(str('\n#Authors: '))
-        for author in obj.reference.author_set.all():
-            response.write('\n    ')
-            response.write(author.first_name + ' ')
-            response.write(author.last_name)
-            response.write(', ' + author.institution)
-        response.write(str('\n#Journal: '))
-        response.write(str(obj.reference.journal))
-        response.write(str('\n#Source: '))
-        response.write(str(obj.reference.doi_isbn))
-        if obj.synthesis_method:
-            response.write(str('\n#Synthesis Method: '))
-            response.write(str(obj.synthesis_method))
-        if obj.starting_materials:
-            response.write(str('\n#Starting Materials: '))
-            response.write(str(obj.starting_materials))
-        if obj.remarks:
-            response.write(str('\n#Remarks: '))
-            response.write(str(obj.remarks))
-        if obj.product:
-            response.write(str('\n#Product: '))
-            response.write(str(obj.product))
-        response.encoding = 'utf-8'
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           (meta_filename))
-    elif data_type == 'band_structure' and bandgap:
-        obj = models.BandStructure.objects.get(pk=pk)
-        p_obj = models.System.objects.get(bandstructure=obj)
-        filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic,
-                                        p_obj.inorganic)
-        response.write(str('#HybriD³ Materials Database\n\n'))
-        response.write('****************\n')
-        response.write('Band gap: ')
-        if obj.band_gap != '':
-            response.write(obj.band_gap + ' eV')
-        else:
-            response.write('N/A')
-        response.write('\n****************\n')
-        write_headers()
-        response.encoding = 'utf-8'
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           (filename))
-    elif data_type == 'band_structure':
-        obj = models.BandStructure.objects.get(pk=pk)
-        p_obj = models.System.objects.get(bandstructure=obj)
-        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
-                                               p_obj.inorganic, obj.pk)
-        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
-        compound_name = dir_in_str.split('/')[-1]
-        meta_filename = file_name_prefix + '.txt'
-        meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
-            meta_file.write('#HybriD3 Materials Database\n')
-            meta_file.write('\n#System: ')
-            meta_file.write(p_obj.compound_name)
-            meta_file.write('\n#Temperature: ')
-            meta_file.write(obj.temperature)
-            meta_file.write('\n#Phase: ')
-            meta_file.write(str(obj.phase.phase))
-            meta_file.write(str('\n#Authors: '))
-            for author in obj.reference.author_set.all():
-                meta_file.write('\n    ')
-                meta_file.write(author.first_name + ' ')
-                meta_file.write(author.last_name)
-                meta_file.write(', ' + author.institution)
-            meta_file.write('\n#Journal: ')
-            meta_file.write(str(obj.reference.journal))
-            meta_file.write('\n#Source: ')
-            meta_file.write(str(obj.reference.doi_isbn))
-        bs_full = os.path.join(dir_in_str, file_name_prefix + '_full.png')
-        bs_mini = os.path.join(dir_in_str, file_name_prefix + '_min.png')
-        filenames = []
-        filenames.append(bs_full)
-        filenames.append(bs_mini)
-        for f in os.listdir(dir_in_str):
-            filename = os.fsdecode(f)
-            if filename.endswith('.in') or filename.endswith('.out') or (
-                    filename.endswith('.txt')):
-                full_filename = os.path.join(dir_in_str, filename)
-                filenames.append(full_filename)
-        zip_dir = compound_name
-        zip_filename = '%s.zip' % zip_dir
-        # change response type and content deposition type
-        string = io.BytesIO()
-        zf = zipfile.ZipFile(string, 'w')
-
-        for fpath in filenames:
-            # Calculate path for file in zip
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(),
-                                content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           zip_filename)
-    elif data_type == 'input_files':
-        obj = models.BandStructure.objects.get(pk=pk)
-        p_obj = models.System.objects.get(bandstructure=obj)
-        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
-                                               p_obj.inorganic, obj.pk)
-        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
-        compound_name = dir_in_str.split('/')[-1]
-        filenames = []
-        for F in ('control.in', 'geometry.in'):
-            if os.path.exists(f'{dir_in_str}/{F}'):
-                filenames.append(f'{dir_in_str}/{F}')
-        zip_dir = compound_name
-        zip_filename = f'{zip_dir}.zip'
-        # change response type and content deposition type
-        string = io.BytesIO()
-        zf = zipfile.ZipFile(string, 'w')
-        for fpath in filenames:
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(),
-                                content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           zip_filename)
-    return response
+    def get_queryset(self, **kwargs):
+        return models.Dataset.objects.filter(
+            system__pk=self.kwargs['pk']).annotate(is_lattice_parameter=Case(
+                When(primary_property__name='lattice parameter',
+                     then=Value(True)),
+                default=Value(False), output_field=BooleanField())).order_by(
+                    '-is_lattice_parameter')
 
 
-def all_entries(request, pk, data_type):
-    str_to_model = {
-        'exciton_emission': models.ExcitonEmission,
-        'synthesis': models.SynthesisMethodOld,
-        'band_structure': models.BandStructure,
-    }
-    template_name = 'materials/all_%ss.html' % data_type
-    compound_name = models.System.objects.get(pk=pk).compound_name
-    obj = str_to_model[data_type].objects.filter(system__pk=pk)
-    return render(request, template_name, {
-        'object': obj,
-        'compound_name': compound_name,
-        'data_type': data_type,
-        'key': pk
-    })
+class PropertyAllEntriesView(generic.ListView):
+    """Display all data sets for a given property and system."""
+    template_name = 'materials/property_all_entries.html'
+
+    def get_queryset(self, **kwargs):
+        return models.Dataset.objects.filter(
+            system__pk=self.kwargs['system_pk']).filter(
+                primary_property__pk=self.kwargs['prop_pk'])
 
 
-def getAuthorSearchResult(search_text):
-    keyWords = search_text.split()
-    results = models.System.objects.\
-        filter(functools.reduce(operator.or_, (
-            Q(synthesismethodold__reference__author__last_name__icontains=x)
-            for x in keyWords)) | functools.reduce(operator.or_, (Q(
-                    excitonemission__reference__author__last_name__icontains=x
-            ) for x in keyWords)) | functools.reduce(operator.or_, (Q(
-                bandstructure__reference__author__last_name__icontains=x
-            ) for x in keyWords))).distinct()
-    return results
-
-
-def search_result(search_term, search_text):
-    if search_term == 'formula':
-        return models.System.objects.filter(
-            Q(formula__icontains=search_text) |
-            Q(group__icontains=search_text) |
-            Q(compound_name__icontains=search_text)).order_by('formula')
-    elif search_term == 'organic':
-        return models.System.objects.filter(
-            organic__icontains=search_text).order_by('organic')
-    elif search_term == 'inorganic':
-        return models.System.objects.filter(
-            inorganic__icontains=search_text).order_by('inorganic')
-    elif search_term == 'author':
-        return getAuthorSearchResult(search_text)
-    else:
-        raise KeyError('Invalid search term.')
+class ReferenceDetailView(generic.DetailView):
+    model = models.Reference
 
 
 class SearchFormView(generic.TemplateView):
@@ -437,18 +177,6 @@ class SearchFormView(generic.TemplateView):
         return render(request, template_name, args)
 
 
-def makeCorrections(form):
-    # alter user input if necessary
-    try:
-        temp = form.temperature
-        if temp.endswith('K') or temp.endswith('C'):
-            temp = temp[:-1].strip()
-            form.temperature = temp
-        return form
-    except Exception:  # just in case
-        return form
-
-
 class AddPubView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_reference.html'
 
@@ -525,14 +253,9 @@ class AddPubView(LoginRequiredMixin, generic.TemplateView):
                     text = 'Save success!'
                     feedback = 'success'
         args = {
-                # 'search_form': search_form,
-                # 'pub_form': pub_form,
                 'feedback': feedback,
                 'text': text,
-                # 'initial_state': True,
                 }
-        # return render(request, self.template_name, args)
-        # ajax version below
         return JsonResponse(args)
 
 
@@ -574,12 +297,10 @@ class AddAuthorsToReferenceView(LoginRequiredMixin, generic.TemplateView):
 
 class SearchAuthorView(generic.TemplateView):
     """This is for add reference page"""
-    # template_name = 'materials/add_reference.html'
     template_name = 'materials/dropdown_list_author.html'
 
     def post(self, request):
         search_form = forms.SearchForm(request.POST)
-        # pub_form = forms.AddReference()
         search_text = ''
         if search_form.is_valid():
             search_text = search_form.cleaned_data['search_text']
@@ -587,14 +308,6 @@ class SearchAuthorView(generic.TemplateView):
                 Q(first_name__icontains=search_text) |
                 Q(last_name__icontains=search_text) |
                 Q(institution__icontains=search_text))
-            # add last_name filter
-        # args = {
-        #     'search_form': search_form,
-        #     'search_result': search_result,
-        #     'pub_form': pub_form
-        # }
-        # return render(request, self.template_name, args)
-        # ajax version
         return render(request, self.template_name,
                       {'search_result': search_result})
 
@@ -847,6 +560,33 @@ class AddDataView(LoginRequiredMixin, generic.TemplateView):
         return render(request, self.template_name, {
             'form': forms.AddDataForm(),
         })
+
+
+class SystemUpdateView(generic.UpdateView):
+    model = models.System
+    template_name = 'materials/system_update_form.html'
+    form_class = forms.AddSystem
+    success_url = '/materials/{pk}'
+
+
+class BandStructureUpdateView(generic.UpdateView):
+    model = models.BandStructure
+    template_name = 'materials/update_band_structure.html'
+    form_class = forms.AddBandStructure
+
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/band_structure' % str(pk)
+
+
+class BandStructureDeleteView(generic.DeleteView):
+    model = models.BandStructure
+    template_name = 'materials/delete_band_structure.html'
+    form_class = forms.AddBandStructure
+
+    def get_success_url(self):
+        pk = self.object.system.pk
+        return '/materials/%s/band_structure' % str(pk)
 
 
 @login_required
@@ -1259,39 +999,21 @@ def delete_dataset_and_files(request, system_pk, dataset_pk, return_path):
     return redirect(return_path)
 
 
-class SystemDetailView(generic.DetailView):
-    model = models.System
-
-
-class ReferenceDetailView(generic.DetailView):
-    model = models.Reference
-
-
-class SystemUpdateView(generic.UpdateView):
-    model = models.System
-    template_name = 'materials/system_update_form.html'
-    form_class = forms.AddSystem
-    success_url = '/materials/{pk}'
-
-
-class BandStructureUpdateView(generic.UpdateView):
-    model = models.BandStructure
-    template_name = 'materials/update_band_structure.html'
-    form_class = forms.AddBandStructure
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/band_structure' % str(pk)
-
-
-class BandStructureDeleteView(generic.DeleteView):
-    model = models.BandStructure
-    template_name = 'materials/delete_band_structure.html'
-    form_class = forms.AddBandStructure
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/band_structure' % str(pk)
+def dataset_data(request, pk):
+    """Return the data set as a text file."""
+    dataset = models.Dataset.objects.get(pk=pk)
+    dataseries = dataset.dataseries_set.first()
+    text = ''
+    x_value = ''
+    y_value = ''
+    for datapoint in dataseries.datapoints.all():
+        for value in datapoint.values.all():
+            if value.qualifier == models.NumericalValue.SECONDARY:
+                x_value = value.value
+            elif value.qualifier == models.NumericalValue.PRIMARY:
+                y_value = value.value
+        text += f'{x_value} {y_value}\n'
+    return HttpResponse(text, content_type='text/plain')
 
 
 def dataset_image(request, pk):
@@ -1322,99 +1044,6 @@ def dataset_image(request, pk):
     return HttpResponse(image, content_type='image/png')
 
 
-def dataset_data(request, pk):
-    """Return the data set as a text file."""
-    dataset = models.Dataset.objects.get(pk=pk)
-    dataseries = dataset.dataseries_set.first()
-    text = ''
-    x_value = ''
-    y_value = ''
-    for datapoint in dataseries.datapoints.all():
-        for value in datapoint.values.all():
-            if value.qualifier == models.NumericalValue.SECONDARY:
-                x_value = value.value
-            elif value.qualifier == models.NumericalValue.PRIMARY:
-                y_value = value.value
-        text += f'{x_value} {y_value}\n'
-    return HttpResponse(text, content_type='text/plain')
-
-
-def reference_data(request, pk):
-    """Return a key-value representation of the data set.
-
-    The representation conforms to the one used in Qresp
-    (http://qresp.org/).
-
-    """
-    data = {}
-    data['info'] = {
-        'downloadPath': request.get_host(),
-        'fileServerPath': '',
-        'folderAbsolutePath': '',
-        'insertedBy': {
-            'firstName': '',
-            'lastName': '',
-            'middleName': ''
-        },
-        'isPublic': 'true',
-        'notebookFile': '',
-        'notebookPath': '',
-        'serverPath': request.get_host(),
-        'timeStamp': datetime.datetime.now()
-    }
-    reference = models.Reference.objects.get(pk=pk)
-    data['reference'] = {}
-    data['reference']['journal'] = {
-        'abbrevName': reference.journal,
-        'fullName': reference.journal,
-        'kind': 'journal',
-        'page': reference.pages_start,
-        'publishedAbstract': '',
-        'publishedDate': '',
-        'receivedDate': '',
-        'title': reference.title,
-        'volume': reference.vol,
-        'year': reference.year,
-    }
-    data['reference']['authors'] = []
-    for author in reference.author_set.all():
-        data['reference']['authors'].append({
-            'firstname': author.first_name,
-            'lastname': author.last_name,
-        })
-    data['PIs'] = []
-    data['PIs'].append({'firstname': '', 'lastname': ''})
-    data['collections'] = []
-    data['collections'].append('')
-    datasets = reference.dataset_set.all()
-    data['charts'] = []
-    dataset_counter = 1
-    for dataset in datasets:
-        chart = {
-            'caption': dataset.label,
-            'files': [f'/materials/dataset-{dataset.pk}/data.txt'],
-            'id': '',
-            'imageFile': f'/materials/dataset-{dataset.pk}/image.png',
-            'kind': 'figure' if dataset.plotted else 'table',
-            'notebookFile': '',
-            'number': dataset_counter,
-            'properties': [],
-        }
-        if dataset.secondary_property:
-            chart['properties'].append(dataset.secondary_property.name)
-        if dataset.primary_property:
-            chart['properties'].append(dataset.primary_property.name)
-        loc = os.path.join(settings.MEDIA_ROOT,
-                           f'uploads/dataset_{dataset.pk}')
-        if os.path.isdir(loc):
-            for file_ in os.listdir(loc):
-                chart['files'].append(settings.MEDIA_URL +
-                                      f'uploads/dataset_{dataset.pk}/{file_}')
-        data['charts'].append(chart)
-        dataset_counter += 1
-    return JsonResponse(data)
-
-
 def autofill_input_data(request):
     """Process an AJAX request to autofill the data textareas."""
     content = UploadedFile(request.FILES['file']).read().decode('utf-8')
@@ -1423,16 +1052,6 @@ def autofill_input_data(request):
         output.write(line)
         output.write('\n')
     return HttpResponse(output.getvalue())
-
-
-class PropertyAllEntriesView(generic.ListView):
-    """Display all data sets for a given property and system."""
-    template_name = 'materials/property_all_entries.html'
-
-    def get_queryset(self, **kwargs):
-        return models.Dataset.objects.filter(
-            system__pk=self.kwargs['system_pk']).filter(
-                primary_property__pk=self.kwargs['prop_pk'])
 
 
 def data_for_chart(request, pk):
@@ -1599,3 +1218,385 @@ def report_issue(request):
         messages.error(request,
                        'You must be logged in to perform this action.')
     return redirect(request.POST['return-path'])
+
+
+def reference_data(request, pk):
+    """Return a key-value representation of the data set.
+
+    The representation conforms to the one used in Qresp
+    (http://qresp.org/).
+
+    """
+    data = {}
+    data['info'] = {
+        'downloadPath': request.get_host(),
+        'fileServerPath': '',
+        'folderAbsolutePath': '',
+        'insertedBy': {
+            'firstName': '',
+            'lastName': '',
+            'middleName': ''
+        },
+        'isPublic': 'true',
+        'notebookFile': '',
+        'notebookPath': '',
+        'serverPath': request.get_host(),
+        'timeStamp': datetime.datetime.now()
+    }
+    reference = models.Reference.objects.get(pk=pk)
+    data['reference'] = {}
+    data['reference']['journal'] = {
+        'abbrevName': reference.journal,
+        'fullName': reference.journal,
+        'kind': 'journal',
+        'page': reference.pages_start,
+        'publishedAbstract': '',
+        'publishedDate': '',
+        'receivedDate': '',
+        'title': reference.title,
+        'volume': reference.vol,
+        'year': reference.year,
+    }
+    data['reference']['authors'] = []
+    for author in reference.author_set.all():
+        data['reference']['authors'].append({
+            'firstname': author.first_name,
+            'lastname': author.last_name,
+        })
+    data['PIs'] = []
+    data['PIs'].append({'firstname': '', 'lastname': ''})
+    data['collections'] = []
+    data['collections'].append('')
+    datasets = reference.dataset_set.all()
+    data['charts'] = []
+    dataset_counter = 1
+    for dataset in datasets:
+        chart = {
+            'caption': dataset.label,
+            'files': [f'/materials/dataset-{dataset.pk}/data.txt'],
+            'id': '',
+            'imageFile': f'/materials/dataset-{dataset.pk}/image.png',
+            'kind': 'figure' if dataset.plotted else 'table',
+            'notebookFile': '',
+            'number': dataset_counter,
+            'properties': [],
+        }
+        if dataset.secondary_property:
+            chart['properties'].append(dataset.secondary_property.name)
+        if dataset.primary_property:
+            chart['properties'].append(dataset.primary_property.name)
+        loc = os.path.join(settings.MEDIA_ROOT,
+                           f'uploads/dataset_{dataset.pk}')
+        if os.path.isdir(loc):
+            for file_ in os.listdir(loc):
+                chart['files'].append(settings.MEDIA_URL +
+                                      f'uploads/dataset_{dataset.pk}/{file_}')
+        data['charts'].append(chart)
+        dataset_counter += 1
+    response = JsonResponse(data)
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
+    return response
+
+
+def data_dl(request, data_type, pk, bandgap=False):
+    """Download a specific entry type"""
+    response = HttpResponse(content_type='text/fhi-aims')
+    if data_type == 'band_gap':
+        data_type = 'band_structure'
+        bandgap = True
+
+    def write_headers():
+        if not bandgap:
+            response.write(str('#HybriD³ Materials Database\n'))
+        response.write(str('\n#System: '))
+        response.write(str(p_obj.compound_name))
+        response.write(str('\n#Temperature: '))
+        response.write(str(obj.temperature + ' K'))
+        response.write(str('\n#Phase: '))
+        response.write(str(obj.phase.phase))
+        authors = obj.reference.author_set.all()
+        response.write(str('\n#Authors ('+str(authors.count())+'): '))
+        for author in authors:
+            response.write('\n    ')
+            response.write(author.first_name + ' ')
+            response.write(author.last_name)
+            response.write(', ' + author.institution)
+        response.write(str('\n#Journal: '))
+        response.write(str(obj.reference.journal))
+        response.write(str('\n#Source: '))
+        if obj.reference.doi_isbn:
+            response.write(str(obj.reference.doi_isbn))
+        else:
+            response.write(str('N/A'))
+
+    def write_a_pos():
+        response.write('\n#a: ')
+        response.write(obj.a)
+        response.write('\n#b: ')
+        response.write(obj.b)
+        response.write('\n#c: ')
+        response.write(obj.c)
+        response.write('\n#alpha: ')
+        response.write(obj.alpha)
+        response.write('\n#beta: ')
+        response.write(obj.beta)
+        response.write('\n#gamma: ')
+        response.write(obj.gamma)
+        response.write('\n\n')
+
+    if data_type == 'exciton_emission':
+        obj = models.ExcitonEmission.objects.get(pk=pk)
+        p_obj = models.System.objects.get(excitonemission=obj)
+        file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
+                                            p_obj.inorganic)
+        dir_in_str = os.path.join(settings.MEDIA_ROOT, 'uploads')
+        meta_filename = file_name_prefix + '.txt'
+        meta_filepath = os.path.join(dir_in_str, meta_filename)
+        with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
+            meta_file.write(str('#HybriD³ Materials Database\n'))
+            meta_file.write(str('\n#System: '))
+            meta_file.write(str(p_obj.compound_name))
+            meta_file.write(str('\n#Temperature: '))
+            meta_file.write(str(obj.temperature))
+            meta_file.write(str('\n#Phase: '))
+            meta_file.write(str(obj.phase.phase))
+            meta_file.write(str('\n#Authors: '))
+            for author in obj.reference.author_set.all():
+                meta_file.write('\n    ')
+                meta_file.write(author.first_name + ' ')
+                meta_file.write(author.last_name)
+                meta_file.write(', ' + author.institution)
+            meta_file.write(str('\n#Journal: '))
+            meta_file.write(str(obj.reference.journal))
+            meta_file.write(str('\n#Source: '))
+            meta_file.write(str(obj.reference.doi_isbn))
+            meta_file.write(str('\n#Exciton Emission Peak: '))
+            meta_file.write(str(obj.excitonemission))
+        pl_file_csv = os.path.join(dir_in_str, file_name_prefix + '.csv')
+        pl_file_html = os.path.join(dir_in_str, file_name_prefix + '.html')
+        filenames = []
+        filenames.append(meta_filepath)
+        filenames.append(pl_file_csv)
+        filenames.append(pl_file_html)
+
+        zip_dir = file_name_prefix
+        zip_filename = '%s.zip' % zip_dir
+        # change response type and content deposition type
+        string = io.BytesIO()
+        zf = zipfile.ZipFile(string, 'w')
+
+        for fpath in filenames:
+            # Calculate path for file in zip
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(),
+                                content_type='application/x-zip-compressed')
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           zip_filename)
+    elif data_type == 'synthesis':
+        obj = models.SynthesisMethodOld.objects.get(pk=pk)
+        p_obj = models.System.objects.get(synthesismethodold=obj)
+        file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
+                                             p_obj.inorganic)
+        meta_filename = file_name_prefix + '.txt'
+        response = HttpResponse(content_type='text/plain')
+        response.write(str('#HybriD³ Materials Database\n'))
+        response.write(str('\n#System: '))
+        response.write(str(p_obj.compound_name))
+        response.write(str('\n#Temperature: '))
+        response.write(str(obj.temperature))
+        response.write(str('\n#Phase: '))
+        response.write(str(obj.phase.phase))
+        response.write(str('\n#Authors: '))
+        for author in obj.reference.author_set.all():
+            response.write('\n    ')
+            response.write(author.first_name + ' ')
+            response.write(author.last_name)
+            response.write(', ' + author.institution)
+        response.write(str('\n#Journal: '))
+        response.write(str(obj.reference.journal))
+        response.write(str('\n#Source: '))
+        response.write(str(obj.reference.doi_isbn))
+        if obj.synthesis_method:
+            response.write(str('\n#Synthesis Method: '))
+            response.write(str(obj.synthesis_method))
+        if obj.starting_materials:
+            response.write(str('\n#Starting Materials: '))
+            response.write(str(obj.starting_materials))
+        if obj.remarks:
+            response.write(str('\n#Remarks: '))
+            response.write(str(obj.remarks))
+        if obj.product:
+            response.write(str('\n#Product: '))
+            response.write(str(obj.product))
+        response.encoding = 'utf-8'
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           (meta_filename))
+    elif data_type == 'band_structure' and bandgap:
+        obj = models.BandStructure.objects.get(pk=pk)
+        p_obj = models.System.objects.get(bandstructure=obj)
+        filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic,
+                                        p_obj.inorganic)
+        response.write(str('#HybriD³ Materials Database\n\n'))
+        response.write('****************\n')
+        response.write('Band gap: ')
+        if obj.band_gap != '':
+            response.write(obj.band_gap + ' eV')
+        else:
+            response.write('N/A')
+        response.write('\n****************\n')
+        write_headers()
+        response.encoding = 'utf-8'
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           (filename))
+    elif data_type == 'band_structure':
+        obj = models.BandStructure.objects.get(pk=pk)
+        p_obj = models.System.objects.get(bandstructure=obj)
+        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
+                                               p_obj.inorganic, obj.pk)
+        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
+        compound_name = dir_in_str.split('/')[-1]
+        meta_filename = file_name_prefix + '.txt'
+        meta_filepath = os.path.join(dir_in_str, meta_filename)
+        with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
+            meta_file.write('#HybriD3 Materials Database\n')
+            meta_file.write('\n#System: ')
+            meta_file.write(p_obj.compound_name)
+            meta_file.write('\n#Temperature: ')
+            meta_file.write(obj.temperature)
+            meta_file.write('\n#Phase: ')
+            meta_file.write(str(obj.phase.phase))
+            meta_file.write(str('\n#Authors: '))
+            for author in obj.reference.author_set.all():
+                meta_file.write('\n    ')
+                meta_file.write(author.first_name + ' ')
+                meta_file.write(author.last_name)
+                meta_file.write(', ' + author.institution)
+            meta_file.write('\n#Journal: ')
+            meta_file.write(str(obj.reference.journal))
+            meta_file.write('\n#Source: ')
+            meta_file.write(str(obj.reference.doi_isbn))
+        bs_full = os.path.join(dir_in_str, file_name_prefix + '_full.png')
+        bs_mini = os.path.join(dir_in_str, file_name_prefix + '_min.png')
+        filenames = []
+        filenames.append(bs_full)
+        filenames.append(bs_mini)
+        for f in os.listdir(dir_in_str):
+            filename = os.fsdecode(f)
+            if filename.endswith('.in') or filename.endswith('.out') or (
+                    filename.endswith('.txt')):
+                full_filename = os.path.join(dir_in_str, filename)
+                filenames.append(full_filename)
+        zip_dir = compound_name
+        zip_filename = '%s.zip' % zip_dir
+        # change response type and content deposition type
+        string = io.BytesIO()
+        zf = zipfile.ZipFile(string, 'w')
+
+        for fpath in filenames:
+            # Calculate path for file in zip
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(),
+                                content_type='application/x-zip-compressed')
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           zip_filename)
+    elif data_type == 'input_files':
+        obj = models.BandStructure.objects.get(pk=pk)
+        p_obj = models.System.objects.get(bandstructure=obj)
+        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
+                                               p_obj.inorganic, obj.pk)
+        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
+        compound_name = dir_in_str.split('/')[-1]
+        filenames = []
+        for F in ('control.in', 'geometry.in'):
+            if os.path.exists(f'{dir_in_str}/{F}'):
+                filenames.append(f'{dir_in_str}/{F}')
+        zip_dir = compound_name
+        zip_filename = f'{zip_dir}.zip'
+        # change response type and content deposition type
+        string = io.BytesIO()
+        zf = zipfile.ZipFile(string, 'w')
+        for fpath in filenames:
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_dir, fname)
+            zf.write(fpath, zip_path)
+        # Must close zip for all contents to be written
+        zf.close()
+        # Grab ZIP file from in-memory, make response with correct MIME-type
+        response = HttpResponse(string.getvalue(),
+                                content_type='application/x-zip-compressed')
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           zip_filename)
+    return response
+
+
+def all_entries(request, pk, data_type):
+    str_to_model = {
+        'exciton_emission': models.ExcitonEmission,
+        'synthesis': models.SynthesisMethodOld,
+        'band_structure': models.BandStructure,
+    }
+    template_name = 'materials/all_%ss.html' % data_type
+    compound_name = models.System.objects.get(pk=pk).compound_name
+    obj = str_to_model[data_type].objects.filter(system__pk=pk)
+    return render(request, template_name, {
+        'object': obj,
+        'compound_name': compound_name,
+        'data_type': data_type,
+        'key': pk
+    })
+
+
+def getAuthorSearchResult(search_text):
+    keyWords = search_text.split()
+    results = models.System.objects.\
+        filter(functools.reduce(operator.or_, (
+            Q(synthesismethodold__reference__author__last_name__icontains=x)
+            for x in keyWords)) | functools.reduce(operator.or_, (Q(
+                    excitonemission__reference__author__last_name__icontains=x
+            ) for x in keyWords)) | functools.reduce(operator.or_, (Q(
+                bandstructure__reference__author__last_name__icontains=x
+            ) for x in keyWords))).distinct()
+    return results
+
+
+def search_result(search_term, search_text):
+    if search_term == 'formula':
+        return models.System.objects.filter(
+            Q(formula__icontains=search_text) |
+            Q(group__icontains=search_text) |
+            Q(compound_name__icontains=search_text)).order_by('formula')
+    elif search_term == 'organic':
+        return models.System.objects.filter(
+            organic__icontains=search_text).order_by('organic')
+    elif search_term == 'inorganic':
+        return models.System.objects.filter(
+            inorganic__icontains=search_text).order_by('inorganic')
+    elif search_term == 'author':
+        return getAuthorSearchResult(search_text)
+    else:
+        raise KeyError('Invalid search term.')
+
+
+def makeCorrections(form):
+    # alter user input if necessary
+    try:
+        temp = form.temperature
+        if temp.endswith('K') or temp.endswith('C'):
+            temp = temp[:-1].strip()
+            form.temperature = temp
+        return form
+    except Exception:  # just in case
+        return form

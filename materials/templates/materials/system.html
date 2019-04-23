@@ -9,12 +9,12 @@
   <div class="card card-default">
     <div class="card-header">
       {% if user.is_superuser %}
-        <a href="/materials/update-system/{{ object.pk }}" >
+        <a href="{% url 'materials:update_system' pk=object_list.first.system.pk %}">
           <button type="button" class="btn btn-success" style="float: right">Edit System Data
           </button>
         </a>
       {% endif %}
-      <h3>{{ object.compound_name }}</h3>
+      <h3>{{ object_list.first.system.compound_name }}</h3>
     </div>
 
     <div class="card-body">
@@ -32,7 +32,7 @@
           <br>
         </div>
 
-        {% for dataset in object.dataset_set.all %}
+        {% for dataset in object_list %}
           {% if dataset.representative %}
             {% if user == dataset.created_by or dataset.visible %}
               <div class="col-md-6">
@@ -49,7 +49,7 @@
                       {% endif %}
                     </h5>
                     {% if user == dataset.created_by %}
-                      {% include 'materials/dataset_buttons.html' with system=object %}
+                      {% include 'materials/dataset_buttons.html' with system=object_list.first.system %}
                     {% endif %}
                   </div>
                   {% if not dataset.visible %}
@@ -69,7 +69,7 @@
               <h5>Synthesis Methods</h5>
             </div>
             <div class="card-body">
-              {% with entry=object.synthesismethodold_set.first %}
+              {% with entry=object_list.first.system.synthesismethodold_set.first %}
                 {% if entry %}
                   {% if entry.synthesis_method %}
                     <div style="margin-left: 20px; text-indent: -20px;">
@@ -125,10 +125,10 @@
                       Synthesis Method
                     </button>
                   </a>
-                  <a href="{% url "materials:all_entries" pk=object.pk data_type="synthesis"%}">
+                  <a href="{% url "materials:all_entries" pk=object_list.first.system.pk data_type="synthesis"%}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{ object.synthesismethodold_set.all|length }})
+                      See all entries ({{ object_list.first.system.synthesismethodold_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -142,7 +142,7 @@
 
         <div class="col-md-6">
           <div class="card card-item">
-            {% with entry=object.excitonemission_set.first %}
+            {% with entry=object_list.first.system.excitonemission_set.first %}
               <div class="card-header">
                 <h5>Photoluminescence emission spectra</h5>
               </div>
@@ -188,10 +188,10 @@
                       Exciton Emission Peak
                     </button>
                   </a>
-                  <a href="{% url "materials:all_entries" pk=object.pk data_type="exciton_emission" %}">
+                  <a href="{% url "materials:all_entries" pk=object_list.first.system.pk data_type="exciton_emission" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{ object.excitonemission_set.all|length }})
+                      See all entries ({{ object_list.first.system.excitonemission_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -205,7 +205,7 @@
 
         <div class="col-md-6">
           <div class="card card-item">
-            {% with entry=object.bandstructure_set.first %}
+            {% with entry=object_list.first.system.bandstructure_set.first %}
               <div class="card-header">
                 <h5>Band Structures</h5>
               </div>
@@ -282,10 +282,10 @@
                       </button>
                     </a>
                   {% endif %}
-                  <a href="{% url "materials:all_entries" pk=object.pk data_type="band_structure" %}">
+                  <a href="{% url "materials:all_entries" pk=object_list.first.system.pk data_type="band_structure" %}">
                     <button type="button" class="btn btn-info">
                       <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{ object.bandstructure_set.all|length }})
+                      See all entries ({{ object_list.first.system.bandstructure_set.all|length }})
                     </button>
                   </a>
                 {% else %}
@@ -304,22 +304,24 @@
 {% endblock %}
 
 {% block script %}
-  {% with entry=object.excitonemission_set.first %}
+  {% with entry=object_list.first.system.excitonemission_set.first %}
     <script type="text/javascript">
-     $('#pl-graph').load("../media/uploads/{{ entry.phase}}_{{object.organic}}_{{object.inorganic }}_pl.html");
+     $('#pl-graph').load("../media/uploads/{{ entry.phase}}_{{object_list.first.system.organic}}_{{object_list.first.system.inorganic }}_pl.html");
     </script>
   {% endwith %}
-  {% with entry=object.bandstructure_set.first %}
-    <script type="text/javascript">
-     var imglinkfull = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_full.png';
-     var imglinkmini = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_min.png';
-     $('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
-     $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
-    </script>
+  {% with system=object_list.first.system %}
+    {% with entry=system.bandstructure_set.first %}
+      <script type="text/javascript">
+       var imglinkfull = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_full.png';
+       var imglinkmini = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_min.png';
+       $('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
+       $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
+      </script>
+    {% endwith %}
   {% endwith %}
   <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
   <script>
-   $.get("{% url 'materials:get_jsmol_input' pk=object.pk %}", function(response) {
+   $.get("{% url 'materials:get_jsmol_input' pk=object_list.first.system.pk %}", function(response) {
      if (response) {
        $('#jmol').html(Jmol.getAppletHtml('jmol', {
          script: response,
@@ -333,5 +335,5 @@
      }
    });
   </script>
-  {% include 'materials/dataset_scripts.html' with datasets=object.dataset_set.all %}
+  {% include 'materials/dataset_scripts.html' with datasets=object_list %}
 {% endblock %}
