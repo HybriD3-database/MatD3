@@ -84,6 +84,20 @@ class ReferenceDetailView(generic.DetailView):
     model = models.Reference
 
 
+class DatasetView(generic.ListView):
+    """Display information about a single data set.
+
+    This is defined as a ListView so that we can reuse the same
+    template as for PropertyAllEntriesView. Otherwise, this is really
+    a DetailView.
+
+    """
+    template_name = 'materials/property_all_entries.html'
+
+    def get_queryset(self, **kwargs):
+        return models.Dataset.objects.filter(pk=self.kwargs['pk'])
+
+
 class SearchFormView(generic.TemplateView):
     """Search for system page"""
     template_name = 'materials/search.html'

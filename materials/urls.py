@@ -6,6 +6,7 @@ app_name = 'materials'
 urlpatterns = [
     path('', views.SearchFormView.as_view(), name='materials_home'),
     path('<int:pk>', views.SystemView.as_view(), name='system'),
+    path('dataset/<int:pk>', views.DatasetView.as_view(), name='dataset'),
     path('<int:sys>/update-band-structure/<int:pk>',
          views.BandStructureUpdateView.as_view(),
          name='update_band_structure'),
