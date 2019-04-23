@@ -5,7 +5,6 @@ from decouple import config
 from decouple import Csv
 import os
 import raven
-import socket
 
 from django.contrib.messages import constants as messages
 
