@@ -4,16 +4,16 @@ import shutil
 
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from mainproject import settings
-
 
 logger = logging.getLogger(__name__)
 
 
 class Base(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(default=timezone.now)
     this = '%(app_label)s_%(class)s'
     created_by = models.ForeignKey(get_user_model(),
                                    related_name=f'{this}_created_by',
@@ -32,7 +32,7 @@ class Base(models.Model):
 
 
 class Property(Base):
-    name = models.CharField(max_length=60, unique=True)
+    name = models.CharField(max_length=100, unique=True)
     require_input_files = models.BooleanField(default=False)
 
     def __str__(self):
