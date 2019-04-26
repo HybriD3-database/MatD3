@@ -153,3 +153,9 @@ table.main-data {
 .inputfile + label:hover {
     background-color: #007bdd;
 }
+
+footer.reference {
+    font-size: 12px;
+    margin: 10px;
+    color: #555;
+}

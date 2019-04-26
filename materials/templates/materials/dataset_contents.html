@@ -45,11 +45,17 @@
             </ul>
           {% endif %}
         </div>
+        <footer class="reference">
+          {% include 'materials/reference_format.html' with ref=dataset.reference %}
+        </footer>
       </div>
     {% endfor %}
   {% elif dataset.plotted %}
     <!-- Plotted data -->
     <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
+    <footer class="reference">
+      {% include 'materials/reference_format.html' with ref=dataset.reference %}
+    </footer>
   {% else %}
     <!-- Tabulated data -->
     {% for series in dataset.dataseries_set.all %}
@@ -88,6 +94,9 @@
             </ul>
           {% endif %}
         </div>
+        <footer class="reference">
+          {% include 'materials/reference_format.html' with ref=dataset.reference %}
+        </footer>
       </div>
     {% endfor %}
   {% endif %}
@@ -102,6 +111,9 @@
       Sample type: {{ dataset.get_sample_type_display }}<br>
       Crystal system: {{ dataset.get_crystal_system_display }}
     </div>
+    <footer class="reference">
+      {% include 'materials/reference_format.html' with ref=dataset.reference %}
+    </footer>
   </div>
 
   <!-- SYNTHESIS METHOD -->
@@ -129,6 +141,9 @@
             {% endif %}
           {% endwith %}
         </div>
+        <footer class="reference">
+          {% include 'materials/reference_format.html' with ref=dataset.reference %}
+        </footer>
       </div>
     </div>
   {% endif %}
@@ -155,6 +170,9 @@
             {% endif %}
           {% endwith %}
         </div>
+        <footer class="reference">
+          {% include 'materials/reference_format.html' with ref=dataset.reference %}
+        </footer>
       </div>
     </div>
   {% endif %}
@@ -197,6 +215,9 @@
             {% endif %}
           {% endwith %}
         </div>
+        <footer class="reference">
+          {% include 'materials/reference_format.html' with ref=dataset.reference %}
+        </footer>
       </div>
     </div>
   {% endif %}
