@@ -303,8 +303,7 @@ class Dataset(Base):
     label = models.TextField(max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     primary_property = models.ForeignKey(
-        Property, null=True, on_delete=models.PROTECT,
-        related_name='primary_property')
+        Property, on_delete=models.PROTECT, related_name='primary_property')
     primary_unit = models.ForeignKey(
         Unit, null=True, on_delete=models.PROTECT, related_name='primary_unit')
     secondary_property = models.ForeignKey(
