@@ -433,6 +433,43 @@
    {% endfor %}
   </script>
   <script>
+   // Autofill the main input data textarea
+   function autofill_data(el) {
+     var i_series = $(el).attr('id').split('import-data-file_')[1];
+     var form_data = new FormData();
+     form_data.append('file', el.files[0]);
+     $(el).val('');  // Clear the file list
+     $.ajax({
+       url: "{% url 'materials:autofill_input_data' %}",
+       type: 'POST',
+       processData: false,
+       contentType: false,
+       dataType: 'text',
+       data: form_data,
+     }).done(function(result) {
+       result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+       var data = result.split(/&/);
+       if (i_series) {
+         $('#id_series_datapoints_' + i_series).html(result);
+       } else { // fill globally
+         for (var i = 1; i <= $('#id_number_of_data_series').val(); i++) {
+           $('#id_series_datapoints_' + i).html(data[i-1].replace(/^\n/, ''));
+         }
+       }
+     }).fail(function(result) {
+       if (!i_series) i_series = 1;
+       $('#id_series_datapoints_' + i_series).html(result);
+     });
+   }
+   $('#import-all-data').change(function() {
+     if ($('#id_primary_property').find(':selected').text() === 'lattice parameter') {
+       import_lattice_parameters(this);
+     } else {
+       autofill_data(this);
+     }
+   });
+  </script>
+  <script>
    // Create a new data series
    var counter_fixed = 0;
    function add_series(i_series) {
@@ -455,6 +492,9 @@
      // Add a fixed property
      fixed_prop_btn.addEventListener('click', function() {
        add_fixed_property(i_series, counter_fixed++);
+     });
+     copy.getElementsByClassName('import-data-file')[0].addEventListener('change', function() {
+       autofill_data(this);
      });
      document.getElementById('data-series').appendChild(copy);
    }
@@ -541,46 +581,6 @@
        $('.series-datapoints').prop('disabled', false);
        $('.series-datapoints').attr('placeholder', saved_main_data_placeholder);
        saved_main_data_placeholder = '';
-     }
-   });
-  </script>
-  <script>
-   // Autofill the main input data textarea
-   function autofill_data(el) {
-     var i_series = $(el).attr('id').split('import-data-file_')[1];
-     var form_data = new FormData();
-     form_data.append('file', el.files[0]);
-     $(el).val('');  // Clear the file list
-     $.ajax({
-       url: "{% url 'materials:autofill_input_data' %}",
-       type: 'POST',
-       processData: false,
-       contentType: false,
-       dataType: 'text',
-       data: form_data,
-     }).done(function(result) {
-       result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-       var data = result.split(/&/);
-       if (i_series) {
-         $('#id_series_datapoints_' + i_series).html(result);
-       } else { // fill globally
-         for (var i = 1; i <= $('#id_number_of_data_series').val(); i++) {
-           $('#id_series_datapoints_' + i).html(data[i-1].replace(/^\n/, ''));
-         }
-       }
-     }).fail(function(result) {
-       if (!i_series) i_series = 1;
-       $('#id_series_datapoints_' + i_series).html(result);
-     });
-   }
-   $('.import-data-file').change(function() {
-     autofill_data(this);
-   });
-   $('#import-all-data').change(function() {
-     if ($('#id_primary_property').find(':selected').text() === 'lattice parameter') {
-       import_lattice_parameters(this);
-     } else {
-       autofill_data(this);
      }
    });
   </script>
