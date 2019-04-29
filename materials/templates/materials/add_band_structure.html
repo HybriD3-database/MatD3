@@ -28,7 +28,8 @@
         </p>
       </form>
 
-      <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}">
+      <form id="add-band-structure" method="post" action="{% url 'materials:add_band_structure' %}"
+            enctype="multipart/form-data">
         {% csrf_token %}
         <div id="reference-search-result">
         </div>
@@ -71,8 +72,5 @@
   <script type="text/javascript">
    ajax_submit($('#search-reference'), $('#reference-search-result'));
    ajax_submit($('#search-system'), $('#system-search-result'));
-  </script>
-  <script type="text/javascript">
-   alert_submit($('#add-band-structure'), $('#feedback'));
   </script>
 {% endblock %}

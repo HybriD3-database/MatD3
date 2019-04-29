@@ -526,9 +526,9 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
                     # save so a pk can be created for use in the
                     # folder location
                     new_form.save()
-                    bs_folder_loc = ('uploads/%s_%s_%s_%s_bs' %
-                                     (new_form.phase, new_form.system.organic,
-                                      new_form.system.inorganic, new_form.pk))
+                    bs_folder_loc = os.path.join(
+                        settings.MEDIA_ROOT,
+                        f'uploads/{new_form.phase}_{new_form.pk}')
                     new_form.folder_location = bs_folder_loc
                     try:
                         os.mkdir(bs_folder_loc)
