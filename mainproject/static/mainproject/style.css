@@ -112,7 +112,7 @@ table.main-data {
     color:#bcdbea;
 }
 
-.tooltip-container .tooltiptext {
+.tooltip-container > .tooltiptext {
     visibility: hidden;
     width: 300px;
     font-weight: normal;
@@ -126,7 +126,7 @@ table.main-data {
     z-index: 11;
 }
 
-.tooltip-container:hover .tooltiptext {
+.tooltip-container:hover > .tooltiptext {
     visibility: visible;
 }
 
@@ -158,4 +158,8 @@ footer.reference {
     font-size: 12px;
     margin: 10px;
     color: #555;
+}
+
+.collapsing {
+    transition: 0.1s;
 }
