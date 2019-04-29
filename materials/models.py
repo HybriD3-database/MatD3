@@ -30,6 +30,9 @@ class Base(models.Model):
         if 'created_by' in kwargs and 'updated_by' not in kwargs:
             self.updated_by = self.created_by
 
+    def __str__(self):
+        return f'ID: {self.pk}'
+
 
 class Property(Base):
     name = models.CharField(max_length=100, unique=True)
@@ -37,6 +40,9 @@ class Property(Base):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name_plural = 'properties'
 
 
 class Unit(Base):
@@ -300,17 +306,17 @@ class Dataset(Base):
         (3, 3),
         (2, 2),
     )
-    label = models.TextField(max_length=1000)
+    label = models.TextField(blank=True, max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     primary_property = models.ForeignKey(
         Property, on_delete=models.PROTECT, related_name='primary_property')
     primary_unit = models.ForeignKey(
         Unit, null=True, on_delete=models.PROTECT, related_name='primary_unit')
     secondary_property = models.ForeignKey(
-        Property, null=True, on_delete=models.PROTECT,
+        Property, null=True, blank=True, on_delete=models.PROTECT,
         related_name='secondary_property')
     secondary_unit = models.ForeignKey(
-        Unit, null=True, on_delete=models.PROTECT,
+        Unit, null=True, blank=True, on_delete=models.PROTECT,
         related_name='secondary_unit')
     reference = models.ForeignKey(
         Reference, null=True, on_delete=models.PROTECT)
@@ -323,6 +329,15 @@ class Dataset(Base):
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        if self.representative:
+            # Unset the representative flag of the dataset that was
+            # previously representative
+            Dataset.objects.filter(system=self.system).filter(
+                primary_property=self.primary_property).update(
+                    representative=False)
+        super().save(*args, **kwargs)
+
     def delete(self, *args, **kwargs):
         """Additionally remove any files uploaded by the user."""
         if self.files.exists():
@@ -334,10 +349,16 @@ class Dataset(Base):
         return Dataset.objects.filter(system=self.system).filter(
             primary_property=self.primary_property).count()
 
+    def __str__(self):
+        return f'ID: {self.pk} ({self.primary_property})'
+
 
 class Dataseries(Base):
     label = models.CharField(max_length=100, blank=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = 'dataseries'
 
     def get_fixed_values(self):
         """Return all fixed properties for the given series."""
@@ -366,6 +387,9 @@ class Dataseries(Base):
         for value in values_float:
             values.append(value.formatted('.10g'))
         return zip(symbols, values, units)
+
+    def __str__(self):
+        return f'ID: {self.pk} ({self.datapoints.count()} data points)'
 
 
 class Datapoint(Base):
@@ -453,13 +477,16 @@ class NumericalValueFixed(NumericalValueBase):
 class ComputationalDetails(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='computational')
-    code = models.TextField()
-    level_of_theory = models.TextField()
-    xc_functional = models.TextField()
-    kgrid = models.TextField()
-    relativity_level = models.TextField()
-    basis = models.TextField()
-    numerical_accuracy = models.TextField()
+    code = models.TextField(blank=True)
+    level_of_theory = models.TextField(blank=True)
+    xc_functional = models.TextField(blank=True)
+    kgrid = models.TextField(blank=True)
+    relativity_level = models.TextField(blank=True)
+    basis = models.TextField(blank=True)
+    numerical_accuracy = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name_plural = 'computational details'
 
 
 class ExperimentalDetails(Base):
@@ -467,6 +494,9 @@ class ExperimentalDetails(Base):
         Dataset, on_delete=models.CASCADE, related_name='experimental')
     method = models.TextField()
     description = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name_plural = 'experimental details'
 
 
 class SynthesisMethod(Base):
