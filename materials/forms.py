@@ -165,7 +165,6 @@ class AddDataForm(forms.Form):
         'database, ...')
     primary_property = forms.ModelChoiceField(
         queryset=models.Property.objects.all(),
-        required=False,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Define the primary property of interest (in a figure, this typically '
@@ -367,7 +366,7 @@ class AddDataForm(forms.Form):
     number_of_data_series = forms.CharField(
         initial=1,
         widget=forms.NumberInput(attrs={'class': 'form-control mx-sm-3',
-                                        'min': '0',
+                                        'min': '1',
                                         'style': 'width:8em'}),
         help_text=''
         'Enter the number of data subgroups. For each subgroup, one or more '
