@@ -174,7 +174,7 @@ LOGGING = {
             'propagate': True,
         },
         '': {
-            'handlers': ['console', 'sentry'],
+            'handlers': ['sentry'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
