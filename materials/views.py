@@ -1075,13 +1075,16 @@ def data_for_chart(request, pk):
                 'secondary-property': dataset.secondary_property.name,
                 'secondary-unit': dataset.secondary_unit.label,
                 'data': []}
-    dataseries = dataset.dataseries_set.first()
-    response['series-label'] = dataseries.label
-    values = models.NumericalValue.objects.filter(
-        datapoint__dataseries=dataseries).order_by(
-            'datapoint_id', 'qualifier').values_list('value', flat=True)
-    for i in range(0, len(values), 2):
-        response['data'].append({'y': values[i], 'x': values[i+1]})
+    for series in dataset.dataseries_set.all():
+        response['data'].append({})
+        this_series = response['data'][-1]
+        this_series['series-label'] = series.label
+        values = models.NumericalValue.objects.filter(
+            datapoint__dataseries=series).order_by(
+                'datapoint_id', 'qualifier').values_list('value', flat=True)
+        this_series['values'] = []
+        for i in range(0, len(values), 2):
+            this_series['values'].append({'y': values[i], 'x': values[i+1]})
     return JsonResponse(response)
 
 
