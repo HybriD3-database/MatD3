@@ -1500,8 +1500,10 @@ def data_dl(request, data_type, pk, bandgap=False):
         bs_full = os.path.join(dir_in_str, file_name_prefix + '_full.png')
         bs_mini = os.path.join(dir_in_str, file_name_prefix + '_min.png')
         filenames = []
-        filenames.append(bs_full)
-        filenames.append(bs_mini)
+        if os.path.exists(bs_full):
+            filenames.append(bs_full)
+        if os.path.exists(bs_mini):
+            filenames.append(bs_mini)
         for f in os.listdir(dir_in_str):
             filename = os.fsdecode(f)
             if filename.endswith('.in') or filename.endswith('.out') or (
