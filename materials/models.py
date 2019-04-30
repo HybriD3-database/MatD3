@@ -311,7 +311,8 @@ class Dataset(Base):
     primary_property = models.ForeignKey(
         Property, on_delete=models.PROTECT, related_name='primary_property')
     primary_unit = models.ForeignKey(
-        Unit, null=True, on_delete=models.PROTECT, related_name='primary_unit')
+        Unit, null=True, blank=True, on_delete=models.PROTECT,
+        related_name='primary_unit')
     secondary_property = models.ForeignKey(
         Property, null=True, blank=True, on_delete=models.PROTECT,
         related_name='secondary_property')
