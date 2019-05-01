@@ -119,6 +119,7 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mainproject/media')
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 # Account
 
