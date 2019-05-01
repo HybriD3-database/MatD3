@@ -618,6 +618,21 @@
    toggleSectionInclusivity('#computational-button', '#id_with_computational_details');
   </script>
   <script>
+   // Helper function for setting the value and freezing/unfreezing a checkbox
+   function set_checkbox(id, value, freeze) {
+     var el = document.getElementById(id);
+     el.checked = value;
+     if (freeze) {
+       el.readOnly = true;
+       el.onclick = function(event) { event.preventDefault(); };
+     } else {
+       el.readOnly = false;
+       el.onclick = null;
+     }
+     el.dispatchEvent(new Event('change'));
+   }
+  </script>
+  <script>
    $('#id_two_axes').change(function(event, force_hide=false) {
      if ($(this).is(':checked') && !force_hide) {
        $('#id_secondary_property').parent().show();
@@ -633,21 +648,10 @@
    });
   </script>
   <script>
-   // If is figure, then "Two axes" must be enabled
+   // If figure then "Two axes" must be enabled
    var is_figure = document.getElementById('id_is_figure');
    is_figure.addEventListener('change', function() {
-     var two_axes = document.getElementById('id_two_axes');
-     if (this.checked) {
-       two_axes.checked = true;
-       two_axes.readOnly = true;
-       two_axes.onclick = function(event) { event.preventDefault(); };
-       two_axes.dispatchEvent(new Event('change'));
-     } else {
-       two_axes.checked = false;
-       two_axes.readOnly = false;
-       two_axes.onclick = null;
-       two_axes.dispatchEvent(new Event('change'));
-     }
+     set_checkbox('id_two_axes', this.checked, this.checked);
    });
    is_figure.dispatchEvent(new Event('change'));
   </script>
@@ -659,11 +663,13 @@
      if (is_lattice_parameter) {
        $('.lattice-parameter-input').attr('hidden', false);
        $('.normal-input').hide();
-       $('#id_two_axes').trigger('change', force_hide=true).prop('disabled', true);
+       set_checkbox('id_is_figure', false, true);
+       set_checkbox('id_two_axes', false, true);
      } else {
        $('.lattice-parameter-input').attr('hidden', true);
        $('.normal-input').show();
-       $('#id_two_axes').trigger('change').prop('disabled', false);
+       set_checkbox('id_is_figure', false, false);
+       set_checkbox('id_two_axes', false, false);
      }
      // Make lattice parameter related fields required only if this property has been selected
      $('input[name^="lattice_constant_"]').each(function() {
