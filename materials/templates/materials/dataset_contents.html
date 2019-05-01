@@ -5,320 +5,318 @@
 -->
 {% load materials_tags %}
 
-<div class="card-body">
-  <!-- MAIN DATA -->
-  <h5>{{ dataset.label }}</h5>
-  {% if dataset.primary_property.name == 'lattice parameter'%}
-    <!-- Lattice parameters require special treatment -->
-    {% for series in dataset.dataseries_set.all %}
-      <div class="card">
-        <div class="card-header">
-          {% if dataset.dataseries_set.all.count > 1 %}
-            Series #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
-          {% else %}
-            Data
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <!-- Lattice constants -->
-          <table class="table-lattice-constants">
-            {% for symbol, value, unit in series.get_lattice_constants %}
-              <tr><td>{{ symbol }}:</td><td>{{ value }}{{ unit }}</td></tr>
+<!-- MAIN DATA -->
+<h5>{{ dataset.label }}</h5>
+{% if dataset.primary_property.name == 'lattice parameter'%}
+  <!-- Lattice parameters require special treatment -->
+  {% for series in dataset.dataseries_set.all %}
+    <div class="card">
+      <div class="card-header">
+        {% if dataset.dataseries_set.all.count > 1 %}
+          Series #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
+        {% else %}
+          Data
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <!-- Lattice constants -->
+        <table class="table-lattice-constants">
+          {% for symbol, value, unit in series.get_lattice_constants %}
+            <tr><td>{{ symbol }}:</td><td>{{ value }}{{ unit }}</td></tr>
+          {% endfor %}
+        </table>
+        <!-- Atomic coordinates (optional) -->
+        {% if series.datapoints.all.count > 6 %}
+          <div class="text-center">
+            <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
+                    data-target="#lattice-parameters-body-{{ series.pk }}">
+              Atomic coordinates (click to expand)
+            </button>
+          </div>
+          <div class="collapse" id="lattice-parameters-body-{{ series.pk }}"></div>
+        {% endif %}
+        {% if series.fixed_values.exists %}
+          Fixed parameters:
+          <ul style="margin-bottom:0;">
+            {% for property, value, unit in series.get_fixed_values %}
+              <li>{{ property }} = {{ value }} {{ unit }}</li>
             {% endfor %}
-          </table>
-          <!-- Atomic coordinates (optional) -->
-          {% if series.datapoints.all.count > 6 %}
-            <div class="text-center">
-              <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
-                      data-target="#lattice-parameters-body-{{ series.pk }}">
-                Atomic coordinates (click to expand)
-              </button>
-            </div>
-            <div class="collapse" id="lattice-parameters-body-{{ series.pk }}"></div>
-          {% endif %}
-          {% if series.fixed_values.exists %}
-            Fixed parameters:
-            <ul style="margin-bottom:0;">
-              {% for property, value, unit in series.get_fixed_values %}
-                <li>{{ property }} = {{ value }} {{ unit }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        </div>
-        <footer class="reference">
-          {% include 'materials/reference_format.html' with ref=dataset.reference %}
-        </footer>
+          </ul>
+        {% endif %}
       </div>
-    {% endfor %}
-  {% elif dataset.is_figure %}
-    <!-- Plotted data -->
-    <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
-    <footer class="reference">
-      {% include 'materials/reference_format.html' with ref=dataset.reference %}
-    </footer>
-  {% else %}
-    <!-- Tabulated data -->
-    {% for series in dataset.dataseries_set.all %}
-      <div class="card">
-        <div class="card-header">
-          {% if dataset.dataseries_set.all.count > 1 %}
-            Series #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
-          {% else %}
-            Data
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                {% if dataset.secondary_property %}
-                  <th>
-                    {{ dataset.secondary_property }}{% if dataset.secondary_unit %},
-                    {{ dataset.secondary_unit }}{% endif %}
-                  </th>
-                {% endif %}
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
+    </div>
+  {% endfor %}
+{% elif dataset.is_figure %}
+  <!-- Plotted data -->
+  <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
+  <footer class="reference">
+    {% include 'materials/reference_format.html' with ref=dataset.reference %}
+  </footer>
+{% else %}
+  <!-- Tabulated data -->
+  {% for series in dataset.dataseries_set.all %}
+    <div class="card">
+      <div class="card-header">
+        {% if dataset.dataseries_set.all.count > 1 %}
+          Series #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
+        {% else %}
+          Data
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              {% if dataset.secondary_property %}
                 <th>
-                  {{ dataset.primary_property }}{% if dataset.primary_unit %},
-                  {{ dataset.primary_unit }}{% endif %}
+                  {{ dataset.secondary_property }}{% if dataset.secondary_unit %},
+                  {{ dataset.secondary_unit }}{% endif %}
                 </th>
-              </tr>
-            </thead>
-            <tbody class="tabulated-data" id="table-{{ series.pk }}"></tbody>
-          </table>
-          {% if series.fixed_values.exists %}
-            Fixed parameters:
-            <ul style="margin-bottom:0;">
-              {% for property, value, unit in series.get_fixed_values %}
-                <li>{{ property }} = {{ value }} {{ unit }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        </div>
-        <footer class="reference">
-          {% include 'materials/reference_format.html' with ref=dataset.reference %}
-        </footer>
+              {% endif %}
+              <th>
+                {{ dataset.primary_property }}{% if dataset.primary_unit %},
+                {{ dataset.primary_unit }}{% endif %}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="tabulated-data" id="table-{{ series.pk }}"></tbody>
+        </table>
+        {% if series.fixed_values.exists %}
+          Fixed parameters:
+          <ul style="margin-bottom:0;">
+            {% for property, value, unit in series.get_fixed_values %}
+              <li>{{ property }} = {{ value }} {{ unit }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
-    {% endfor %}
-  {% endif %}
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
+    </div>
+  {% endfor %}
+{% endif %}
 
-  <!-- SYSTEM DESCRIPTION -->
-  <div class="card">
-    <div class="card-header">
-      System description
-    </div>
-    <div class="card-body">
-      Dimensionality: {{ dataset.dimensionality }}D<br>
-      Sample type: {{ dataset.get_sample_type_display }}<br>
-      Crystal system: {{ dataset.get_crystal_system_display }}
-    </div>
-    <footer class="reference">
-      {% include 'materials/reference_format.html' with ref=dataset.reference %}
-    </footer>
+<!-- SYSTEM DESCRIPTION -->
+<div class="card">
+  <div class="card-header">
+    System description
   </div>
+  <div class="card-body">
+    Dimensionality: {{ dataset.dimensionality }}D<br>
+    Sample type: {{ dataset.get_sample_type_display }}<br>
+    Crystal system: {{ dataset.get_crystal_system_display }}
+  </div>
+  <footer class="reference">
+    {% include 'materials/reference_format.html' with ref=dataset.reference %}
+  </footer>
+</div>
 
-  <!-- SYNTHESIS METHOD -->
-  {% if dataset.synthesis.exists %}
-    <div class="card">
-      <button class="btn text-left expand-hide-button"
-              data-toggle="collapse"
-              data-target="#synthesis-body-{{ dataset.pk }}">
-        Synthesis method (click to expand)
-      </button>
-      <div class="collapse" id="synthesis-body-{{ dataset.pk }}">
-        <div class="card-body">
-          {% with dataset.synthesis.first as synthesis %}
-            {% if synthesis.starting_materials %}
-              <p>Starting materials: {{ synthesis.starting_materials }}</p>
-            {% endif %}
-            {% if synthesis.product %}
-              <p>Product: {{ synthesis.product }}</p>
-            {% endif %}
-            {% if synthesis.description %}
-              <p>Description: {{ synthesis.description }}</p>
-            {% endif %}
-            {% if synthesis.comment %}
-              <p><i>Comment: {{ synthesis.comment }}</i></p>
-            {% endif %}
-          {% endwith %}
-        </div>
-        <footer class="reference">
-          {% include 'materials/reference_format.html' with ref=dataset.reference %}
-        </footer>
+<!-- SYNTHESIS METHOD -->
+{% if dataset.synthesis.exists %}
+  <div class="card">
+    <button class="btn text-left expand-hide-button"
+            data-toggle="collapse"
+            data-target="#synthesis-body-{{ dataset.pk }}">
+      Synthesis method (click to expand)
+    </button>
+    <div class="collapse" id="synthesis-body-{{ dataset.pk }}">
+      <div class="card-body">
+        {% with dataset.synthesis.first as synthesis %}
+          {% if synthesis.starting_materials %}
+            <p>Starting materials: {{ synthesis.starting_materials }}</p>
+          {% endif %}
+          {% if synthesis.product %}
+            <p>Product: {{ synthesis.product }}</p>
+          {% endif %}
+          {% if synthesis.description %}
+            <p>Description: {{ synthesis.description }}</p>
+          {% endif %}
+          {% if synthesis.comment %}
+            <p><i>Comment: {{ synthesis.comment }}</i></p>
+          {% endif %}
+        {% endwith %}
       </div>
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
     </div>
-  {% endif %}
+  </div>
+{% endif %}
 
-  <!-- EXPERIMENTAL DETAILS -->
-  {% if dataset.experimental.exists %}
-    <div class="card">
-      <button class="btn text-left expand-hide-button"
-              data-toggle="collapse"
-              data-target="#experimental-body-{{ dataset.pk }}">
-        Experimental details (click to expand)
-      </button>
-      <div class="collapse" id="experimental-body-{{ dataset.pk }}">
-        <div class="card-body">
-          {% with dataset.experimental.first as exp %}
-            {% if exp.method %}
-              <p>Method: {{ exp.method }}</p>
-            {% endif %}
-            {% if exp.description %}
-              <p>Description: {{ exp.description }}</p>
-            {% endif %}
-            {% if exp.comment %}
-              <p><i>Comment: {{ exp.comment }}</i></p>
-            {% endif %}
-          {% endwith %}
-        </div>
-        <footer class="reference">
-          {% include 'materials/reference_format.html' with ref=dataset.reference %}
-        </footer>
+<!-- EXPERIMENTAL DETAILS -->
+{% if dataset.experimental.exists %}
+  <div class="card">
+    <button class="btn text-left expand-hide-button"
+            data-toggle="collapse"
+            data-target="#experimental-body-{{ dataset.pk }}">
+      Experimental details (click to expand)
+    </button>
+    <div class="collapse" id="experimental-body-{{ dataset.pk }}">
+      <div class="card-body">
+        {% with dataset.experimental.first as exp %}
+          {% if exp.method %}
+            <p>Method: {{ exp.method }}</p>
+          {% endif %}
+          {% if exp.description %}
+            <p>Description: {{ exp.description }}</p>
+          {% endif %}
+          {% if exp.comment %}
+            <p><i>Comment: {{ exp.comment }}</i></p>
+          {% endif %}
+        {% endwith %}
       </div>
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
     </div>
-  {% endif %}
+  </div>
+{% endif %}
 
-  <!-- COMPUTATIONAL DETAILS -->
-  {% if dataset.computational.exists %}
-    <div class="card">
-      <button class="btn text-left expand-hide-button"
-              data-toggle="collapse"
-              data-target="#computational-body-{{ dataset.pk }}">
-        Computational details (click to expand)
-      </button>
-      <div class="collapse" id="computational-body-{{ dataset.pk }}">
-        <div class="card-body">
-          {% with dataset.computational.first as comp %}
-            {% if comp.code %}
-              <p>Code: {{ comp.code }}</p>
-            {% endif %}
-            {% if comp.level_of_theory %}
-              <p>Level of theory:
-                {{ comp.level_of_theory }}</p>
-            {% endif %}
-            {% if comp.xc_functional %}
-              <p>Exchange-correlation functional: {{ comp.xc_functional }}</p>
-            {% endif %}
-            {% if comp.kgrid %}
-              <p>K-point grid: {{ comp.kgrid }}</p>
-            {% endif %}
-            {% if comp.relativity_level %}
-              <p>Level of relativity: {{ comp.relativity_level }}</p>
-            {% endif %}
-            {% if comp.basis %}
-              <p>Basis set definition: {{ comp.basis }}</p>
-            {% endif %}
-            {% if comp.numerical_accuracy %}
-              <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
-            {% endif %}
-            {% if comp.comment %}
-              <p><i>Comment: {{ comp.comment }}</i></p>
-            {% endif %}
-          {% endwith %}
-        </div>
-        <footer class="reference">
-          {% include 'materials/reference_format.html' with ref=dataset.reference %}
-        </footer>
+<!-- COMPUTATIONAL DETAILS -->
+{% if dataset.computational.exists %}
+  <div class="card">
+    <button class="btn text-left expand-hide-button"
+            data-toggle="collapse"
+            data-target="#computational-body-{{ dataset.pk }}">
+      Computational details (click to expand)
+    </button>
+    <div class="collapse" id="computational-body-{{ dataset.pk }}">
+      <div class="card-body">
+        {% with dataset.computational.first as comp %}
+          {% if comp.code %}
+            <p>Code: {{ comp.code }}</p>
+          {% endif %}
+          {% if comp.level_of_theory %}
+            <p>Level of theory:
+              {{ comp.level_of_theory }}</p>
+          {% endif %}
+          {% if comp.xc_functional %}
+            <p>Exchange-correlation functional: {{ comp.xc_functional }}</p>
+          {% endif %}
+          {% if comp.kgrid %}
+            <p>K-point grid: {{ comp.kgrid }}</p>
+          {% endif %}
+          {% if comp.relativity_level %}
+            <p>Level of relativity: {{ comp.relativity_level }}</p>
+          {% endif %}
+          {% if comp.basis %}
+            <p>Basis set definition: {{ comp.basis }}</p>
+          {% endif %}
+          {% if comp.numerical_accuracy %}
+            <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
+          {% endif %}
+          {% if comp.comment %}
+            <p><i>Comment: {{ comp.comment }}</i></p>
+          {% endif %}
+        {% endwith %}
       </div>
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
     </div>
-  {% endif %}
+  </div>
+{% endif %}
 
-  <!-- REFERENCE -->
-  {% if with_reference and dataset.reference %}
-    <div class="card">
-      <button class="btn text-left expand-hide-button" data-toggle="collapse"
-              data-target="#reference-body-{{ dataset.pk }}">
-        Reference (click to expand)
-      </button>
-      <div class="collapse" id="reference-body-{{ dataset.pk }}">
-        <div class="card-body">
-          {% include 'materials/reference_format.html' with ref=dataset.reference %}
-        </div>
-        <p class="text-center">
-          <a href="{% url 'materials:reference' pk=dataset.reference.pk %}">
-            <button class="btn btn-primary">All data for this reference</button>
-          </a>
-        </p>
-      </div>
-    </div>
-  {% endif %}
-
-  <!-- META -->
+<!-- REFERENCE -->
+{% if with_reference and dataset.reference %}
   <div class="card">
     <button class="btn text-left expand-hide-button" data-toggle="collapse"
-            data-target="#meta-body-{{ dataset.pk }}">
-      Meta (click to expand)
+            data-target="#reference-body-{{ dataset.pk }}">
+      Reference (click to expand)
     </button>
-    <div class="collapse" id="meta-body-{{ dataset.pk }}">
+    <div class="collapse" id="reference-body-{{ dataset.pk }}">
       <div class="card-body">
-        {% if dataset.extraction_method %}
-          Extraction method: {{ dataset.extraction_method }}<br>
-        {% endif %}
-        Entry added on {{ dataset.created }}<br>
-        Last updated on {{ dataset.updated }}<br>
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
       </div>
+      <p class="text-center">
+        <a href="{% url 'materials:reference' pk=dataset.reference.pk %}">
+          <button class="btn btn-primary">All data for this reference</button>
+        </a>
+      </p>
     </div>
   </div>
+{% endif %}
 
-  <!-- UPLOADED FILES -->
-  {% if dataset.files.exists %}
-    <br>
-    <p>
-      <a href="{% url "materials:download_dataset_files" pk=dataset.pk %}">
-        <button type="button" class="btn btn-primary">
-          <span class="fa fa-download" aria-hidden="true"></span>
-          Files
-        </button>
-      </a>
-      <i class="fa fa-question-circle tooltip-container">
-        <span class="tooltiptext">Files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...)</span>
-      </i>
-    </p>
-  {% endif %}
-
-  <!-- BUTTON FOR VIEWING ALL ENTRIES -->
-  {% if with_all_entries and dataset.primary_property.pk %}
-    {% with dataset.num_all_entries as num %}
-      {% if num > 1 %}
-        <p class="text-center m-1">
-          <a href="{% url 'materials:property_all_entries' system_pk=dataset.system.pk prop_pk=dataset.primary_property.pk %}">
-            See all entries for this property ({{ num }} total)
-          </a>
-        </p>
+<!-- META -->
+<div class="card">
+  <button class="btn text-left expand-hide-button" data-toggle="collapse"
+          data-target="#meta-body-{{ dataset.pk }}">
+    Meta (click to expand)
+  </button>
+  <div class="collapse" id="meta-body-{{ dataset.pk }}">
+    <div class="card-body">
+      {% if dataset.extraction_method %}
+        Extraction method: {{ dataset.extraction_method }}<br>
       {% endif %}
-    {% endwith %}
-  {% endif %}
+      Entry added on {{ dataset.created }}<br>
+      Last updated on {{ dataset.updated }}<br>
+    </div>
+  </div>
+</div>
 
-  <div class="text-center" style="margin-top:10px">
-    <strong style="margin-right:10px">Dataset ID: {{ dataset.pk }}</strong>
-    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
-            data-target="#issue-report-{{ dataset.pk }}">
-      Report an issue
-    </button>
+<!-- UPLOADED FILES -->
+{% if dataset.files.exists %}
+  <br>
+  <p>
+    <a href="{% url "materials:download_dataset_files" pk=dataset.pk %}">
+      <button type="button" class="btn btn-primary">
+        <span class="fa fa-download" aria-hidden="true"></span>
+        Files
+      </button>
+    </a>
     <i class="fa fa-question-circle tooltip-container">
-      <span class="tooltiptext">Did you find any mistakes or inconsistencies about this data set? If so, send us a note and we'll have a look at it and send you a reply. Thanks!</span>
+      <span class="tooltiptext">Files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...)</span>
     </i>
-  </div>
+  </p>
+{% endif %}
 
-  <div class="collapse issue-report" id="issue-report-{{ dataset.pk }}">
-    <form method="post" action="{% url 'materials:report_issue' %}">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="issue-report-contents-{{ dataset.pk }}">Description</label>
-        {% if user.is_authenticated %}
-          <textarea class="form-control" id="issue-report-contents-{{ dataset.pk }}"
-                    name="description" required
-                    placeholder="Anything you would like to draw our attention to"></textarea>
-        {% else %}
-          <textarea class="form-control" id="issue-report-contents-{{ dataset.pk }}"
-                    name="description" required disabled
-                    placeholder="You must be logged in to perform this action."></textarea>
-        {% endif %}
-      </div>
-      <input type="hidden" name="pk" value="{{ dataset.pk }}">
-      <input type="hidden" name="return-path" value="{{ request.path }}">
+<!-- BUTTON FOR VIEWING ALL ENTRIES -->
+{% if with_all_entries and dataset.primary_property.pk %}
+  {% with dataset.num_all_entries as num %}
+    {% if num > 1 %}
+      <p class="text-center m-1">
+        <a href="{% url 'materials:property_all_entries' system_pk=dataset.system.pk prop_pk=dataset.primary_property.pk %}">
+          See all entries for this property ({{ num }} total)
+        </a>
+      </p>
+    {% endif %}
+  {% endwith %}
+{% endif %}
+
+<div class="text-center" style="margin-top:10px">
+  <strong style="margin-right:10px">Dataset ID: {{ dataset.pk }}</strong>
+  <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
+          data-target="#issue-report-{{ dataset.pk }}">
+    Report an issue
+  </button>
+  <i class="fa fa-question-circle tooltip-container">
+    <span class="tooltiptext">Did you find any mistakes or inconsistencies about this data set? If so, send us a note and we'll have a look at it and send you a reply. Thanks!</span>
+  </i>
+</div>
+
+<div class="collapse issue-report" id="issue-report-{{ dataset.pk }}">
+  <form method="post" action="{% url 'materials:report_issue' %}">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="issue-report-contents-{{ dataset.pk }}">Description</label>
       {% if user.is_authenticated %}
-        <button type="submit" class="btn btn-primary btn-sm"">Submit</button>
+        <textarea class="form-control" id="issue-report-contents-{{ dataset.pk }}"
+                  name="description" required
+                  placeholder="Anything you would like to draw our attention to"></textarea>
+      {% else %}
+        <textarea class="form-control" id="issue-report-contents-{{ dataset.pk }}"
+                  name="description" required disabled
+                  placeholder="You must be logged in to perform this action."></textarea>
       {% endif %}
-    </form>
-  </div>
+    </div>
+    <input type="hidden" name="pk" value="{{ dataset.pk }}">
+    <input type="hidden" name="return-path" value="{{ request.path }}">
+    {% if user.is_authenticated %}
+      <button type="submit" class="btn btn-primary btn-sm"">Submit</button>
+    {% endif %}
+  </form>
 </div>

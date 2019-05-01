@@ -20,22 +20,12 @@
     <div class="card-body">
       <div class="row">
 
-        <div class="col-md-6">
-          <div class="card card-item">
-            <div class="card-header">
-              <h5>Unit cell</h5>
-            </div>
-            <div class="card-body">
-              <div id="jmol"></div>
-            </div>
-          </div>
-          <br>
-        </div>
-
         {% for dataset in object_list %}
           {% if dataset.representative %}
             {% if user == dataset.created_by or dataset.visible %}
-              <div class="col-md-6">
+              <!-- In case of lattice parameters use a wider column to make
+                   room for the JSmol visualization below -->
+              <div class="col-md-{% if dataset.primary_property.name == 'lattice parameter'%}12{% else %}6{% endif %}">
                 <div class="card card-item">
                   {% if not dataset.visible %}
                     <div style="background:#fadb9b">
@@ -55,7 +45,31 @@
                   {% if not dataset.visible %}
                     </div>
                   {% endif %}
-                  {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
+                  <div class="card-body">
+                    {% if dataset.primary_property.name == 'lattice parameter'%}
+                    <div class="row">
+                      <div class="col-md-6">
+                        {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
+                      </div>
+                      <div class="col-md-6">
+                        <h5>&nbsp;</h5>
+                        <div class="card">
+                          <div class="card-header">
+                            Unit cell
+                          </div>
+                          <div class="card-body">
+                            <div id="jmol"></div>
+                          </div>
+                          <footer class="reference">
+                            {% include 'materials/reference_format.html' with ref=dataset.reference %}
+                          </footer>
+                        </div>
+                      </div>
+                    </div>
+                    {% else %}
+                    {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
+                    {% endif %}
+                  </div>
                 </div>
                 <br>
               </div>
@@ -327,7 +341,7 @@
          script: response,
          j2sPath: "{% static 'jsmol/j2s' %}",
          height: 450,
-         width: 500,
+         width: 470,
        }));
      } else {
        var parent = document.getElementById('jmol').parentNode.parentNode.parentNode;

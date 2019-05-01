@@ -1163,9 +1163,9 @@ def get_lattice_parameters(request, pk):
 def get_jsmol_input(request, pk):
     """Return a statement to be executed by JSmol.
 
-    Go through the lattice parameter data sets of the given
-    system. Pick the first data set where the lattice vectors and
-    atomic coordinates are present and can be converted to
+    Go through the lattice parameter data series of the representative
+    data set of the given system. Pick the first one where the lattice
+    vectors and atomic coordinates are present and can be converted to
     floats. Construct the "load data ..." inline statement suitable
     for JSmol. If there are no lattice parameter data or none of the
     data sets are usable (some lattice parameters or atomic
@@ -1173,40 +1173,40 @@ def get_jsmol_input(request, pk):
     response.
 
     """
-    system = models.System.objects.get(pk=pk)
-    for dataset in system.dataset_set.filter(
-            primary_property__name='lattice parameter').order_by(
-                '-representative'):
-        for series in dataset.dataseries_set.all():
-            data = lattice_parameters_as_json(series.pk)
-            lattice_vectors = []
-            try:
-                for vector in data['vectors']:
-                    lattice_vectors.append([float(x) for x in vector])
-                if len(lattice_vectors) == 3:
-                    coord_type = data['coord-type']
-                    response = io.StringIO()
-                    response.write("load data 'model'|#AIMS|")
-                    if coord_type == 'atom_frac':
-                        for symbol, *coords in data['coordinates']:
-                            coords_f = [float(x) for x in coords]
-                            x, y, z = [sum(
-                                [coords_f[i_dir]*lattice_vectors[i_dir][comp]
-                                 for i_dir in range(3)]) for comp in range(3)]
-                            response.write(f'atom {x} {y} {z} {symbol}|')
-                    else:
-                        for symbol, coord_x, coord_y, coord_z in data[
-                                'coordinates']:
-                            response.write(
-                                f'atom {coord_x} {coord_y} {coord_z} '
-                                f'{symbol}|')
-                    response.write("end 'model' unitcell [")
-                    for x, y, z in data['vectors']:
-                        response.write(f' {x} {y} {z}')
-                    response.write(']')
-                    return HttpResponse(response.getvalue())
-            except (KeyError, ValueError):
-                pass
+    dataset = models.Dataset.objects.filter(system__pk=pk).filter(
+        primary_property__name='lattice parameter').get(representative=True)
+    for series in dataset.dataseries_set.all():
+        data = lattice_parameters_as_json(series.pk)
+        lattice_vectors = []
+        try:
+            for vector in data['vectors']:
+                lattice_vectors.append([float(x) for x in vector])
+            if len(lattice_vectors) == 3:
+                coord_type = data['coord-type']
+                response = io.StringIO()
+                response.write("load data 'model'|#AIMS|")
+                if coord_type == 'atom_frac':
+                    for symbol, *coords in data['coordinates']:
+                        coords_f = [float(x) for x in coords]
+                        x, y, z = [sum(
+                            [coords_f[i_dir]*lattice_vectors[i_dir][comp]
+                             for i_dir in range(3)]) for comp in range(3)]
+                        response.write(f'atom {x} {y} {z} {symbol}|')
+                else:
+                    for symbol, coord_x, coord_y, coord_z in data[
+                            'coordinates']:
+                        response.write(
+                            f'atom {coord_x} {coord_y} {coord_z} {symbol}|')
+                response.write("end 'model' unitcell [")
+                for x, y, z in data['vectors']:
+                    response.write(f' {x} {y} {z}')
+                response.write(']')
+                return HttpResponse(response.getvalue())
+        except (KeyError, ValueError):
+            pass
+    logger.warning('The representative data set for lattice parameters of '
+                   f'system {pk} cannot be visualized in JSmol.',
+                   extra={'request': request})
     return HttpResponse()
 
 

@@ -31,7 +31,9 @@
                 {% if not dataset.visible %}
                   </div>
                 {% endif %}
-                {% include 'materials/dataset_contents.html' with with_all_entries=True %}
+                <div class="card-body">
+                  {% include 'materials/dataset_contents.html' with with_all_entries=True %}
+                </div>
               </div>
               <br>
             </div>
