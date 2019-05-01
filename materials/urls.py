@@ -15,8 +15,9 @@ urlpatterns = [
          name='delete_band_structure'),
     path('<int:system_pk>/publish-system/<int:dataset_pk>/<path:return_path>',
          views.toggle_dataset_visibility, name='publish_system'),
-    path('<int:system_pk>/toggle-plotted/<int:dataset_pk>/<path:return_path>',
-         views.toggle_dataset_plotted, name='toggle_plotted'),
+    path('<int:system_pk>/toggle-is-figure/<int:dataset_pk>/'
+         '<path:return_path>',
+         views.toggle_dataset_is_figure, name='toggle_is_figure'),
     path('download-dataset-files/<int:pk>', views.download_dataset_files,
          name='download_dataset_files'),
     path('download-input-data-files/<int:pk>', views.download_input_files,

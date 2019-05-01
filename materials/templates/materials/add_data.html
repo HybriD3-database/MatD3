@@ -74,13 +74,13 @@
                 </div>
                 <hr>
                 <div class="form-check form-check-inline">
+                  {% include 'materials/input_field.html' with field=form.is_figure %}
+                </div>
+                <div class="form-check form-check-inline">
                   {% include 'materials/input_field.html' with field=form.visible_to_public %}
                 </div>
                 <div class="form-check form-check-inline">
                   {% include 'materials/input_field.html' with field=form.two_axes %}
-                </div>
-                <div class="form-check form-check-inline">
-                  {% include 'materials/input_field.html' with field=form.plotted %}
                 </div>
                 <hr>
                 <div class="form-row">
@@ -433,6 +433,8 @@
    {% endfor %}
   </script>
   <script>
+   // When entering data with multiple columns, set "Is figure" to true. Do this only once.
+   var is_figure_untested = true;
    // Autofill the main input data textarea
    function autofill_data(el) {
      var i_series = $(el).attr('id').split('import-data-file_')[1];
@@ -455,6 +457,18 @@
          for (var i = 1; i <= $('#id_number_of_data_series').val(); i++) {
            $('#id_series_datapoints_' + i).val(data[i-1].replace(/^\n/, ''));
          }
+       }
+       if (is_figure_untested) {
+         // If the are multiple lines and multiple columns, this is likely a figure.
+         lines = data[0].split('\n', 2);
+         if (lines.length > 1 && lines[0].split(' ').length > 1) {
+           var is_figure = document.getElementById('id_is_figure');
+           if (!is_figure.checked) {
+             is_figure.checked = true;
+             is_figure.dispatchEvent(new Event('change'));
+           }
+         }
+         is_figure_untested = false;
        }
      }).fail(function(result) {
        if (!i_series) i_series = 1;
@@ -617,6 +631,25 @@
        $('.series-datapoints').attr('placeholder', 'value_1 value_2 ...');
      }
    });
+  </script>
+  <script>
+   // If is figure, then "Two axes" must be enabled
+   var is_figure = document.getElementById('id_is_figure');
+   is_figure.addEventListener('change', function() {
+     var two_axes = document.getElementById('id_two_axes');
+     if (this.checked) {
+       two_axes.checked = true;
+       two_axes.readOnly = true;
+       two_axes.onclick = function(event) { event.preventDefault(); };
+       two_axes.dispatchEvent(new Event('change'));
+     } else {
+       two_axes.checked = false;
+       two_axes.readOnly = false;
+       two_axes.onclick = null;
+       two_axes.dispatchEvent(new Event('change'));
+     }
+   });
+   is_figure.dispatchEvent(new Event('change'));
   </script>
   <script>
    // Lattice parameter specific

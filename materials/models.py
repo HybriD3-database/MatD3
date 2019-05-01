@@ -322,7 +322,7 @@ class Dataset(Base):
     reference = models.ForeignKey(
         Reference, null=True, on_delete=models.PROTECT)
     visible = models.BooleanField()
-    plotted = models.BooleanField()
+    is_figure = models.BooleanField()
     is_experimental = models.BooleanField()  # theoretical if false
     dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)

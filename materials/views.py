@@ -755,11 +755,10 @@ def submit_data(request):
     dataset.label = form.cleaned_data['data_set_label']
     dataset.primary_property = form.cleaned_data['primary_property']
     dataset.primary_unit = form.cleaned_data['primary_unit']
-    if form.cleaned_data['two_axes']:
-        dataset.secondary_property = form.cleaned_data['secondary_property']
-        dataset.secondary_unit = form.cleaned_data['secondary_unit']
+    dataset.secondary_property = form.cleaned_data['secondary_property']
+    dataset.secondary_unit = form.cleaned_data['secondary_unit']
     dataset.visible = form.cleaned_data['visible_to_public']
-    dataset.plotted = form.cleaned_data['plotted']
+    dataset.is_figure = form.cleaned_data['is_figure']
     dataset.is_experimental = (
         form.cleaned_data['origin_of_data'] == 'is_experimental')
     dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
@@ -903,7 +902,7 @@ def submit_data(request):
             try:
                 for line in form.cleaned_data[
                         'series_datapoints_' + str(i_series)].splitlines():
-                    if line.startswith('#') or not line or line == '\r':
+                    if re.match(r'\s*#', line) or not line or line == '\r':
                         continue
                     x_value, y_value = line.split()[:2]
                     datapoints.append(models.Datapoint(
@@ -917,7 +916,7 @@ def submit_data(request):
             try:
                 for line in form.cleaned_data[
                         'series_datapoints_' + str(i_series)].splitlines():
-                    if line.startswith('#') or not line or line == '\r':
+                    if re.match(r'\s*#', line) or not line or line == '\r':
                         continue
                     for value in line.split():
                         datapoints.append(models.Datapoint(
@@ -977,9 +976,9 @@ def toggle_dataset_visibility(request, system_pk, dataset_pk, return_path):
 
 
 @dataset_author_check
-def toggle_dataset_plotted(request, system_pk, dataset_pk, return_path):
+def toggle_dataset_is_figure(request, system_pk, dataset_pk, return_path):
     dataset = models.Dataset.objects.get(pk=dataset_pk)
-    dataset.plotted = not dataset.plotted
+    dataset.is_figure = not dataset.is_figure
     dataset.save()
     return redirect(return_path)
 
@@ -1070,11 +1069,11 @@ def dataset_image(request, pk):
 def autofill_input_data(request):
     """Process an AJAX request to autofill the data textareas."""
     content = UploadedFile(request.FILES['file']).read().decode('utf-8')
-    output = io.StringIO()
-    for line in content.split('\n'):
-        output.write(line)
-        output.write('\n')
-    return HttpResponse(output.getvalue())
+    lines = content.splitlines()
+    for i_line, line in enumerate(lines):
+        if re.match(r'\s*#', line) or not line:
+            del lines[i_line]
+    return HttpResponse('\n'.join(lines))
 
 
 def data_for_chart(request, pk):
@@ -1305,7 +1304,7 @@ def reference_data(request, pk):
             'files': [f'/materials/dataset-{dataset.pk}/data.txt'],
             'id': '',
             'imageFile': f'/materials/dataset-{dataset.pk}/image.png',
-            'kind': 'figure' if dataset.plotted else 'table',
+            'kind': 'figure' if dataset.is_figure else 'table',
             'notebookFile': '',
             'number': dataset_counter,
             'properties': [],

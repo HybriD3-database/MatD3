@@ -1,6 +1,6 @@
-<a href="{% url 'materials:toggle_plotted' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
+<a href="{% url 'materials:toggle_is_figure' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
   <button type="button" class="btn btn-success">
-    {% if dataset.plotted %}
+    {% if dataset.is_figure %}
       Show table
     {% else %}
       Show figure

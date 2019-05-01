@@ -50,7 +50,7 @@
         </footer>
       </div>
     {% endfor %}
-  {% elif dataset.plotted %}
+  {% elif dataset.is_figure %}
     <!-- Plotted data -->
     <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
     <footer class="reference">

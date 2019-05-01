@@ -197,14 +197,13 @@ class AddDataForm(forms.Form):
         help_text=''
         'Define the secondary unit of interest. If the unit of interest '
         'missing here, add it under "Define new unit".')
-    visible_to_public = forms.BooleanField(
+    is_figure = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        initial=True,
         required=False,
         help_text=''
-        'Choose whether the data should be initially visible on the website. '
-        'If not, only you can view the data. This setting can be easily '
-        'toggled later.')
+        'Choose whether the data is more suitably presented as a figure or as '
+        'a table. Especially for a large amount of data points, a figure '
+        'might make more sense. This setting can be easily toggled later.')
     two_axes = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         initial=False,
@@ -212,13 +211,13 @@ class AddDataForm(forms.Form):
         help_text=''
         'Select this if your data has independent (x) and dependent (y) '
         'variables.')
-    plotted = forms.BooleanField(
+    visible_to_public = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        initial=True,
         required=False,
         help_text=''
-        'Choose whether the data is more suitably presented as a figure or as '
-        'a table. Especially for a large amount of data points, a figure '
-        '("plotted") might make more sense. This setting can be easily '
+        'Choose whether the data should be initially visible on the website. '
+        'If not, only you can view the data. This setting can be easily '
         'toggled later.')
     origin_of_data = forms.ChoiceField(
         initial='is_experimental',
@@ -488,6 +487,12 @@ class AddDataForm(forms.Form):
                 elif key.startswith('atomic_coordinates_'):
                     self.fields[key] = forms.CharField(
                         required=False, widget=forms.Textarea, initial=value)
+
+    def clean(self):
+        """Set secondary property conditionally required."""
+        data = self.cleaned_data
+        if data.get('two_axes') and not data.get('secondary_property'):
+            self.add_error('secondary_property', 'This field is required.')
 
     def get_series(self):
         """Return a list of initial values for data series."""
