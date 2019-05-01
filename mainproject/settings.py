@@ -115,18 +115,18 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mainproject/static')
 ]
 
+# Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mainproject/media')
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+
+# Account
 
 LOGIN_REDIRECT_URL = '/'
-
 LOGIN_URL = '/account/login'
-
-# Account settings
-
 ACCOUNT_ACTIVATION_DAYS = 7
 
-# Email settings
+# Email
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='')
