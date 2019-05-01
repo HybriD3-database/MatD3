@@ -731,6 +731,12 @@ def submit_data(request):
                                                   value=array[i]))
         return filtered_list
 
+    def error_and_return(dataset, line, form):
+        """Shortcut for returning with info about the error."""
+        messages.error(request, f'Could not process line: {line}')
+        dataset.delete()
+        return render(request, 'materials/add_data.html', {'form': form})
+
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
         # Show formatted field labels in the error message, not the
@@ -749,8 +755,9 @@ def submit_data(request):
     dataset.label = form.cleaned_data['data_set_label']
     dataset.primary_property = form.cleaned_data['primary_property']
     dataset.primary_unit = form.cleaned_data['primary_unit']
-    dataset.secondary_property = form.cleaned_data['secondary_property']
-    dataset.secondary_unit = form.cleaned_data['secondary_unit']
+    if form.cleaned_data['two_axes']:
+        dataset.secondary_property = form.cleaned_data['secondary_property']
+        dataset.secondary_unit = form.cleaned_data['secondary_unit']
     dataset.visible = form.cleaned_data['visible_to_public']
     dataset.plotted = form.cleaned_data['plotted']
     dataset.is_experimental = (
@@ -889,33 +896,35 @@ def submit_data(request):
                 except AttributeError:
                     # Skip comments and empty lines
                     if not re.match(r'(?:\r?$|#|//)', line):
-                        messages.error(request,
-                                       'Could not process input for '
-                                       f'atomic coordinates: {line}')
-                        dataset.delete()
-                        return render(request, 'materials/add_data.html',
-                                      {'form': form})
+                        return error_and_return(dataset, line, form)
             add_datapoint_ids(lattice_vectors, 9, 3)
             models.NumericalValue.objects.bulk_create(lattice_vectors)
         elif form.cleaned_data['two_axes']:
-            for line in form.cleaned_data[
-                    'series_datapoints_' + str(i_series)].split('\n'):
-                if line.startswith('#') or not line or line == '\r':
-                    continue
-                x_value, y_value = line.split()
-                datapoints.append(models.Datapoint(
-                    created_by=request.user, dataseries=dataseries))
-                add_numerical_value(numerical_values, errors, x_value,
-                                    is_secondary=True)
-                add_numerical_value(numerical_values, errors, y_value)
+            try:
+                for line in form.cleaned_data[
+                        'series_datapoints_' + str(i_series)].splitlines():
+                    if line.startswith('#') or not line or line == '\r':
+                        continue
+                    x_value, y_value = line.split()[:2]
+                    datapoints.append(models.Datapoint(
+                        created_by=request.user, dataseries=dataseries))
+                    add_numerical_value(numerical_values, errors, x_value,
+                                        is_secondary=True)
+                    add_numerical_value(numerical_values, errors, y_value)
+            except ValueError:
+                return error_and_return(dataset, line, form)
         else:
-            for value in form.cleaned_data[
-                    'series_datapoints_' + str(i_series)].split():
-                if value.startswith('#') or not value:
-                    continue
-                datapoints.append(models.Datapoint(
-                    created_by=request.user, dataseries=dataseries))
-                add_numerical_value(numerical_values, errors, value)
+            try:
+                for line in form.cleaned_data[
+                        'series_datapoints_' + str(i_series)].splitlines():
+                    if line.startswith('#') or not line or line == '\r':
+                        continue
+                    for value in line.split():
+                        datapoints.append(models.Datapoint(
+                            created_by=request.user, dataseries=dataseries))
+                        add_numerical_value(numerical_values, errors, value)
+            except ValueError:
+                return error_and_return(dataset, line, form)
         # Fixed properties
         counter = 0
         for key in form.cleaned_data:

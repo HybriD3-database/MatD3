@@ -450,15 +450,15 @@
        result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
        var data = result.split(/&/);
        if (i_series) {
-         $('#id_series_datapoints_' + i_series).html(result);
+         $('#id_series_datapoints_' + i_series).val(result);
        } else { // fill globally
          for (var i = 1; i <= $('#id_number_of_data_series').val(); i++) {
-           $('#id_series_datapoints_' + i).html(data[i-1].replace(/^\n/, ''));
+           $('#id_series_datapoints_' + i).val(data[i-1].replace(/^\n/, ''));
          }
        }
      }).fail(function(result) {
        if (!i_series) i_series = 1;
-       $('#id_series_datapoints_' + i_series).html(result);
+       $('#id_series_datapoints_' + i_series).val(result);
      });
    }
    $('#import-all-data').change(function() {
