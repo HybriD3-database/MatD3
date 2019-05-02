@@ -10,7 +10,7 @@ Array.from(document.getElementsByClassName('expand-hide-button')).forEach(functi
         for (var i=0; i<data['vectors'].length; i++) {
           var tr = document.createElement('tr');
           var td = document.createElement('td');
-          td.innerHTML = 'lattice vector';
+          td.innerHTML = 'lattice_vector';
           td.style = 'text-align:left';
           tr.appendChild(td);
           for (var j=0; j<3; j++) {
@@ -22,28 +22,27 @@ Array.from(document.getElementsByClassName('expand-hide-button')).forEach(functi
         }
         table.appendChild(fragment);
         target.append(table);
-        var coord_type = document.createElement('div');
-        coord_type.style.textAlign = 'center';
-        coord_type.style.fontStyle = 'italic';
         if (data['coord-type'] == 'atom_frac') {
-          coord_type.innerHTML = 'Fractional coordinates:';
+          var coord_type = 'atom_frac';
         } else {
-          coord_type.innerHTML = 'Absolute coordinates:';
+          var coord_type = 'atom';
         }
-        target.append(coord_type);
         table = document.createElement('table');
         table.className = 'table-atomic-coordinates';
         for (var i=0; i<data['coordinates'].length; i++) {
           var tr = document.createElement('tr');
           var td = document.createElement('td');
-          td.innerHTML = data['coordinates'][i][0];
-          td.style = 'text-align:left';
+          td.innerHTML = coord_type;
           tr.appendChild(td);
           for (var j=1; j<4; j++) {
             var td = document.createElement('td');
             td.innerHTML = data['coordinates'][i][j];
             tr.appendChild(td);
           }
+          var td = document.createElement('td');
+          td.style = 'text-align:left';
+          td.innerHTML = data['coordinates'][i][0];
+          tr.appendChild(td);
           fragment.appendChild(tr);
         }
         table.appendChild(fragment);

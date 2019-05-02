@@ -1148,14 +1148,13 @@ def atomic_coordinates_as_json(pk):
     for symbol, coord_x, coord_y, coord_z in zip(
             symbols, coords[:N], coords[N:2*N], coords[2*N:3*N]):
         data['coordinates'].append((symbol,
-                                    coord_x.formatted('.10g'),
-                                    coord_y.formatted('.10g'),
-                                    coord_z.formatted('.10g')))
+                                    coord_x.formatted('.9g'),
+                                    coord_y.formatted('.9g'),
+                                    coord_z.formatted('.9g')))
     return data
 
 
 def get_atomic_coordinates(request, pk):
-    print('test')
     return JsonResponse(atomic_coordinates_as_json(pk))
 
 
