@@ -26,7 +26,7 @@
           {% endfor %}
         </table>
         <!-- Atomic coordinates (optional) -->
-        {% if series.datapoints.all.count > 6 %}
+        {% if series.datapoints.all.count > 6 and not skip_atomic_structure %}
           <div class="text-center">
             <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
                     data-target="#atomic-coordinates-body-{{ series.pk }}">

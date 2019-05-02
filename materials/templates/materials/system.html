@@ -49,21 +49,10 @@
                     {% if dataset.primary_property.name == 'atomic structure'%}
                     <div class="row">
                       <div class="col-md-6">
-                        {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}
+                        {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True skip_atomic_structure=True %}
                       </div>
                       <div class="col-md-6">
-                        <h5>&nbsp;</h5>
-                        <div class="card">
-                          <div class="card-header">
-                            Unit cell
-                          </div>
-                          <div class="card-body">
-                            <div id="jmol"></div>
-                          </div>
-                          <footer class="reference">
-                            {% include 'materials/reference_format.html' with ref=dataset.reference %}
-                          </footer>
-                        </div>
+                        {% include 'materials/jsmol_card.html' %}
                       </div>
                     </div>
                     {% else %}
