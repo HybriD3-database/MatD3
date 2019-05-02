@@ -668,8 +668,10 @@
      } else {
        $('.atomic-structure-input').attr('hidden', true);
        $('.normal-input').show();
-       set_checkbox('id_is_figure', false, false);
-       set_checkbox('id_two_axes', false, false);
+       if (document.getElementById('id_is_figure').readOnly) {
+         set_checkbox('id_is_figure', false, false);
+         set_checkbox('id_two_axes', false, false);
+       }
      }
      // Make atomic structure related fields required only if this property has been selected
      $('input[name^="lattice_constant_"]').each(function() {
