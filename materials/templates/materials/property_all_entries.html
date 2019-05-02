@@ -16,11 +16,7 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  {% if dataset.is_experimental %}
-                    <h5>Experimental</h5>
-                  {% else %}
-                    <h5>Theoretical</h5>
-                  {% endif %}
+                  <h5>{{ dataset.label }}</h5>
                   {% if user == dataset.created_by %}
                     {% include 'materials/dataset_buttons.html' with system=dataset.system %}
                   {% endif %}

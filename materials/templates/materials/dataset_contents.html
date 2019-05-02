@@ -6,16 +6,17 @@
 {% load materials_tags %}
 
 <!-- MAIN DATA -->
-<h5>{{ dataset.label }}</h5>
+<h5>Origin: {% if dataset.is_experimental %}experimental{% else %}theoretical{% endif %}
+  {{ dataset.get_all_fixed_properties }}
+</h5>
 {% if dataset.primary_property.name == 'atomic structure'%}
   <!-- Atomic structures require special treatment -->
   {% for series in dataset.dataseries_set.all %}
     <div class="card">
       <div class="card-header">
+        {{ dataset.primary_property|capfirst }}
         {% if dataset.dataseries_set.all.count > 1 %}
-          Series #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
-        {% else %}
-          Data
+          #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
         {% endif %}
       </div>
       <div class="card-body">
@@ -60,10 +61,9 @@
   {% for series in dataset.dataseries_set.all %}
     <div class="card">
       <div class="card-header">
+        {{ dataset.primary_property|capfirst }}
         {% if dataset.dataseries_set.all.count > 1 %}
-          Series #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
-        {% else %}
-          Data
+          #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
         {% endif %}
       </div>
       <div class="card-body">
@@ -93,9 +93,6 @@
           </ul>
         {% endif %}
       </div>
-      <footer class="reference">
-        {% include 'materials/reference_format.html' with ref=dataset.reference %}
-      </footer>
     </div>
   {% endfor %}
 {% endif %}
@@ -110,9 +107,6 @@
     Sample type: {{ dataset.get_sample_type_display }}<br>
     Crystal system: {{ dataset.get_crystal_system_display }}
   </div>
-  <footer class="reference">
-    {% include 'materials/reference_format.html' with ref=dataset.reference %}
-  </footer>
 </div>
 
 <!-- SYNTHESIS METHOD -->
@@ -140,9 +134,6 @@
           {% endif %}
         {% endwith %}
       </div>
-      <footer class="reference">
-        {% include 'materials/reference_format.html' with ref=dataset.reference %}
-      </footer>
     </div>
   </div>
 {% endif %}
@@ -169,9 +160,6 @@
           {% endif %}
         {% endwith %}
       </div>
-      <footer class="reference">
-        {% include 'materials/reference_format.html' with ref=dataset.reference %}
-      </footer>
     </div>
   </div>
 {% endif %}
@@ -214,9 +202,6 @@
           {% endif %}
         {% endwith %}
       </div>
-      <footer class="reference">
-        {% include 'materials/reference_format.html' with ref=dataset.reference %}
-      </footer>
     </div>
   </div>
 {% endif %}

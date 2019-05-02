@@ -353,6 +353,17 @@ class Dataset(Base):
     def __str__(self):
         return f'ID: {self.pk} ({self.primary_property})'
 
+    def get_all_fixed_properties(self):
+        """Return a formatted list of all fixed properties."""
+        values = NumericalValueFixed.objects.filter(dataseries__dataset=self)
+        text = ''
+        if not values:
+            return ''
+        for i_value, value in enumerate(values):
+            text += (f'{value.physical_property} = {value.formatted()} '
+                     f'{value.unit}{", " if i_value < len(values)-1 else ""}')
+        return '(' + text + ')'
+
 
 class Dataseries(Base):
     label = models.CharField(max_length=100, blank=True)
