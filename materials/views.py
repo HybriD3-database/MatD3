@@ -1204,9 +1204,6 @@ def get_jsmol_input(request, pk):
                 return HttpResponse(response.getvalue())
         except (KeyError, ValueError):
             pass
-    logger.warning('The representative data set for atomic structure of '
-                   f'system {pk} cannot be visualized in JSmol.',
-                   extra={'request': request})
     return HttpResponse()
 
 
