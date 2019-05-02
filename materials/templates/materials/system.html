@@ -23,9 +23,9 @@
         {% for dataset in object_list %}
           {% if dataset.representative %}
             {% if user == dataset.created_by or dataset.visible %}
-              <!-- In case of lattice parameters use a wider column to make
+              <!-- In case of atomic structures use a wider column to make
                    room for the JSmol visualization below -->
-              <div class="col-md-{% if dataset.primary_property.name == 'lattice parameter'%}12{% else %}6{% endif %}">
+              <div class="col-md-{% if dataset.primary_property.name == 'atomic structure'%}12{% else %}6{% endif %}">
                 <div class="card card-item">
                   {% if not dataset.visible %}
                     <div style="background:#fadb9b">
@@ -46,7 +46,7 @@
                     </div>
                   {% endif %}
                   <div class="card-body">
-                    {% if dataset.primary_property.name == 'lattice parameter'%}
+                    {% if dataset.primary_property.name == 'atomic structure'%}
                     <div class="row">
                       <div class="col-md-6">
                         {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True %}

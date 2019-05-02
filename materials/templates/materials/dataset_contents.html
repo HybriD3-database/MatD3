@@ -7,8 +7,8 @@
 
 <!-- MAIN DATA -->
 <h5>{{ dataset.label }}</h5>
-{% if dataset.primary_property.name == 'lattice parameter'%}
-  <!-- Lattice parameters require special treatment -->
+{% if dataset.primary_property.name == 'atomic structure'%}
+  <!-- Atomic structures require special treatment -->
   {% for series in dataset.dataseries_set.all %}
     <div class="card">
       <div class="card-header">
@@ -29,11 +29,11 @@
         {% if series.datapoints.all.count > 6 %}
           <div class="text-center">
             <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
-                    data-target="#lattice-parameters-body-{{ series.pk }}">
+                    data-target="#atomic-coordinates-body-{{ series.pk }}">
               Atomic coordinates (click to expand)
             </button>
           </div>
-          <div class="collapse" id="lattice-parameters-body-{{ series.pk }}"></div>
+          <div class="collapse" id="atomic-coordinates-body-{{ series.pk }}"></div>
         {% endif %}
         {% if series.fixed_values.exists %}
           Fixed parameters:

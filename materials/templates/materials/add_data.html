@@ -343,7 +343,7 @@
               </div>
               {{ form.series_datapoints }}
             </div>
-            <div class="lattice-parameter-input" hidden="true">
+            <div class="atomic-structure-input" hidden="true">
               <div class="form-group">
                 {{ form.lattice_constant_a.label_tag }}
                 {{ form.lattice_constant_a.help_text|tooltip }}
@@ -476,7 +476,7 @@
      });
    }
    $('#import-all-data').change(function() {
-     if ($('#id_primary_property').find(':selected').text() === 'lattice parameter') {
+     if ($('#id_primary_property').find(':selected').text() === 'atomic structure') {
        import_lattice_parameters(this);
      } else {
        autofill_data(this);
@@ -656,27 +656,27 @@
    is_figure.dispatchEvent(new Event('change'));
   </script>
   <script>
-   // Lattice parameter specific
+   // Atomic structure specific
    $('#id_primary_property').change(function() {
-     var is_lattice_parameter =
-       $('#id_primary_property').find(':selected').text() === 'lattice parameter';
-     if (is_lattice_parameter) {
-       $('.lattice-parameter-input').attr('hidden', false);
+     var is_atomic_structure =
+       $('#id_primary_property').find(':selected').text() === 'atomic structure';
+     if (is_atomic_structure) {
+       $('.atomic-structure-input').attr('hidden', false);
        $('.normal-input').hide();
        set_checkbox('id_is_figure', false, true);
        set_checkbox('id_two_axes', false, true);
      } else {
-       $('.lattice-parameter-input').attr('hidden', true);
+       $('.atomic-structure-input').attr('hidden', true);
        $('.normal-input').show();
        set_checkbox('id_is_figure', false, false);
        set_checkbox('id_two_axes', false, false);
      }
-     // Make lattice parameter related fields required only if this property has been selected
+     // Make atomic structure related fields required only if this property has been selected
      $('input[name^="lattice_constant_"]').each(function() {
-       $(this).prop('required', is_lattice_parameter);
+       $(this).prop('required', is_atomic_structure);
      });
      $('textarea[name^="series_datapoints_"]').each(function() {
-       $(this).prop('required', !is_lattice_parameter);
+       $(this).prop('required', !is_atomic_structure);
      });
    });
    function import_lattice_parameters(el) {
@@ -703,7 +703,7 @@
            }
          }
          if (aims_format) {
-           // Generate the lattice parameters (lattice constants and angles)
+           // Generate the atomic structure (lattice constants and angles)
            // from lattice vectors
            lattice_vectors = [];
            var regex = /^ *lattice_vector\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\b/;
@@ -730,7 +730,7 @@
            beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
            gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
          } else {
-           // Read the lattice parameters directly from an input file
+           // Read the atomic structure directly from an input file
            var nr_reg = /\b([a-z]+)\s+(-?(?:\d+(?:\.\d+)?|\.\d+)(?:\(\d+(?:\.\d+)?\)|\b))/g;
            var matches = [];
            while (matches = nr_reg.exec(input_data)) {

@@ -1,11 +1,11 @@
 Array.from(document.getElementsByClassName('expand-hide-button')).forEach(function(element) {
   element.addEventListener('click', function() {
     var target = document.getElementById(element.dataset.target.split('#')[1]);
-    if (target.id.startsWith('lattice-parameters-body-') && target.innerHTML === '') {
-      var series_id = target.id.split('lattice-parameters-body-')[1];
-      $.getJSON('/materials/get-lattice-parameters/' + series_id, function(data) {
+    if (target.id.startsWith('atomic-coordinates-body-') && target.innerHTML === '') {
+      var series_id = target.id.split('atomic-coordinates-body-')[1];
+      $.getJSON('/materials/get-atomic-coordinates/' + series_id, function(data) {
         var table = document.createElement('table');
-        table.className = 'table-lattice-parameters';
+        table.className = 'table-atomic-coordinates';
         var fragment = document.createDocumentFragment();
         for (var i=0; i<data['vectors'].length; i++) {
           var tr = document.createElement('tr');
@@ -32,7 +32,7 @@ Array.from(document.getElementsByClassName('expand-hide-button')).forEach(functi
         }
         target.append(coord_type);
         table = document.createElement('table');
-        table.className = 'table-lattice-parameters';
+        table.className = 'table-atomic-coordinates';
         for (var i=0; i<data['coordinates'].length; i++) {
           var tr = document.createElement('tr');
           var td = document.createElement('td');

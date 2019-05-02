@@ -63,11 +63,11 @@ class SystemView(generic.ListView):
 
     def get_queryset(self, **kwargs):
         return models.Dataset.objects.filter(
-            system__pk=self.kwargs['pk']).annotate(is_lattice_parameter=Case(
-                When(primary_property__name='lattice parameter',
+            system__pk=self.kwargs['pk']).annotate(is_atomic_structure=Case(
+                When(primary_property__name='atomic structure',
                      then=Value(True)),
                 default=Value(False), output_field=BooleanField())).order_by(
-                    '-is_lattice_parameter')
+                    '-is_atomic_structure')
 
 
 class PropertyAllEntriesView(generic.ListView):
@@ -841,10 +841,8 @@ def submit_data(request):
                 'series_label_' + str(i_series)]
         dataseries.save()
         # Go through exceptional cases first. Some properties such as
-        # "lattice parameter" require special treatment.
-        if dataset.primary_property.require_input_files:
-            pass
-        elif dataset.primary_property.name == 'lattice parameter':
+        # "atomic structure" require special treatment.
+        if dataset.primary_property.name == 'atomic structure':
             for symbol, key in (('a', 'a'), ('b', 'b'), ('c', 'c'),
                                 ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
                 datapoint = models.Datapoint.objects.create(
@@ -1114,10 +1112,10 @@ def get_series_values(request, pk):
     return JsonResponse(response, safe=False)
 
 
-def lattice_parameters_as_json(pk):
-    """Get atomic coordinates from the lattice parameter list.
+def atomic_coordinates_as_json(pk):
+    """Get atomic coordinates from the atomic structure list.
 
-    The first six entries of the "lattice parameter" property are the
+    The first six entries of the "atomic structure" property are the
     lattice constants and angles. These need to be skipped when
     fetching for the lattice vectors and atomic coordinates.
 
@@ -1156,27 +1154,28 @@ def lattice_parameters_as_json(pk):
     return data
 
 
-def get_lattice_parameters(request, pk):
-    return JsonResponse(lattice_parameters_as_json(pk))
+def get_atomic_coordinates(request, pk):
+    print('test')
+    return JsonResponse(atomic_coordinates_as_json(pk))
 
 
 def get_jsmol_input(request, pk):
     """Return a statement to be executed by JSmol.
 
-    Go through the lattice parameter data series of the representative
+    Go through the atomic structure data series of the representative
     data set of the given system. Pick the first one where the lattice
     vectors and atomic coordinates are present and can be converted to
     floats. Construct the "load data ..." inline statement suitable
-    for JSmol. If there are no lattice parameter data or none of the
+    for JSmol. If there are no atomic structure data or none of the
     data sets are usable (some lattice parameters or atomic
     coordinates missing or not valid numbers) return an empty
     response.
 
     """
     dataset = models.Dataset.objects.filter(system__pk=pk).filter(
-        primary_property__name='lattice parameter').get(representative=True)
+        primary_property__name='atomic structure').get(representative=True)
     for series in dataset.dataseries_set.all():
-        data = lattice_parameters_as_json(series.pk)
+        data = atomic_coordinates_as_json(series.pk)
         lattice_vectors = []
         try:
             for vector in data['vectors']:
@@ -1204,7 +1203,7 @@ def get_jsmol_input(request, pk):
                 return HttpResponse(response.getvalue())
         except (KeyError, ValueError):
             pass
-    logger.warning('The representative data set for lattice parameters of '
+    logger.warning('The representative data set for atomic structure of '
                    f'system {pk} cannot be visualized in JSmol.',
                    extra={'request': request})
     return HttpResponse()

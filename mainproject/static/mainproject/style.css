@@ -75,14 +75,14 @@ body {
     padding: 2px 5px;
 }
 
-.table-lattice-parameters {
+.table-atomic-coordinates {
     align: center;
     margin: 10px auto;
     text-align: right;
     padding: 0px 5px;
 }
 
-.table-lattice-parameters td {
+.table-atomic-coordinates td {
     padding: 0px 5px;
 }
 
