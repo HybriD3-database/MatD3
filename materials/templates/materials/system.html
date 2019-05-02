@@ -318,7 +318,7 @@
   {% endwith %}
   <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
   <script>
-   {% if object_list.first %}
+   {% if object_list.first and object_list.first.system.pk %}
    $.get("{% url 'materials:get_jsmol_input' pk=object_list.first.system.pk %}", function(response) {
      if (response) {
        $('#jmol').html(Jmol.getAppletHtml('jmol', {
@@ -328,8 +328,8 @@
          width: 470,
        }));
      } else {
-       var parent = document.getElementById('jmol').parentNode.parentNode.parentNode;
-       parent.parentNode.removeChild(parent);
+       var el = document.getElementById('jmol');
+       el.innerHTML = 'Atomic coordinates currently not avaiable.';
      }
    });
    {% endif %}
