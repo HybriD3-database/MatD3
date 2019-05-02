@@ -1016,6 +1016,8 @@ def delete_dataset_and_files(request, system_pk, dataset_pk, return_path):
     """Delete current data set and all associated files."""
     dataset = models.Dataset.objects.get(pk=dataset_pk)
     dataset.delete()
+    if not return_path.startswith('/'):
+        return_path = '/' + return_path
     return redirect(return_path)
 
 
