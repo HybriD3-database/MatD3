@@ -8,7 +8,7 @@
   {% load static %}
   <div class="card card-default">
     <div class="card-header">
-      {% if user.is_superuser %}
+      {% if user.is_superuser and object_list.first %}
         <a href="{% url 'materials:update_system' pk=object_list.first.system.pk %}">
           <button type="button" class="btn btn-success" style="float: right">Edit System Data
           </button>
@@ -335,6 +335,7 @@
   {% endwith %}
   <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
   <script>
+   {% if object_list.first %}
    $.get("{% url 'materials:get_jsmol_input' pk=object_list.first.system.pk %}", function(response) {
      if (response) {
        $('#jmol').html(Jmol.getAppletHtml('jmol', {
@@ -348,6 +349,7 @@
        parent.parentNode.removeChild(parent);
      }
    });
+   {% endif %}
   </script>
   {% include 'materials/dataset_scripts.html' with datasets=object_list %}
 {% endblock %}
