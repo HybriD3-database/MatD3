@@ -1,10 +1,8 @@
 import datetime
-import functools
 import io
 import logging
 import matplotlib
 import numpy
-import operator
 import os
 import re
 import zipfile
@@ -30,10 +28,11 @@ from django.shortcuts import render
 from django.shortcuts import reverse
 from django.views import generic
 
+from . import forms
+from . import models
+from . import utils
 from accounts.models import UserProfile
 from mainproject import settings
-from materials import forms
-from materials import models
 import materials.rangeparser
 
 matplotlib.use('Agg')
@@ -181,7 +180,7 @@ class SearchFormView(generic.TemplateView):
                             system_info['bs_pk'] = 0
                         systems_info.append(system_info)
             else:
-                systems = search_result(search_term, search_text)
+                systems = utils.search_result(search_term, search_text)
 
         args = {
             'systems': systems,
@@ -303,7 +302,8 @@ class AddAuthorsToReferenceView(LoginRequiredMixin, generic.TemplateView):
     def post(self, request):
         author_count = request.POST['author_count']
         # variable number of author forms
-        author_formset = formset_factory(forms.AddAuthor, extra=int(author_count))
+        author_formset = formset_factory(
+            forms.AddAuthor, extra=int(author_count))
         return render(request, self.template_name,
                       {'entered_author_count': author_count,
                        'author_formset': author_formset})
@@ -511,8 +511,8 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
             sys_pk = request.POST.get('system')
             syn_pk = request.POST.get('synthesis-methods')
             try:
-                new_form.synthesis_method = models.SynthesisMethodOld.objects.get(
-                    pk=int(syn_pk))
+                new_form.synthesis_method = (
+                    models.SynthesisMethodOld.objects.get(pk=int(syn_pk)))
             except Exception:
                 # no synthesis method was chosen (or maybe an error occurred)
                 pass
@@ -551,7 +551,7 @@ class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
                     # successful after this thing, call another
                     # function that plots the BS. Once done, update
                     # the plotted state to done plotbs(bs_folder_loc)
-                    new_form = makeCorrections(new_form)
+                    new_form = utils.makeCorrections(new_form)
                     text = 'Save success!'
                     feedback = 'success'
                     new_form.save()
@@ -737,6 +737,10 @@ def submit_data(request):
         dataset.delete()
         return render(request, 'materials/add_data.html', {'form': form})
 
+    def skip_this_line(line):
+        """Test whether the line is empty or a comment."""
+        return re.match(r'\s*#', line) or not line or line == '\r'
+
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
         # Show formatted field labels in the error message, not the
@@ -769,7 +773,6 @@ def submit_data(request):
     dataset.representative = not bool(models.Dataset.objects.filter(
         system=dataset.system).filter(
             primary_property=dataset.primary_property))
-    dataset.has_files = False
     dataset.save()
     logger.info(f'Create dataset #{dataset.pk}')
     # Uploaded files
@@ -896,11 +899,26 @@ def submit_data(request):
                         return error_and_return(dataset, line, form)
             add_datapoint_ids(lattice_vectors, 9, 3)
             models.NumericalValue.objects.bulk_create(lattice_vectors)
+        elif dataset.primary_property.name == 'band structure':
+            # Get kpoints
+            k_labels = []
+            for line in form.cleaned_data[
+                    'series_datapoints_' + str(i_series)].splitlines():
+                if skip_this_line(line):
+                    continue
+                k_labels.append(line.split())
+            # Get files
+            files = []
+            for f in dataset.files.all():
+                if re.match(r'band10\d+\.out',
+                            os.path.basename(f.dataset_file.name)):
+                    files.append(f.dataset_file)
+            utils.plot_band_structure(k_labels, files, dataset)
         elif form.cleaned_data['two_axes']:
             try:
                 for line in form.cleaned_data[
                         'series_datapoints_' + str(i_series)].splitlines():
-                    if re.match(r'\s*#', line) or not line or line == '\r':
+                    if skip_this_line(line):
                         continue
                     x_value, y_value = line.split()[:2]
                     datapoints.append(models.Datapoint(
@@ -914,7 +932,7 @@ def submit_data(request):
             try:
                 for line in form.cleaned_data[
                         'series_datapoints_' + str(i_series)].splitlines():
-                    if re.match(r'\s*#', line) or not line or line == '\r':
+                    if skip_this_line(line):
                         continue
                     for value in line.split():
                         datapoints.append(models.Datapoint(
@@ -1071,7 +1089,7 @@ def autofill_input_data(request):
     content = UploadedFile(request.FILES['file']).read().decode('utf-8')
     lines = content.splitlines()
     for i_line, line in enumerate(lines):
-        if re.match(r'\s*#', line) or not line:
+        if re.match(r'\s*#', line) or not line or line == '\r':
             del lines[i_line]
     return HttpResponse('\n'.join(lines))
 
@@ -1114,50 +1132,8 @@ def get_series_values(request, pk):
     return JsonResponse(response, safe=False)
 
 
-def atomic_coordinates_as_json(pk):
-    """Get atomic coordinates from the atomic structure list.
-
-    The first six entries of the "atomic structure" property are the
-    lattice constants and angles. These need to be skipped when
-    fetching for the lattice vectors and atomic coordinates.
-
-    """
-    series = models.Dataseries.objects.get(pk=pk)
-    vectors = models.NumericalValue.objects.filter(
-        datapoint__dataseries=series).filter(
-           datapoint__symbols__isnull=True).order_by(
-               'datapoint_id', 'counter')
-    data = {'vectors':
-            [[x.formatted('.10g') for x in vectors[:3]],
-             [x.formatted('.10g') for x in vectors[3:6]],
-             [x.formatted('.10g') for x in vectors[6:9]]]}
-    # Here counter=1 filters out the first six entries
-    symbols = models.Symbol.objects.filter(
-        datapoint__dataseries=series).filter(counter=1).order_by(
-            'datapoint_id').values_list('value', flat=True)
-    coords = models.NumericalValue.objects.filter(
-        datapoint__dataseries=series).filter(
-            datapoint__symbols__counter=1).select_related('error').order_by(
-                'counter', 'datapoint_id')
-    tmp = models.Symbol.objects.filter(
-        datapoint__dataseries=series).annotate(
-            num=models.models.Count('datapoint__symbols')).filter(
-                num=2).first()
-    if tmp:
-        data['coord-type'] = tmp.value
-    data['coordinates'] = []
-    N = int(len(coords)/3)
-    for symbol, coord_x, coord_y, coord_z in zip(
-            symbols, coords[:N], coords[N:2*N], coords[2*N:3*N]):
-        data['coordinates'].append((symbol,
-                                    coord_x.formatted('.9g'),
-                                    coord_y.formatted('.9g'),
-                                    coord_z.formatted('.9g')))
-    return data
-
-
 def get_atomic_coordinates(request, pk):
-    return JsonResponse(atomic_coordinates_as_json(pk))
+    return JsonResponse(utils.atomic_coordinates_as_json(pk))
 
 
 def get_jsmol_input(request, pk):
@@ -1176,7 +1152,7 @@ def get_jsmol_input(request, pk):
     dataset = models.Dataset.objects.filter(system__pk=pk).filter(
         primary_property__name='atomic structure').get(representative=True)
     for series in dataset.dataseries_set.all():
-        data = atomic_coordinates_as_json(series.pk)
+        data = utils.atomic_coordinates_as_json(series.pk)
         lattice_vectors = []
         try:
             for vector in data['vectors']:
@@ -1324,6 +1300,18 @@ def reference_data(request, pk):
     response["Access-Control-Max-Age"] = "1000"
     response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
     return response
+
+
+def extract_k_from_control_in(request):
+    """Extract the k-point path from the provided control.in."""
+    content = UploadedFile(request.FILES['file']).read().decode('utf-8')
+    lines = content.splitlines()
+    k_labels = []
+    for i_line, line in enumerate(lines):
+        if re.match(r' *output\b\s* band', line):
+            words = line.split()
+            k_labels.append(f'{words[-2]} {words[-1]}')
+    return HttpResponse('\n'.join(k_labels))
 
 
 def data_dl(request, data_type, pk, bandgap=False):
@@ -1584,46 +1572,3 @@ def all_entries(request, pk, data_type):
         'data_type': data_type,
         'key': pk
     })
-
-
-def getAuthorSearchResult(search_text):
-    keyWords = search_text.split()
-    results = models.System.objects.\
-        filter(functools.reduce(operator.or_, (
-            Q(synthesismethodold__reference__author__last_name__icontains=x)
-            for x in keyWords)) | functools.reduce(operator.or_, (Q(
-                    excitonemission__reference__author__last_name__icontains=x
-            ) for x in keyWords)) | functools.reduce(operator.or_, (Q(
-                bandstructure__reference__author__last_name__icontains=x
-            ) for x in keyWords))).distinct()
-    return results
-
-
-def search_result(search_term, search_text):
-    if search_term == 'formula':
-        return models.System.objects.filter(
-            Q(formula__icontains=search_text) |
-            Q(group__icontains=search_text) |
-            Q(compound_name__icontains=search_text)).order_by('formula')
-    elif search_term == 'organic':
-        return models.System.objects.filter(
-            organic__icontains=search_text).order_by('organic')
-    elif search_term == 'inorganic':
-        return models.System.objects.filter(
-            inorganic__icontains=search_text).order_by('inorganic')
-    elif search_term == 'author':
-        return getAuthorSearchResult(search_text)
-    else:
-        raise KeyError('Invalid search term.')
-
-
-def makeCorrections(form):
-    # alter user input if necessary
-    try:
-        temp = form.temperature
-        if temp.endswith('K') or temp.endswith('C'):
-            temp = temp[:-1].strip()
-            form.temperature = temp
-        return form
-    except Exception:  # just in case
-        return form

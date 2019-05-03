@@ -36,7 +36,6 @@ class Base(models.Model):
 
 class Property(Base):
     name = models.CharField(max_length=100, unique=True)
-    require_input_files = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -9,7 +9,7 @@
 <h5>Origin: {% if dataset.is_experimental %}experimental{% else %}theoretical{% endif %}
   {{ dataset.get_all_fixed_properties }}
 </h5>
-{% if dataset.primary_property.name == 'atomic structure'%}
+{% if dataset.primary_property.name == 'atomic structure' %}
   <!-- Atomic structures require special treatment -->
   {% for series in dataset.dataseries_set.all %}
     <div class="card">
@@ -50,6 +50,52 @@
       </footer>
     </div>
   {% endfor %}
+{% elif dataset.primary_property.name == 'band structure' %}
+  <!-- Band structures require special treatment -->
+  {% with series=dataset.dataseries_set.first %}
+    <div class="card">
+      <div class="card-header">
+        {{ dataset.primary_property|capfirst }}
+      </div>
+      <div class="card-body">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" role="tab"
+               href="#band-structure-full-{{ dataset.pk }}">
+              Full image
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" role="tab"
+               href="#band-structure-small-{{ dataset.pk }}">
+              Zoomed
+            </a>
+          </li>
+        </ul>
+        <div class="tab-content" id="add-results-tab-content">
+          <div class="tab-pane show active" id="band-structure-full-{{ dataset.pk }}" role="tabpanel">
+            <img class="img-fluid"
+                 src="/media/uploads/dataset_{{ dataset.pk }}/band_structure_full.png">
+          </div>
+          <div class="tab-pane" id="band-structure-small-{{ dataset.pk }}" role="tabpanel">
+            <img class="img-fluid"
+                 src="/media/uploads/dataset_{{ dataset.pk }}/band_structure_small.png">
+          </div>
+        </div>
+        {% if series.fixed_values.exists %}
+          Fixed parameters:
+          <ul style="margin-bottom:0;">
+            {% for property, value, unit in series.get_fixed_values %}
+              <li>{{ property }} = {{ value }} {{ unit }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
+    </div>
+  {% endwith %}
 {% elif dataset.is_figure %}
   <!-- Plotted data -->
   <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
@@ -250,7 +296,7 @@
     <a href="{% url "materials:download_dataset_files" pk=dataset.pk %}">
       <button type="button" class="btn btn-primary">
         <span class="fa fa-download" aria-hidden="true"></span>
-        Files
+        Uploaded files
       </button>
     </a>
     <i class="fa fa-question-circle tooltip-container">

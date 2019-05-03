@@ -68,6 +68,8 @@ urlpatterns = [
     path('get-jsmol-input/<int:pk>', views.get_jsmol_input,
          name="get_jsmol_input"),
     path('report-issue', views.report_issue, name="report_issue"),
+    path('extract-k-from-control-in', views.extract_k_from_control_in,
+         name="extract_k_from_control_in"),
     re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
             name='all_entries'),
 ]

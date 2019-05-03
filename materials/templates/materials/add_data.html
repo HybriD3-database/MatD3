@@ -7,33 +7,29 @@
     </div>
     <div class="card-body">
       {% load materials_tags %}
-      <ul class="nav nav-tabs" id="new-data-tab" role="tablist">
+      <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
-          <a class="nav-link active" id="data-tab" data-toggle="tab"
-             href="#results" role="tab">
+          <a class="nav-link active" data-toggle="tab" href="#results" role="tab">
             Add new results
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="new-property-tab" data-toggle="tab"
-             href="#properties" role="tab">
+          <a class="nav-link" data-toggle="tab" href="#properties" role="tab">
             Define new property
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="new-unit-tab" data-toggle="tab"
-             href="#units" role="tab">
+          <a class="nav-link" data-toggle="tab" href="#units" role="tab">
             Define new unit
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="new-unit-tab" data-toggle="tab"
-             href="#unsorted" role="tab">
+          <a class="nav-link" data-toggle="tab" href="#unsorted" role="tab">
             Other
           </a>
         </li>
       </ul>
-      <div class="tab-content" id="add-results-tab-content">
+      <div class="tab-content">
         <!-- ADD NEW RESULTS -->
         <div class="tab-pane show active" id="results" role="tabpanel">
           <br>
@@ -458,11 +454,11 @@
            $('#id_series_datapoints_' + i).val(data[i-1].replace(/^\n/, ''));
          }
        }
-       if (is_figure_untested) {
+       var is_figure = document.getElementById('id_is_figure');
+       if (is_figure_untested && !is_figure.readOnly) {
          // If the are multiple lines and multiple columns, this is likely a figure.
          lines = data[0].split('\n', 2);
          if (lines.length > 1 && lines[0].split(' ').length > 1) {
-           var is_figure = document.getElementById('id_is_figure');
            if (!is_figure.checked) {
              is_figure.checked = true;
              is_figure.dispatchEvent(new Event('change'));
@@ -573,30 +569,6 @@
    add_fixed_property({{ series_counter }}, {{ name_counter }},
                       '{{ prop|escapejs }}', '{{ unit|escapejs }}', '{{ value|escapejs }}');
    {% endfor %}
-  </script>
-  <script>
-   // Properties that require input files
-   var saved_main_data_placeholder = '';
-   $('#id_primary_property').change(function() {
-     primary_unit = $(this).parent().next();
-     secondary_property = primary_unit.next();
-     secondary_unit = secondary_property.next();
-     if ($(this).find(':selected').attr('require_input_files') === 'True') {
-       primary_unit.hide();
-       secondary_property.hide();
-       secondary_unit.hide();
-       $('.series-datapoints').prop('disabled', true);
-       saved_main_data_placeholder = $('.series-datapoints').attr('placeholder');
-       $('.series-datapoints').attr('placeholder', '...');
-     } else if (saved_main_data_placeholder) {
-       primary_unit.show();
-       secondary_property.show();
-       secondary_unit.show();
-       $('.series-datapoints').prop('disabled', false);
-       $('.series-datapoints').attr('placeholder', saved_main_data_placeholder);
-       saved_main_data_placeholder = '';
-     }
-   });
   </script>
   <script>
    // Collapsable sections of the input
@@ -788,5 +760,59 @@
    $('#id_lattice_constant_gamma_{{ series_counter }}').val('{{ gamma|escapejs }}');
    $('#id_atomic_coordinates_{{ series_counter }}').val('{{ coordinates|escapejs }}');
    {% endfor %}
+  </script>
+  <script>
+   // Band structures
+   var band_structure_selected = false;
+   $('#id_primary_property').change(function() {
+     primary_unit = $(this).parent().next();
+     if ($(this).find(':selected').text() == 'band structure') {
+       primary_unit.hide();
+       $('#id_two_axes').trigger('change', force_hide=true).prop('disabled', true);
+       number_of_data_series.readOnly = true;
+       number_of_data_series.value = 1;
+       number_of_data_series.dispatchEvent(new Event('change'));
+       band_structure_selected = true;
+       set_checkbox('id_is_figure', false, true);
+       set_checkbox('id_two_axes', false, true);
+       $('.series-datapoints').attr('placeholder', '# K-point path\nX L\nL Gamma\n...');
+     } else if (band_structure_selected) {
+       primary_unit.show();
+       $('#id_two_axes').trigger('change').prop('disabled', false);
+       number_of_data_series.readOnly = false;
+       band_structure_selected = false;
+       set_checkbox('id_is_figure', false, false);
+       set_checkbox('id_two_axes', false, false);
+     }
+   });
+   // Attempt to autofill the k-path textarea from control.in if present
+   document.getElementById('id_uploaded_files').addEventListener('change', function() {
+     var primary_prop = document.getElementById('id_primary_property');
+     if (primary_prop.options[primary_prop.selectedIndex].text == 'band structure' &&
+         !document.getElementById('id_series_datapoints_1').value) {
+       var control_file = null;
+       for (var i = 0; i < this.files.length; i++) {
+         if (this.files[i].name == 'control.in') {
+           control_file = this.files[i];
+           break;
+         }
+       }
+       if (control_file) {
+         var form_data = new FormData();
+         form_data.append('file', control_file);
+         $.ajax({
+           url: "{% url 'materials:extract_k_from_control_in' %}",
+           type: 'POST',
+           processData: false,
+           contentType: false,
+           dataType: 'text',
+           data: form_data,
+         }).done(function(result) {
+           result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+           document.getElementById('id_series_datapoints_1').value = result;
+         }).fail(function(result) {});
+       }
+     }
+   });
   </script>
 {% endblock %}
