@@ -139,6 +139,9 @@
           </ul>
         {% endif %}
       </div>
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
     </div>
   {% endfor %}
 {% endif %}
