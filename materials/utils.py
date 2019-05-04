@@ -66,7 +66,7 @@ def plot_band_structure(k_labels, files, dataset):
     from matplotlib import pyplot
     matplotlib.use('Agg')
     ENERGY_FULL_MIN = -8
-    ENERGY_FULL_MAX =  8
+    ENERGY_FULL_MAX = 8
     ENERGY_SMALL_MIN = -2
     ENERGY_SMALL_MAX = 5
     HELPER_LINE_WIDTH = 0.2
@@ -87,22 +87,22 @@ def plot_band_structure(k_labels, files, dataset):
     # A segment location is where a k-point should be displayed
     segment_locations = numpy.empty(len(files)+1, dtype=int)
     segment_locations[0] = 0
-    n_kpoints_total = 0
     # Read in all data points (energies) next
     data_raw = []
+    n_kpoints = []
+    fermi_energy = -1e10
     for i_segment, file_ in enumerate(files):
         lines = file_.readlines()
-        n_kpoints = len(lines)
+        n_kpoints.append(len(lines))
         # If the first k-point is the same as the last k-point of
         # the previous segment, it needs to be skipped.
         skip_first = i_segment > 0 and '|' not in k_labels_reduced[i_segment]
         if skip_first:
-            n_kpoints -= 1
+            n_kpoints[-1] -= 1
             i_skip = 1
         else:
             i_skip = 0
-        n_kpoints_total += n_kpoints
-        segment_locations[i_segment+1] = n_kpoints_total-1
+        segment_locations[i_segment+1] = sum(n_kpoints)-1
         # Determine the number of bands from the first line of the
         # first file. This is assumed to be constant througout.
         if i_segment == 0:
@@ -110,20 +110,27 @@ def plot_band_structure(k_labels, files, dataset):
             n_bands = int(len(words[5:])/2)
             min_index = int(1e10)
             max_index = 0
-        data_raw.append(numpy.empty([n_kpoints, n_bands]))
-        for i_kpoint in range(n_kpoints):
+        data_raw.append(numpy.empty([n_kpoints[-1], n_bands]))
+        for i_kpoint in range(n_kpoints[-1]):
             words = lines[i_kpoint+i_skip].split()
             for i_band in range(n_bands):
-                data_raw[-1][i_kpoint, i_band] = float(words[5+2*i_band])
+                band_energy = float(words[5+2*i_band])
+                occupation = float(words[4+2*i_band])
+                data_raw[-1][i_kpoint, i_band] = band_energy
+                if occupation > 1e-10:
+                    fermi_energy = max(fermi_energy, band_energy)
+    for i_segment in range(len(data_raw)):
+        data_raw[i_segment] -= fermi_energy
+        for i_kpoint in range(n_kpoints[i_segment]):
             min_index = min(min_index, numpy.searchsorted(
-                data_raw[-1][i_kpoint, :], ENERGY_FULL_MIN))
+                data_raw[i_segment][i_kpoint, :], ENERGY_FULL_MIN))
             max_index = max(max_index, numpy.searchsorted(
-                data_raw[-1][i_kpoint, :], ENERGY_FULL_MAX))
+                data_raw[i_segment][i_kpoint, :], ENERGY_FULL_MAX))
         file_.close()
     # Reduce the full data because we are only interested in a small
     # energy window.
     n_bands_reduced = max_index - min_index
-    data = numpy.empty([n_bands_reduced, n_kpoints_total])
+    data = numpy.empty([n_bands_reduced, sum(n_kpoints)])
     k_start = 0
     for i_segment in range(len(data_raw)):
         n_kpoints = data_raw[i_segment].shape[0]

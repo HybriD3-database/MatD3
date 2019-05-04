@@ -913,6 +913,14 @@ def submit_data(request):
                 if re.match(r'band10\d+\.out',
                             os.path.basename(f.dataset_file.name)):
                     files.append(f.dataset_file)
+                if os.path.basename(f.dataset_file.name) in [
+                        'band_structure_full.png', 'band_structure_small.png']:
+                    messages.error(
+                        request,
+                        f'Rename {os.path.basename(f.dataset_file.name)} '
+                        '(this name is reserved)')
+                    return render(
+                        request, 'materials/add_data.html', {'form': form})
             utils.plot_band_structure(k_labels, files, dataset)
         elif form.cleaned_data['two_axes']:
             try:
