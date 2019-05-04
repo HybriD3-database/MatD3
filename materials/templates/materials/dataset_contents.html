@@ -14,7 +14,7 @@
   {% for series in dataset.dataseries_set.all %}
     <div class="card">
       <div class="card-header">
-        {{ dataset.primary_property|capfirst }}
+        Lattice parameters
         {% if dataset.dataseries_set.all.count > 1 %}
           #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
         {% endif %}
