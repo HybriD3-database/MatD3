@@ -343,6 +343,10 @@ class Dataset(Base):
         if self.files.exists():
             shutil.rmtree(
                 os.path.dirname(self.files.first().dataset_file.path))
+        if self.representative:
+            Dataset.objects.filter(system=self.system).filter(
+                primary_property=self.primary_property).exclude(
+                    pk=self.pk).update(representative=True)
         super().delete(*args, **kwargs)
 
     def num_all_entries(self):
