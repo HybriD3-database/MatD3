@@ -99,32 +99,6 @@ class AddSystem(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddBandStructure(forms.ModelForm):
-    all_fields = ('temperature', 'phase', 'method', 'specific_method',
-                  'comments', 'source', 'data_extraction_method', 'band_gap')
-    band_structure_files = forms.FileField(widget=forms.ClearableFileInput(
-        attrs={'multiple': True}), required=False)
-    control_in_file = forms.FileField(label='"control.in" file',
-                                      required=False)
-    geometry_in_file = forms.FileField(label='"geometry.in" file',
-                                       required=False)
-
-    class Meta:
-        model = models.BandStructure
-        exclude = ('contributor', 'reference', 'system', 'folder_location',
-                   'plotted', 'synthesis_method')
-        labels = {
-            'phase': 'Crystal system',
-            'band_gap': 'Band gap (eV)',
-            'temperature': 'Temperature (K)'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
     class CharField(forms.CharField):

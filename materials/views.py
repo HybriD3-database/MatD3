@@ -489,84 +489,6 @@ class AddTemperature(LoginRequiredMixin, generic.TemplateView):
         return render(request, self.template_name, args)
 
 
-class AddBandStructureView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_band_structure.html'
-
-    def get(self, request):
-        search_form = forms.SearchForm()
-        band_structure_form = forms.AddBandStructure()
-        return render(request, self.template_name, {
-            'search_form': search_form,
-            'band_structure_form': band_structure_form,
-            'initial_state': True,
-            # determines whether this field appears on the form
-            'related_synthesis': True
-        })
-
-    def post(self, request):
-        form = forms.AddBandStructure(request.POST, request.FILES)
-        if form.is_valid():
-            new_form = form.save(commit=False)
-            pub_pk = request.POST.get('reference')
-            sys_pk = request.POST.get('system')
-            syn_pk = request.POST.get('synthesis-methods')
-            try:
-                new_form.synthesis_method = (
-                    models.SynthesisMethodOld.objects.get(pk=int(syn_pk)))
-            except Exception:
-                # no synthesis method was chosen (or maybe an error occurred)
-                pass
-            if int(pub_pk) > 0 and int(sys_pk) > 0:
-                new_form.reference = models.Reference.objects.get(pk=pub_pk)
-                new_form.system = models.System.objects.get(pk=sys_pk)
-                # text += 'Settings ready. '
-                if request.user.is_authenticated:
-                    new_form.contributor = UserProfile.objects.get(
-                        user=request.user)
-                    # save so a pk can be created for use in the
-                    # folder location
-                    new_form.save()
-                    bs_folder_loc = os.path.join(
-                        settings.MEDIA_ROOT,
-                        f'uploads/{new_form.phase}_{new_form.pk}')
-                    new_form.folder_location = bs_folder_loc
-                    try:
-                        os.mkdir(bs_folder_loc)
-                    except Exception:
-                        pass
-                    band_files = request.FILES.getlist('band_structure_files')
-                    control_file = request.FILES.get('control_in_file')
-                    geometry_file = request.FILES.get('geometry_in_file')
-                    band_files.append(control_file)
-                    band_files.append(geometry_file)
-                    for f in band_files:
-                        filename = f.name
-                        full_filename = os.path.join(bs_folder_loc, filename)
-                        with open(full_filename, 'wb+') as write_bs:
-                            for chunk in f.chunks():
-                                write_bs.write(chunk)
-                    # have a script that goes through the band gaps
-                    # and spits out some states set plotstate field to
-                    # False, save once done, tell user that upload is
-                    # successful after this thing, call another
-                    # function that plots the BS. Once done, update
-                    # the plotted state to done plotbs(bs_folder_loc)
-                    new_form = utils.makeCorrections(new_form)
-                    text = 'Save success!'
-                    feedback = 'success'
-                    new_form.save()
-                else:
-                    text = 'Failed to submit, please login and try again.'
-                    feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-
-        args = {'feedback': feedback, 'text': text}
-
-        return JsonResponse(args)
-
-
 class AddDataView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_data.html'
 
@@ -581,26 +503,6 @@ class SystemUpdateView(generic.UpdateView):
     template_name = 'materials/system_update_form.html'
     form_class = forms.AddSystem
     success_url = '/materials/{pk}'
-
-
-class BandStructureUpdateView(generic.UpdateView):
-    model = models.BandStructure
-    template_name = 'materials/update_band_structure.html'
-    form_class = forms.AddBandStructure
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/band_structure' % str(pk)
-
-
-class BandStructureDeleteView(generic.DeleteView):
-    model = models.BandStructure
-    template_name = 'materials/delete_band_structure.html'
-    form_class = forms.AddBandStructure
-
-    def get_success_url(self):
-        pk = self.object.system.pk
-        return '/materials/%s/band_structure' % str(pk)
 
 
 @login_required
