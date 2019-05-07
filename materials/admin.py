@@ -163,10 +163,3 @@ class DatasetAdmin(BaseAdmin):
 
 
 admin.site.register(models.Dataset, DatasetAdmin)
-
-
-class BandStructureAdmin(admin.ModelAdmin):
-    list_display = ('system', 'folder_location')
-
-
-admin.site.register(models.BandStructure, BandStructureAdmin)
