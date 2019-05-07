@@ -104,7 +104,7 @@ def plot_band_structure(k_labels, files, dataset):
             i_skip = 0
         segment_locations[i_segment+1] = sum(n_kpoints)-1
         # Determine the number of bands from the first line of the
-        # first file. This is assumed to be constant througout.
+        # first file.
         if i_segment == 0:
             words = lines[0].split()
             n_bands = int(len(words[5:])/2)
@@ -113,7 +113,8 @@ def plot_band_structure(k_labels, files, dataset):
         data_raw.append(numpy.empty([n_kpoints[-1], n_bands]))
         for i_kpoint in range(n_kpoints[-1]):
             words = lines[i_kpoint+i_skip].split()
-            for i_band in range(n_bands):
+            n_bands_local = int((len(words)-5)/2)
+            for i_band in range(min(n_bands, n_bands_local)):
                 band_energy = float(words[5+2*i_band])
                 occupation = float(words[4+2*i_band])
                 data_raw[-1][i_kpoint, i_band] = band_energy
