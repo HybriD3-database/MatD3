@@ -823,6 +823,11 @@ def submit_data(request):
                         '(this name is reserved)')
                     return render(
                         request, 'materials/add_data.html', {'form': form})
+            # The band files need to be alphabeticaly sorted
+            for i in range(len(files)):
+                for j in range(i+1, len(files)):
+                    if files[i].name > files[j].name:
+                        files[i], files[j] = files[j], files[i]
             utils.plot_band_structure(k_labels, files, dataset)
         elif form.cleaned_data['two_axes']:
             try:
@@ -1215,9 +1220,8 @@ def reference_data(request, pk):
 def extract_k_from_control_in(request):
     """Extract the k-point path from the provided control.in."""
     content = UploadedFile(request.FILES['file']).read().decode('utf-8')
-    lines = content.splitlines()
     k_labels = []
-    for i_line, line in enumerate(lines):
+    for line in content.splitlines():
         if re.match(r' *output\b\s* band', line):
             words = line.split()
             k_labels.append(f'{words[-2]} {words[-1]}')
