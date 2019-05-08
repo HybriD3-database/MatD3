@@ -1,12 +1,14 @@
-<a href="{% url 'materials:toggle_is_figure' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
-  <button type="button" class="btn btn-success">
-    {% if dataset.is_figure %}
-      Show table
-    {% else %}
-      Show figure
-    {% endif %}
-  </button>
-</a>
+{% if dataset.primary_property.name != 'band structure' and dataset.primary_property.name != 'atomic structure' %}
+  <a href="{% url 'materials:toggle_is_figure' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
+    <button type="button" class="btn btn-success">
+      {% if dataset.is_figure %}
+        Show table
+      {% else %}
+        Show figure
+      {% endif %}
+    </button>
+  </a>
+{% endif %}
 <a href="{% url 'materials:publish_system' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
   <button type="button" class="btn btn-success">
     {% if dataset.visible %}
