@@ -15,7 +15,7 @@
     <div class="card">
       <div class="card-header">
         Lattice parameters
-        {% if dataset.dataseries_set.all.count > 1 %}
+        {% if dataset.dataseries_set.count > 1 %}
           #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
         {% endif %}
       </div>
@@ -27,7 +27,7 @@
           {% endfor %}
         </table>
         <!-- Atomic coordinates (optional) -->
-        {% if series.datapoints.all.count > 6 and not skip_atomic_structure %}
+        {% if series.datapoints.count > 6 and not skip_atomic_structure %}
           <div class="text-center">
             <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
                     data-target="#atomic-coordinates-body-{{ series.pk }}">
@@ -108,7 +108,7 @@
     <div class="card">
       <div class="card-header">
         {{ dataset.primary_property|capfirst }}
-        {% if dataset.dataseries_set.all.count > 1 %}
+        {% if dataset.dataseries_set.count > 1 %}
           #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
         {% endif %}
       </div>

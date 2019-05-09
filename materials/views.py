@@ -882,7 +882,7 @@ def submit_data(request):
     # successfully added
     n_data_points = 0
     for series in dataset.dataseries_set.all():
-        n_data_points += series.datapoints.all().count()
+        n_data_points += series.datapoints.count()
     if n_data_points > 0:
         messages.success(request,
                          f'{n_data_points} new data point'
@@ -1060,8 +1060,11 @@ def get_jsmol_input(request, pk):
     response.
 
     """
-    dataset = models.Dataset.objects.filter(system__pk=pk).filter(
-        primary_property__name='atomic structure').get(representative=True)
+    datasets = models.Dataset.objects.filter(system__pk=pk).filter(
+        primary_property__name='atomic structure')
+    if not datasets:
+        return HttpResponse()
+    dataset = datasets.get(representative=True)
     for series in dataset.dataseries_set.all():
         data = utils.atomic_coordinates_as_json(series.pk)
         lattice_vectors = []

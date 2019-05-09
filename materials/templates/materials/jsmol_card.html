@@ -5,7 +5,7 @@
     <div id="jmol"></div>
     <br>
     {% for series in dataset.dataseries_set.all %}
-      {% if series.datapoints.all.count > 6 %}
+      {% if series.datapoints.count > 6 %}
         <div class="text-center">
           <button class="text-center btn btn-default expand-hide-button"
                   data-toggle="collapse"
