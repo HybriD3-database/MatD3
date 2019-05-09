@@ -173,11 +173,7 @@ class SearchFormView(generic.TemplateView):
                         else:
                             system_info['syn_pk'] = 0
                         system_info['apos_pk'] = 0
-                        if ee.system.bandstructure_set.count() > 0:
-                            system_info['bs_pk'] = (
-                                ee.system.bandstructure_set.first().pk)
-                        else:
-                            system_info['bs_pk'] = 0
+                        system_info['bs_pk'] = 0
                         systems_info.append(system_info)
             else:
                 systems = utils.search_result(search_term, search_text)
@@ -1366,108 +1362,6 @@ def data_dl(request, data_type, pk, bandgap=False):
         response.encoding = 'utf-8'
         response['Content-Disposition'] = ('attachment; filename=%s' %
                                            (meta_filename))
-    elif data_type == 'band_structure' and bandgap:
-        obj = models.BandStructure.objects.get(pk=pk)
-        p_obj = models.System.objects.get(bandstructure=obj)
-        filename = '%s_%s_%s_bg.txt' % (obj.phase, p_obj.organic,
-                                        p_obj.inorganic)
-        response.write(str('#HybriD³ Materials Database\n\n'))
-        response.write('****************\n')
-        response.write('Band gap: ')
-        if obj.band_gap != '':
-            response.write(obj.band_gap + ' eV')
-        else:
-            response.write('N/A')
-        response.write('\n****************\n')
-        write_headers()
-        response.encoding = 'utf-8'
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           (filename))
-    elif data_type == 'band_structure':
-        obj = models.BandStructure.objects.get(pk=pk)
-        p_obj = models.System.objects.get(bandstructure=obj)
-        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
-                                               p_obj.inorganic, obj.pk)
-        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
-        compound_name = dir_in_str.split('/')[-1]
-        meta_filename = file_name_prefix + '.txt'
-        meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
-            meta_file.write('#HybriD3 Materials Database\n')
-            meta_file.write('\n#System: ')
-            meta_file.write(p_obj.compound_name)
-            meta_file.write('\n#Temperature: ')
-            meta_file.write(obj.temperature)
-            meta_file.write('\n#Phase: ')
-            meta_file.write(str(obj.phase.phase))
-            meta_file.write(str('\n#Authors: '))
-            for author in obj.reference.author_set.all():
-                meta_file.write('\n    ')
-                meta_file.write(author.first_name + ' ')
-                meta_file.write(author.last_name)
-                meta_file.write(', ' + author.institution)
-            meta_file.write('\n#Journal: ')
-            meta_file.write(str(obj.reference.journal))
-            meta_file.write('\n#Source: ')
-            meta_file.write(str(obj.reference.doi_isbn))
-        bs_full = os.path.join(dir_in_str, file_name_prefix + '_full.png')
-        bs_mini = os.path.join(dir_in_str, file_name_prefix + '_min.png')
-        filenames = []
-        if os.path.exists(bs_full):
-            filenames.append(bs_full)
-        if os.path.exists(bs_mini):
-            filenames.append(bs_mini)
-        for f in os.listdir(dir_in_str):
-            filename = os.fsdecode(f)
-            if filename.endswith('.in') or filename.endswith('.out') or (
-                    filename.endswith('.txt')):
-                full_filename = os.path.join(dir_in_str, filename)
-                filenames.append(full_filename)
-        zip_dir = compound_name
-        zip_filename = '%s.zip' % zip_dir
-        # change response type and content deposition type
-        string = io.BytesIO()
-        zf = zipfile.ZipFile(string, 'w')
-
-        for fpath in filenames:
-            # Calculate path for file in zip
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(),
-                                content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           zip_filename)
-    elif data_type == 'input_files':
-        obj = models.BandStructure.objects.get(pk=pk)
-        p_obj = models.System.objects.get(bandstructure=obj)
-        file_name_prefix = '%s_%s_%s_%s_bs' % (obj.phase, p_obj.organic,
-                                               p_obj.inorganic, obj.pk)
-        dir_in_str = os.path.join(settings.MEDIA_ROOT, obj.folder_location)
-        compound_name = dir_in_str.split('/')[-1]
-        filenames = []
-        for F in ('control.in', 'geometry.in'):
-            if os.path.exists(f'{dir_in_str}/{F}'):
-                filenames.append(f'{dir_in_str}/{F}')
-        zip_dir = compound_name
-        zip_filename = f'{zip_dir}.zip'
-        # change response type and content deposition type
-        string = io.BytesIO()
-        zf = zipfile.ZipFile(string, 'w')
-        for fpath in filenames:
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(),
-                                content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           zip_filename)
     return response
 
 
@@ -1475,7 +1369,6 @@ def all_entries(request, pk, data_type):
     str_to_model = {
         'exciton_emission': models.ExcitonEmission,
         'synthesis': models.SynthesisMethodOld,
-        'band_structure': models.BandStructure,
     }
     template_name = 'materials/all_%ss.html' % data_type
     compound_name = models.System.objects.get(pk=pk).compound_name

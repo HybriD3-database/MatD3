@@ -200,100 +200,6 @@
           <br>
         </div>
 
-        <div class="col-md-6">
-          <div class="card card-item">
-            {% with entry=object_list.first.system.bandstructure_set.first %}
-              <div class="card-header">
-                <h5>Band Structures</h5>
-              </div>
-              <div class="card-body">
-                {% if entry.plotted and entry.visible %}
-                  <div class="tab-content">
-                    <div id="home" class="tab-pane fade show active">
-                      <div id="bs-graph-full"></div>
-                    </div>
-                    <div id="mini" class="tab-pane fade">
-                      <div id="bs-graph-mini"></div>
-                    </div>
-                  </div>
-                  <ul class="nav nav-tabs nav-tabs-band-structure">
-                    <li class="active">
-                      <a class="nav-link active" data-toggle="tab" href="#home">Full size</a>
-                    </li>
-                    <li>
-                      <a class="nav-link" data-toggle="tab" href="#mini">Zoomed</a>
-                    </li>
-                  </ul>
-                {% elif entry.folder_location|length > 0 and entry.visible %}
-                  <h3>Band Structure is not plotted</h3>
-                {% else %}
-                  <h3>Band Structure file unavailable</h3>
-                {% endif %}
-
-                {% if entry.visible %}
-                  <p class="details">Band gap:
-                    <span style="font-weight: normal;">
-                      {% if entry.band_gap|length > 0 %}
-                        {{ entry.band_gap }} eV
-                      {% else %}N/A
-                      {% endif %}
-                    </span>
-                  </p>
-                  {% if entry.temperature %}
-                    <strong>Temperature:</strong> {{ entry.temperature }} K <br>
-                  {% endif %}
-                  <strong>Crystal system:</strong> {{ entry.phase }} <br>
-                  <strong>Method:</strong> {{ entry.method }} <br>
-                  <strong>Source:</strong> {{ entry.source }}
-                  <br>
-                  <strong>Data extraction:</strong> {{ entry.data_extraction_method }} <br>
-                  {% if entry.comments %}
-                    <div style="margin-left: 20px; text-indent: -20px;">
-                      <strong>Comments:</strong> {{ entry.comments }}
-                    </div>
-                  {% endif %}
-                  {% with entry.reference.author_set.all as authors %}
-                    <button type="button" class="btn btn-primary" data-toggle="collapse"
-                            data-target="#reference4">
-                      <span class="fa fa-book" aria-hidden="true"></span>
-                      Reference
-                    </button>
-                    <div id="reference4" class="collapse">
-                      {% include 'materials/reference_format.html' with ref=entry.reference %}
-                    </div>
-                    <br>
-                  {% endwith %}
-                  {% if entry.folder_location and entry.plotted %}
-                    <a href="{% url "materials:data_dl" data_type="band_structure" pk=entry.pk %}">
-                      <button type="button" class="btn btn-primary">
-                        <span class="fa fa-download" aria-hidden="true"></span>
-                        Band Structure
-                      </button>
-                    </a>
-                  {% endif %}
-                  {% if entry.band_gap != '' %}
-                    <a href="{% url "materials:data_dl" data_type="band_gap" pk=entry.pk %}">
-                      <button type="button" class="btn btn-primary">
-                        <span class="fa fa-download" aria-hidden="true"></span>
-                        Band Gap
-                      </button>
-                    </a>
-                  {% endif %}
-                  <a href="{% url "materials:all_entries" pk=object_list.first.system.pk data_type="band_structure" %}">
-                    <button type="button" class="btn btn-info">
-                      <span class="fa fa-folder-open" aria-hidden="true"></span>
-                      See all entries ({{ object_list.first.system.bandstructure_set.all|length }})
-                    </button>
-                  </a>
-                {% else %}
-                  <h3>No data available</h3>
-                {% endif %}
-            {% endwith %}
-              </div>
-          </div>
-          <br>
-        </div>
-
         {% include "materials/license_note.html" %}
       </div>
     </div>
@@ -305,16 +211,6 @@
     <script type="text/javascript">
      $('#pl-graph').load("../media/uploads/{{ entry.phase}}_{{object_list.first.system.organic}}_{{object_list.first.system.inorganic }}_pl.html");
     </script>
-  {% endwith %}
-  {% with system=object_list.first.system %}
-    {% with entry=system.bandstructure_set.first %}
-      <script type="text/javascript">
-       var imglinkfull = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_full.png';
-       var imglinkmini = '../media/uploads/{{ entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk}}_bs/{{entry.phase}}_{{system.organic}}_{{system.inorganic}}_{{entry.pk }}_bs_min.png';
-       $('#bs-graph-full').html("<img src=" + imglinkfull + " width='500'/>");
-       $('#bs-graph-mini').html("<img src=" + imglinkmini + " width='500'/>");
-      </script>
-    {% endwith %}
   {% endwith %}
   <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
   <script>

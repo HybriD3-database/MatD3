@@ -238,40 +238,6 @@ class ExcitonEmission(IDInfo):
         super().delete(*args, **kwargs)
 
 
-class BandStructure(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    band_gap = models.CharField(max_length=10, blank=True)
-    folder_location = models.CharField(max_length=500, blank=True)
-    plotted = models.BooleanField(default=False)
-    visible = models.BooleanField(default=False)
-    synthesis_method = models.ForeignKey(SynthesisMethodOld,
-                                         on_delete=models.PROTECT, null=True,
-                                         blank=True)
-
-    def __str__(self):
-        return self.folder_location
-
-    def getFullBSPath(self):
-        path = (
-            '../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_full.png' %
-            (self.phase, self.system.organic, self.system.inorganic, self.pk,
-             self.phase, self.system.organic, self.system.inorganic, self.pk))
-        return path
-
-    def getMiniBSPath(self):
-        path = (
-            '../../media/uploads/%s_%s_%s_%s_bs/%s_%s_%s_%s_bs_min.png' %
-            (self.phase, self.system.organic, self.system.inorganic, self.pk,
-             self.phase, self.system.organic, self.system.inorganic, self.pk))
-        return path
-
-    def delete(self, *args, **kwargs):
-        folder_loc = os.path.join(settings.MEDIA_ROOT, self.folder_location)
-        if os.path.isdir(folder_loc):
-            shutil.rmtree(folder_loc)
-        super().delete(*args, **kwargs)
-
-
 class Dataset(Base):
     SINGLE_CRYSTAL = 0
     POWDER = 1
