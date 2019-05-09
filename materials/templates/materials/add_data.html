@@ -14,6 +14,16 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#reference" role="tab">
+            Add new reference
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#system" role="tab">
+            Add new system
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#properties" role="tab">
             Define new property
           </a>
@@ -21,11 +31,6 @@
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#units" role="tab">
             Define new unit
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#unsorted" role="tab">
-            Other
           </a>
         </li>
       </ul>
@@ -247,6 +252,29 @@
 
           </form>
         </div>
+
+
+        <!-- REFERENCE -->
+        <div class="tab-pane" id="reference" role="tabpanel">
+          <br>
+          <div id="other-list" class="list-group">
+            <a href="{% url 'materials:add_reference'%}" class="list-group-item list-group-item-action">
+              Add Reference
+            </a>
+          </div>
+        </div>
+
+        <!-- SYSTEM -->
+        <div class="tab-pane" id="system" role="tabpanel">
+          <br>
+          <div id="other-list" class="list-group">
+            <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
+              Add System
+            </a>
+          </div>
+        </div>
+
+        
         <!-- ADD NEW PROPERTY -->
         <div class="tab-pane" id="properties" role="tabpanel">
           <br>
@@ -268,18 +296,6 @@
             <br>
             <button type="submit" name="submit-unit" class="btn btn-primary">Submit</button>
           </form>
-        </div>
-        <!-- UNSORTED -->
-        <div class="tab-pane" id="unsorted" role="tabpanel">
-          <br>
-          <div id="other-list" class="list-group">
-            <a href="{% url 'materials:add_reference'%}" class="list-group-item list-group-item-action">
-              Add Reference
-            </a>
-            <a href="{% url 'materials:add_system'%}" class="list-group-item list-group-item-action">
-              Add System
-            </a>
-          </div>
         </div>
       </div>
     </div>
