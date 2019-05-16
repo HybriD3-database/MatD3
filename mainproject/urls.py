@@ -15,6 +15,6 @@ urlpatterns = [
     path('contact/', generic.TemplateView.as_view(
         template_name='mainproject/contact.html'), name='contact'),
     path('materials/', include('materials.urls', namespace='materials')),
-    path('account/', include('accounts.urls', namespace='accounts')),
+    path('accounts/', include('accounts.urls', namespace='accounts')),
     path('nested_admin/', include('nested_admin.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

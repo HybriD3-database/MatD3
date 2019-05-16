@@ -10,7 +10,6 @@ import zipfile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import UploadedFile
 from django.core.mail import send_mail
 from django.db import transaction
@@ -21,6 +20,7 @@ from django.db.models import Value
 from django.db.models import When
 from django.forms import formset_factory
 from django.http import HttpResponse
+from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
@@ -31,7 +31,6 @@ from django.views import generic
 from . import forms
 from . import models
 from . import utils
-from accounts.models import UserProfile
 from mainproject import settings
 import materials.rangeparser
 
@@ -51,10 +50,33 @@ def dataset_author_check(view):
                            'an attempt was made to delete it by '
                            f'{request.user}',
                            extra={'request': request})
-            return PermissionDenied
+            return HttpResponseForbidden()
     wrap.__doc__ = view.__doc__
     wrap.__name__ = view.__name__
     return wrap
+
+
+def staff_status_required(view):
+    @login_required
+    def wrap(request, *args, **kwargs):
+        if request.user.is_staff:
+            return view(request, *args, **kwargs)
+        else:
+            logger.warning(f'{request.user.username} is trying to submit data '
+                           'but does not have staff status.',
+                           extra={'request': request})
+            return HttpResponseForbidden()
+    wrap.__doc__ = view.__doc__
+    wrap.__name__ = view.__name__
+    return wrap
+
+
+class StaffStatusMixin(LoginRequiredMixin):
+    """Verify that the current user is at least staff."""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
 
 
 class SystemView(generic.ListView):
@@ -485,7 +507,7 @@ class AddTemperature(LoginRequiredMixin, generic.TemplateView):
         return render(request, self.template_name, args)
 
 
-class AddDataView(LoginRequiredMixin, generic.TemplateView):
+class AddDataView(StaffStatusMixin, generic.TemplateView):
     template_name = 'materials/add_data.html'
 
     def get(self, request, *args, **kwargs):
@@ -521,7 +543,7 @@ def add_unit(request):
     return redirect(reverse('materials:add_data'))
 
 
-@login_required
+@staff_status_required
 @transaction.atomic
 def submit_data(request):
     """Primary function for submitting data from the user."""

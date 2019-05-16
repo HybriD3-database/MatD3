@@ -25,11 +25,13 @@
         </ul>
         <ul class="navbar-nav ml-auto">
           {% if user.is_authenticated %}
+            {% if user.is_staff %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'materials:add_data' %}">Add Data</a>
+              </li>
+            {% endif %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'materials:add_data' %}">Add Data</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:home' %}">Accounts</a>
+              <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
             </li>
           {% else %}
             <li class="nav-item">

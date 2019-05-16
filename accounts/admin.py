@@ -1,21 +1,19 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+
 from accounts.models import UserProfile
 
 
-class UserProfileAdmin(admin.ModelAdmin):
-    """Register your models here."""
-    list_display = ('user', 'user_info', 'institution', 'website')
-
-    def user_info(self, obj):
-        return obj.description
-
-    def get_queryset(self, request):
-        queryset = super(UserProfileAdmin, self).get_queryset(request)
-        queryset = queryset.order_by('institution', 'user')
-
-        return queryset
-
-    user_info.short_description = 'Info'
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = 'profile'
 
 
-admin.site.register(UserProfile, UserProfileAdmin)
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)

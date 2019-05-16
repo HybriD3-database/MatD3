@@ -2,8 +2,8 @@ import logging
 import os
 import shutil
 
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.utils import timezone
 
 from mainproject import settings
