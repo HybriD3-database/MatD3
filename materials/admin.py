@@ -1,14 +1,26 @@
 import nested_admin
 
 from django.contrib import admin
+from django import forms
 from django.utils import timezone
 
 from . import models
 
 
-class BaseAdmin(nested_admin.NestedModelAdmin):
+class BaseMixin:
     readonly_fields = ('id', 'created_by', 'created', 'updated_by', 'updated')
 
+    def check_perm(self, user, obj=None):
+        return user.is_superuser or obj and obj.created_by == user
+
+    def has_change_permission(self, request, obj=None):
+        return self.check_perm(request.user, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return self.check_perm(request.user, obj)
+
+
+class BaseAdmin(BaseMixin, nested_admin.NestedModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.updated_by = request.user
         obj.updated = timezone.now()
@@ -27,20 +39,16 @@ class BaseAdmin(nested_admin.NestedModelAdmin):
         formset.save_m2m()
 
 
-class BaseInline(nested_admin.NestedStackedInline):
-    readonly_fields = BaseAdmin.readonly_fields
-
-
 admin.site.register(models.System)
 admin.site.register(models.Reference)
 admin.site.register(models.Author)
 
 
 class PropertyAdmin(BaseAdmin):
-    list_display = ('name', 'id', 'created_by', 'updated_by', 'updated')
+    list_display = ('id', 'name', 'created_by', 'updated_by', 'updated')
     fieldsets = (
         ('', {
-            'fields': ('name', 'require_input_files'),
+            'fields': ('name',),
         }),
         ('Meta', {'fields': BaseAdmin.readonly_fields}),
     )
@@ -50,7 +58,7 @@ admin.site.register(models.Property, PropertyAdmin)
 
 
 class UnitAdmin(BaseAdmin):
-    list_display = ('label', 'id', 'created_by', 'updated_by', 'updated')
+    list_display = ('id', 'label', 'created_by', 'updated_by', 'updated')
     fieldsets = (
         ('', {
             'fields': ('label',),
@@ -62,7 +70,7 @@ class UnitAdmin(BaseAdmin):
 admin.site.register(models.Unit, UnitAdmin)
 
 
-class CommentInline(BaseInline):
+class CommentInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.Comment
     verbose_name_plural = ''
     fields = ['text']
@@ -95,14 +103,14 @@ class ComputationalAdmin(BaseAdmin):
 admin.site.register(models.ComputationalDetails, ComputationalAdmin)
 
 
-class NumericalValueInline(BaseInline):
+class NumericalValueInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.NumericalValue
     extra = 0
     verbose_name_plural = ''
     fields = ['qualifier', 'value']
 
 
-class DatapointInline(BaseInline):
+class DatapointInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.Datapoint
     extra = 0
     verbose_name_plural = ''
@@ -110,43 +118,57 @@ class DatapointInline(BaseInline):
     inlines = [NumericalValueInline]
 
 
+class NumericalValueFixedForm(forms.ModelForm):
+    """Needed only to make the error field non-mandatory."""
+    error = forms.FloatField(required=False)
+
+
+class NumericalValueFixedInline(nested_admin.NestedTabularInline):
+    model = models.NumericalValueFixed
+    form = NumericalValueFixedForm
+    extra = 0
+    verbose_name_plural = 'Fixed parameters'
+    fields = ('physical_property', 'value_type', 'value', 'error', 'unit')
+
+
 class DataseriesAdmin(BaseAdmin):
     list_display = ('id', 'created_by', 'updated_by', 'updated')
     fields = [f.name for f in models.Dataseries._meta.local_fields]
-    inlines = [DatapointInline]
+    inlines = [DatapointInline, NumericalValueFixedInline]
 
 
 admin.site.register(models.Dataseries, DataseriesAdmin)
 
 
-class SynthesisInline(BaseInline):
+class SynthesisInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.SynthesisMethod
     fields = SynthesisAdmin.fields
     inlines = [CommentInline]
     extra = 0
 
 
-class ExperimentalInline(BaseInline):
+class ExperimentalInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.ExperimentalDetails
     fields = ExperimentalAdmin.fields
     inlines = [CommentInline]
     extra = 0
 
 
-class ComputationalInline(BaseInline):
+class ComputationalInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.ComputationalDetails
     fields = ComputationalAdmin.fields
     inlines = [CommentInline]
     extra = 0
 
 
-class DataseriesInline(BaseInline):
+class DataseriesInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.Dataseries
     extra = 0
     fields = [f.name for f in models.Dataseries._meta.local_fields]
+    inlines = [NumericalValueFixedInline]
 
 
-class FilesInline(BaseInline):
+class FilesInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.DatasetFile
     fields = [f.name for f in models.DatasetFile._meta.local_fields]
     extra = 0

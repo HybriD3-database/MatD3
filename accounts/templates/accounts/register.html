@@ -1,0 +1,16 @@
+{% extends 'accounts/base.html' %}
+
+{% block body %}
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Register for HybriD&#xb3; database</h4>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
