@@ -103,11 +103,26 @@ class ComputationalAdmin(BaseAdmin):
 admin.site.register(models.ComputationalDetails, ComputationalAdmin)
 
 
-class NumericalValueInline(BaseMixin, nested_admin.NestedStackedInline):
+class SymbolInline(BaseMixin, nested_admin.NestedStackedInline):
+    model = models.Symbol
+    extra = 0
+    verbose_name_plural = ''
+    fields = ['value']
+
+
+class ErrorInline(BaseMixin, nested_admin.NestedStackedInline):
+    model = models.Error
+    extra = 0
+    verbose_name_plural = ''
+    fields = ['value']
+
+
+class NumericalValueInline(BaseMixin, nested_admin.NestedTabularInline):
     model = models.NumericalValue
     extra = 0
     verbose_name_plural = ''
-    fields = ['qualifier', 'value']
+    fields = ['qualifier', 'value_type', 'value']
+    inlines = [ErrorInline]
 
 
 class DatapointInline(BaseMixin, nested_admin.NestedStackedInline):
@@ -115,7 +130,7 @@ class DatapointInline(BaseMixin, nested_admin.NestedStackedInline):
     extra = 0
     verbose_name_plural = ''
     fields = ['id']
-    inlines = [NumericalValueInline]
+    inlines = [SymbolInline, NumericalValueInline]
 
 
 class NumericalValueFixedForm(forms.ModelForm):
