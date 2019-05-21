@@ -6,40 +6,41 @@
 {% load materials_tags %}
 
 <!-- MAIN DATA -->
-<h5>Origin: {% if dataset.is_experimental %}experimental{% else %}theoretical{% endif %}
+<h5>{{ dataset.label }}</h5>
+<h5>Origin: {% if dataset.is_experimental %}experimental{% else %}computational{% endif %}
   {{ dataset.get_all_fixed_properties }}
 </h5>
 {% if dataset.primary_property.name == 'atomic structure' %}
   <!-- Atomic structures require special treatment -->
-  {% for series in dataset.dataseries_set.all %}
+  {% for subset in dataset.subsets.all %}
     <div class="card">
       <div class="card-header">
         Lattice parameters
-        {% if dataset.dataseries_set.count > 1 %}
-          #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
+        {% if dataset.subsets.count > 1 %}
+          #{{ forloop.counter }}{% if subset.label %} - {{ subset.label }}{% endif %}
         {% endif %}
       </div>
       <div class="card-body">
         <!-- Lattice constants -->
         <table class="table-lattice-constants">
-          {% for symbol, value, unit in series.get_lattice_constants %}
+          {% for symbol, value, unit in subset.get_lattice_constants %}
             <tr><td>{{ symbol }}:</td><td>{{ value }}{{ unit }}</td></tr>
           {% endfor %}
         </table>
         <!-- Atomic coordinates (optional) -->
-        {% if series.datapoints.count > 6 and not skip_atomic_structure %}
+        {% if subset.datapoints.count > 6 and not skip_atomic_structure %}
           <div class="text-center">
             <button class="text-center btn btn-default expand-hide-button" data-toggle="collapse"
-                    data-target="#atomic-coordinates-body-{{ series.pk }}">
+                    data-target="#atomic-coordinates-body-{{ subset.pk }}">
               Atomic coordinates (click to expand)
             </button>
           </div>
-          <div class="collapse" id="atomic-coordinates-body-{{ series.pk }}"></div>
+          <div class="collapse" id="atomic-coordinates-body-{{ subset.pk }}"></div>
         {% endif %}
-        {% if series.fixed_values.exists %}
+        {% if subset.fixed_values.exists %}
           Fixed parameters:
           <ul style="margin-bottom:0;">
-            {% for property, value, unit in series.get_fixed_values %}
+            {% for property, value, unit in subset.get_fixed_values %}
               <li>{{ property }} = {{ value }} {{ unit }}</li>
             {% endfor %}
           </ul>
@@ -52,7 +53,7 @@
   {% endfor %}
 {% elif dataset.primary_property.name == 'band structure' %}
   <!-- Band structures require special treatment -->
-  {% with series=dataset.dataseries_set.first %}
+  {% with subset=dataset.subsets.first %}
     <div class="card">
       <div class="card-header">
         {{ dataset.primary_property|capfirst }}
@@ -82,10 +83,10 @@
                  src="/media/uploads/dataset_{{ dataset.pk }}/band_structure_small.png">
           </div>
         </div>
-        {% if series.fixed_values.exists %}
+        {% if subset.fixed_values.exists %}
           Fixed parameters:
           <ul style="margin-bottom:0;">
-            {% for property, value, unit in series.get_fixed_values %}
+            {% for property, value, unit in subset.get_fixed_values %}
               <li>{{ property }} = {{ value }} {{ unit }}</li>
             {% endfor %}
           </ul>
@@ -104,12 +105,12 @@
   </footer>
 {% else %}
   <!-- Tabulated data -->
-  {% for series in dataset.dataseries_set.all %}
+  {% for subset in dataset.subsets.all %}
     <div class="card">
       <div class="card-header">
         {{ dataset.primary_property|capfirst }}
-        {% if dataset.dataseries_set.count > 1 %}
-          #{{ forloop.counter }}{% if series.label %} - {{ series.label }}{% endif %}
+        {% if dataset.subsets.count > 1 %}
+          #{{ forloop.counter }}{% if subset.label %} - {{ subset.label }}{% endif %}
         {% endif %}
       </div>
       <div class="card-body">
@@ -118,22 +119,22 @@
             <tr>
               {% if dataset.secondary_property %}
                 <th>
-                  {{ dataset.secondary_property }}{% if dataset.secondary_unit %},
+                  {{ dataset.secondary_property|capfirst }}{% if dataset.secondary_unit %},
                   {{ dataset.secondary_unit }}{% endif %}
                 </th>
               {% endif %}
               <th>
-                {{ dataset.primary_property }}{% if dataset.primary_unit %},
+                {{ dataset.primary_property|capfirst }}{% if dataset.primary_unit %},
                 {{ dataset.primary_unit }}{% endif %}
               </th>
             </tr>
           </thead>
-          <tbody class="tabulated-data" id="table-{{ series.pk }}"></tbody>
+          <tbody class="tabulated-data" id="table-{{ subset.pk }}"></tbody>
         </table>
-        {% if series.fixed_values.exists %}
+        {% if subset.fixed_values.exists %}
           Fixed parameters:
           <ul style="margin-bottom:0;">
-            {% for property, value, unit in series.get_fixed_values %}
+            {% for property, value, unit in subset.get_fixed_values %}
               <li>{{ property }} = {{ value }} {{ unit }}</li>
             {% endfor %}
           </ul>
@@ -303,7 +304,7 @@
       </button>
     </a>
     <i class="fa fa-question-circle tooltip-container">
-      <span class="tooltiptext">Files containing anything that is relevant to the current data set (input files to a calculation, image of the sample, ...)</span>
+      <span class="tooltiptext">Files containing anything that is relevant to the current data (input files to a calculation, image of the sample, ...)</span>
     </i>
   </p>
 {% endif %}
@@ -322,13 +323,13 @@
 {% endif %}
 
 <div class="text-center" style="margin-top:10px">
-  <strong style="margin-right:10px">Dataset ID: {{ dataset.pk }}</strong>
+  <strong style="margin-right:10px">Data set ID: {{ dataset.pk }}</strong>
   <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
           data-target="#issue-report-{{ dataset.pk }}">
     Report an issue
   </button>
   <i class="fa fa-question-circle tooltip-container">
-    <span class="tooltiptext">Did you find any mistakes or inconsistencies about this data set? If so, send us a note and we'll have a look at it and send you a reply. Thanks!</span>
+    <span class="tooltiptext">Did you find any mistakes or inconsistencies about this data? If so, send us a note and we'll have a look at it and send you a reply. Thanks!</span>
   </i>
 </div>
 

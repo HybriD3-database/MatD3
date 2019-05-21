@@ -4,17 +4,17 @@
   <div class="card-body">
     <div id="jmol"></div>
     <br>
-    {% for series in dataset.dataseries_set.all %}
-      {% if series.datapoints.count > 6 %}
+    {% for subset in dataset.subsets.all %}
+      {% if subset.datapoints.count > 6 %}
         <div class="text-center">
           <button class="text-center btn btn-default expand-hide-button"
                   data-toggle="collapse"
-                  data-target="#atomic-coordinates-body-{{ series.pk }}">
+                  data-target="#atomic-coordinates-body-{{ subset.pk }}">
             Atomic coordinates (click to expand)
           </button>
         </div>
       {% endif %}
-      <div class="collapse" id="atomic-coordinates-body-{{ series.pk }}"></div>
+      <div class="collapse" id="atomic-coordinates-body-{{ subset.pk }}"></div>
     {% endfor %}
   </div>
 </div>

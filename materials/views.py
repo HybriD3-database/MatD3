@@ -512,7 +512,7 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name, {
-            'form': forms.AddDataForm(),
+            'main_form': forms.AddDataForm(),
         })
 
 
@@ -655,7 +655,7 @@ def submit_data(request):
         """Shortcut for returning with info about the error."""
         messages.error(request, f'Could not process line: {line}')
         dataset.delete()
-        return render(request, 'materials/add_data.html', {'form': form})
+        return render(request, 'materials/add_data.html', {'main_form': form})
 
     def skip_this_line(line):
         """Test whether the line is empty or a comment."""
@@ -671,12 +671,12 @@ def submit_data(request):
                 form._errors[field.label] = form._errors.pop(field.name)
         messages.error(request, form.errors)
         form._errors = errors_save
-        return render(request, 'materials/add_data.html', {'form': form})
+        return render(request, 'materials/add_data.html', {'main_form': form})
     # Create data set
     dataset = models.Dataset(created_by=request.user)
     dataset.system = form.cleaned_data['select_system']
     dataset.reference = form.cleaned_data['select_reference']
-    dataset.label = form.cleaned_data['data_set_label']
+    dataset.label = form.cleaned_data['label']
     dataset.primary_property = form.cleaned_data['primary_property']
     dataset.primary_unit = form.cleaned_data['primary_unit']
     dataset.secondary_property = form.cleaned_data['secondary_property']
@@ -748,30 +748,27 @@ def submit_data(request):
                 text=form.cleaned_data['computational_comment'])
     # For best performance, the main data should be inserted with
     # calls to bulk_create. The following work arrays are are
-    # populated with data during the loop over series and then
+    # populated with data during the loop over subsets and then
     # inserted into the database after the main loop.
     datapoints = []
     symbols = []
     numerical_values = []
     errors = []
-    for i_series in range(1,
-                          int(form.cleaned_data['number_of_data_series']) + 1):
-        # Create data series
-        dataseries = models.Dataseries(created_by=request.user,
-                                       dataset=dataset)
-        if 'series_label_' + str(i_series) in form.cleaned_data:
-            dataseries.label = form.cleaned_data[
-                'series_label_' + str(i_series)]
-        dataseries.save()
+    for i_subset in range(1, int(form.cleaned_data['number_of_subsets']) + 1):
+        # Create data subset
+        subset = models.Subset(created_by=request.user, dataset=dataset)
+        if 'subset_label_' + str(i_subset) in form.cleaned_data:
+            subset.label = form.cleaned_data['subset_label_' + str(i_subset)]
+        subset.save()
         # Go through exceptional cases first. Some properties such as
         # "atomic structure" require special treatment.
         if dataset.primary_property.name == 'atomic structure':
             for symbol, key in (('a', 'a'), ('b', 'b'), ('c', 'c'),
                                 ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
                 datapoint = models.Datapoint.objects.create(
-                    created_by=request.user, dataseries=dataseries)
+                    created_by=request.user, subset=subset)
                 datapoint.symbols.create(created_by=request.user, value=symbol)
-                name = 'lattice_constant_' + key + '_' + str(i_series)
+                name = 'lattice_constant_' + key + '_' + str(i_subset)
                 value, value_type, error = clean_value(form.cleaned_data[name])
                 models.NumericalValue.objects.create(created_by=request.user,
                                                      datapoint=datapoint,
@@ -785,14 +782,14 @@ def submit_data(request):
             lattice_vectors = []
             lattice_errors = []  # dummy
             for line in form.cleaned_data[
-                    'atomic_coordinates_' + str(i_series)].split('\n'):
+                    'atomic_coordinates_' + str(i_subset)].split('\n'):
                 try:
                     if line.startswith('lattice_vector'):
                         m = re.match(r'\s*lattice_vector' +
                                      3*r'\s+(-?\d+(?:\.\d+)?)' + r'\b', line)
                         coords = m.groups()
                         models.Datapoint.objects.create(
-                            created_by=request.user, dataseries=dataseries)
+                            created_by=request.user, subset=subset)
                         for i_coord, coord in enumerate(coords):
                             add_numerical_value(lattice_vectors,
                                                 lattice_errors,
@@ -805,7 +802,7 @@ def submit_data(request):
                             r'(\w+)\b', line)
                         coord_type, *coords, element = m.groups()
                         datapoints.append(models.Datapoint(
-                            created_by=request.user, dataseries=dataseries))
+                            created_by=request.user, subset=subset))
                         symbols.append(models.Symbol(created_by=request.user,
                                                      value=coord_type))
                         symbols.append(models.Symbol(created_by=request.user,
@@ -823,7 +820,7 @@ def submit_data(request):
             # Get kpoints
             k_labels = []
             for line in form.cleaned_data[
-                    'series_datapoints_' + str(i_series)].splitlines():
+                    'subset_datapoints_' + str(i_subset)].splitlines():
                 if skip_this_line(line):
                     continue
                 k_labels.append(line.split())
@@ -840,7 +837,8 @@ def submit_data(request):
                         f'Rename {os.path.basename(f.dataset_file.name)} '
                         '(this name is reserved)')
                     return render(
-                        request, 'materials/add_data.html', {'form': form})
+                        request, 'materials/add_data.html', {'main_form':
+                                                             form})
             # The band files need to be alphabeticaly sorted
             for i in range(len(files)):
                 for j in range(i+1, len(files)):
@@ -850,12 +848,12 @@ def submit_data(request):
         elif form.cleaned_data['two_axes']:
             try:
                 for line in form.cleaned_data[
-                        'series_datapoints_' + str(i_series)].splitlines():
+                        'subset_datapoints_' + str(i_subset)].splitlines():
                     if skip_this_line(line):
                         continue
                     x_value, y_value = line.split()[:2]
                     datapoints.append(models.Datapoint(
-                        created_by=request.user, dataseries=dataseries))
+                        created_by=request.user, subset=subset))
                     add_numerical_value(numerical_values, errors, x_value,
                                         is_secondary=True)
                     add_numerical_value(numerical_values, errors, y_value)
@@ -864,24 +862,22 @@ def submit_data(request):
         else:
             try:
                 for line in form.cleaned_data[
-                        'series_datapoints_' + str(i_series)].splitlines():
+                        'subset_datapoints_' + str(i_subset)].splitlines():
                     if skip_this_line(line):
                         continue
                     for value in line.split():
                         datapoints.append(models.Datapoint(
-                            created_by=request.user, dataseries=dataseries))
+                            created_by=request.user, subset=subset))
                         add_numerical_value(numerical_values, errors, value)
             except ValueError:
                 return error_and_return(dataset, line, form)
         # Fixed properties
         counter = 0
         for key in form.cleaned_data:
-            if key.startswith('fixed_property_' + str(i_series) + '_'):
+            if key.startswith('fixed_property_' + str(i_subset) + '_'):
                 suffix = key.split('fixed_property_')[1]
                 fixed_value = models.NumericalValueFixed(
-                    created_by=request.user,
-                    dataseries=dataseries,
-                    counter=counter)
+                    created_by=request.user, subset=subset, counter=counter)
                 fixed_value.physical_property = (
                     form.cleaned_data['fixed_property_' + suffix])
                 fixed_value.unit = form.cleaned_data['fixed_unit_' + suffix]
@@ -903,8 +899,8 @@ def submit_data(request):
     # If all went well, let the user know how much data was
     # successfully added
     n_data_points = 0
-    for series in dataset.dataseries_set.all():
-        n_data_points += series.datapoints.count()
+    for subset in dataset.subsets.all():
+        n_data_points += subset.datapoints.count()
     if n_data_points > 0:
         messages.success(request,
                          f'{n_data_points} new data point'
@@ -975,11 +971,11 @@ def delete_dataset_and_files(request, system_pk, dataset_pk, return_path):
 def dataset_data(request, pk):
     """Return the data set as a text file."""
     dataset = models.Dataset.objects.get(pk=pk)
-    dataseries = dataset.dataseries_set.first()
+    subset = dataset.subsets.first()
     text = ''
     x_value = ''
     y_value = ''
-    for datapoint in dataseries.datapoints.all():
+    for datapoint in subset.datapoints.all():
         for value in datapoint.values.all():
             if value.qualifier == models.NumericalValue.SECONDARY:
                 x_value = value.value
@@ -993,8 +989,8 @@ def dataset_image(request, pk):
     """Return a png image of the data set."""
     from matplotlib import pyplot
     dataset = models.Dataset.objects.get(pk=pk)
-    dataseries = dataset.dataseries_set.first()
-    datapoints = dataseries.datapoints.all()
+    subset = dataset.subsets.first()
+    datapoints = subset.datapoints.all()
     x_values = numpy.zeros(len(datapoints))
     y_values = numpy.zeros(len(datapoints))
     for i_dp, datapoint in enumerate(datapoints):
@@ -1034,23 +1030,23 @@ def data_for_chart(request, pk):
                 'secondary-property': dataset.secondary_property.name,
                 'secondary-unit': dataset.secondary_unit.label,
                 'data': []}
-    for series in dataset.dataseries_set.all():
+    for subset in dataset.subsets.all():
         response['data'].append({})
-        this_series = response['data'][-1]
-        this_series['series-label'] = series.label
+        this_subset = response['data'][-1]
+        this_subset['subset-label'] = subset.label
         values = models.NumericalValue.objects.filter(
-            datapoint__dataseries=series).order_by(
+            datapoint__subset=subset).order_by(
                 'datapoint_id', 'qualifier').values_list('value', flat=True)
-        this_series['values'] = []
+        this_subset['values'] = []
         for i in range(0, len(values), 2):
-            this_series['values'].append({'y': values[i], 'x': values[i+1]})
+            this_subset['values'].append({'y': values[i], 'x': values[i+1]})
     return JsonResponse(response)
 
 
-def get_series_values(request, pk):
-    """Return the numerical values of a series as a formatted list."""
+def get_subset_values(request, pk):
+    """Return the numerical values of a subset as a formatted list."""
     values = models.NumericalValue.objects.filter(
-        datapoint__dataseries__pk=pk).select_related(
+        datapoint__subset__pk=pk).select_related(
             'error').order_by('qualifier', 'datapoint__pk')
     total_len = len(values)
     y_len = total_len
@@ -1072,7 +1068,7 @@ def get_atomic_coordinates(request, pk):
 def get_jsmol_input(request, pk):
     """Return a statement to be executed by JSmol.
 
-    Go through the atomic structure data series of the representative
+    Go through the atomic structure data subsets of the representative
     data set of the given system. Pick the first one where the lattice
     vectors and atomic coordinates are present and can be converted to
     floats. Construct the "load data ..." inline statement suitable
@@ -1087,8 +1083,8 @@ def get_jsmol_input(request, pk):
     if not datasets:
         return HttpResponse()
     dataset = datasets.get(representative=True)
-    for series in dataset.dataseries_set.all():
-        data = utils.atomic_coordinates_as_json(series.pk)
+    for subset in dataset.subsets.all():
+        data = utils.atomic_coordinates_as_json(subset.pk)
         lattice_vectors = []
         try:
             for vector in data['vectors']:

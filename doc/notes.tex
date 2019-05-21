@@ -285,18 +285,18 @@ All experimental and theoretical results are contained in data sets. A data set 
   \end{itemize}
 \end{tcolorbox}
 
-A data set consists of one or more data series. If the data set describes, for example, the dielectric function measured at different temperatures, then each curve corresponding to a specific temperature would be a series in the data set.
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Dataseries(Base)]
+A data set consists of one or more data subsets. If the data set describes, for example, the dielectric function measured at different temperatures, then each curve corresponding to a specific temperature would be a data subset.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Subset(Base)]
   \begin{itemize}
   \item \texttt{dataset} --- reference to the primary key of Dataset
-  \item \texttt{label} --- short description of this series
+  \item \texttt{label} --- short description of this subset
   \end{itemize}
 \end{tcolorbox}
 
-A data series consists of one or more data points. When describing a single value such as the band gap of a material with no additional dependencies, the whole data set would consist of one series with only one data point with one numerical value.
+A data subset consists of one or more data points. When describing a single value such as the band gap of a material with no additional dependencies, the whole data set would consist of one subset with only one data point with one numerical value.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Datapoint(Base)]
   \begin{itemize}
-  \item \texttt{dataseries} --- reference to the primary key of Dataseries
+  \item \texttt{subset} --- reference to the primary key of Subset
   \end{itemize}
 \end{tcolorbox}
 
@@ -319,11 +319,11 @@ Any errors (uncertainties) associated with a numerical value are stored in a sep
   \end{itemize}
 \end{tcolorbox}
 
-A separate table is used for values that are fixed for the whole data set or series. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Whether the value is fixed at the data set or series level depends on whether the \texttt{dataset} or \texttt{dataseries} field is non-null. Also, unlike regular numerical values, the fixed values are far lesser in number that we can attach the errors directly to the values without a performance penalty.
+A separate table is used for values that are fixed across a data subset. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Also, unlike regular numerical values, the fixed values are far lesser in number that we can attach the errors directly to the values without a performance penalty.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValueFixed(Base)]
   \begin{itemize}
   \item \texttt{dataset} --- reference to the primary key of Dataset
-  \item \texttt{dataseries} --- reference to the primary key of Dataseries
+  \item \texttt{subset} --- reference to the primary key of Subset
   \item \texttt{physical\_property} --- reference to the primary key of Property
   \item \texttt{unit} --- reference to the primary key of Unit
   \item \texttt{value} --- floating point number

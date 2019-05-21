@@ -99,16 +99,19 @@ class AddSystem(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
+class AutoCharField(forms.CharField):
+    """Like regular CharField but max_length is automatically determined."""
+    def __init__(self, model=None, field=None, *args, **kwargs):
+        if model:
+            max_length = model._meta.get_field(field).max_length
+        else:
+            max_length = None
+        super().__init__(required=False, max_length=max_length,
+                         *args, **kwargs)
+
+
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
-    class CharField(forms.CharField):
-        def __init__(self, model=None, field=None, *args, **kwargs):
-            if model:
-                max_length = model._meta.get_field(field).max_length
-            else:
-                max_length = None
-            super().__init__(required=False, max_length=max_length,
-                             *args, **kwargs)
 
     # General
     select_reference = forms.ModelChoiceField(
@@ -124,19 +127,18 @@ class AddDataForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Select the system that is associated with the inserted data.')
-    data_set_label = CharField(
+    label = AutoCharField(
         model=models.Dataset, field='label',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
-        'Main description of the data set. This can include an explanation of '
-        'the significance of the results.')
-    extraction_method = CharField(
+        'Main description of the data. This can include an explanation of the '
+        'significance of the results.')
+    extraction_method = AutoCharField(
         model=models.Dataset, field='extraction_method',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
-        'How was the current data set obtained? For example, manually '
-        'extracted from a publication, from author, from another '
-        'database, ...')
+        'How was the current data obtained? For example, manually extracted '
+        'from a publication, from author, from another database, ...')
     primary_property = forms.ModelChoiceField(
         queryset=models.Property.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -221,19 +223,19 @@ class AddDataForm(forms.Form):
     # Synthesis
     with_synthesis_details = forms.BooleanField(
         required=False, initial=False, widget=forms.HiddenInput())
-    starting_materials = CharField(
+    starting_materials = AutoCharField(
         model=models.SynthesisMethod, field='starting_materials',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Specify the starting materials.')
-    product = CharField(
+    product = AutoCharField(
         model=models.SynthesisMethod, field='product',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Specify the final product of synthesis.')
-    synthesis_description = CharField(
+    synthesis_description = AutoCharField(
         label='Description',
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
         help_text='Describe the steps of the synthesis process.')
-    synthesis_comment = CharField(
+    synthesis_comment = AutoCharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
@@ -243,17 +245,17 @@ class AddDataForm(forms.Form):
     # Experimental
     with_experimental_details = forms.BooleanField(
         required=False, initial=False, widget=forms.HiddenInput())
-    experimental_method = CharField(
+    experimental_method = AutoCharField(
         label='Method',
         model=models.ExperimentalDetails, field='method',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Short name of the method used, e.g., "X-ray diffraction".')
-    experimental_description = CharField(
+    experimental_description = AutoCharField(
         label='Description',
         model=models.ExperimentalDetails, field='description',
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
         help_text='Describe all experimental steps here.')
-    experimental_comment = CharField(
+    experimental_comment = AutoCharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
@@ -263,7 +265,7 @@ class AddDataForm(forms.Form):
     # Computational
     with_computational_details = forms.BooleanField(
         required=False, initial=False, widget=forms.HiddenInput())
-    code = CharField(
+    code = AutoCharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Abinit, Quantum espresso...',
@@ -272,7 +274,7 @@ class AddDataForm(forms.Form):
         'Name of the code(s) used for calculations. It is recommended to also '
         'include other identifiers such as version number, branch name, or '
         'even the commit number if applicable.')
-    level_of_theory = CharField(
+    level_of_theory = AutoCharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder':
@@ -283,7 +285,7 @@ class AddDataForm(forms.Form):
         'used in the calculation. It gives an overall picture of the physics '
         'involved. Finer details of the level of theory such as the level of '
         'relativity should be filled separately.')
-    xc_functional = CharField(
+    xc_functional = AutoCharField(
         label='Exchange-correlation functional',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
@@ -292,7 +294,7 @@ class AddDataForm(forms.Form):
         help_text=''
         'Level of approximation used to treat the electron-electron '
         'interaction.')
-    k_point_grid = CharField(
+    k_point_grid = AutoCharField(
         label='K-point grid',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
@@ -300,7 +302,7 @@ class AddDataForm(forms.Form):
         }),
         help_text=''
         'Details of the k-point mesh.')
-    level_of_relativity = CharField(
+    level_of_relativity = AutoCharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder':
@@ -309,7 +311,7 @@ class AddDataForm(forms.Form):
         help_text=''
         'Specify the level of relativity. Note that this also includes the '
         'description of spin-orbit coupling!')
-    basis_set_definition = CharField(
+    basis_set_definition = AutoCharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'JTH PAW, TM PP with semicore...',
@@ -318,7 +320,7 @@ class AddDataForm(forms.Form):
         'Details of the basis set or of the algorithms directly related to '
         'the basis set. For example, in case of a plane wave calculation, '
         'also include details of the pseudopotential here if applicable.')
-    numerical_accuracy = CharField(
+    numerical_accuracy = AutoCharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder':
@@ -328,15 +330,15 @@ class AddDataForm(forms.Form):
         'Include all parameters here that describe the accuracy of the '
         'calculation (tolerance parameters for an SCF cycle, quality of '
         'integration grids, number of excited states included, ...).')
-    computational_comment = CharField(
+    computational_comment = AutoCharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
         'Additional information not revelant or suitable for the description '
         'part.')
 
-    # Data series
-    number_of_data_series = forms.CharField(
+    # Data subset
+    number_of_subsets = forms.CharField(
         initial=1,
         widget=forms.NumberInput(attrs={'class': 'form-control mx-sm-3',
                                         'min': '1',
@@ -346,20 +348,21 @@ class AddDataForm(forms.Form):
         'properties or some other aspect of the experiment/calculation are '
         'typically fixed (see the help text for "Add fixed property"). In '
         'case of a figure, each curve is typically considered a separate data '
-        'series.')
-    series_label = CharField(
+        'subset.')
+    subset_label = AutoCharField(
         label='Label',
-        model=models.Dataseries, field='label',
+        model=models.Subset, field='label',
         widget=forms.TextInput(
-            attrs={'class': 'form-control series-label-class'}),
+            attrs={'class': 'form-control subset-label-class'}),
         help_text=''
-        'Short description of the data series (optional). In a figure, this '
+        'Short description of the data subset (optional). In a figure, this '
         'information is typically shown in the legend. Not applicable with '
-        'only one series in the data set.')
-    series_datapoints = forms.CharField(
+        'only one data subset set.')
+    subset_datapoints = forms.CharField(
         required=False,
+        label='Data points',
         widget=forms.Textarea(
-            attrs={'class': 'form-control series-datapoints', 'rows': '3',
+            attrs={'class': 'form-control subset-datapoints', 'rows': '3',
                    'placeholder': 'value_1 value_2 ...'}),
         help_text=''
         'Insert data points here. These may be a single value, a series of '
@@ -431,19 +434,19 @@ class AddDataForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         help_text=''
         'Upload files containing anything that is relevant to the current '
-        'data set (input files to a calculation, image of the sample, ...). '
+        'data (input files to a calculation, image of the sample, ...). '
         'Multiple files can be selected here.')
 
     def __init__(self, *args, **kwargs):
-        """Dynamically add series and fixed properties."""
+        """Dynamically add subsets and fixed properties."""
         super().__init__(*args, **kwargs)
         self.label_suffix = ''
         if args:
             for key, value in args[0].items():
-                if key.startswith('series_datapoints_'):
+                if key.startswith('subset_datapoints_'):
                     self.fields[key] = forms.CharField(
                         required=False, widget=forms.Textarea, initial=value)
-                elif key.startswith('series_label_'):
+                elif key.startswith('subset_label_'):
                     self.fields[key] = forms.CharField(required=False,
                                                        initial=value)
                 elif key.startswith('fixed_property_'):
@@ -468,14 +471,14 @@ class AddDataForm(forms.Form):
         if data.get('two_axes') and not data.get('secondary_property'):
             self.add_error('secondary_property', 'This field is required.')
 
-    def get_series(self):
-        """Return a list of initial values for data series."""
+    def get_subset(self):
+        """Return a list of initial values for data subset."""
         results = []
         for field in self.fields:
-            if field.startswith('series_datapoints_'):
-                counter = field.split('series_datapoints_')[1]
-                if 'series_label_' + counter in self.fields:
-                    label = self.fields['series_label_' + counter].initial
+            if field.startswith('subset_datapoints_'):
+                counter = field.split('subset_datapoints_')[1]
+                if 'subset_label_' + counter in self.fields:
+                    label = self.fields['subset_label_' + counter].initial
                 else:
                     label = ''
                 results.append([counter, label, self.fields[field].initial])
@@ -487,8 +490,8 @@ class AddDataForm(forms.Form):
         for field in self.fields:
             if field.startswith('fixed_property_'):
                 suffix = field.split('fixed_property_')[1]
-                series, counter = suffix.split('_')
-                results.append([series, counter,
+                subset, counter = suffix.split('_')
+                results.append([subset, counter,
                                 self.fields[field].initial,
                                 self.fields['fixed_unit_' + suffix].initial,
                                 self.fields['fixed_value_' + suffix].initial])
@@ -498,15 +501,15 @@ class AddDataForm(forms.Form):
         results = []
         for field in self.fields:
             if field.startswith('lattice_constant_a_'):
-                series = field.split('lattice_constant_a_')[1]
+                subset = field.split('lattice_constant_a_')[1]
                 results.append([
-                    series,
-                    self.fields['lattice_constant_a_' + series].initial,
-                    self.fields['lattice_constant_b_' + series].initial,
-                    self.fields['lattice_constant_c_' + series].initial,
-                    self.fields['lattice_constant_alpha_' + series].initial,
-                    self.fields['lattice_constant_beta_' + series].initial,
-                    self.fields['lattice_constant_gamma_' + series].initial,
-                    self.fields['atomic_coordinates_' + series].initial,
+                    subset,
+                    self.fields['lattice_constant_a_' + subset].initial,
+                    self.fields['lattice_constant_b_' + subset].initial,
+                    self.fields['lattice_constant_c_' + subset].initial,
+                    self.fields['lattice_constant_alpha_' + subset].initial,
+                    self.fields['lattice_constant_beta_' + subset].initial,
+                    self.fields['lattice_constant_gamma_' + subset].initial,
+                    self.fields['atomic_coordinates_' + subset].initial,
                 ])
         return results

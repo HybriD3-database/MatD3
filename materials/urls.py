@@ -4,7 +4,7 @@ from materials import views
 
 app_name = 'materials'
 urlpatterns = [
-    path('', views.SearchFormView.as_view(), name='materials_home'),
+    path('search', views.SearchFormView.as_view(), name='search'),
     path('<int:pk>', views.SystemView.as_view(), name='system'),
     path('dataset/<int:pk>', views.DatasetView.as_view(), name='dataset'),
     path('<int:system_pk>/publish-system/<int:dataset_pk>/<path:return_path>',
@@ -55,8 +55,8 @@ urlpatterns = [
          name='get_atomic_coordinates'),
     path('get-dropdown-options/<str:name>', views.get_dropdown_options,
          name='get_dropdown_options'),
-    path('get-series-values/<int:pk>', views.get_series_values,
-         name='get_series_values'),
+    path('get-subset-values/<int:pk>', views.get_subset_values,
+         name='get_subset_values'),
     path('get-jsmol-input/<int:pk>', views.get_jsmol_input,
          name="get_jsmol_input"),
     path('report-issue', views.report_issue, name="report_issue"),

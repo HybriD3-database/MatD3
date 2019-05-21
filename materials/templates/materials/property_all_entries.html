@@ -16,7 +16,7 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  <h5>{{ dataset.label }}</h5>
+                  <h5>{{ dataset.primary_property.name }}</h5>
                   {% if user == dataset.created_by %}
                     {% include 'materials/dataset_buttons.html' with system=dataset.system %}
                   {% endif %}

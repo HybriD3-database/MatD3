@@ -20,25 +20,25 @@ def atomic_coordinates_as_json(pk):
     fetching for the lattice vectors and atomic coordinates.
 
     """
-    series = models.Dataseries.objects.get(pk=pk)
+    subset = models.Subset.objects.get(pk=pk)
     vectors = models.NumericalValue.objects.filter(
-        datapoint__dataseries=series).filter(
-           datapoint__symbols__isnull=True).order_by(
-               'datapoint_id', 'counter')
+        datapoint__subset=subset).filter(
+            datapoint__symbols__isnull=True).order_by(
+                'datapoint_id', 'counter')
     data = {'vectors':
             [[x.formatted('.10g') for x in vectors[:3]],
              [x.formatted('.10g') for x in vectors[3:6]],
              [x.formatted('.10g') for x in vectors[6:9]]]}
     # Here counter=1 filters out the first six entries
     symbols = models.Symbol.objects.filter(
-        datapoint__dataseries=series).filter(counter=1).order_by(
+        datapoint__subset=subset).filter(counter=1).order_by(
             'datapoint_id').values_list('value', flat=True)
     coords = models.NumericalValue.objects.filter(
-        datapoint__dataseries=series).filter(
+        datapoint__subset=subset).filter(
             datapoint__symbols__counter=1).select_related('error').order_by(
                 'counter', 'datapoint_id')
     tmp = models.Symbol.objects.filter(
-        datapoint__dataseries=series).annotate(
+        datapoint__subset=subset).annotate(
             num=models.models.Count('datapoint__symbols')).filter(
                 num=2).first()
     if tmp:

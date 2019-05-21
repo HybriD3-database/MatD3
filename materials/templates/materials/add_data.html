@@ -1,12 +1,13 @@
 {% extends 'materials/base.html' %}
 
+{% load materials_tags %}
+
 {% block body %}
   <div class="card card-default">
     <div class="card-header">
       <h4>Add Data</h4>
     </div>
     <div class="card-body">
-      {% load materials_tags %}
       <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
           <a class="nav-link active" data-toggle="tab" href="#results" role="tab">
@@ -49,53 +50,53 @@
               <div class="card-body card-add-data">
                 <div class="form-row">
                   <div class="form-group col-md-6">
-                    {% include 'materials/input_field.html' with field=form.select_reference %}
+                    {% input_field main_form.select_reference %}
                   </div>
                   <div class="form-group col-md-6">
-                    {% include 'materials/input_field.html' with field=form.select_system %}
+                    {% input_field main_form.select_system %}
                   </div>
                   <div class="form-group col-md-6">
-                    {% include 'materials/input_field.html' with field=form.data_set_label %}
+                    {% input_field main_form.label %}
                   </div>
                   <div class="form-group col-md-6">
-                    {% include 'materials/input_field.html' with field=form.extraction_method %}
+                    {% input_field main_form.extraction_method %}
                   </div>
                   <div class="from-group col-md-4">
-                    {% include 'materials/input_field.html' with field=form.primary_property %}
+                    {% input_field main_form.primary_property %}
                   </div>
                   <div class="from-group col-md-2">
-                    {% include 'materials/input_field.html' with field=form.primary_unit %}
+                    {% input_field main_form.primary_unit %}
                   </div>
                   <div class="from-group col-md-4">
-                    {% include 'materials/input_field.html' with field=form.secondary_property %}
+                    {% input_field main_form.secondary_property %}
                   </div>
                   <div class="from-group col-md-2">
-                    {% include 'materials/input_field.html' with field=form.secondary_unit %}
+                    {% input_field main_form.secondary_unit %}
                   </div>
                 </div>
                 <hr>
                 <div class="form-check form-check-inline">
-                  {% include 'materials/input_field.html' with field=form.is_figure %}
+                  {% input_field main_form.is_figure %}
                 </div>
                 <div class="form-check form-check-inline">
-                  {% include 'materials/input_field.html' with field=form.visible_to_public %}
+                  {% input_field main_form.visible_to_public %}
                 </div>
                 <div class="form-check form-check-inline">
-                  {% include 'materials/input_field.html' with field=form.two_axes %}
+                  {% input_field main_form.two_axes %}
                 </div>
                 <hr>
                 <div class="form-row">
                   <div class="col-md-6">
-                    {% include 'materials/input_field.html' with field=form.origin_of_data %}
+                    {% input_field main_form.origin_of_data %}
                   </div>
                   <div class="col-md-6">
-                    {% include 'materials/input_field.html' with field=form.dimensionality_of_the_system %}
+                    {% input_field main_form.dimensionality_of_the_system %}
                   </div>
                   <div class="col-md-6">
-                    {% include 'materials/input_field.html' with field=form.sample_type %}
+                    {% input_field main_form.sample_type %}
                   </div>
                   <div class="col-md-6">
-                    {% include 'materials/input_field.html' with field=form.crystal_system %}
+                    {% input_field main_form.crystal_system %}
                   </div>
                 </div>
               </div>
@@ -110,22 +111,22 @@
                       style="background:#dce9ff">
                 Synthesis method (click to add)
               </button>
-              {{ form.with_synthesis_details }}
+              {{ main_form.with_synthesis_details }}
               <div class="collapse" id="synthesis-body">
                 <div class="card-body card-add-data">
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.starting_materials %}
+                      {% input_field main_form.starting_materials %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.product %}
+                      {% input_field main_form.product %}
                     </div>
                   </div>
                   <div class="form-group">
-                    {% include 'materials/input_field.html' with field=form.synthesis_description %}
+                    {% input_field main_form.synthesis_description %}
                   </div>
                   <div class="form-group">
-                    {% include 'materials/input_field.html' with field=form.synthesis_comment %}
+                    {% input_field main_form.synthesis_comment %}
                   </div>
                 </div>
               </div>
@@ -140,17 +141,17 @@
                       style="background:#dce9ff">
                 Experimental details (click to add)
               </button>
-              {{ form.with_experimental_details }}
+              {{ main_form.with_experimental_details }}
               <div class="collapse" id="experimental-body">
                 <div class="card-body card-add-data">
                   <div class="form-group">
-                    {% include 'materials/input_field.html' with field=form.experimental_method %}
+                    {% input_field main_form.experimental_method %}
                   </div>
                   <div class="form-group">
-                    {% include 'materials/input_field.html' with field=form.experimental_description %}
+                    {% input_field main_form.experimental_description %}
                   </div>
                   <div class="form-group">
-                    {% include 'materials/input_field.html' with field=form.experimental_comment %}
+                    {% input_field main_form.experimental_comment %}
                   </div>
                 </div>
               </div>
@@ -165,34 +166,34 @@
                       style="background:#dce9ff">
                 Computational details (click to add)
               </button>
-              {{ form.with_computational_details }}
+              {{ main_form.with_computational_details }}
               <div class="collapse" id="computational-body">
                 <div class="card-body card-add-data">
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.code %}
+                      {% input_field main_form.code %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.level_of_theory %}
+                      {% input_field main_form.level_of_theory %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.xc_functional %}
+                      {% input_field main_form.xc_functional %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.k_point_grid %}
+                      {% input_field main_form.k_point_grid %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.level_of_relativity %}
+                      {% input_field main_form.level_of_relativity %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.basis_set_definition %}
+                      {% input_field main_form.basis_set_definition %}
                     </div>
                     <div class="form-group col-md-6">
-                      {% include 'materials/input_field.html' with field=form.numerical_accuracy %}
+                      {% input_field main_form.numerical_accuracy %}
                     </div>
                   </div>
                   <div class="form-group">
-                    {% include 'materials/input_field.html' with field=form.computational_comment %}
+                    {% input_field main_form.computational_comment %}
                   </div>
                 </div>
               </div>
@@ -203,30 +204,30 @@
             <!-- DATA -->
             <div class="card card-item">
               <div class="card-header">
-                Data set
+                Data
               </div>
               <div class="card-body card-add-data">
                 <div class="row">
                   <div class="col-md-12">
                     <div class="form-inline">
                       <div class="form-group">
-                        {{ form.number_of_data_series.label_tag }}
+                        {{ main_form.number_of_subsets.label_tag }}
                         <div style="margin-left:3px">
-                          {{ form.number_of_data_series.help_text|tooltip }}
+                          {{ main_form.number_of_subsets.help_text|tooltip }}
                         </div>
-                        {{ form.number_of_data_series }}
+                        {{ main_form.number_of_subsets }}
                       </div>
                       <input type="file" id="import-all-data" class="inputfile">
                       <label for="import-all-data"><i class="fa fa-upload" aria-hidden="true"></i>
                         Import all from file...</label>
                       <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
-                        <span class="tooltiptext">Select to import all data (all series) from a single file. Use the ampersand ("&") as a delimiter between different data series.</span>
+                        <span class="tooltiptext">Select to import all data (all subsets) from a single file. Use the ampersand ("&") as a delimiter between different data subsets.</span>
                       </i>
                     </div>
                   </div>
                 </div>
                 <br>
-                <div id="data-series"></div>
+                <div id="data-subset"></div>
               </div>
             </div>
 
@@ -238,7 +239,7 @@
                 Additional data
               </div>
               <div class="card-body card-add-data">
-                {% include 'materials/input_field.html' with field=form.uploaded_files %}
+                {% input_field main_form.uploaded_files %}
               </div>
             </div>
 
@@ -274,7 +275,6 @@
           </div>
         </div>
 
-        
         <!-- ADD NEW PROPERTY -->
         <div class="tab-pane" id="properties" role="tabpanel">
           <br>
@@ -301,10 +301,10 @@
     </div>
   </div>
 
-  <!-- data series template -->
-  <div class="data-series-template d-none">
+  <!-- data subset template -->
+  <div class="data-subset-template d-none">
     <br>
-    <div class="card card-series">
+    <div class="card card-subset">
       <div class="card-header"></div>
       <div class="card-body">
         <div class="row">
@@ -313,11 +313,11 @@
               <div class="col-md-7">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text">{{ form.series_label.label }}</span>
+                    <span class="input-group-text">{{ main_form.subset_label.label }}</span>
                   </div>
-                  {{ form.series_label }}
+                  {{ main_form.subset_label }}
                   <i class="fa fa-question-circle fa-2x tooltip-container" style="margin:3px">
-                    <span class="tooltiptext">{{ form.series_label.help_text }}</span>
+                    <span class="tooltiptext">{{ main_form.subset_label.help_text }}</span>
                   </i>
                 </div>
               </div>
@@ -335,19 +335,19 @@
           </div>
           <div class="col-md-4">
             <div class="normal-input">
-              {{ form.series_datapoints.label_tag }}
-              {{ form.series_datapoints.help_text|tooltip }}
+              {{ main_form.subset_datapoints.label_tag }}
+              {{ main_form.subset_datapoints.help_text|tooltip }}
               <div class="float-right">
                 <input type="file" id="import-data-file" class="inputfile import-data-file">
                 <label for="import-data-file"><i class="fa fa-upload" aria-hidden="true"></i>
                   Import from file...</label>
               </div>
-              {{ form.series_datapoints }}
+              {{ main_form.subset_datapoints }}
             </div>
             <div class="atomic-structure-input" hidden="true">
               <div class="form-group">
-                {{ form.lattice_constant_a.label_tag }}
-                {{ form.lattice_constant_a.help_text|tooltip }}
+                {{ main_form.lattice_constant_a.label_tag }}
+                {{ main_form.lattice_constant_a.help_text|tooltip }}
                 <div class="float-right">
                   <input type="file" id="import-lattice-parameters"
                          class="inputfile import-lattice-parameters">
@@ -355,21 +355,21 @@
                     Import from file...</label>
                 </div>
                 <div class="input-group">
-                  {{ form.lattice_constant_a }}
-                  {{ form.lattice_constant_b }}
-                  {{ form.lattice_constant_c }}
+                  {{ main_form.lattice_constant_a }}
+                  {{ main_form.lattice_constant_b }}
+                  {{ main_form.lattice_constant_c }}
                 </div>
               </div>
               <div class="form-group">
-                {{ form.lattice_constant_alpha.label_tag }}
+                {{ main_form.lattice_constant_alpha.label_tag }}
                 <div class="input-group">
-                  {{ form.lattice_constant_alpha }}
-                  {{ form.lattice_constant_beta }}
-                  {{ form.lattice_constant_gamma }}
+                  {{ main_form.lattice_constant_alpha }}
+                  {{ main_form.lattice_constant_beta }}
+                  {{ main_form.lattice_constant_gamma }}
                 </div>
               </div>
               <div class="form-group">
-                {% include 'materials/input_field.html' with field=form.atomic_coordinates %}
+                {% input_field main_form.atomic_coordinates %}
               </div>
             </div>
           </div>
@@ -427,7 +427,7 @@
   </script>
   <script>
    // Use selectize on all dropdown menus
-   {% for field in form.visible_fields %}
+   {% for field in main_form.visible_fields %}
    {% if field.field.widget.input_type == 'select' %}
    fill_selectize('{{ field.name }}', '{{ field.id_for_label }}', {{ field.value|default_if_none:'' }});
    {% endif %}
@@ -438,7 +438,7 @@
    var is_figure_untested = true;
    // Autofill the main input data textarea
    function autofill_data(el) {
-     var i_series = $(el).attr('id').split('import-data-file_')[1];
+     var i_subset = $(el).attr('id').split('import-data-file_')[1];
      var form_data = new FormData();
      form_data.append('file', el.files[0]);
      $(el).val('');  // Clear the file list
@@ -452,11 +452,11 @@
      }).done(function(result) {
        result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
        var data = result.split(/&/);
-       if (i_series) {
-         $('#id_series_datapoints_' + i_series).val(result);
+       if (i_subset) {
+         $('#id_subset_datapoints_' + i_subset).val(result);
        } else { // fill globally
-         for (var i = 1; i <= $('#id_number_of_data_series').val(); i++) {
-           $('#id_series_datapoints_' + i).val(data[i-1].replace(/^\n/, ''));
+         for (var i = 1; i <= $('#id_number_of_subsets').val(); i++) {
+           $('#id_subset_datapoints_' + i).val(data[i-1].replace(/^\n/, ''));
          }
        }
        var is_figure = document.getElementById('id_is_figure');
@@ -472,8 +472,8 @@
          is_figure_untested = false;
        }
      }).fail(function(result) {
-       if (!i_series) i_series = 1;
-       $('#id_series_datapoints_' + i_series).val(result);
+       if (!i_subset) i_subset = 1;
+       $('#id_subset_datapoints_' + i_subset).val(result);
      });
    }
    $('#import-all-data').change(function() {
@@ -485,39 +485,39 @@
    });
   </script>
   <script>
-   // Create a new data series
+   // Create a new data subset
    var counter_fixed = 0;
-   function add_series(i_series) {
-     // The name and id of each input is appended by _<i_series>
-     var copy = document.getElementsByClassName('data-series-template')[0].cloneNode(true);
-     copy.classList.remove('d-none', 'data-series-template');
-     copy.getElementsByClassName('card-header')[0].innerHTML = 'Series #' + i_series;
+   function add_subset(i_subset) {
+     // The name and id of each input is appended by _<i_subset>
+     var copy = document.getElementsByClassName('data-subset-template')[0].cloneNode(true);
+     copy.classList.remove('d-none', 'data-subset-template');
+     copy.getElementsByClassName('card-header')[0].innerHTML = 'Subset #' + i_subset;
      var elements = copy.querySelectorAll('input, textarea');
      for (var i = 0; i < elements.length; i++) {
-       elements[i].id += '_' + i_series;
-       elements[i].name += '_' + i_series;
+       elements[i].id += '_' + i_subset;
+       elements[i].name += '_' + i_subset;
      }
      elements = copy.getElementsByTagName('label');
      for (var i = 0; i < elements.length; i++) {
-       elements[i].htmlFor += '_' + i_series;
+       elements[i].htmlFor += '_' + i_subset;
      }
-     copy.getElementsByClassName('fixed-properties')[0].id = 'fixed-properties-' + i_series;
+     copy.getElementsByClassName('fixed-properties')[0].id = 'fixed-properties-' + i_subset;
      var fixed_prop_btn = copy.getElementsByClassName('add-fixed-property')[0]
-     fixed_prop_btn.id += 'add-fixed-property-' + i_series;
+     fixed_prop_btn.id += 'add-fixed-property-' + i_subset;
      // Add a fixed property
      fixed_prop_btn.addEventListener('click', function() {
-       add_fixed_property(i_series, counter_fixed++);
+       add_fixed_property(i_subset, counter_fixed++);
      });
      copy.getElementsByClassName('import-data-file')[0].addEventListener('change', function() {
        autofill_data(this);
      });
-     document.getElementById('data-series').appendChild(copy);
+     document.getElementById('data-subset').appendChild(copy);
    }
    // Create a new set of fixed property fields
-   function add_fixed_property(series, counter, prop_initial='', unit_initial='',
+   function add_fixed_property(subset, counter, prop_initial='', unit_initial='',
                                value_initial='') {
      var copy = document.getElementsByClassName('fixed-property-template')[0].cloneNode(true);
-     var suffix = series + '_' + counter;
+     var suffix = subset + '_' + counter;
      var el, name;
      copy.classList.remove('d-none', 'fixed-property-template');
      function edit_id_and_name(type) {
@@ -539,39 +539,39 @@
        row = this.parentNode.parentNode.parentNode.parentNode;
        row.parentNode.removeChild(row);
      });
-     document.getElementById('fixed-properties-' + series).appendChild(copy);
+     document.getElementById('fixed-properties-' + subset).appendChild(copy);
    }
-   var number_of_data_series = document.getElementById('id_number_of_data_series');
-   number_of_data_series.addEventListener('change', function() {
-     var data_series = document.getElementById('data-series');
-     var n_series_current = data_series.children.length;
-     var n_series_requested = this.value;
-     var n_to_add = n_series_requested - n_series_current;
+   var number_of_subsets = document.getElementById('id_number_of_subsets');
+   number_of_subsets.addEventListener('change', function() {
+     var data_subset = document.getElementById('data-subset');
+     var n_subset_current = data_subset.children.length;
+     var n_subset_requested = this.value;
+     var n_to_add = n_subset_requested - n_subset_current;
      if (n_to_add > 0) {
        for (var i = 1; i <= n_to_add; i++) {
-         add_series(n_series_current+i);
+         add_subset(n_subset_current+i);
        }
      }
      if (n_to_add < 0) {
        for (var i = n_to_add; i < 0; i++) {
-         data_series.removeChild(data_series.lastChild);
+         data_subset.removeChild(data_subset.lastChild);
        }
      }
-     if (data_series.hasChildNodes()) {
-       data_series.firstChild.getElementsByClassName('series-label-class')[0].disabled =
-         n_series_requested == 1;
+     if (data_subset.hasChildNodes()) {
+       data_subset.firstChild.getElementsByClassName('subset-label-class')[0].disabled =
+         n_subset_requested == 1;
      }
-     document.getElementById('import-all-data').disabled = n_series_requested == 0;
+     document.getElementById('import-all-data').disabled = n_subset_requested == 0;
    });
-   number_of_data_series.dispatchEvent(new Event('change'));
-   // Prefill series from a previous instance of the form
-   {% for name_counter, label, values in form.get_series %}
-   document.getElementById('id_series_label_{{ name_counter }}').value = '{{ label|escapejs }}';
-   document.getElementById('id_series_datapoints_{{ name_counter }}').value = '{{ values|escapejs }}';
+   number_of_subsets.dispatchEvent(new Event('change'));
+   // Prefill the data subsets from a previous instance of the form
+   {% for name_counter, label, values in main_form.get_subset %}
+   document.getElementById('id_subset_label_{{ name_counter }}').value = '{{ label|escapejs }}';
+   document.getElementById('id_subset_datapoints_{{ name_counter }}').value = '{{ values|escapejs }}';
    {% endfor %}
    // Prefill fixed properties from a previous instance of the form
-   {% for series_counter, name_counter, prop, unit, value in form.get_fixed_properties %}
-   add_fixed_property({{ series_counter }}, {{ name_counter }},
+   {% for subset_counter, name_counter, prop, unit, value in main_form.get_fixed_properties %}
+   add_fixed_property({{ subset_counter }}, {{ name_counter }},
                       '{{ prop|escapejs }}', '{{ unit|escapejs }}', '{{ value|escapejs }}');
    {% endfor %}
   </script>
@@ -615,12 +615,12 @@
        $('#id_secondary_property').parent().show();
        $('#id_secondary_unit').parent().show();
        $('label[for="id_primary_property-selectized"]').html('Primary property (y-axis)');
-       $('.series-datapoints').attr('placeholder', 'x1 y1\nx2 y2\n...');
+       $('.subset-datapoints').attr('placeholder', 'x1 y1\nx2 y2\n...');
      } else {
        $('#id_secondary_property').parent().hide();
        $('#id_secondary_unit').parent().hide();
        $('label[for="id_primary_property-selectized"]').html('Primary property');
-       $('.series-datapoints').attr('placeholder', 'value_1 value_2 ...');
+       $('.subset-datapoints').attr('placeholder', 'value_1 value_2 ...');
      }
    });
   </script>
@@ -654,12 +654,12 @@
      $('input[name^="lattice_constant_"]').each(function() {
        $(this).prop('required', is_atomic_structure);
      });
-     $('textarea[name^="series_datapoints_"]').each(function() {
+     $('textarea[name^="subset_datapoints_"]').each(function() {
        $(this).prop('required', !is_atomic_structure);
      });
    });
    function import_lattice_parameters(el) {
-     var i_series = $(el).attr('id').split('import-lattice-parameters_')[1];
+     var i_subset = $(el).attr('id').split('import-lattice-parameters_')[1];
      var form_data = new FormData();
      form_data.append('file', el.files[0]);
      $(el).val('');  // Clear the file list
@@ -693,12 +693,10 @@
                lattice_vectors.push([match_[1], match_[2], match_[3]]);
              }
            }
-           function norm(vector) {
-             return Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
-           }
-           function get_angle(v1, v2, norm1, norm2) {
-             return Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
-           }
+           var norm = vector =>
+             Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
+           var get_angle = (v1, v2, norm1, norm2) =>
+             Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
            if (lattice_vectors.length < 3) {
              throw 'Unable to read in three lattice vectors!';
            }
@@ -733,8 +731,8 @@
          $('#id_atomic_coordinates_' + dest_suffix).val(input_data);
        }
        try {
-         if (i_series) {
-           process_batch(response, i_series);
+         if (i_subset) {
+           process_batch(response, i_subset);
          } else {
            response = response.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
            var data = response.split('&');
@@ -748,22 +746,22 @@
          $('#id_atomic_coordinates_1').val(e);
        }
      }).fail(function(response) {
-       if (!i_series) i_series = 1;
-       $('#id_atomic_coordinates_' + i_series).html(response);
+       if (!i_subset) i_subset = 1;
+       $('#id_atomic_coordinates_' + i_subset).html(response);
      });
    }
    $('.import-lattice-parameters').change(function() {
      import_lattice_parameters(this);
    });
    // Prefill from a previous instance of the form
-   {% for series_counter, a, b, c, alpha, beta, gamma, coordinates in form.get_lattice_parameters %}
-   $('#id_lattice_constant_a_{{ series_counter }}').val('{{ a|escapejs }}');
-   $('#id_lattice_constant_b_{{ series_counter }}').val('{{ b|escapejs }}');
-   $('#id_lattice_constant_c_{{ series_counter }}').val('{{ c|escapejs }}');
-   $('#id_lattice_constant_alpha_{{ series_counter }}').val('{{ alpha|escapejs }}');
-   $('#id_lattice_constant_beta_{{ series_counter }}').val('{{ beta|escapejs }}');
-   $('#id_lattice_constant_gamma_{{ series_counter }}').val('{{ gamma|escapejs }}');
-   $('#id_atomic_coordinates_{{ series_counter }}').val('{{ coordinates|escapejs }}');
+   {% for subset_counter, a, b, c, alpha, beta, gamma, coordinates in main_form.get_lattice_parameters %}
+   $('#id_lattice_constant_a_{{ subset_counter }}').val('{{ a|escapejs }}');
+   $('#id_lattice_constant_b_{{ subset_counter }}').val('{{ b|escapejs }}');
+   $('#id_lattice_constant_c_{{ subset_counter }}').val('{{ c|escapejs }}');
+   $('#id_lattice_constant_alpha_{{ subset_counter }}').val('{{ alpha|escapejs }}');
+   $('#id_lattice_constant_beta_{{ subset_counter }}').val('{{ beta|escapejs }}');
+   $('#id_lattice_constant_gamma_{{ subset_counter }}').val('{{ gamma|escapejs }}');
+   $('#id_atomic_coordinates_{{ subset_counter }}').val('{{ coordinates|escapejs }}');
    {% endfor %}
   </script>
   <script>
@@ -774,17 +772,17 @@
      if ($(this).find(':selected').text() == 'band structure') {
        primary_unit.hide();
        $('#id_two_axes').trigger('change', force_hide=true).prop('disabled', true);
-       number_of_data_series.readOnly = true;
-       number_of_data_series.value = 1;
-       number_of_data_series.dispatchEvent(new Event('change'));
+       number_of_subsets.readOnly = true;
+       number_of_subsets.value = 1;
+       number_of_subsets.dispatchEvent(new Event('change'));
        band_structure_selected = true;
        set_checkbox('id_is_figure', false, true);
        set_checkbox('id_two_axes', false, true);
-       $('.series-datapoints').attr('placeholder', '# K-point path\nX L\nL Gamma\n...');
+       $('.subset-datapoints').attr('placeholder', '# K-point path\nX L\nL Gamma\n...');
      } else if (band_structure_selected) {
        primary_unit.show();
        $('#id_two_axes').trigger('change').prop('disabled', false);
-       number_of_data_series.readOnly = false;
+       number_of_subsets.readOnly = false;
        band_structure_selected = false;
        set_checkbox('id_is_figure', false, false);
        set_checkbox('id_two_axes', false, false);
@@ -794,7 +792,7 @@
    document.getElementById('id_uploaded_files').addEventListener('change', function() {
      var primary_prop = document.getElementById('id_primary_property');
      if (primary_prop.options[primary_prop.selectedIndex].text == 'band structure' &&
-         !document.getElementById('id_series_datapoints_1').value) {
+         !document.getElementById('id_subset_datapoints_1').value) {
        var control_file = null;
        for (var i = 0; i < this.files.length; i++) {
          if (this.files[i].name == 'control.in') {
@@ -814,7 +812,7 @@
            data: form_data,
          }).done(function(result) {
            result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-           document.getElementById('id_series_datapoints_1').value = result;
+           document.getElementById('id_subset_datapoints_1').value = result;
          }).fail(function(result) {});
        }
      }

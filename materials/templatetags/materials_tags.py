@@ -10,3 +10,8 @@ def tooltip(value):
     value = escape(value)
     return mark_safe('<i class="fa fa-question-circle tooltip-container">'
                      '<span class="tooltiptext">' + value + '</span></i>')
+
+
+@register.inclusion_tag('materials/input_field.html')
+def input_field(field):
+    return {'field': field}

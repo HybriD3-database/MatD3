@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Base(models.Model):
+    """Basic meta information that all models must have."""
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(default=timezone.now)
     this = '%(app_label)s_%(class)s'
@@ -124,7 +125,7 @@ class Tag(models.Model):
 
 
 class System(models.Model):
-    """Contains meta data for investigated system."""
+    """Primary information about the physical system."""
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
     group = models.CharField(max_length=100, blank=True)  # aka Alternate names
@@ -239,6 +240,12 @@ class ExcitonEmission(IDInfo):
 
 
 class Dataset(Base):
+    """Class for mainly tables and figures.
+
+    It doesn't have to be limited to tables and figures though. A data
+    set is a self-contained collection of any data.
+
+    """
     SINGLE_CRYSTAL = 0
     POWDER = 1
     FILM = 2
@@ -295,6 +302,9 @@ class Dataset(Base):
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name_plural = 'data sets'
+
     def save(self, *args, **kwargs):
         if self.representative:
             # Unset the representative flag of the dataset that was
@@ -324,7 +334,7 @@ class Dataset(Base):
 
     def get_all_fixed_properties(self):
         """Return a formatted list of all fixed properties."""
-        values = NumericalValueFixed.objects.filter(dataseries__dataset=self)
+        values = NumericalValueFixed.objects.filter(subset__dataset=self)
         text = ''
         if not values:
             return ''
@@ -334,15 +344,23 @@ class Dataset(Base):
         return '(' + text + ')'
 
 
-class Dataseries(Base):
+class Subset(Base):
+    """Subset of data.
+
+    A data set always has at least one subset. It may have more if it
+    makes sense to split up data into several subsets (e.g., several
+    curves in a figure).
+
+    """
     label = models.CharField(max_length=100, blank=True)
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
+                                related_name='subsets')
 
     class Meta:
-        verbose_name_plural = 'dataseries'
+        verbose_name_plural = 'data subsets'
 
     def get_fixed_values(self):
-        """Return all fixed properties for the given series."""
+        """Return all fixed properties for the given subset."""
         values = self.fixed_values.all()
         output = []
         for value in values:
@@ -353,11 +371,11 @@ class Dataseries(Base):
 
     def get_lattice_constants(self):
         """Return three lattice constants and angles."""
-        symbols = Symbol.objects.filter(datapoint__dataseries=self).annotate(
+        symbols = Symbol.objects.filter(datapoint__subset=self).annotate(
             num=models.Count('datapoint__symbols')).filter(num=1).order_by(
                 'datapoint_id').values_list('value', flat=True)
         values_float = NumericalValue.objects.filter(
-            datapoint__dataseries=self).annotate(
+            datapoint__subset=self).annotate(
                 num=models.Count('datapoint__values')).filter(
                     num=1).select_related('error').order_by('datapoint_id')
         if self.dataset.primary_unit:
@@ -374,8 +392,14 @@ class Dataseries(Base):
 
 
 class Datapoint(Base):
-    dataseries = models.ForeignKey(Dataseries, on_delete=models.CASCADE,
-                                   related_name='datapoints')
+    """Container for the data point.
+
+    The actual data are contained in other tables such as
+    NumericalValue.
+
+    """
+    subset = models.ForeignKey(
+        Subset, on_delete=models.CASCADE, related_name='datapoints')
 
 
 class NumericalValueBase(Base):
@@ -399,6 +423,7 @@ class NumericalValueBase(Base):
 
 
 class NumericalValue(NumericalValueBase):
+    """Numerical value(s) associated with a data point."""
     PRIMARY = 0
     SECONDARY = 1
     QUALIFIER_TYPES = (
@@ -411,7 +436,7 @@ class NumericalValue(NumericalValueBase):
         default=PRIMARY, choices=QUALIFIER_TYPES)
 
     def formatted(self, F=''):
-        """Return the value as a polished string.
+        """Return the value as a formatted string.
 
         In particular, the value type and an error, if present, are
         attached to the value, e.g., ">12.3 (±0.4)".
@@ -437,14 +462,15 @@ class Symbol(Base):
 
 
 class NumericalValueFixed(NumericalValueBase):
+    """Values that are constant within a data subset."""
     physical_property = models.ForeignKey(Property, on_delete=models.PROTECT)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE,
                                 related_name='fixed_values')
-    dataseries = models.ForeignKey(Dataseries,
-                                   null=True,
-                                   on_delete=models.CASCADE,
-                                   related_name='fixed_values')
+    subset = models.ForeignKey(Subset,
+                               null=True,
+                               on_delete=models.CASCADE,
+                               related_name='fixed_values')
     error = models.FloatField(null=True)
 
     def formatted(self):

@@ -1,6 +1,6 @@
 Array.from(document.querySelectorAll('tbody[class="tabulated-data"]')).forEach(function(table_body) {
-  var series_pk = table_body.id.split('-')[1];
-  $.getJSON('/materials/get-series-values/' + series_pk, function(data) {
+  var subset_pk = table_body.id.split('-')[1];
+  $.getJSON('/materials/get-subset-values/' + subset_pk, function(data) {
     var table = document.createElement('table');
     var fragment = document.createDocumentFragment();
     for (var i=0; i<data.length; i++) {

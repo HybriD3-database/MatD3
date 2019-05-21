@@ -6,7 +6,7 @@
     {% if user.is_authenticated %}
       <h2 class="text-center">Welcome, {{user.first_name}}, to the HybriD&sup3; materials database</h2>
     {% else %}
-      <h2>Welcome to the HybriD&sup3; materials database</h2>
+      <h2 class="text-center">Welcome to the HybriD&sup3; materials database</h2>
     {% endif %}
     <div class="d-none d-sm-block">
       <img src="{% static 'materials/images/perovskite_model.png' %}"
@@ -20,11 +20,6 @@
       <p>
         The HybriD&sup3; materials database will provide a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
       </p>
-      <div class="d-flex">
-        <div class="alert alert-warning col-12 text-center p-0">
-          At this point, the database is in its infancy.
-        </div>
-      </div>
       <p>
         The data is available under the Creative Commons license with attribution clause, described <a href="https://creativecommons.org/licenses/by/4.0/">here</a> and, in its full text, <a href="https://creativecommons.org/licenses/by/4.0/legalcode">here</a>. We also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.
       </p>
@@ -35,7 +30,7 @@
     <a href="{% url 'contact' %}">
       <button type="buttom" class="btn btn-primary">Learn more</button>
     </a>
-    <a href="{% url 'materials:materials_home' %}">
+    <a href="{% url 'materials:search' %}">
       <button type="button" class="btn btn-primary">Start searching</button>
     </a>
   </section>

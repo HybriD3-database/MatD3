@@ -146,13 +146,13 @@ class NumericalValueFixedInline(nested_admin.NestedTabularInline):
     fields = ('physical_property', 'value_type', 'value', 'error', 'unit')
 
 
-class DataseriesAdmin(BaseAdmin):
+class SubsetAdmin(BaseAdmin):
     list_display = ('id', 'created_by', 'updated_by', 'updated')
-    fields = [f.name for f in models.Dataseries._meta.local_fields]
+    fields = [f.name for f in models.Subset._meta.local_fields]
     inlines = [DatapointInline, NumericalValueFixedInline]
 
 
-admin.site.register(models.Dataseries, DataseriesAdmin)
+admin.site.register(models.Subset, SubsetAdmin)
 
 
 class SynthesisInline(BaseMixin, nested_admin.NestedStackedInline):
@@ -176,10 +176,10 @@ class ComputationalInline(BaseMixin, nested_admin.NestedStackedInline):
     extra = 0
 
 
-class DataseriesInline(BaseMixin, nested_admin.NestedStackedInline):
-    model = models.Dataseries
+class SubsetInline(BaseMixin, nested_admin.NestedStackedInline):
+    model = models.Subset
     extra = 0
-    fields = [f.name for f in models.Dataseries._meta.local_fields]
+    fields = [f.name for f in models.Subset._meta.local_fields]
     inlines = [NumericalValueFixedInline]
 
 
@@ -196,7 +196,7 @@ class DatasetAdmin(BaseAdmin):
     ordering = ('-updated',)
     fields = [f.name for f in models.Dataset._meta.local_fields]
     inlines = (SynthesisInline, ExperimentalInline, ComputationalInline,
-               DataseriesInline, FilesInline)
+               SubsetInline, FilesInline)
 
 
 admin.site.register(models.Dataset, DatasetAdmin)
