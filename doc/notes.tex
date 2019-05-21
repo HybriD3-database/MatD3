@@ -31,6 +31,8 @@ pdftex}
 
 \maketitle
 
+\tableofcontents
+
 \section{Access and setup}
 
 The repository of the HybriD$^3$ database is hosted at Duke's GitLab website under Xiaochen Du's account. First, make sure you have access to GitLab by logging in to
@@ -200,11 +202,15 @@ if some of the changes do not appear on the homepage. If you are unsure about so
 
 A good place to get started and learn more about Django is the official Django tutorial, which starts here: \url{https://docs.djangoproject.com/en/2.1/intro/tutorial01}.
 
+\section{Adding new users}
+
+
+
 \section{Database structure}
 
 This section provides an overview of the Django models used in this project. The presentation focuses on how the models are defined in the Python source code and not the actual SQL tables. For example, even though fields such as the primary key are not listed in the following, it is understood that these are automatically created for the SQL tables.
 
-Most tables inherit from a base table which records the history of how each entry is created/updated. Since actualy polymorphism is not supported in relational databases, Django explicitly copies these fields to any child models.
+Most models inherit from a base models which records information of how each entry is created/updated. Since actual polymorphism is not supported in relational databases, Django explicitly copies these fields to any child models.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Base]
   \begin{itemize}
   \item \texttt{created} --- date the entry was created
@@ -214,15 +220,13 @@ Most tables inherit from a base table which records the history of how each entr
   \end{itemize}
 \end{tcolorbox}
 
-All properties are stored in a table which contains the name and an input file requirement of the property. The latter is necessary for properties such as the band structure, whose data points cannot be manually entered and where the user must supply the data in the form of files.
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Property(Base)]
+All properties are stored in a table which contains the name of the property. \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Property(Base)]
   \begin{itemize}
   \item \texttt{name} --- displayed name of the property
-  \item \texttt{require\_input\_files} --- whether this property requires any input files. If true, the files must be located at \verb+MEDIA_ROOT/input_files/dataset_#+, where \verb+#+ is the ID of the data set.
   \end{itemize}
 \end{tcolorbox}
 
-All units are stored in a table which contains just the label field.
+All units are stored in a table which contains the label field.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Unit(Base)]
   \begin{itemize}
   \item \texttt{label} --- ``nm'', ``cm$^2$ V$^{-1}$ s$^{-1}$'', \ldots
@@ -285,7 +289,7 @@ All experimental and theoretical results are contained in data sets. A data set 
   \end{itemize}
 \end{tcolorbox}
 
-A data set consists of one or more data subsets. If the data set describes, for example, the dielectric function measured at different temperatures, then each curve corresponding to a specific temperature would be a data subset.
+A data set consists of one or more data subsets. One is always present but there could be several if it is possible to logically group the data somehow. For instance, different curves in a figure would correspond to separate data subsets.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Subset(Base)]
   \begin{itemize}
   \item \texttt{dataset} --- reference to the primary key of Dataset
@@ -319,7 +323,7 @@ Any errors (uncertainties) associated with a numerical value are stored in a sep
   \end{itemize}
 \end{tcolorbox}
 
-A separate table is used for values that are fixed across a data subset. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Also, unlike regular numerical values, the fixed values are far lesser in number that we can attach the errors directly to the values without a performance penalty.
+A separate table is used for values that are fixed across a data subset. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Unlike regular numerical values, the fixed values are far lesser in number so that we can attach the errors directly to the values without a performance penalty.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValueFixed(Base)]
   \begin{itemize}
   \item \texttt{dataset} --- reference to the primary key of Dataset
@@ -434,6 +438,17 @@ If you are unsure about any rule described in this section, see the source code 
 
 \begin{itemize}
 \item Leave one space around the opening and closing symbols of a construct (e.g., \verb+{{+, \verb+%}+, \ldots).
+\end{itemize}
+
+\section{Other}
+
+\begin{itemize}
+\item Should it be necessary to clean the Django permissions table, run
+\begin{verbatim}
+Permission.objects.all().delete()
+\end{verbatim}
+  This deletes all permissions and once Django is restarted, rebuilds only the ones for tables which are present.
+\item In order to have an interactive shell, install iPython in the virtual environment (not just system wide).
 \end{itemize}
 
 \end{document}
