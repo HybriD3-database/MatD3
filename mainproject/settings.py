@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'raven.contrib.django.raven_compat',
     'nested_admin',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -125,7 +126,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = int(5e8)
 # Account
 
 LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/account/login'
+LOGIN_URL = '/accounts/login'
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # Email
@@ -181,4 +182,12 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
+}
+
+# REST framework
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
 }
