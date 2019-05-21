@@ -3,3 +3,4 @@ hybrid3env/*
 *.pyc
 /static
 .env
+.coverage

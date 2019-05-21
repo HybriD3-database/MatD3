@@ -204,7 +204,7 @@ A good place to get started and learn more about Django is the official Django t
 
 \section{Adding new users}
 
-
+When a new user is registered, all users with the superuser status receive an email. The new user cannot submit any new data until their status has been set to ``staff status'' by one of the superusers. Note that for security reasons, they should not have the superuser status without a good reason.
 
 \section{Database structure}
 
@@ -444,11 +444,16 @@ If you are unsure about any rule described in this section, see the source code 
 
 \begin{itemize}
 \item Should it be necessary to clean the Django permissions table, run
-\begin{verbatim}
-Permission.objects.all().delete()
-\end{verbatim}
+  \begin{lstlisting}
+    Permission.objects.all().delete()
+  \end{lstlisting}
   This deletes all permissions and once Django is restarted, rebuilds only the ones for tables which are present.
 \item In order to have an interactive shell, install iPython in the virtual environment (not just system wide).
+\item The command for running tests with Coverage.py is
+  \begin{lstlisting}
+    coverage run manage.py test && coverate report -m
+  \end{lstlisting}
+  In order to save time and not rebuild the test database every time, use the \texttt{--keepdb} flag with test.
 \end{itemize}
 
 \end{document}

@@ -61,7 +61,7 @@ def activate(request, uid, token):
                   email_addresses,
                   fail_silently=False,
                   html_message=(f'The account of "{user.username}" is '
-                                'waiting to be activated.'))
+                                'waiting to be elevated to staff status.'))
         messages.success(request, 'Account confirmed.')
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         messages.error(request, 'Activation link is invalid!')
