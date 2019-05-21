@@ -1041,8 +1041,8 @@ def data_for_chart(request, pk):
         response['primary-property'] = dataset.primary_property_label
     if dataset.secondary_property_label:
         response['secondary-property'] = (
-            f'{dataset.secondary_property_label} '
-            f'({dataset.secondary_property.name})')
+            f'{dataset.secondary_property.name} '
+            f'({dataset.secondary_property_label})')
     for subset in dataset.subsets.all():
         response['data'].append({})
         this_subset = response['data'][-1]
