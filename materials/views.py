@@ -81,6 +81,7 @@ class StaffStatusMixin(LoginRequiredMixin):
 
 class SystemView(generic.ListView):
     template_name = 'materials/system.html'
+    context_object_name = 'dataset_list'
 
     def get_queryset(self, **kwargs):
         return models.Dataset.objects.filter(
