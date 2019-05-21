@@ -514,6 +514,8 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name, {
             'main_form': forms.AddDataForm(),
+            'property_form': forms.AddPropertyForm(),
+            'unit_form': forms.AddUnitForm(),
         })
 
 
@@ -526,7 +528,7 @@ class SystemUpdateView(generic.UpdateView):
 
 @login_required
 def add_property(request):
-    name = request.POST['property-name']
+    name = request.POST['property_name']
     models.Property.objects.create(created_by=request.user, name=name)
     messages.success(request,
                      f'New property "{name}" successfully added to '
@@ -536,7 +538,7 @@ def add_property(request):
 
 @login_required
 def add_unit(request):
-    label = request.POST['unit-label']
+    label = request.POST['unit_label']
     models.Unit.objects.create(created_by=request.user, label=label)
     messages.success(request,
                      f'New unit "{label}" successfully added to '

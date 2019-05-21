@@ -280,10 +280,12 @@
           <br>
           <form method="post" action="{% url 'materials:add_property' %}">
             {% csrf_token %}
-            <label for="property-name">Property name: </label>
-            <input id="property-name" name="property-name" type="text" required>
-            <br>
-            <button type="submit" name="submit-property" class="btn btn-primary">Submit</button>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                {% input_field property_form.property_name %}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
           </form>
         </div>
         <!-- ADD NEW UNIT -->
@@ -291,10 +293,12 @@
           <br>
           <form method="post" action="{% url 'materials:add_unit' %}">
             {% csrf_token %}
-            <label for="unit-label">Unit label: </label>
-            <input id="unit-label" name="unit-label" type="text" required>
-            <br>
-            <button type="submit" name="submit-unit" class="btn btn-primary">Submit</button>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                {% input_field unit_form.unit_label %}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
           </form>
         </div>
       </div>

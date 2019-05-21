@@ -110,6 +110,20 @@ class AutoCharField(forms.CharField):
                          *args, **kwargs)
 
 
+class AddPropertyForm(forms.Form):
+    property_name = AutoCharField(
+        model=models.Property, field='name',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Name of the physical property.')
+
+
+class AddUnitForm(forms.Form):
+    unit_label = AutoCharField(
+        model=models.Unit, field='label',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='Label of the unit.')
+
+
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
 
