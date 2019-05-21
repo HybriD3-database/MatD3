@@ -10,7 +10,7 @@ function plot_data(element, data, x_property, x_unit, y_property, y_unit) {
   ]
   for (var i = 0; i < data.length; i++) {
     datasets.push({
-      label: data[i]['series-label'],
+      label: data[i]['subset-label'],
       backgroundColor: 'rgba(0,0,0,0)',
       borderColor: colors[i],
       data: data[i]['values']

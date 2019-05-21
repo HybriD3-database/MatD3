@@ -682,8 +682,12 @@ def submit_data(request):
     dataset.label = form.cleaned_data['label']
     dataset.primary_property = form.cleaned_data['primary_property']
     dataset.primary_unit = form.cleaned_data['primary_unit']
+    dataset.primary_property_label = form.cleaned_data[
+        'primary_property_label']
     dataset.secondary_property = form.cleaned_data['secondary_property']
     dataset.secondary_unit = form.cleaned_data['secondary_unit']
+    dataset.secondary_property_label = form.cleaned_data[
+        'secondary_property_label']
     dataset.visible = form.cleaned_data['visible_to_public']
     dataset.is_figure = form.cleaned_data['is_figure']
     dataset.is_experimental = (
@@ -1033,10 +1037,25 @@ def data_for_chart(request, pk):
                 'secondary-property': dataset.secondary_property.name,
                 'secondary-unit': dataset.secondary_unit.label,
                 'data': []}
+    if dataset.primary_property_label:
+        response['primary-property'] = dataset.primary_property_label
+    if dataset.secondary_property_label:
+        response['secondary-property'] = (
+            f'{dataset.secondary_property_label} '
+            f'({dataset.secondary_property.name})')
     for subset in dataset.subsets.all():
         response['data'].append({})
         this_subset = response['data'][-1]
         this_subset['subset-label'] = subset.label
+        fixed_values = []
+        for value in models.NumericalValueFixed.objects.filter(subset=subset):
+            fixed_values.append(f' {value.physical_property} = '
+                                f'{value.formatted()} {value.unit}')
+        if this_subset['subset-label']:
+            this_subset['subset-label'] = (
+                f"{this_subset['subset-label']}:{','.join(fixed_values)}")
+        else:
+            this_subset['subset-label'] = (','.join(fixed_values)).lstrip()
         values = models.NumericalValue.objects.filter(
             datapoint__subset=subset).order_by(
                 'datapoint_id', 'qualifier').values_list('value', flat=True)

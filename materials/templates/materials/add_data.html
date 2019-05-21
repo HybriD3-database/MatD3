@@ -74,6 +74,14 @@
                     {% input_field main_form.secondary_unit %}
                   </div>
                 </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    {% input_field main_form.primary_property_label %}
+                  </div>
+                  <div class="form-group col-md-6">
+                    {% input_field main_form.secondary_property_label %}
+                  </div>
+                </div>
                 <hr>
                 <div class="form-check form-check-inline">
                   {% input_field main_form.is_figure %}
@@ -618,11 +626,13 @@
      if ($(this).is(':checked') && !force_hide) {
        $('#id_secondary_property').parent().show();
        $('#id_secondary_unit').parent().show();
+       $('#id_secondary_property_label').parent().show();
        $('label[for="id_primary_property-selectized"]').html('Primary property (y-axis)');
        $('.subset-datapoints').attr('placeholder', 'x1 y1\nx2 y2\n...');
      } else {
        $('#id_secondary_property').parent().hide();
        $('#id_secondary_unit').parent().hide();
+       $('#id_secondary_property_label').parent().hide();
        $('label[for="id_primary_property-selectized"]').html('Primary property');
        $('.subset-datapoints').attr('placeholder', 'value_1 value_2 ...');
      }

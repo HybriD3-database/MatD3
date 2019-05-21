@@ -170,6 +170,12 @@ class AddDataForm(forms.Form):
         'properties, leave empty. If the data is in arbitray units, select '
         '"a.u." (note that this is different from empty). If the unit of '
         'interest is missing here, add it under "Define new unit".')
+    primary_property_label = AutoCharField(
+        model=models.Dataset, field='primary_property_label',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+        'If present, this label is used on the y-axis of a figure. Default is '
+        'to use the same name as the physical property.')
     secondary_property = forms.ModelChoiceField(
         queryset=models.Property.objects.all(),
         required=False,
@@ -187,6 +193,12 @@ class AddDataForm(forms.Form):
         help_text=''
         'Define the secondary unit of interest. If the unit of interest '
         'missing here, add it under "Define new unit".')
+    secondary_property_label = AutoCharField(
+        model=models.Dataset, field='secondary_property_label',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+        'If present, this label is used on the x-axis of a figure. Default is '
+        'to use the same name as the physical property.')
     is_figure = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         required=False,

@@ -8,7 +8,7 @@
 <!-- MAIN DATA -->
 <h5>{{ dataset.label }}</h5>
 <h5>Origin: {% if dataset.is_experimental %}experimental{% else %}computational{% endif %}
-  {{ dataset.get_all_fixed_properties }}
+  {{ dataset.get_all_fixed_temperatures }}
 </h5>
 {% if dataset.primary_property.name == 'atomic structure' %}
   <!-- Atomic structures require special treatment -->

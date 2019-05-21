@@ -285,12 +285,14 @@ class Dataset(Base):
     primary_unit = models.ForeignKey(
         Unit, null=True, blank=True, on_delete=models.PROTECT,
         related_name='primary_unit')
+    primary_property_label = models.TextField(blank=True, max_length=50)
     secondary_property = models.ForeignKey(
         Property, null=True, blank=True, on_delete=models.PROTECT,
         related_name='secondary_property')
     secondary_unit = models.ForeignKey(
         Unit, null=True, blank=True, on_delete=models.PROTECT,
         related_name='secondary_unit')
+    secondary_property_label = models.TextField(blank=True, max_length=50)
     reference = models.ForeignKey(
         Reference, null=True, on_delete=models.PROTECT)
     visible = models.BooleanField()
@@ -332,16 +334,14 @@ class Dataset(Base):
     def __str__(self):
         return f'ID: {self.pk} ({self.primary_property})'
 
-    def get_all_fixed_properties(self):
-        """Return a formatted list of all fixed properties."""
-        values = NumericalValueFixed.objects.filter(subset__dataset=self)
-        text = ''
-        if not values:
-            return ''
-        for i_value, value in enumerate(values):
-            text += (f'{value.physical_property} = {value.formatted()} '
-                     f'{value.unit}{", " if i_value < len(values)-1 else ""}')
-        return '(' + text + ')'
+    def get_all_fixed_temperatures(self):
+        """Return a formatted list of all fixed temperatures."""
+        values = []
+        for value in NumericalValueFixed.objects.filter(
+                subset__dataset=self).filter(
+                    physical_property__name='temperature'):
+            values.append(f'{value.formatted()} {value.unit}')
+        return ('(T = ' + ', '.join(values) + ')' if values else '')
 
 
 class Subset(Base):
