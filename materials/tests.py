@@ -1,9 +1,16 @@
 from copy import deepcopy
+from selenium import webdriver
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import Permission
+from django.shortcuts import reverse
+from django.test import LiveServerTestCase
 from django.test import TestCase
 
 from . import models
+from accounts.tests import USERNAME
+from accounts.tests import PASSWORD
 
 User = get_user_model()
 dataset_template = models.Dataset(visible=True,
@@ -80,3 +87,51 @@ class ModelsTestCase(TestCase):
         self.assertEqual(models.Dataset.linked_to.through.objects.count(), 20)
         models.Dataset.objects.last().delete()
         self.assertEqual(models.Dataset.linked_to.through.objects.count(), 12)
+
+
+class SeleniumTestCase(LiveServerTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        users = Group.objects.create(name='users')
+        for perm in Permission.objects.filter(
+                content_type__app_label='materials'):
+            users.permissions.add(perm)
+        user = User.objects.create(
+            username=USERNAME, is_active=True, is_staff=True)
+        user.set_password(PASSWORD)
+        user.save()
+        users.user_set.add(user)
+        cls.selenium = webdriver.Firefox(service_log_path='/dev/null')
+        cls.selenium.maximize_window()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        super().tearDownClass()
+
+    def login(self):
+        self.selenium.get(self.live_server_url)
+        self.selenium.find_element_by_link_text('Login').click()
+        self.selenium.find_element_by_name('username').send_keys(USERNAME)
+        self.selenium.find_element_by_name('password').send_keys(PASSWORD)
+        self.selenium.find_element_by_xpath('//button[@type="submit"]').click()
+
+    def test_properties_and_units(self):
+        S = self.selenium
+        self.login()
+        S.get(self.live_server_url + reverse('materials:add_data'))
+        for property_ in ['band gap', 'atomic structure']:
+            S.find_element_by_link_text('Define new property').click()
+            S.find_element_by_name('property_name').send_keys(property_)
+            property_link = reverse("materials:add_property")
+            property_submit = S.find_element_by_xpath(
+                f'//form[@action="{property_link}"]//button[@type="submit"]')
+            property_submit.click()
+        for unit in ['eV', 'Å']:
+            S.find_element_by_link_text('Define new unit').click()
+            S.find_element_by_name('unit_label').send_keys(unit)
+            unit_link = reverse("materials:add_unit")
+            unit_submit = S.find_element_by_xpath(
+                f'//form[@action="{unit_link}"]//button[@type="submit"]')
+            unit_submit.click()
