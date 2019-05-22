@@ -16,3 +16,4 @@ class MaterialsConfig(AppConfig):
                     users.permissions.add(perm)
         except Exception:
             pass
+        from materials import signals  # noqa

@@ -17,7 +17,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
-    'materials.apps.MaterialsConfig',
+    'materials',
     'accounts',
     'django.contrib.admin',
     'django.contrib.auth',

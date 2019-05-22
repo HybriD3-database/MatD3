@@ -1,7 +1,7 @@
 import nested_admin
 
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 from django.utils import timezone
 
 from . import models
@@ -134,7 +134,7 @@ class DatapointInline(BaseMixin, nested_admin.NestedStackedInline):
 
 
 class NumericalValueFixedForm(forms.ModelForm):
-    """Needed only to make the error field non-mandatory."""
+    """Needed to make the error field non-mandatory."""
     error = forms.FloatField(required=False)
 
 
@@ -194,9 +194,11 @@ class DatasetAdmin(BaseAdmin):
                     'updated_by', 'updated')
     list_filter = ('updated',)
     ordering = ('-updated',)
-    fields = [f.name for f in models.Dataset._meta.local_fields]
+    fields = ([f.name for f in models.Dataset._meta.local_fields] +
+              ['linked_to'])
     inlines = (SynthesisInline, ExperimentalInline, ComputationalInline,
                SubsetInline, FilesInline)
+    filter_horizontal = ['linked_to']
 
 
 admin.site.register(models.Dataset, DatasetAdmin)

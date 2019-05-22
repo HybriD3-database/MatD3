@@ -26,6 +26,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.shortcuts import reverse
+from django.utils.safestring import mark_safe
 from django.views import generic
 
 from . import forms
@@ -118,6 +119,16 @@ class DatasetView(generic.ListView):
 
     def get_queryset(self, **kwargs):
         return models.Dataset.objects.filter(pk=self.kwargs['pk'])
+
+
+class LinkedDataView(generic.ListView):
+    """Returns data sets that are linked to each other."""
+    template_name = 'materials/linked_data.html'
+
+    def get_queryset(self, **kwargs):
+        dataset = models.Dataset.objects.get(pk=self.kwargs['pk'])
+        datasets = dataset.linked_to.all()
+        return list(datasets) + [dataset]
 
 
 class SearchFormView(generic.TemplateView):
@@ -654,9 +665,9 @@ def submit_data(request):
                                                   value=array[i]))
         return filtered_list
 
-    def error_and_return(dataset, line, form):
+    def error_and_return(dataset, text, form):
         """Shortcut for returning with info about the error."""
-        messages.error(request, f'Could not process line: {line}')
+        messages.error(request, text)
         dataset.delete()
         return render(request, 'materials/add_data.html', {'main_form': form})
 
@@ -820,7 +831,8 @@ def submit_data(request):
                 except AttributeError:
                     # Skip comments and empty lines
                     if not re.match(r'(?:\r?$|#|//)', line):
-                        return error_and_return(dataset, line, form)
+                        return error_and_return(
+                            dataset, f'Could not process line: {line}', form)
             add_datapoint_ids(lattice_vectors, 9, 3)
             models.NumericalValue.objects.bulk_create(lattice_vectors)
         elif dataset.primary_property.name == 'band structure':
@@ -839,13 +851,10 @@ def submit_data(request):
                     files.append(f.dataset_file)
                 if os.path.basename(f.dataset_file.name) in [
                         'band_structure_full.png', 'band_structure_small.png']:
-                    messages.error(
-                        request,
+                    return error_and_return(
+                        dataset,
                         f'Rename {os.path.basename(f.dataset_file.name)} '
-                        '(this name is reserved)')
-                    return render(
-                        request, 'materials/add_data.html', {'main_form':
-                                                             form})
+                        '(this name is reserved)', form)
             # The band files need to be alphabeticaly sorted
             for i in range(len(files)):
                 for j in range(i+1, len(files)):
@@ -865,7 +874,8 @@ def submit_data(request):
                                         is_secondary=True)
                     add_numerical_value(numerical_values, errors, y_value)
             except ValueError:
-                return error_and_return(dataset, line, form)
+                return error_and_return(
+                    dataset, f'Could not process line: {line}', form)
         else:
             try:
                 for line in form.cleaned_data[
@@ -877,7 +887,8 @@ def submit_data(request):
                             created_by=request.user, subset=subset))
                         add_numerical_value(numerical_values, errors, value)
             except ValueError:
-                return error_and_return(dataset, line, form)
+                return error_and_return(
+                    dataset, f'Could not process line: {line}', form)
         # Fixed properties
         counter = 0
         for key in form.cleaned_data:
@@ -903,19 +914,28 @@ def submit_data(request):
     models.Error.objects.bulk_create(generate_numerical_value_ids(errors))
     add_datapoint_ids(symbols, len(symbols), len(datapoints))
     models.Symbol.objects.bulk_create(symbols)
+    # Linked data sets
+    for pk in form.cleaned_data['related_data_sets'].split():
+        try:
+            dataset.linked_to.add(models.Dataset.objects.get(pk=pk))
+        except models.Dataset.DoesNotExist:
+            return error_and_return(
+                dataset, f'Related data set {pk} does not exist', form)
     # If all went well, let the user know how much data was
     # successfully added
     n_data_points = 0
     for subset in dataset.subsets.all():
         n_data_points += subset.datapoints.count()
     if n_data_points > 0:
-        messages.success(request,
-                         f'{n_data_points} new data point'
-                         f'{"s" if n_data_points != 1 else ""} '
-                         'successfully added to the database!')
+        message = (f'{n_data_points} new '
+                   f'data point{"s" if n_data_points != 1 else ""} '
+                   'successfully added to the database.')
     else:
-        messages.success(request,
-                         'New data successfully added to the database!')
+        message = 'New data successfully added to the database.'
+    dataset_url = reverse('materials:dataset', kwargs={'pk': dataset.pk})
+    message = mark_safe(message +
+                        f' <a href="{dataset_url}">View</a> the data set.')
+    messages.success(request, message)
     return redirect(reverse('materials:add_data'))
 
 

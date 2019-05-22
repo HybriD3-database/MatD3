@@ -13,5 +13,5 @@ def tooltip(value):
 
 
 @register.inclusion_tag('materials/input_field.html')
-def input_field(field):
-    return {'field': field}
+def input_field(field, inline=False):
+    return {'field': field, 'inline': inline}

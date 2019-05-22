@@ -128,6 +128,17 @@ class AddDataForm(forms.Form):
     """Main form for submitting data."""
 
     # General
+    related_data_sets = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+        'List of data set IDs directly related (linked) to this data (space '
+        'separated). Two or more data sets can be linked if they are results '
+        'of the same experiment or calculation but describe different '
+        'physical properties (e.g., "band structure" and "band gap" or '
+        '"absorption coefficient" and "absorption peak position"). Find the '
+        'related data set IDs as "Data set ID" at the bottom of the data sets.'
+    )
     select_reference = forms.ModelChoiceField(
         queryset=models.Reference.objects.all(),
         required=False,
@@ -496,6 +507,10 @@ class AddDataForm(forms.Form):
         data = self.cleaned_data
         if data.get('two_axes') and not data.get('secondary_property'):
             self.add_error('secondary_property', 'This field is required.')
+        if not all(map(lambda x: x.isdigit(),
+                       data.get('related_data_sets').split())):
+            self.add_error('related_data_sets',
+                           'This must be a list of space separated integers.')
 
     def get_subset(self):
         """Return a list of initial values for data subset."""

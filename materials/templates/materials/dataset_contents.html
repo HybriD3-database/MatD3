@@ -159,6 +159,28 @@
   </div>
 </div>
 
+<!-- LINKED DATA -->
+{% if dataset.linked_to.exists %}
+  <div class="card">
+    <div class="card-header">
+      Related data
+    </div>
+    <div class="card-body">
+      This data set is directly linked to other data sets:
+      <ul>
+        {% for linked_set in dataset.linked_to.all %}
+          <li>
+            <a href="{% url 'materials:dataset' pk=linked_set.pk %}">
+              data set {{ linked_set.pk }} ({{ linked_set.primary_property.name }})
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'materials:linked_data' pk=dataset.pk %}">See all related data</a>
+    </div>
+  </div>
+{% endif %}
+
 <!-- SYNTHESIS METHOD -->
 {% if dataset.synthesis.exists %}
   <div class="card">

@@ -303,6 +303,7 @@ class Dataset(Base):
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
+    linked_to = models.ManyToManyField('self')
 
     class Meta:
         verbose_name_plural = 'data sets'
@@ -465,8 +466,6 @@ class NumericalValueFixed(NumericalValueBase):
     """Values that are constant within a data subset."""
     physical_property = models.ForeignKey(Property, on_delete=models.PROTECT)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-    dataset = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE,
-                                related_name='fixed_values')
     subset = models.ForeignKey(Subset,
                                null=True,
                                on_delete=models.CASCADE,

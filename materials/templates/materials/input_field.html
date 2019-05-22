@@ -1,39 +1,46 @@
 {% load materials_tags %}
 
-{% if field.field.widget.input_type == 'checkbox' %}
-  <!-- CHECKBOX -->
-  {{ field }}
-  <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-  <div style="margin-left:3px">
-    {{ field.help_text|tooltip }}
-  </div>
-{% elif field.field.widget.input_type == 'radio' %}
-  <!-- RADIO -->
-  <legend class="col-form-label">
-    {{ field.label }}
-    {{ field.help_text|tooltip }}
-  </legend>
-  {% for radio in field %}
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" id="{{ radio.id_for_label }}"
-             name="{{ field.name }}" value="{{ radio.data.value }}"
-             {% if radio.data.attrs.checked %}checked{% endif %}>
-      <label class="form-check-label" for="{{ radio.id_for_label }}">
-        {{ radio.choice_label|capfirst }}
-      </label>
-    </div>
-  {% endfor %}
-{% else %}
-  <!-- OTHERS -->
-  {{ field.label_tag }}
-  {{ field.help_text|tooltip }}
-  {% if field.errors %}
-    <span class="alert alert-danger">{{ field.errors.as_text }}</span>
-  {% endif %}
-  {% if field.field.widget.input_type == 'select' %}
-    <select id="{{ field.id_for_label }}" name="{{ field.name }}" placeholder="--none--" hidden>
-    </select>
-  {% else %}
+{% if inline %}<div class="input-group">{% endif %}
+
+  {% if field.field.widget.input_type == 'checkbox' %}
+    <!-- CHECKBOX -->
     {{ field }}
+    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    <div style="margin-left:3px">
+      {{ field.help_text|tooltip }}
+    </div>
+  {% elif field.field.widget.input_type == 'radio' %}
+    <!-- RADIO -->
+    <legend class="col-form-label">
+      {{ field.label }}
+      {{ field.help_text|tooltip }}
+    </legend>
+    {% for radio in field %}
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" id="{{ radio.id_for_label }}"
+               name="{{ field.name }}" value="{{ radio.data.value }}"
+               {% if radio.data.attrs.checked %}checked{% endif %}>
+        <label class="form-check-label" for="{{ radio.id_for_label }}">
+          {{ radio.choice_label|capfirst }}
+        </label>
+      </div>
+    {% endfor %}
+  {% else %}
+    <!-- OTHERS -->
+    {% if inline %}<div class="mt-2 mr-2">{% endif %}
+    {{ field.label_tag }}
+    {{ field.help_text|tooltip }}
+    {% if inline %}</div>{% endif %}
+    {% if field.field.widget.input_type == 'select' %}
+      <select id="{{ field.id_for_label }}" name="{{ field.name }}" placeholder="--none--" hidden>
+      </select>
+    {% else %}
+      {{ field }}
+    {% endif %}
   {% endif %}
+
+{% if inline %}</div>{% endif %}
+
+{% if field.errors %}
+  <p class="alert alert-danger">{{ field.errors.as_text }}</p>
 {% endif %}

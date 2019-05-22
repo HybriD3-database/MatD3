@@ -51,15 +51,15 @@ body {
     background-color: #f0f0f0;
 }
 
-.card-series {
+.card-subset {
     box-shadow: 4px 4px 8px 1px #bbb;
 }
 
-.card-series > .card-header {
+.card-subset > .card-header {
     background-color: #e9fbfe;
 }
 
-.card-series > .card-body {
+.card-subset > .card-body {
     background-color: #f6f6f6;
 }
 
