@@ -34,7 +34,6 @@ from . import forms
 from . import models
 from . import utils
 from mainproject import settings
-import materials.rangeparser
 
 matplotlib.use('Agg')
 logger = logging.getLogger(__name__)
@@ -44,7 +43,7 @@ def dataset_author_check(view):
     """Test whether the logged on user is the creator of the data set."""
     @login_required
     def wrap(request, *args, **kwargs):
-        dataset = get_object_or_404(models.Dataset, pk=kwargs['dataset_pk'])
+        dataset = get_object_or_404(models.Dataset, pk=kwargs['pk'])
         if dataset.created_by == request.user:
             return view(request, *args, **kwargs)
         else:
@@ -139,7 +138,6 @@ class SearchFormView(generic.TemplateView):
         ['formula', 'Formula'],
         ['organic', 'Organic Component'],
         ['inorganic', 'Inorganic Component'],
-        ['exciton_emission', 'Exciton Emission'],
         ['author', 'Author']
     ]
 
@@ -157,61 +155,7 @@ class SearchFormView(generic.TemplateView):
             search_text = form.cleaned_data['search_text']
             search_term = request.POST.get('search_term')
             systems_info = []
-            if search_term == 'exciton_emission':
-                searchrange = materials.rangeparser.parserange(search_text)
-                if len(searchrange) > 0:
-                    if searchrange[0] == 'bidirectional':
-                        if searchrange[3] == '>=':
-                            systems = models.ExcitonEmission.objects.filter(
-                                exciton_emission__gte=searchrange[1]).order_by(
-                                    '-exciton_emission')
-                        elif searchrange[3] == '>':
-                            systems = models.ExcitonEmission.objects.filter(
-                                exciton_emission__gt=searchrange[1]).order_by(
-                                    '-exciton_emission')
-                        if searchrange[4] == '<=':
-                            systems = systems.filter(
-                                exciton_emission__lte=searchrange[2]).order_by(
-                                    '-exciton_emission')
-                        elif searchrange[4] == '<':
-                            systems = systems.filter(
-                                exciton_emission__lt=searchrange[2]).order_by(
-                                    '-exciton_emission')
-                    elif searchrange[0] == 'unidirectional':
-                        if searchrange[2] == '>=':
-                            systems = models.ExcitonEmission.objects.filter(
-                                exciton_emission__gte=searchrange[1]).order_by(
-                                    '-exciton_emission')
-                        elif searchrange[2] == '>':
-                            systems = models.ExcitonEmission.objects.filter(
-                                exciton_emission__gt=searchrange[1]).order_by(
-                                    '-exciton_emission')
-                        elif searchrange[2] == '<=':
-                            systems = models.ExcitonEmission.objects.filter(
-                                exciton_emission__lte=searchrange[1]).order_by(
-                                    '-exciton_emission')
-                        elif searchrange[2] == '<':
-                            systems = models.ExcitonEmission.objects.filter(
-                                exciton_emission__lt=searchrange[1]).order_by(
-                                    '-exciton_emission')
-                    for ee in systems:
-                        system_info = {}
-                        system_info['compound_name'] = ee.system.compound_name
-                        system_info['common_formula'] = ee.system.group
-                        system_info['chemical_formula'] = ee.system.formula
-                        system_info['ee'] = str(ee.exciton_emission)
-                        system_info['sys_pk'] = ee.system.pk
-                        system_info['ee_pk'] = ee.pk
-                        if ee.system.synthesismethodold_set.count() > 0:
-                            system_info['syn_pk'] = (
-                                ee.system.synthesismethodold_set.first().pk)
-                        else:
-                            system_info['syn_pk'] = 0
-                        system_info['apos_pk'] = 0
-                        system_info['bs_pk'] = 0
-                        systems_info.append(system_info)
-            else:
-                systems = utils.search_result(search_term, search_text)
+            systems = utils.search_result(search_term, search_text)
 
         args = {
             'systems': systems,
@@ -397,40 +341,6 @@ class AddAuthorView(LoginRequiredMixin, generic.TemplateView):
         return JsonResponse(args)
 
 
-class AddTagView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_tag.html'
-
-    def get(self, request):
-        input_form = forms.AddTag()
-        return render(request, self.template_name, {
-            'input_form': input_form,
-        })
-
-    def post(self, request):
-        # search_form = forms.SearchForm()
-        input_form = forms.AddTag(request.POST)
-        if input_form.is_valid():
-            tag = input_form.cleaned_data['tag'].lower()
-            q_set_len = len(
-                models.Tag.objects.filter(tag__iexact=tag)
-                )
-            if q_set_len == 0:
-                input_form.save()
-                text = 'Tag successfully added!'
-                feedback = 'success'
-            else:
-                text = 'Failed to submit, tag is already in database.'
-                feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-        args = {
-                'feedback': feedback,
-                'text': text
-                }
-        return JsonResponse(args)
-
-
 class SearchSystemView(generic.TemplateView):
     template_name = 'materials/dropdown_list_system.html'
 
@@ -484,40 +394,6 @@ class AddSystemView(LoginRequiredMixin, generic.TemplateView):
             feedback = 'failure'
         args = {'feedback': feedback, 'text': text}
         return JsonResponse(args)
-
-
-class AddPhase(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/form.html'
-
-    def get(self, request):
-        form = forms.AddPhase()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = forms.AddPhase(request.POST)
-        if form.is_valid():
-            form.save()
-            text = form.cleaned_data['email']
-        args = {'form': form, 'text': text}
-        return render(request, self.template_name, args)
-
-
-class AddTemperature(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/form.html'
-
-    def get(self, request):
-        form = forms.AddTemperature()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = forms.AddTemperature(request.POST)
-        if form.is_valid():
-            form.save()
-            text = form.cleaned_data['email']
-
-        args = {'form': form, 'text': text}
-
-        return render(request, self.template_name, args)
 
 
 class AddDataView(StaffStatusMixin, generic.TemplateView):
@@ -941,22 +817,32 @@ def submit_data(request):
 
 
 @dataset_author_check
-def toggle_dataset_visibility(request, system_pk, dataset_pk, return_path):
-    dataset = models.Dataset.objects.get(pk=dataset_pk)
+def toggle_visibility(request, pk, return_url):
+    dataset = models.Dataset.objects.get(pk=pk)
     dataset.visible = not dataset.visible
     dataset.save()
-    return redirect(return_path)
+    return redirect(return_url)
 
 
 @dataset_author_check
-def toggle_dataset_is_figure(request, system_pk, dataset_pk, return_path):
-    dataset = models.Dataset.objects.get(pk=dataset_pk)
+def toggle_is_figure(request, pk, return_url):
+    dataset = models.Dataset.objects.get(pk=pk)
     dataset.is_figure = not dataset.is_figure
     dataset.save()
-    return redirect(return_path)
+    return redirect(return_url)
 
 
-def download_dataset_files(request, pk):
+@dataset_author_check
+def delete_dataset(request, pk, return_url):
+    """Delete current data set and all associated files."""
+    dataset = models.Dataset.objects.get(pk=pk)
+    dataset.delete()
+    if not return_url.startswith('/'):
+        return_url = '/' + return_url
+    return redirect(return_url)
+
+
+def dataset_files(request, pk):
     dataset = models.Dataset.objects.get(pk=pk)
     in_memory_object = io.BytesIO()
     zf = zipfile.ZipFile(in_memory_object, 'w')
@@ -967,33 +853,6 @@ def download_dataset_files(request, pk):
                             content_type='application/x-zip-compressed')
     response['Content-Disposition'] = f'attachment; filename=files.zip'
     return response
-
-
-def download_input_files(request, pk):
-    loc = os.path.join(settings.MEDIA_ROOT, f'input_files/dataset_{pk}')
-    files = os.listdir(loc)
-    file_full_paths = [os.path.join(loc, f) for f in files]
-    zip_dir = 'files'
-    zip_filename = 'files.zip'
-    in_memory_object = io.BytesIO()
-    zf = zipfile.ZipFile(in_memory_object, 'w')
-    for file_path, file_name in zip(file_full_paths, files):
-        zf.write(file_path, os.path.join(zip_dir, file_name))
-    zf.close()
-    response = HttpResponse(in_memory_object.getvalue(),
-                            content_type='application/x-zip-compressed')
-    response['Content-Disposition'] = f'attachment; filename={zip_filename}'
-    return response
-
-
-@dataset_author_check
-def delete_dataset_and_files(request, system_pk, dataset_pk, return_path):
-    """Delete current data set and all associated files."""
-    dataset = models.Dataset.objects.get(pk=dataset_pk)
-    dataset.delete()
-    if not return_path.startswith('/'):
-        return_path = '/' + return_path
-    return redirect(return_path)
 
 
 def dataset_data(request, pk):
@@ -1053,10 +912,18 @@ def autofill_input_data(request):
 
 def data_for_chart(request, pk):
     dataset = models.Dataset.objects.get(pk=pk)
+    if dataset.primary_unit:
+        primary_unit_label = dataset.primary_unit.label
+    else:
+        primary_unit_label = ''
+    if dataset.secondary_unit:
+        secondary_unit_label = dataset.secondary_unit.label
+    else:
+        secondary_unit_label = ''
     response = {'primary-property': dataset.primary_property.name,
-                'primary-unit': dataset.primary_unit.label,
+                'primary-unit': primary_unit_label,
                 'secondary-property': dataset.secondary_property.name,
-                'secondary-unit': dataset.secondary_unit.label,
+                'secondary-unit': secondary_unit_label,
                 'data': []}
     if dataset.primary_property_label:
         response['primary-property'] = dataset.primary_property_label
@@ -1360,160 +1227,3 @@ def prefilled_form(request, pk):
         if hasattr(comp, 'comment'):
             form['values']['computational_comment'] = comp.comment.text
     return JsonResponse(form)
-
-
-def data_dl(request, data_type, pk, bandgap=False):
-    """Download a specific entry type"""
-    response = HttpResponse(content_type='text/fhi-aims')
-    if data_type == 'band_gap':
-        data_type = 'band_structure'
-        bandgap = True
-
-    def write_headers():
-        if not bandgap:
-            response.write(str('#HybriD³ Materials Database\n'))
-        response.write(str('\n#System: '))
-        response.write(str(p_obj.compound_name))
-        response.write(str('\n#Temperature: '))
-        response.write(str(obj.temperature + ' K'))
-        response.write(str('\n#Phase: '))
-        response.write(str(obj.phase.phase))
-        authors = obj.reference.author_set.all()
-        response.write(str('\n#Authors ('+str(authors.count())+'): '))
-        for author in authors:
-            response.write('\n    ')
-            response.write(author.first_name + ' ')
-            response.write(author.last_name)
-            response.write(', ' + author.institution)
-        response.write(str('\n#Journal: '))
-        response.write(str(obj.reference.journal))
-        response.write(str('\n#Source: '))
-        if obj.reference.doi_isbn:
-            response.write(str(obj.reference.doi_isbn))
-        else:
-            response.write(str('N/A'))
-
-    def write_a_pos():
-        response.write('\n#a: ')
-        response.write(obj.a)
-        response.write('\n#b: ')
-        response.write(obj.b)
-        response.write('\n#c: ')
-        response.write(obj.c)
-        response.write('\n#alpha: ')
-        response.write(obj.alpha)
-        response.write('\n#beta: ')
-        response.write(obj.beta)
-        response.write('\n#gamma: ')
-        response.write(obj.gamma)
-        response.write('\n\n')
-
-    if data_type == 'exciton_emission':
-        obj = models.ExcitonEmission.objects.get(pk=pk)
-        p_obj = models.System.objects.get(excitonemission=obj)
-        file_name_prefix = '%s_%s_%s_pl' % (obj.phase, p_obj.organic,
-                                            p_obj.inorganic)
-        dir_in_str = os.path.join(settings.MEDIA_ROOT, 'uploads')
-        meta_filename = file_name_prefix + '.txt'
-        meta_filepath = os.path.join(dir_in_str, meta_filename)
-        with open(meta_filepath, encoding='utf-8', mode='w+') as meta_file:
-            meta_file.write(str('#HybriD³ Materials Database\n'))
-            meta_file.write(str('\n#System: '))
-            meta_file.write(str(p_obj.compound_name))
-            meta_file.write(str('\n#Temperature: '))
-            meta_file.write(str(obj.temperature))
-            meta_file.write(str('\n#Phase: '))
-            meta_file.write(str(obj.phase.phase))
-            meta_file.write(str('\n#Authors: '))
-            for author in obj.reference.author_set.all():
-                meta_file.write('\n    ')
-                meta_file.write(author.first_name + ' ')
-                meta_file.write(author.last_name)
-                meta_file.write(', ' + author.institution)
-            meta_file.write(str('\n#Journal: '))
-            meta_file.write(str(obj.reference.journal))
-            meta_file.write(str('\n#Source: '))
-            meta_file.write(str(obj.reference.doi_isbn))
-            meta_file.write(str('\n#Exciton Emission Peak: '))
-            meta_file.write(str(obj.excitonemission))
-        pl_file_csv = os.path.join(dir_in_str, file_name_prefix + '.csv')
-        pl_file_html = os.path.join(dir_in_str, file_name_prefix + '.html')
-        filenames = []
-        filenames.append(meta_filepath)
-        filenames.append(pl_file_csv)
-        filenames.append(pl_file_html)
-
-        zip_dir = file_name_prefix
-        zip_filename = '%s.zip' % zip_dir
-        # change response type and content deposition type
-        string = io.BytesIO()
-        zf = zipfile.ZipFile(string, 'w')
-
-        for fpath in filenames:
-            # Calculate path for file in zip
-            fdir, fname = os.path.split(fpath)
-            zip_path = os.path.join(zip_dir, fname)
-            zf.write(fpath, zip_path)
-        # Must close zip for all contents to be written
-        zf.close()
-        # Grab ZIP file from in-memory, make response with correct MIME-type
-        response = HttpResponse(string.getvalue(),
-                                content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           zip_filename)
-    elif data_type == 'synthesis':
-        obj = models.SynthesisMethodOld.objects.get(pk=pk)
-        p_obj = models.System.objects.get(synthesismethodold=obj)
-        file_name_prefix = '%s_%s_%s_syn' % (obj.phase, p_obj.organic,
-                                             p_obj.inorganic)
-        meta_filename = file_name_prefix + '.txt'
-        response = HttpResponse(content_type='text/plain')
-        response.write(str('#HybriD³ Materials Database\n'))
-        response.write(str('\n#System: '))
-        response.write(str(p_obj.compound_name))
-        response.write(str('\n#Temperature: '))
-        response.write(str(obj.temperature))
-        response.write(str('\n#Phase: '))
-        response.write(str(obj.phase.phase))
-        response.write(str('\n#Authors: '))
-        for author in obj.reference.author_set.all():
-            response.write('\n    ')
-            response.write(author.first_name + ' ')
-            response.write(author.last_name)
-            response.write(', ' + author.institution)
-        response.write(str('\n#Journal: '))
-        response.write(str(obj.reference.journal))
-        response.write(str('\n#Source: '))
-        response.write(str(obj.reference.doi_isbn))
-        if obj.synthesis_method:
-            response.write(str('\n#Synthesis Method: '))
-            response.write(str(obj.synthesis_method))
-        if obj.starting_materials:
-            response.write(str('\n#Starting Materials: '))
-            response.write(str(obj.starting_materials))
-        if obj.remarks:
-            response.write(str('\n#Remarks: '))
-            response.write(str(obj.remarks))
-        if obj.product:
-            response.write(str('\n#Product: '))
-            response.write(str(obj.product))
-        response.encoding = 'utf-8'
-        response['Content-Disposition'] = ('attachment; filename=%s' %
-                                           (meta_filename))
-    return response
-
-
-def all_entries(request, pk, data_type):
-    str_to_model = {
-        'exciton_emission': models.ExcitonEmission,
-        'synthesis': models.SynthesisMethodOld,
-    }
-    template_name = 'materials/all_%ss.html' % data_type
-    compound_name = models.System.objects.get(pk=pk).compound_name
-    obj = str_to_model[data_type].objects.filter(system__pk=pk)
-    return render(request, template_name, {
-        'object': obj,
-        'compound_name': compound_name,
-        'data_type': data_type,
-        'key': pk
-    })

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('idinfo_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='materials.IDInfo')),
                 ('synthesis_method', models.TextField()),
-                ('syn_file', models.FileField(blank=True, upload_to=materials.models.syn_file_name)),
+                ('syn_file', models.FileField(blank=True)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='materials.System')),
             ],
             bases=('materials.idinfo',),

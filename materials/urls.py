@@ -1,23 +1,22 @@
 from django.urls import path
-from django.urls import re_path
-from materials import views
+
+from . import views
 
 app_name = 'materials'
 urlpatterns = [
     path('search', views.SearchFormView.as_view(), name='search'),
     path('<int:pk>', views.SystemView.as_view(), name='system'),
     path('dataset/<int:pk>', views.DatasetView.as_view(), name='dataset'),
-    path('<int:system_pk>/publish-system/<int:dataset_pk>/<path:return_path>',
-         views.toggle_dataset_visibility, name='publish_system'),
-    path('<int:system_pk>/toggle-is-figure/<int:dataset_pk>/'
-         '<path:return_path>',
-         views.toggle_dataset_is_figure, name='toggle_is_figure'),
-    path('download-dataset-files/<int:pk>', views.download_dataset_files,
-         name='download_dataset_files'),
-    path('download-input-data-files/<int:pk>', views.download_input_files,
-         name='download_input_files'),
-    path('<int:system_pk>/delete-dataset/<int:dataset_pk>/<path:return_path>',
-         views.delete_dataset_and_files, name='delete_dataset'),
+    path('dataset/<int:pk>/toggle-visibility/<path:return_url>',
+         views.toggle_visibility, name='toggle_visibility'),
+    path('dataset/<int:pk>/toggle-is-figure/<path:return_url>',
+         views.toggle_is_figure, name='toggle_is_figure'),
+    path('dataset/<int:pk>/delete/<path:return_url>',
+         views.delete_dataset, name='delete_dataset'),
+    path('dataset/<int:pk>/files', views.dataset_files, name='dataset_files'),
+    path('dataset/<int:pk>/data.txt', views.dataset_data, name='dataset_data'),
+    path('dataset/<int:pk>/image.png', views.dataset_image,
+         name='dataset_image'),
     path('add-pub', views.AddPubView.as_view(), name='add_reference'),
     path('search-pub', views.SearchPubView.as_view(),
          name='search_reference'),
@@ -33,16 +32,10 @@ urlpatterns = [
     path('add-property', views.add_property, name='add_property'),
     path('add-unit', views.add_unit, name='add_unit'),
     path('submit-data', views.submit_data, name='submit_data'),
-    path('add-tag', views.AddTagView.as_view(), name='add_tag'),
-    re_path(r'^data-dl/(?P<data_type>.*)/(?P<pk>\d+)$', views.data_dl,
-            name='data_dl'),
     path('update-system/<int:pk>', views.SystemUpdateView.as_view(),
          name='update_system'),
     path('reference-data/<int:pk>', views.reference_data,
          name='reference_data'),
-    path('dataset/<int:pk>/image.png', views.dataset_image,
-         name='dataset_image'),
-    path('dataset/<int:pk>/data.txt', views.dataset_data, name='dataset_data'),
     path('reference/<int:pk>', views.ReferenceDetailView.as_view(),
          name='reference'),
     path('autofill-input-data', views.autofill_input_data,
@@ -66,6 +59,4 @@ urlpatterns = [
          name='linked_data'),
     path('prefilled-form/<int:pk>', views.prefilled_form,
          name='prefilled_form'),
-    re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
-            name='all_entries'),
 ]

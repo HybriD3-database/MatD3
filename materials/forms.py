@@ -60,12 +60,6 @@ class AddReference(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddPhase(forms.ModelForm):
-    class Meta:
-        model = models.Phase
-        fields = '__all__'
-
-
 class AddSystem(forms.ModelForm):
     all_fields = ('compound_name', 'formula', 'group', 'organic', 'inorganic',
                   'description', 'tags')

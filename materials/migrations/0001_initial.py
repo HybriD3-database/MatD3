@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
             name='AtomicPositions',
             fields=[
                 ('idinfo_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='materials.IDInfo')),
-                ('fhi_file', models.FileField(blank=True, upload_to=materials.models.file_name)),
+                ('fhi_file', models.FileField(blank=True)),
                 ('a', models.CharField(max_length=10)),
                 ('b', models.CharField(max_length=10)),
                 ('c', models.CharField(max_length=10)),

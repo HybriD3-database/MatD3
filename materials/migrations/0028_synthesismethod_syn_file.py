@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='synthesismethod',
             name='syn_file',
-            field=models.FileField(blank=True, upload_to=materials.models.syn_file_name),
+            field=models.FileField(blank=True),
         ),
     ]

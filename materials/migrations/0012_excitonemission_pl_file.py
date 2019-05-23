@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='excitonemission',
             name='pl_file',
-            field=models.FileField(blank=True, upload_to=materials.models.pl_file_name),
+            field=models.FileField(blank=True),
         ),
     ]

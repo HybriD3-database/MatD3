@@ -319,7 +319,7 @@
 {% if dataset.files.exists %}
   <br>
   <p>
-    <a href="{% url "materials:download_dataset_files" pk=dataset.pk %}">
+    <a href="{% url "materials:dataset_files" pk=dataset.pk %}">
       <button type="button" class="btn btn-primary">
         <span class="fa fa-download" aria-hidden="true"></span>
         Uploaded files

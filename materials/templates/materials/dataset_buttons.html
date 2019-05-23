@@ -1,5 +1,5 @@
 {% if dataset.primary_property.name != 'band structure' and dataset.primary_property.name != 'atomic structure' %}
-  <a href="{% url 'materials:toggle_is_figure' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
+  <a href="{% url 'materials:toggle_is_figure' pk=dataset.pk return_url=request.path %}">
     <button type="button" class="btn btn-success">
       {% if dataset.is_figure %}
         Show table
@@ -9,7 +9,7 @@
     </button>
   </a>
 {% endif %}
-<a href="{% url 'materials:publish_system' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}">
+<a href="{% url 'materials:toggle_visibility' pk=dataset.pk return_url=request.path %}">
   <button type="button" class="btn btn-success">
     {% if dataset.visible %}
       Unpublish
@@ -24,7 +24,7 @@
   </button>
 </a>
 <button data-reverse-url=
-        "{% url 'materials:delete_dataset' system_pk=system.pk dataset_pk=dataset.pk return_path=request.path %}"
+        "{% url 'materials:delete_dataset' pk=dataset.pk return_url=request.path %}"
         type="button" class="btn btn-danger delete_button">
   Delete
 </button>

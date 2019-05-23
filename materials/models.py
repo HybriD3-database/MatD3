@@ -6,8 +6,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from mainproject import settings
-
 logger = logging.getLogger(__name__)
 
 
@@ -50,26 +48,6 @@ class Unit(Base):
 
     def __str__(self):
         return self.label
-
-
-def file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = '%s_%s_%s_apos.%s' % (instance.phase, instance.system.organic,
-                                     instance.system.inorganic, ext)
-    return os.path.join('uploads', filename)
-
-
-def pl_file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = '%s_%s_%s_pl.%s' % (instance.phase, instance.system.organic,
-                                   instance.system.inorganic, ext)
-    return os.path.join('uploads', filename)
-
-
-def syn_file_name(instance, filename):
-    filename = '%s_%s_%s_syn.txt' % (instance.phase, instance.system.organic,
-                                     instance.system.inorganic)
-    return os.path.join('uploads', filename)
 
 
 class Reference(models.Model):
@@ -140,103 +118,6 @@ class System(models.Model):
 
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
-
-    def getAuthors(self):
-        """Returns a list of authors related to a system.
-
-        An author appears no more than once.
-
-        """
-        def authorSort(author):  # function that decides author sort criteria
-            return author.last_name
-
-        L = []
-        for dataType in [self.atomicpositions_set, self.synthesismethodold_set,
-                         self.excitonemission_set, self.bandstructure_set]:
-            for data in dataType.all():
-                for author in data.reference.author_set.all():
-                    if author not in L:  # don't add duplicate authors
-                        L.append(author)
-
-        return sorted(L, key=authorSort)
-
-
-class Phase(models.Model):
-    phase = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.phase
-
-
-class Method(models.Model):
-    method = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.method
-
-
-class SpecificMethod(models.Model):
-    specific_method = models.CharField(max_length=500)
-
-    def __str__(self):
-        return self.specific_method
-
-
-class IDInfo(models.Model):
-    reference = models.ForeignKey(Reference, on_delete=models.PROTECT)
-    source = models.CharField(max_length=500)
-    data_extraction_method = models.CharField(max_length=500)
-    contributor = models.ForeignKey('accounts.UserProfile',
-                                    on_delete=models.PROTECT)
-    temperature = models.CharField(max_length=20, blank=True)
-    phase = models.ForeignKey(Phase, on_delete=models.PROTECT)
-    method = models.ForeignKey(Method, on_delete=models.PROTECT, null=True)
-    specific_method = models.ForeignKey(SpecificMethod,
-                                        on_delete=models.PROTECT, null=True)
-    comments = models.CharField(max_length=1000, blank=True)
-    last_update = models.DateField(auto_now=True)
-
-    def getAuthors(self):
-        return self.reference.getAuthors()
-
-
-class SynthesisMethodOld(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    synthesis_method = models.TextField(max_length=1000, blank=True)
-    starting_materials = models.TextField(max_length=1000, blank=True)
-    remarks = models.TextField(max_length=1000, blank=True)
-    product = models.TextField(max_length=1000, blank=True)
-    syn_file = models.FileField(upload_to=syn_file_name, blank=True)
-
-    def __str__(self):
-        return (self.system.compound_name + ' synthesis #' +
-                str(self.methodNumber()))
-
-    def methodNumber(self):
-        for i, obj in enumerate(self.system.synthesismethodold_set.all()):
-            if obj.pk == self.pk:
-                return i + 1
-
-
-class ExcitonEmission(IDInfo):
-    system = models.ForeignKey(System, on_delete=models.PROTECT)
-    exciton_emission = models.DecimalField(max_digits=7, decimal_places=4)
-    pl_file = models.FileField(upload_to=pl_file_name, blank=True)
-    plotted = models.BooleanField(default=False)
-    synthesis_method = models.ForeignKey(SynthesisMethodOld,
-                                         on_delete=models.PROTECT, null=True,
-                                         blank=True)
-
-    def __str__(self):
-        return str(self.exciton_emission)
-
-    def delete(self, *args, **kwargs):
-        if(self.pl_file):
-            file_loc = os.path.join(settings.MEDIA_ROOT, 'uploads',
-                                    str(self.pl_file).split('/')[1])
-            if os.path.isfile(file_loc):
-                os.remove(file_loc)
-        super().delete(*args, **kwargs)
 
 
 class Dataset(Base):
