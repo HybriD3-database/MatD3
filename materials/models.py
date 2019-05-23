@@ -36,11 +36,11 @@ class Base(models.Model):
 class Property(Base):
     name = models.CharField(max_length=100, unique=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name_plural = 'properties'
+
+    def __str__(self):
+        return self.name
 
 
 class Unit(Base):
@@ -130,11 +130,17 @@ class Dataset(Base):
     SINGLE_CRYSTAL = 0
     POWDER = 1
     FILM = 2
-    UNKNOWN = 3
+    BULK_POLYCRYSTALLINE = 3
+    PELLET = 4
+    NANOFORM = 5
+    UNKNOWN = 6
     SAMPLE_TYPES = (
         (SINGLE_CRYSTAL, 'single crystal'),
         (POWDER, 'powder'),
         (FILM, 'film'),
+        (BULK_POLYCRYSTALLINE, 'bulk polycrystalline'),
+        (PELLET, 'pellet'),
+        (NANOFORM, 'nanoform'),
         (UNKNOWN, 'unknown'),
     )
     TRICLINIC = 0
@@ -189,6 +195,9 @@ class Dataset(Base):
     class Meta:
         verbose_name_plural = 'data sets'
 
+    def __str__(self):
+        return f'ID: {self.pk} ({self.primary_property})'
+
     def save(self, *args, **kwargs):
         if self.representative:
             # Unset the representative flag of the dataset that was
@@ -212,9 +221,6 @@ class Dataset(Base):
     def num_all_entries(self):
         return Dataset.objects.filter(system=self.system).filter(
             primary_property=self.primary_property).count()
-
-    def __str__(self):
-        return f'ID: {self.pk} ({self.primary_property})'
 
     def get_all_fixed_temperatures(self):
         """Return a formatted list of all fixed temperatures."""
@@ -240,6 +246,9 @@ class Subset(Base):
 
     class Meta:
         verbose_name_plural = 'data subsets'
+
+    def __str__(self):
+        return f'ID: {self.pk} ({self.datapoints.count()} data points)'
 
     def get_fixed_values(self):
         """Return all fixed properties for the given subset."""
@@ -268,9 +277,6 @@ class Subset(Base):
         for value in values_float:
             values.append(value.formatted('.10g'))
         return zip(symbols, values, units)
-
-    def __str__(self):
-        return f'ID: {self.pk} ({self.datapoints.count()} data points)'
 
 
 class Datapoint(Base):
