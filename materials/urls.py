@@ -64,6 +64,8 @@ urlpatterns = [
          name="extract_k_from_control_in"),
     path('linked-data/<int:pk>', views.LinkedDataView.as_view(),
          name='linked_data'),
+    path('prefilled-form/<int:pk>', views.prefilled_form,
+         name='prefilled_form'),
     re_path(r'^(?P<pk>\d+)/(?P<data_type>.*)$', views.all_entries,
             name='all_entries'),
 ]

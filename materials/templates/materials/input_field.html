@@ -6,7 +6,7 @@
     <!-- CHECKBOX -->
     {{ field }}
     <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-    <div style="margin-left:3px">
+    <div class="ml-1">
       {{ field.help_text|tooltip }}
     </div>
   {% elif field.field.widget.input_type == 'radio' %}

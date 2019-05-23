@@ -18,6 +18,7 @@ from django.db.models import Case
 from django.db.models import Q
 from django.db.models import Value
 from django.db.models import When
+from django.db.models.fields import TextField
 from django.forms import formset_factory
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
@@ -1285,6 +1286,80 @@ def extract_k_from_control_in(request):
             words = line.split()
             k_labels.append(f'{words[-2]} {words[-1]}')
     return HttpResponse('\n'.join(k_labels))
+
+
+def prefilled_form(request, pk):
+    """Return a mostly filled form as json.
+
+    The form is filled based on data set pk. Fields such the actual
+    numerical values are not filled in.
+
+    """
+    def pk_or_none(obj):
+        if obj:
+            return obj.pk
+        return None
+
+    def bool_to_text(value):
+        """Return boolean as text.
+
+        Due to the way the templating system work, this is required
+        for certain inputs.
+
+        """
+        if value:
+            return 'True'
+        return 'False'
+    dataset = models.Dataset.objects.get(pk=pk)
+    form = {
+        'values': {
+            'select_reference': pk_or_none(dataset.reference),
+            'select_system': dataset.system.pk,
+            'primary_property': dataset.primary_property.pk,
+            'primary_unit': pk_or_none(dataset.primary_unit),
+            'secondary_property': pk_or_none(dataset.secondary_property),
+            'secondary_unit': pk_or_none(dataset.secondary_unit),
+            'label': dataset.label,
+            'extraction_method': dataset.extraction_method,
+            'primary_property_label': dataset.primary_property_label,
+            'secondary_property_label': dataset.secondary_property_label,
+            'is_figure': dataset.is_figure,
+            'visible_to_public': dataset.visible,
+            'two_axes': bool(dataset.secondary_property),
+            'origin_of_data': ('is_experimental' if dataset.is_experimental
+                               else 'is_theoretical'),
+            'sample_type': dataset.sample_type,
+            'dimensionality_of_the_system': dataset.dimensionality,
+            'crystal_system': dataset.crystal_system,
+            'with_synthesis_details': bool_to_text(dataset.synthesis.exists()),
+            'with_experimental_details': bool_to_text(
+                dataset.experimental.exists()),
+            'with_computational_details': bool_to_text(
+                dataset.computational.exists())
+        },
+    }
+    if dataset.synthesis.exists():
+        synthesis = dataset.synthesis.first()
+        for field in filter(lambda field: type(field) is TextField,
+                            models.SynthesisDetails._meta.get_fields()):
+            form['values'][field.name] = getattr(synthesis, field.name)
+        if hasattr(synthesis, 'comment'):
+            form['values']['synthesis_comment'] = synthesis.comment.text
+    if dataset.experimental.exists():
+        experimental = dataset.synthesis.first()
+        for field in filter(lambda field: type(field) is TextField,
+                            models.ExperimentalDetails._meta.get_fields()):
+            form['values'][field.name] = getattr(experimental, field.name)
+        if hasattr(experimental, 'comment'):
+            form['values']['experimental_comment'] = experimental.comment.text
+    if dataset.computational.exists():
+        comp = dataset.computational.first()
+        for field in filter(lambda field: type(field) is TextField,
+                            models.ComputationalDetails._meta.get_fields()):
+            form['values'][field.name] = getattr(comp, field.name)
+        if hasattr(comp, 'comment'):
+            form['values']['computational_comment'] = comp.comment.text
+    return JsonResponse(form)
 
 
 def data_dl(request, data_type, pk, bandgap=False):

@@ -294,7 +294,7 @@ class Dataset(Base):
         related_name='secondary_unit')
     secondary_property_label = models.TextField(blank=True, max_length=50)
     reference = models.ForeignKey(
-        Reference, null=True, on_delete=models.PROTECT)
+        Reference, null=True, blank=True, on_delete=models.PROTECT)
     visible = models.BooleanField()
     is_figure = models.BooleanField()
     is_experimental = models.BooleanField()  # theoretical if false
@@ -303,7 +303,7 @@ class Dataset(Base):
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
-    linked_to = models.ManyToManyField('self')
+    linked_to = models.ManyToManyField('self', blank=True)
 
     class Meta:
         verbose_name_plural = 'data sets'
@@ -449,19 +449,6 @@ class NumericalValue(NumericalValueBase):
         return value_str
 
 
-class Symbol(Base):
-    """Data point information not storable as floats.
-
-    This includes, for example, k-point coordinates such as "X" or the
-    component of a tensor such as "c111".
-
-    """
-    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE,
-                                  related_name='symbols')
-    value = models.CharField(max_length=10)
-    counter = models.PositiveSmallIntegerField(default=0)
-
-
 class NumericalValueFixed(NumericalValueBase):
     """Values that are constant within a data subset."""
     physical_property = models.ForeignKey(Property, on_delete=models.PROTECT)
@@ -480,15 +467,28 @@ class NumericalValueFixed(NumericalValueBase):
         return value_str
 
 
+class Symbol(Base):
+    """Data point information not storable as floats.
+
+    This includes, for example, k-point coordinates such as "X" or the
+    component of a tensor such as "c111".
+
+    """
+    datapoint = models.ForeignKey(Datapoint, on_delete=models.CASCADE,
+                                  related_name='symbols')
+    value = models.CharField(max_length=10)
+    counter = models.PositiveSmallIntegerField(default=0)
+
+
 class ComputationalDetails(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='computational')
     code = models.TextField(blank=True)
     level_of_theory = models.TextField(blank=True)
     xc_functional = models.TextField(blank=True)
-    kgrid = models.TextField(blank=True)
-    relativity_level = models.TextField(blank=True)
-    basis = models.TextField(blank=True)
+    k_point_grid = models.TextField(blank=True)
+    level_of_relativity = models.TextField(blank=True)
+    basis_set_definition = models.TextField(blank=True)
     numerical_accuracy = models.TextField(blank=True)
 
     class Meta:

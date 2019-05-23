@@ -58,8 +58,8 @@
                           </i>
                         </label>
                       </div>
-                      <input id="prefill" type="number" class="form-control" min="0" disabled>
-                      <div><button class="btn btn-info">OK</button></div>
+                      <input id="prefill" type="number" class="form-control" min="0">
+                      <div><button id="prefill-button" class="btn btn-info">OK</button></div>
                     </div>
                   </div>
                   <div class="form-group col-md-6">
@@ -231,24 +231,18 @@
                 Data
               </div>
               <div class="card-body card-add-data">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="form-inline">
-                      <div class="form-group">
-                        {{ main_form.number_of_subsets.label_tag }}
-                        <div style="margin-left:3px">
-                          {{ main_form.number_of_subsets.help_text|tooltip }}
-                        </div>
-                        {{ main_form.number_of_subsets }}
-                      </div>
-                      <input type="file" id="import-all-data" class="inputfile">
-                      <label for="import-all-data"><i class="fa fa-upload" aria-hidden="true"></i>
-                        Import all from file...</label>
-                      <i class="fa fa-question-circle tooltip-container" style="margin-left:3px">
-                        <span class="tooltiptext">Select to import all data (all subsets) from a single file. Use the ampersand ("&") as a delimiter between different data subsets.</span>
-                      </i>
-                    </div>
+                <div class="form-inline">
+                  <div class="form-group">
+                    {{ main_form.number_of_subsets.label_tag }}
+                    <span class="ml-2">{{ main_form.number_of_subsets.help_text|tooltip }}</span>
+                    {{ main_form.number_of_subsets }}
                   </div>
+                  <input type="file" id="import-all-data" class="inputfile">
+                  <label for="import-all-data"><i class="fa fa-upload" aria-hidden="true"></i>
+                    Import all from file...</label>
+                  <i class="fa fa-question-circle tooltip-container ml-2">
+                    <span class="tooltiptext">Select to import all data (all subsets) from a single file. Use the ampersand ("&") as a delimiter between different data subsets.</span>
+                  </i>
                 </div>
                 <br>
                 <div id="data-subset"></div>
@@ -344,14 +338,13 @@
                     <span class="input-group-text">{{ main_form.subset_label.label }}</span>
                   </div>
                   {{ main_form.subset_label }}
-                  <i class="fa fa-question-circle fa-2x tooltip-container" style="margin:3px">
+                  <i class="fa fa-question-circle fa-2x tooltip-container ml-2 mt-1">
                     <span class="tooltiptext">{{ main_form.subset_label.help_text }}</span>
                   </i>
                 </div>
               </div>
               <div class="col-md-5">
-                <button type="button" class="btn btn-info add-fixed-property"
-                        style="margin-bottom:15px">
+                <button type="button" class="btn btn-info add-fixed-property mb-3">
                   Add fixed property
                 </button>
                 <i class="fa fa-question-circle fa-2x tooltip-container">
@@ -437,9 +430,11 @@
   <script src="{% static 'materials/javascript/selectize.js' %}"></script>
   <script>
    // All dropdown menus are filled with data from a JSON request
-   function fill_selectize(name, id, initial_value) {
+   var selectized = {};
+   function fill_selectize(name, initial_value) {
+     var id = 'id_' + name;
      $.getJSON('/materials/get-dropdown-options/' + name, function(options) {
-       $('#' + id).selectize({
+       selectized[name] =  $('#' + id).selectize({
          maxOptions: 500,
          sortField: 'text',
          items: [initial_value],
@@ -457,7 +452,7 @@
    // Use selectize on all dropdown menus
    {% for field in main_form.visible_fields %}
    {% if field.field.widget.input_type == 'select' %}
-   fill_selectize('{{ field.name }}', '{{ field.id_for_label }}', {{ field.value|default_if_none:'' }});
+   fill_selectize('{{ field.name }}', {{ field.value|default_if_none:'' }});
    {% endif %}
    {% endfor %}
   </script>
@@ -609,14 +604,21 @@
      $(button).click(function() {
        if ($(hidden_field).val() === 'True') {
          $(hidden_field).val('False');
-         $(button).css({'background': '#dce9ff'});
-         $(button).html($(button).html().split('remove)')[0] + 'add)');
+         $(this).attr('aria-expanded', true);
+         $(this).css({'background': '#dce9ff'});
+         $(this).html($(this).html().split('remove)')[0] + 'add)');
        } else {
          $(hidden_field).val('True');
-         $(button).css({'background': '#f3ebff'});
-         $(button).html($(button).html().split('add)')[0] + 'remove)');
+         $(this).attr('aria-expanded', false);
+         $(this).css({'background': '#f3ebff'});
+         $(this).html($(this).html().split('add)')[0] + 'remove)');
        }
      });
+     $(button).attr('aria-expanded', $(hidden_field).val() === 'True');
+     if ($(hidden_field).val() === 'True') {
+       $(hidden_field).val('False');
+       $(button).click();
+     }
    }
    toggleSectionInclusivity('#synthesis-button', '#id_with_synthesis_details');
    toggleSectionInclusivity('#experimental-button', '#id_with_experimental_details');
@@ -661,6 +663,57 @@
      set_checkbox('id_two_axes', this.checked, this.checked);
    });
    is_figure.dispatchEvent(new Event('change'));
+  </script>
+  <script>
+   // Prefill most of the form from an other data set
+   var prefill_input = document.getElementById('prefill');
+   var prefill_button = document.getElementById('prefill-button');
+   prefill_button.addEventListener('click', function(event) {
+     event.preventDefault();
+     axios.get('/materials/prefilled-form/' + prefill_input.value)
+          .then(function(response) {
+            var values = response['data']['values'];
+            for (var key in values) {
+              var el = document.getElementById('id_' + key);
+              if (el) {
+                if (el.type === 'select-one') {
+                  selectized[key][0].selectize.setValue(values[key]);
+                } else if (el.type === 'checkbox') {
+                  el.checked = values[key];
+                } else {
+                  el.value = values[key];
+                }
+              } else { // radio buttons
+                document.querySelector('.form-check-input[name="' + key +
+                                       '"][value="' + values[key] + '"]')
+                        .checked = true;
+              }
+            }
+            var expandables = ['synthesis', 'experimental', 'computational'];
+            for (var i = 0; i < expandables.length; i++) {
+              var button = '#' + expandables[i] + '-button';
+              var hidden_field = '#id_with_' + expandables[i] + '_details';
+              // Django renders the value of hidden_field as a string of 'True'
+              // or 'False', which is different from the aria-expanded value of
+              // 'true' or 'false' as set by Bootstrap, which leads to the messy conditional.
+              var cond = ($(button).attr('aria-expanded') === 'false' &&
+                          $(hidden_field).val() === 'True') ||
+                         ($(button).attr('aria-expanded') === 'true' &&
+                          $(hidden_field).val() === 'False');
+              if (cond) {
+                if ($(hidden_field).val() === 'True') {
+                  $(hidden_field).val('False');
+                } else {
+                  $(hidden_field).val('True');
+                }
+                $(button).click();
+              }
+            }
+            document.getElementById('id_primary_property').dispatchEvent(new Event('change'));
+            document.getElementById('id_two_axes').dispatchEvent(new Event('change'));
+            prefill_input.value = '';
+          });
+   });
   </script>
   <script>
    // Atomic structure specific
@@ -799,7 +852,7 @@
    var band_structure_selected = false;
    $('#id_primary_property').change(function() {
      primary_unit = $(this).parent().next();
-     if ($(this).find(':selected').text() == 'band structure') {
+     if ($(this).find(':selected').text() === 'band structure') {
        primary_unit.hide();
        $('#id_two_axes').trigger('change', force_hide=true).prop('disabled', true);
        number_of_subsets.readOnly = true;
@@ -821,11 +874,11 @@
    // Attempt to autofill the k-path textarea from control.in if present
    document.getElementById('id_uploaded_files').addEventListener('change', function() {
      var primary_prop = document.getElementById('id_primary_property');
-     if (primary_prop.options[primary_prop.selectedIndex].text == 'band structure' &&
+     if (primary_prop.options[primary_prop.selectedIndex].text === 'band structure' &&
          !document.getElementById('id_subset_datapoints_1').value) {
        var control_file = null;
        for (var i = 0; i < this.files.length; i++) {
-         if (this.files[i].name == 'control.in') {
+         if (this.files[i].name === 'control.in') {
            control_file = this.files[i];
            break;
          }
