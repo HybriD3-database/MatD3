@@ -3,14 +3,14 @@
 {% if inline %}<div class="input-group">{% endif %}
 
   {% if field.field.widget.input_type == 'checkbox' %}
-    <!-- CHECKBOX -->
+    {# CHECKBOX #}
     {{ field }}
     <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
     <div class="ml-1">
       {{ field.help_text|tooltip }}
     </div>
   {% elif field.field.widget.input_type == 'radio' %}
-    <!-- RADIO -->
+    {# RADIO #}
     <legend class="col-form-label">
       {{ field.label }}
       {{ field.help_text|tooltip }}
@@ -26,7 +26,7 @@
       </div>
     {% endfor %}
   {% else %}
-    <!-- OTHERS -->
+    {# OTHERS #}
     {% if inline %}<div class="mt-2 mr-2">{% endif %}
     {{ field.label_tag }}
     {{ field.help_text|tooltip }}

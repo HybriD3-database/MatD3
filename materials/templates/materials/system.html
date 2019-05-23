@@ -1,8 +1,9 @@
-<!--
-     List of data sets for a specific material.
-     Only the representative data sets corresponding to each property are shown.
--->
 {% extends 'materials/base.html' %}
+
+{% comment %}
+List of data sets for a specific material. Only the representative
+data sets corresponding to each property are shown.
+{% endcomment %}
 
 {% block body %}
   {% load static %}
@@ -23,8 +24,10 @@
         {% for dataset in dataset_list %}
           {% if dataset.representative %}
             {% if user == dataset.created_by or dataset.visible %}
-              <!-- In case of atomic structures use a wider column to make
-                   room for the JSmol visualization below -->
+              {% comment %}
+              In case of atomic structures use a wider column to make
+              room for the JSmol visualization below
+              {% endcomment %}
               <div class="col-md-{% if dataset.primary_property.name == 'atomic structure'%}12{% else %}6{% endif %}">
                 <div class="card card-item">
                   {% if not dataset.visible %}

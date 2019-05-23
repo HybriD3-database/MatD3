@@ -1,58 +1,31 @@
 {% if systems.count > 0 %}
   <table class="table table-hover table-sm">
-    {% if search_term == "exciton_emission" %}
-      <thead>
+    <thead>
+      <tr>
+        <th>Compound Name</th>
+        <th>Chemical Formula</th>
+        <th>Alternate Names</th>
+        <th>Organic Component</th>
+        <th>Inorganic Component</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for system in systems %}
         <tr>
-          <th>Compound Name</th>
-          <th>Common Formula</th>
-          <th>Chemical Formula</th>
-          <th>Exciton Emission</th>
-          <th>Download</th>
+          <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.compound_name }}</a></td>
+          <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.formula }}</a></td>
+          <td>
+            <ul style="padding: 0px; list-style-type: none" id="authors-list">
+              {% for name in system.listAlternateNames %}
+                <li><a href="{% url 'materials:system' pk=system.pk %}">{{ name }}</a></li>
+              {% endfor %}
+            </ul>
+          </td>
+          <td>{{ system.organic }}</td>
+          <td>{{ system.inorganic }}</td>
         </tr>
-      </thead>
-      <tbody>
-        {% for ee in systems_info %}
-          <tr>
-            <td><a href="/materials/{{ ee.sys_pk }}_{{ ee.apos_pk }}_{{ ee.syn_pk }}_{{ ee.ee_pk }}_{{ ee.bs_pk }}">{{ ee.compound_name }}</a></td>
-            <td><a href="/materials/{{ ee.sys_pk }}_{{ ee.apos_pk }}_{{ ee.syn_pk }}_{{ ee.ee_pk }}_{{ ee.bs_pk }}">{{ ee.common_formula }}</a></td>
-            <td><a href="/materials/{{ ee.sys_pk }}_{{ ee.apos_pk }}_{{ ee.syn_pk }}_{{ ee.ee_pk }}_{{ ee.bs_pk }}">{{ ee.chemical_formula }}</a></td>
-            <td>{{ ee.ee }}</td>
-            <td>
-              <a href="{% url "materials:data_dl" data_type="exciton_emission" pk=ee.ee_pk %}">
-                <span class="fa fa-download" aria-hidden="true"></span>
-                Exciton Emission Peak
-              </a></td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    {% else %}
-      <thead>
-        <tr>
-          <th>Compound Name</th>
-          <th>Chemical Formula</th>
-          <th>Alternate Names</th>
-          <th>Organic Component</th>
-          <th>Inorganic Component</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for system in systems %}
-          <tr>
-            <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.compound_name }}</a></td>
-            <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.formula }}</a></td>
-            <td>
-              <ul style="padding: 0px; list-style-type: none" id="authors-list">
-                {% for name in system.listAlternateNames %}
-                  <li><a href="{% url 'materials:system' pk=system.pk %}">{{ name }}</a></li>
-                {% endfor %}
-              </ul>
-            </td>
-            <td>{{ system.organic }}</td>
-            <td>{{ system.inorganic }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    {% endif %}
+      {% endfor %}
+    </tbody>
   </table>
 {% else %}
   <p class="alert alert-warning" role="alert">No results found. Please retry with a new search term</p>

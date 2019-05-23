@@ -10,10 +10,6 @@
       <form id="add-system" method="post" action="/materials/add-system">
         {% csrf_token %}
         {{ form.as_p }}
-        <div class="alert alert-warning" role="alert">
-          Can't find a tag?
-          <a class="alert-link" target="_blank" href="{% url 'materials:add_tag' %}">click here to add a tag</a>.
-        </div>
         <button type="submit" class="btn btn-primary">Add new system</button>
       </form>
       <div id="results">

@@ -1,9 +1,10 @@
-<!--
-     Contents of class="card-body" corresponding to a data set. Not
-     all sections are included by default. This file should be
-     included using the "with ..." syntax to include certain parts.
--->
 {% load materials_tags %}
+
+{% comment %}
+Contents of class="card-body" corresponding to a data set. Not all
+sections are included by default. This file should be included using
+the "with ..." syntax to include certain parts.
+{% endcomment %}
 
 <!-- MAIN DATA -->
 <h5>{{ dataset.label }}</h5>
@@ -11,7 +12,7 @@
   {{ dataset.get_all_fixed_temperatures }}
 </h5>
 {% if dataset.primary_property.name == 'atomic structure' %}
-  <!-- Atomic structures require special treatment -->
+  {# Atomic structures require special treatment #}
   {% for subset in dataset.subsets.all %}
     <div class="card">
       <div class="card-header">
@@ -52,7 +53,7 @@
     </div>
   {% endfor %}
 {% elif dataset.primary_property.name == 'band structure' %}
-  <!-- Band structures require special treatment -->
+  {# Band structures require special treatment #}
   {% with subset=dataset.subsets.first %}
     <div class="card">
       <div class="card-header">
@@ -98,13 +99,13 @@
     </div>
   {% endwith %}
 {% elif dataset.is_figure %}
-  <!-- Plotted data -->
+  {# Plotted data #}
   <canvas id="figure_{{ dataset.pk }}" width="400" height="300"></canvas>
   <footer class="reference">
     {% include 'materials/reference_format.html' with ref=dataset.reference %}
   </footer>
 {% else %}
-  <!-- Tabulated data -->
+  {# Tabulated data #}
   {% for subset in dataset.subsets.all %}
     <div class="card">
       <div class="card-header">
