@@ -10,6 +10,7 @@ import zipfile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.core.mail import send_mail
 from django.db import transaction
@@ -1048,11 +1049,13 @@ def report_issue(request):
         body = (f'Description:\n\n<blockquote>{description}</blockquote>'
                 'This report was issued by the user '
                 f'{user.username} ({user.email})')
+        email_addresses = list(User.objects.filter(
+            is_superuser=True).values_list('email', flat=True))
         send_mail(
             f'Issue report about dataset {pk}',
             '',
             'report@hybrid3',
-            ['raullaasner@gmail.com'],
+            email_addresses,
             fail_silently=False,
             html_message=body,
         )
