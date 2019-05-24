@@ -154,9 +154,9 @@ the "with ..." syntax to include certain parts.
     System description
   </div>
   <div class="card-body">
-    Dimensionality: {{ dataset.dimensionality }}D<br>
-    Sample type: {{ dataset.get_sample_type_display }}<br>
-    Crystal system: {{ dataset.get_crystal_system_display }}
+    <strong>Dimensionality:</strong> {{ dataset.dimensionality }}D<br>
+    <strong>Sample type:</strong> {{ dataset.get_sample_type_display }}<br>
+    <strong>Crystal system:</strong> {{ dataset.get_crystal_system_display }}
   </div>
 </div>
 
@@ -194,16 +194,16 @@ the "with ..." syntax to include certain parts.
       <div class="card-body">
         {% with dataset.synthesis.first as synthesis %}
           {% if synthesis.starting_materials %}
-            <p>Starting materials: {{ synthesis.starting_materials }}</p>
+            <p><strong>Starting materials:</strong> {{ synthesis.starting_materials }}</p>
           {% endif %}
           {% if synthesis.product %}
-            <p>Product: {{ synthesis.product }}</p>
+            <p><strong>Product:</strong> {{ synthesis.product }}</p>
           {% endif %}
           {% if synthesis.description %}
-            <p>Description: {{ synthesis.description }}</p>
+            <p><strong>Description:</strong> {{ synthesis.description }}</p>
           {% endif %}
           {% if synthesis.comment %}
-            <p><i>Comment: {{ synthesis.comment }}</i></p>
+            <p><i><strong>Comment:</strong></i> {{ synthesis.comment }}</i></p>
           {% endif %}
         {% endwith %}
       </div>
@@ -223,13 +223,13 @@ the "with ..." syntax to include certain parts.
       <div class="card-body">
         {% with dataset.experimental.first as exp %}
           {% if exp.method %}
-            <p>Method: {{ exp.method }}</p>
+            <p><strong>Method:</strong> {{ exp.method }}</p>
           {% endif %}
           {% if exp.description %}
-            <p>Description: {{ exp.description }}</p>
+            <p><strong>Description:</strong> {{ exp.description }}</p>
           {% endif %}
           {% if exp.comment %}
-            <p><i>Comment: {{ exp.comment }}</i></p>
+            <p><i><strong>Comment:</strong> {{ exp.comment }}</i></p>
           {% endif %}
         {% endwith %}
       </div>
@@ -249,26 +249,26 @@ the "with ..." syntax to include certain parts.
       <div class="card-body">
         {% with dataset.computational.first as comp %}
           {% if comp.code %}
-            <p>Code: {{ comp.code }}</p>
+            <p><strong>Code:</strong> {{ comp.code }}</p>
           {% endif %}
           {% if comp.level_of_theory %}
-            <p>Level of theory:
+            <p><strong>Level of theory:</strong>
               {{ comp.level_of_theory }}</p>
           {% endif %}
           {% if comp.xc_functional %}
-            <p>Exchange-correlation functional: {{ comp.xc_functional }}</p>
+            <p><strong>Exchange-correlation functional:</strong> {{ comp.xc_functional }}</p>
           {% endif %}
           {% if comp.kgrid %}
-            <p>K-point grid: {{ comp.kgrid }}</p>
+            <p><strong>K-point grid:</strong> {{ comp.kgrid }}</p>
           {% endif %}
           {% if comp.relativity_level %}
-            <p>Level of relativity: {{ comp.relativity_level }}</p>
+            <p><strong>Level of relativity:</strong> {{ comp.relativity_level }}</p>
           {% endif %}
           {% if comp.basis %}
-            <p>Basis set definition: {{ comp.basis }}</p>
+            <p><strong>Basis set definition:</strong> {{ comp.basis }}</p>
           {% endif %}
           {% if comp.numerical_accuracy %}
-            <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
+            <p><strong>Numerical accuracy:</strong> {{ comp.numerical_accuracy }}</p>
           {% endif %}
           {% with dataset.get_geometry_file_location as location %}
             {% if location %}
@@ -276,7 +276,7 @@ the "with ..." syntax to include certain parts.
             {% endif %}
           {% endwith %}
           {% if comp.comment %}
-            <p><i>Comment: {{ comp.comment }}</i></p>
+            <p><i><strong>Comment:</strong> {{ comp.comment }}</i></p>
           {% endif %}
         {% endwith %}
       </div>
@@ -313,10 +313,10 @@ the "with ..." syntax to include certain parts.
   <div class="collapse" id="meta-body-{{ dataset.pk }}">
     <div class="card-body">
       {% if dataset.extraction_method %}
-        Extraction method: {{ dataset.extraction_method }}<br>
+        <strong>Extraction method:</strong> {{ dataset.extraction_method }}<br>
       {% endif %}
-      Entry added on {{ dataset.created }}<br>
-      Last updated on {{ dataset.updated }}<br>
+      <strong>Entry added:</strong> {{ dataset.created }}<br>
+      <strong>Last updated:</strong> {{ dataset.updated }}<br>
     </div>
   </div>
 </div>
