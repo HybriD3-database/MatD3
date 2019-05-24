@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
+from mainproject import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -230,6 +232,14 @@ class Dataset(Base):
                     physical_property__name='temperature'):
             values.append(f'{value.formatted()} {value.unit}')
         return ('(T = ' + ', '.join(values) + ')' if values else '')
+
+    def get_geometry_file_location(self):
+        if self.primary_property.name != 'atomic structure':
+            for file_ in self.files.all():
+                if os.path.basename(file_.dataset_file.name) == 'geometry.in':
+                    return os.path.join(settings.MEDIA_URL,
+                                        file_.dataset_file.name)
+        return ''
 
 
 class Subset(Base):

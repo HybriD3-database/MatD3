@@ -270,6 +270,11 @@ the "with ..." syntax to include certain parts.
           {% if comp.numerical_accuracy %}
             <p>Numerical accuracy: {{ comp.numerical_accuracy }}</p>
           {% endif %}
+          {% with dataset.get_geometry_file_location as location %}
+            {% if location %}
+              <p><a href="{{ location }}">Geometry used in the calculation</a></p>
+            {% endif %}
+          {% endwith %}
           {% if comp.comment %}
             <p><i>Comment: {{ comp.comment }}</i></p>
           {% endif %}
