@@ -22,6 +22,8 @@ class BaseMixin:
 
 class BaseAdmin(BaseMixin, nested_admin.NestedModelAdmin):
     def save_model(self, request, obj, form, change):
+        if not hasattr(obj, 'created_by'):
+            obj.created_by = request.user
         obj.updated_by = request.user
         obj.updated = timezone.now()
         super().save_model(request, obj, form, change)
