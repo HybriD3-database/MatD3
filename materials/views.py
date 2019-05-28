@@ -1208,18 +1208,26 @@ def prefilled_form(request, pk):
                 dataset.computational.exists())
         },
     }
+
+    def change_key(dictionary, key_old, key_new):
+        dictionary[key_new] = dictionary[key_old]
+        del dictionary[key_old]
+
     if dataset.synthesis.exists():
         synthesis = dataset.synthesis.first()
         for field in filter(lambda field: type(field) is TextField,
-                            models.SynthesisDetails._meta.get_fields()):
+                            models.SynthesisMethod._meta.get_fields()):
             form['values'][field.name] = getattr(synthesis, field.name)
+        change_key(form['values'], 'description', 'synthesis_description')
         if hasattr(synthesis, 'comment'):
             form['values']['synthesis_comment'] = synthesis.comment.text
     if dataset.experimental.exists():
-        experimental = dataset.synthesis.first()
+        experimental = dataset.experimental.first()
         for field in filter(lambda field: type(field) is TextField,
                             models.ExperimentalDetails._meta.get_fields()):
             form['values'][field.name] = getattr(experimental, field.name)
+        change_key(form['values'], 'method', 'experimental_method')
+        change_key(form['values'], 'description', 'experimental_description')
         if hasattr(experimental, 'comment'):
             form['values']['experimental_comment'] = experimental.comment.text
     if dataset.computational.exists():
