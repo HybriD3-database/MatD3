@@ -13,3 +13,4 @@ django-nested-admin==3.2.3
 djangorestframework==3.9.2
 coverage==4.5.3
 selenium==3.141.0
+requests==2.22.0

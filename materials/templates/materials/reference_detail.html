@@ -9,7 +9,7 @@
     </div>
     <div class="card-body">
       <div class="row">
-        {% for dataset in object.dataset_set.all %}
+        {% for dataset in object.datasets.all %}
           {% if user == dataset.created_by or dataset.visible %}
             <div class="col-md-6">
               <div class="card card-item">
@@ -42,5 +42,5 @@
 {% endblock %}
 
 {% block script %}
-  {% include 'materials/dataset_scripts.html' with datasets=object.dataset_set.all %}
+  {% include 'materials/dataset_scripts.html' with datasets=object.datasets.all %}
 {% endblock %}

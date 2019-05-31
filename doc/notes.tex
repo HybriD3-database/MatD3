@@ -395,14 +395,6 @@ User uploaded files are stored in \texttt{DatasetFile}.
   \end{itemize}
 \end{tcolorbox}
 
-Band structures are treated differently from other physical properties. We specify only the reference to a data set and location of the data, which is currently stored in a text format on the hard drive.
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=BandStructure(Base)]
-  \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Dataset
-  \item \texttt{folder\_location}
-  \end{itemize}
-\end{tcolorbox}
-
 All user information is stored in the \texttt{UserProfile} table.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=UserProfile]
   \begin{itemize}
@@ -423,7 +415,14 @@ If you are unsure about any rule described in this section, see the source code 
 \subsection{Python}
 
 \begin{itemize}
-\item This project follows the PEP 8 style guide. Use a text editor that highlights parts of the code that do not conform to PEP 8 or use an external tool for that. One such tool is flake8 (\texttt{pip install flake8}). You can test your code by running \texttt{flake8 file.py}.
+\item This project follows the PEP 8 style guide. Use a text editor that highlights parts of the code that do not conform to PEP 8 or use an external tool for that. One such tool is flake8 (\texttt{pip install flake8}). You can test your code by running \texttt{flake8 file.py}. Among other things, the maximum line length is 79 characters.
+\end{itemize}
+
+\subsection{HTML and Javascript}
+
+\begin{itemize}
+\item The maximum line length for Javascript is 80 characters.
+\item The line length limit of HTML is harder to establish because of the highly nested nature of HTML. Although not as strict, try to keep the lines within 120 characters.
 \end{itemize}
 
 \subsection{Imports}
@@ -447,7 +446,7 @@ If you are unsure about any rule described in this section, see the source code 
   \begin{lstlisting}
     Permission.objects.all().delete()
   \end{lstlisting}
-  This deletes all permissions and once makemigrations and migrate are run, rebuilds only the ones for tables which are present.
+  This deletes all permissions. Once makemigrations and migrate are run, only the premissions for tables which are present are rebuilt.
 \item In order to have an interactive shell, install iPython in the virtual environment (not just system wide).
 \item The command for running tests with Coverage.py is
   \begin{lstlisting}

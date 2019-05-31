@@ -275,6 +275,15 @@ the "with ..." syntax to include certain parts.
               <p><a href="{{ location }}">Geometry used in the calculation</a></p>
             {% endif %}
           {% endwith %}
+          {% if comp.repositories.exists %}
+            <p><strong>External repositories:</strong>
+              <ul>
+                {% for repo in comp.repositories.all %}
+                  <li><a href="{{ repo.url }}">{{ repo.url }}</a></li>
+                {% endfor %}
+              </ul>
+            </p>
+          {% endif %}
           {% if comp.comment %}
             <p><i><strong>Comment:</strong> {{ comp.comment }}</i></p>
           {% endif %}

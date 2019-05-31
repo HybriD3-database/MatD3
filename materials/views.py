@@ -5,6 +5,7 @@ import matplotlib
 import numpy
 import os
 import re
+import requests
 import zipfile
 
 from django.contrib import messages
@@ -642,6 +643,17 @@ def submit_data(request):
                 computational_details=computational,
                 created_by=request.user,
                 text=form.cleaned_data['computational_comment'])
+        if form.cleaned_data['external_repositories']:
+            for url in form.cleaned_data['external_repositories'].split():
+                if not requests.head(url).ok:
+                    return error_and_return(dataset,
+                                            'Could not process url for the '
+                                            f'external repository: "{url}"',
+                                            form)
+                models.ExternalRepository.objects.create(
+                    computational_details=computational,
+                    created_by=request.user,
+                    url=url)
     # For best performance, the main data should be inserted with
     # calls to bulk_create. The following work arrays are are
     # populated with data during the loop over subsets and then

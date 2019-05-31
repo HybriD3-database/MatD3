@@ -361,6 +361,15 @@ class AddDataForm(forms.Form):
         'Include all parameters here that describe the accuracy of the '
         'calculation (tolerance parameters for an SCF cycle, quality of '
         'integration grids, number of excited states included, ...).')
+    external_repositories = AutoCharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder':
+            'http://dx.doi.org/00.00000/NOMAD/2000.01.30-5 ...',
+        }),
+        help_text=''
+        'Provide link(s) to external repositories such as NOMAD, which host '
+        'additional data related to the data entered here.')
     computational_comment = AutoCharField(
         label='Comments',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
