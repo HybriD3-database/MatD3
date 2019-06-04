@@ -23,6 +23,7 @@ from django.db.models import Value
 from django.db.models import When
 from django.db.models.fields import TextField
 from django.forms import formset_factory
+from django.http import Http404
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
@@ -830,30 +831,54 @@ def submit_data(request):
     return redirect(reverse('materials:add_data'))
 
 
+def resolve_return_url(pk, view_name):
+    """Determine URL from the view name and other arguments.
+
+    This is useful for the data set buttons such as delete, which can
+    then return to the same address.
+
+    """
+    if view_name == 'dataset':
+        return redirect(reverse('materials:dataset', kwargs={'pk': pk}))
+    elif view_name == 'reference':
+        ref_pk = models.Dataset.objects.get(pk=pk).reference.pk
+        return redirect(reverse('materials:reference', kwargs={'pk': ref_pk}))
+    elif view_name == 'system':
+        sys_pk = models.Dataset.objects.get(pk=pk).system.pk
+        return redirect(reverse('materials:system', kwargs={'pk': sys_pk}))
+    elif view_name == 'property_all_entries':
+        sys_pk = models.Dataset.objects.get(pk=pk).system.pk
+        prop_pk = models.Dataset.objects.get(pk=pk).primary_property.pk
+        return redirect(reverse(
+            'materials:property_all_entries',
+            kwargs={'system_pk': sys_pk, 'prop_pk': prop_pk}))
+    else:
+        return Http404
+
+
 @dataset_author_check
-def toggle_visibility(request, pk, return_url):
+def toggle_visibility(request, pk, view_name):
     dataset = models.Dataset.objects.get(pk=pk)
     dataset.visible = not dataset.visible
     dataset.save()
-    return redirect(return_url)
+    return resolve_return_url(pk, view_name)
 
 
 @dataset_author_check
-def toggle_is_figure(request, pk, return_url):
+def toggle_is_figure(request, pk, view_name):
     dataset = models.Dataset.objects.get(pk=pk)
     dataset.is_figure = not dataset.is_figure
     dataset.save()
-    return redirect(return_url)
+    return resolve_return_url(pk, view_name)
 
 
 @dataset_author_check
-def delete_dataset(request, pk, return_url):
+def delete_dataset(request, pk, view_name):
     """Delete current data set and all associated files."""
+    return_url = resolve_return_url(pk, view_name)
     dataset = models.Dataset.objects.get(pk=pk)
     dataset.delete()
-    if not return_url.startswith('/'):
-        return_url = '/' + return_url
-    return redirect(return_url)
+    return return_url
 
 
 def dataset_files(request, pk):
