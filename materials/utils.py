@@ -1,3 +1,4 @@
+# This file is covered by the BSD license. See LICENSE in the root directory.
 """Helper functions for this project."""
 import functools
 import io

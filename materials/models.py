@@ -1,3 +1,4 @@
+# This file is covered by the BSD license. See LICENSE in the root directory.
 import logging
 import os
 import shutil

@@ -1,5 +1,5 @@
 mainproject/media/*
-hybrid3env/*
+venv/*
 *.pyc
 /static
 .env

@@ -1,3 +1,4 @@
+# This file is covered by the BSD license. See LICENSE in the root directory.
 import nested_admin
 
 from django import forms

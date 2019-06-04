@@ -1,3 +1,4 @@
+# This file is covered by the BSD license. See LICENSE in the root directory.
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core import mail

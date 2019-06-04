@@ -1,3 +1,4 @@
+# This file is covered by the BSD license. See LICENSE in the root directory.
 """WSGI config for myproject project.
 
 It exposes the WSGI callable as a module-level variable named

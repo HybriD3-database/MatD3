@@ -1,3 +1,4 @@
+# This file is covered by the BSD license. See LICENSE in the root directory.
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import update_session_auth_hash
