@@ -674,7 +674,7 @@
    prefill_button.addEventListener('click', function(event) {
      event.preventDefault();
      axios.get('/materials/prefilled-form/' + prefill_input.value)
-          .then(function(response) {
+          .then(response => {
             var values = response['data']['values'];
             for (var key in values) {
               var el = document.getElementById('id_' + key);
@@ -715,6 +715,9 @@
             document.getElementById('id_primary_property').dispatchEvent(new Event('change'));
             document.getElementById('id_two_axes').dispatchEvent(new Event('change'));
             prefill_input.value = '';
+          })
+          .catch(response => {
+            console.log('Error in prefilling the form');
           });
    });
   </script>

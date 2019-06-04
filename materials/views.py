@@ -1192,7 +1192,7 @@ def prefilled_form(request, pk):
         if value:
             return 'True'
         return 'False'
-    dataset = models.Dataset.objects.get(pk=pk)
+    dataset = get_object_or_404(models.Dataset, pk=pk)
     form = {
         'values': {
             'select_reference': pk_or_none(dataset.reference),
