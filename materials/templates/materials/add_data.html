@@ -546,16 +546,16 @@
      var suffix = subset + '_' + counter;
      var el, name;
      copy.classList.remove('d-none', 'fixed-property-template');
-     function edit_id_and_name(type) {
+     const edit_id_and_name = type => {
        name = 'fixed_' + type + '_' + suffix;
        el = copy.querySelector('[name="fixed_' + type + '"]');
-       el.id = name;
+       el.id = 'id_' + name;
        el.name = name;
      }
      edit_id_and_name('property');
-     fill_selectize('property', name, prop_initial);
+     fill_selectize(name, prop_initial);
      edit_id_and_name('unit');
-     fill_selectize('unit', name, unit_initial);
+     fill_selectize(name, unit_initial);
      edit_id_and_name('value');
      if (value_initial) {
        copy.querySelector('[name="fixed_value_' + suffix + '"]').value = value_initial;
