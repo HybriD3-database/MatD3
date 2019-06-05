@@ -589,7 +589,6 @@ def submit_data(request):
         form.cleaned_data['origin_of_data'] == 'is_experimental')
     dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
     dataset.sample_type = form.cleaned_data['sample_type']
-    dataset.crystal_system = 0
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
     dataset.representative = not bool(models.Dataset.objects.filter(
@@ -1243,7 +1242,6 @@ def prefilled_form(request, pk):
                                else 'is_theoretical'),
             'sample_type': dataset.sample_type,
             'dimensionality_of_the_system': dataset.dimensionality,
-            'crystal_system': dataset.crystal_system,
             'with_synthesis_details': bool_to_text(dataset.synthesis.exists()),
             'with_experimental_details': bool_to_text(
                 dataset.experimental.exists()),

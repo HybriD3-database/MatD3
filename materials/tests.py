@@ -18,8 +18,7 @@ dataset_template = models.Dataset(visible=True,
                                   is_figure=False,
                                   is_experimental=True,
                                   dimensionality=3,
-                                  sample_type=models.Dataset.SINGLE_CRYSTAL,
-                                  crystal_system=models.Dataset.TRICLINIC)
+                                  sample_type=models.Dataset.SINGLE_CRYSTAL)
 system_template = models.System(compound_name='MAPbI3',
                                 formula='(CH3NH3)PbI3',
                                 group='MAPI',

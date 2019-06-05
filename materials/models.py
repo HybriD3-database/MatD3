@@ -146,24 +146,6 @@ class Dataset(Base):
         (NANOFORM, 'nanoform'),
         (UNKNOWN, 'unknown'),
     )
-    TRICLINIC = 0
-    MONOCLINIC = 1
-    ORTHORHOMBIC = 2
-    TETRAGONAL = 3
-    TRIGONAL = 4
-    HEXAGONAL = 5
-    CUBIC = 6
-    UNKNOWN_SYSTEM = 7
-    CRYSTAL_SYSTEMS = (
-        (TRICLINIC, 'triclinic'),
-        (MONOCLINIC, 'monoclinic'),
-        (ORTHORHOMBIC, 'orthorhombic'),
-        (TETRAGONAL, 'tetragonal'),
-        (TRIGONAL, 'trigonal'),
-        (HEXAGONAL, 'hexagonal'),
-        (CUBIC, 'cubic'),
-        (UNKNOWN_SYSTEM, 'unknown'),
-    )
     DIMENSIONALITIES = (
         (3, 3),
         (2, 2),
@@ -193,7 +175,6 @@ class Dataset(Base):
     is_experimental = models.BooleanField()  # theoretical if false
     dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
-    crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
     linked_to = models.ManyToManyField('self', blank=True)

@@ -394,8 +394,8 @@ class AddDataForm(forms.Form):
         'subset.')
     crystal_system = forms.ChoiceField(
         required=False,
-        initial=models.Dataset.CRYSTAL_SYSTEMS[0],
-        choices=(models.Dataset.CRYSTAL_SYSTEMS),
+        initial=models.Subset.CRYSTAL_SYSTEMS[0],
+        choices=(models.Subset.CRYSTAL_SYSTEMS),
         widget=forms.RadioSelect(),
         help_text='Select the crystal system.')
     subset_label = AutoCharField(
@@ -502,7 +502,7 @@ class AddDataForm(forms.Form):
                     self.fields[key] = forms.ChoiceField(
                         required=False,
                         initial=value,
-                        choices=(models.Dataset.CRYSTAL_SYSTEMS),
+                        choices=(models.Subset.CRYSTAL_SYSTEMS),
                         widget=forms.RadioSelect())
                 elif key.startswith('fixed_property_'):
                     self.fields[key] = forms.ModelChoiceField(
