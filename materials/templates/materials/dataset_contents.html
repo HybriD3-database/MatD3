@@ -22,6 +22,7 @@ the "with ..." syntax to include certain parts.
         {% endif %}
       </div>
       <div class="card-body">
+        <p><strong>Crystal system:</strong> {{ subset.get_crystal_system_display }}</p>
         <!-- Lattice constants -->
         <table class="table-lattice-constants">
           {% for symbol, value, unit in subset.get_lattice_constants %}
@@ -60,6 +61,7 @@ the "with ..." syntax to include certain parts.
         {{ dataset.primary_property|capfirst }}
       </div>
       <div class="card-body">
+        <p><strong>Crystal system:</strong> {{ subset.get_crystal_system_display }}</p>
         <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" role="tab"
@@ -115,6 +117,7 @@ the "with ..." syntax to include certain parts.
         {% endif %}
       </div>
       <div class="card-body">
+        <p><strong>Crystal system:</strong> {{ subset.get_crystal_system_display }}</p>
         <table class="table table-sm">
           <thead>
             <tr>
@@ -156,7 +159,6 @@ the "with ..." syntax to include certain parts.
   <div class="card-body">
     <strong>Dimensionality:</strong> {{ dataset.dimensionality }}D<br>
     <strong>Sample type:</strong> {{ dataset.get_sample_type_display }}<br>
-    <strong>Crystal system:</strong> {{ dataset.get_crystal_system_display }}
   </div>
 </div>
 

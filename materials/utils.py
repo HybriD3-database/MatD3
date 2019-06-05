@@ -12,6 +12,10 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from . import models
 
+matplotlib.use('Agg')  # noqa
+
+from matplotlib import pyplot
+
 
 def atomic_coordinates_as_json(pk):
     """Get atomic coordinates from the atomic structure list.
@@ -64,8 +68,6 @@ def plot_band_structure(k_labels, files, dataset):
         List of file names containing the band energies.
 
     """
-    from matplotlib import pyplot
-    matplotlib.use('Agg')
     ENERGY_FULL_MIN = -8
     ENERGY_FULL_MAX = 8
     ENERGY_SMALL_MIN = -2

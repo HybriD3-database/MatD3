@@ -40,6 +40,9 @@ from . import utils
 from mainproject import settings
 
 matplotlib.use('Agg')
+
+from matplotlib import pyplot  # noqa
+
 logger = logging.getLogger(__name__)
 
 
@@ -586,7 +589,7 @@ def submit_data(request):
         form.cleaned_data['origin_of_data'] == 'is_experimental')
     dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
     dataset.sample_type = form.cleaned_data['sample_type']
-    dataset.crystal_system = form.cleaned_data['crystal_system']
+    dataset.crystal_system = 0
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
     dataset.representative = not bool(models.Dataset.objects.filter(
@@ -667,8 +670,9 @@ def submit_data(request):
     for i_subset in range(1, int(form.cleaned_data['number_of_subsets']) + 1):
         # Create data subset
         subset = models.Subset(created_by=request.user, dataset=dataset)
-        if 'subset_label_' + str(i_subset) in form.cleaned_data:
-            subset.label = form.cleaned_data['subset_label_' + str(i_subset)]
+        subset.crystal_system = form.cleaned_data[f'crystal_system_{i_subset}']
+        if f'subset_label_{i_subset}' in form.cleaned_data:
+            subset.label = form.cleaned_data[f'subset_label_{i_subset}']
         subset.save()
         # Go through exceptional cases first. Some properties such as
         # "atomic structure" require special treatment.
@@ -678,7 +682,7 @@ def submit_data(request):
                 datapoint = models.Datapoint.objects.create(
                     created_by=request.user, subset=subset)
                 datapoint.symbols.create(created_by=request.user, value=symbol)
-                name = 'lattice_constant_' + key + '_' + str(i_subset)
+                name = f'lattice_constant_{key}_{i_subset}'
                 value, value_type, error = clean_value(form.cleaned_data[name])
                 models.NumericalValue.objects.create(created_by=request.user,
                                                      datapoint=datapoint,
@@ -692,7 +696,7 @@ def submit_data(request):
             lattice_vectors = []
             lattice_errors = []  # dummy
             for line in form.cleaned_data[
-                    'atomic_coordinates_' + str(i_subset)].split('\n'):
+                    f'atomic_coordinates_{i_subset}'].split('\n'):
                 try:
                     if line.startswith('lattice_vector'):
                         m = re.match(r'\s*lattice_vector' +
@@ -731,7 +735,7 @@ def submit_data(request):
             # Get kpoints
             k_labels = []
             for line in form.cleaned_data[
-                    'subset_datapoints_' + str(i_subset)].splitlines():
+                    f'subset_datapoints_{i_subset}'].splitlines():
                 if skip_this_line(line):
                     continue
                 k_labels.append(line.split())
@@ -756,7 +760,7 @@ def submit_data(request):
         elif form.cleaned_data['two_axes']:
             try:
                 for line in form.cleaned_data[
-                        'subset_datapoints_' + str(i_subset)].splitlines():
+                        f'subset_datapoints_{i_subset}'].splitlines():
                     if skip_this_line(line):
                         continue
                     x_value, y_value = line.split()[:2]
@@ -771,7 +775,7 @@ def submit_data(request):
         else:
             try:
                 for line in form.cleaned_data[
-                        'subset_datapoints_' + str(i_subset)].splitlines():
+                        f'subset_datapoints_{i_subset}'].splitlines():
                     if skip_this_line(line):
                         continue
                     for value in line.split():
@@ -784,7 +788,7 @@ def submit_data(request):
         # Fixed properties
         counter = 0
         for key in form.cleaned_data:
-            if key.startswith('fixed_property_' + str(i_subset) + '_'):
+            if key.startswith(f'fixed_property_{i_subset}_'):
                 suffix = key.split('fixed_property_')[1]
                 fixed_value = models.NumericalValueFixed(
                     created_by=request.user, subset=subset, counter=counter)
@@ -913,7 +917,6 @@ def dataset_data(request, pk):
 
 def dataset_image(request, pk):
     """Return a png image of the data set."""
-    from matplotlib import pyplot
     dataset = models.Dataset.objects.get(pk=pk)
     subset = dataset.subsets.first()
     datapoints = subset.datapoints.all()
@@ -983,6 +986,8 @@ def data_for_chart(request, pk):
                 f"{this_subset['subset-label']}:{','.join(fixed_values)}")
         else:
             this_subset['subset-label'] = (','.join(fixed_values)).lstrip()
+        this_subset['subset-label'] += (
+            f' ({models.Subset.CRYSTAL_SYSTEMS[subset.crystal_system][1]})')
         values = models.NumericalValue.objects.filter(
             datapoint__subset=subset).order_by(
                 'datapoint_id', 'qualifier').values_list('value', flat=True)

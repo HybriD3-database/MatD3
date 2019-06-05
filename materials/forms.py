@@ -154,6 +154,7 @@ class AddDataForm(forms.Form):
         'Main description of the data. This can include an explanation of the '
         'significance of the results.')
     extraction_method = AutoCharField(
+        label='Data extraction protocol',
         model=models.Dataset, field='extraction_method',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
@@ -178,7 +179,10 @@ class AddDataForm(forms.Form):
         'interest is missing here, add it under "Define new unit".')
     primary_property_label = AutoCharField(
         model=models.Dataset, field='primary_property_label',
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Leave empty if not required'
+        }),
         help_text=''
         'If present, this label is used on the y-axis of a figure. Default is '
         'to use the same name as the physical property.')
@@ -201,7 +205,10 @@ class AddDataForm(forms.Form):
         'missing here, add it under "Define new unit".')
     secondary_property_label = AutoCharField(
         model=models.Dataset, field='secondary_property_label',
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Leave empty if not required'
+        }),
         help_text=''
         'If present, this label is used on the x-axis of a figure. Default is '
         'to use the same name as the physical property.')
@@ -246,11 +253,6 @@ class AddDataForm(forms.Form):
         choices=(models.Dataset.SAMPLE_TYPES),
         widget=forms.RadioSelect(),
         help_text='Select the type of the sample.')
-    crystal_system = forms.ChoiceField(
-        initial=models.Dataset.CRYSTAL_SYSTEMS[0],
-        choices=(models.Dataset.CRYSTAL_SYSTEMS),
-        widget=forms.RadioSelect(),
-        help_text='Select the crystal system.')
 
     # Synthesis
     with_synthesis_details = forms.BooleanField(
@@ -390,6 +392,12 @@ class AddDataForm(forms.Form):
         'typically fixed (see the help text for "Add fixed property"). In '
         'case of a figure, each curve is typically considered a separate data '
         'subset.')
+    crystal_system = forms.ChoiceField(
+        required=False,
+        initial=models.Dataset.CRYSTAL_SYSTEMS[0],
+        choices=(models.Dataset.CRYSTAL_SYSTEMS),
+        widget=forms.RadioSelect(),
+        help_text='Select the crystal system.')
     subset_label = AutoCharField(
         label='Label',
         model=models.Subset, field='label',
@@ -403,7 +411,7 @@ class AddDataForm(forms.Form):
         required=False,
         label='Data points',
         widget=forms.Textarea(
-            attrs={'class': 'form-control subset-datapoints', 'rows': '3',
+            attrs={'class': 'form-control subset-datapoints', 'rows': '4',
                    'placeholder': 'value_1 value_2 ...'}),
         help_text=''
         'Insert data points here. These may be a single value, a series of '
@@ -490,6 +498,12 @@ class AddDataForm(forms.Form):
                 elif key.startswith('subset_label_'):
                     self.fields[key] = forms.CharField(required=False,
                                                        initial=value)
+                elif key.startswith('crystal_system_'):
+                    self.fields[key] = forms.ChoiceField(
+                        required=False,
+                        initial=value,
+                        choices=(models.Dataset.CRYSTAL_SYSTEMS),
+                        widget=forms.RadioSelect())
                 elif key.startswith('fixed_property_'):
                     self.fields[key] = forms.ModelChoiceField(
                         queryset=models.Property.objects.all(), initial=value)
@@ -522,11 +536,14 @@ class AddDataForm(forms.Form):
         for field in self.fields:
             if field.startswith('subset_datapoints_'):
                 counter = field.split('subset_datapoints_')[1]
+                crystal_system = self.fields[
+                    'crystal_system_' + counter].initial
                 if 'subset_label_' + counter in self.fields:
                     label = self.fields['subset_label_' + counter].initial
                 else:
                     label = ''
-                results.append([counter, label, self.fields[field].initial])
+                datapoints = self.fields[field].initial
+                results.append([counter, crystal_system, label, datapoints])
         return results
 
     def get_fixed_properties(self):

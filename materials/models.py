@@ -254,9 +254,28 @@ class Subset(Base):
     curves in a figure).
 
     """
+    TRICLINIC = 0
+    MONOCLINIC = 1
+    ORTHORHOMBIC = 2
+    TETRAGONAL = 3
+    TRIGONAL = 4
+    HEXAGONAL = 5
+    CUBIC = 6
+    UNKNOWN_SYSTEM = 7
+    CRYSTAL_SYSTEMS = (
+        (TRICLINIC, 'triclinic'),
+        (MONOCLINIC, 'monoclinic'),
+        (ORTHORHOMBIC, 'orthorhombic'),
+        (TETRAGONAL, 'tetragonal'),
+        (TRIGONAL, 'trigonal'),
+        (HEXAGONAL, 'hexagonal'),
+        (CUBIC, 'cubic'),
+        (UNKNOWN_SYSTEM, 'unknown'),
+    )
     label = models.CharField(max_length=100, blank=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
                                 related_name='subsets')
+    crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
 
     class Meta:
         verbose_name_plural = 'data subsets'

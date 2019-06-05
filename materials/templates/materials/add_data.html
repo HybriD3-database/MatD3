@@ -114,13 +114,10 @@
                     {% input_field main_form.origin_of_data %}
                   </div>
                   <div class="col-md-6">
-                    {% input_field main_form.dimensionality_of_the_system %}
-                  </div>
-                  <div class="col-md-6">
                     {% input_field main_form.sample_type %}
                   </div>
                   <div class="col-md-6">
-                    {% input_field main_form.crystal_system %}
+                    {% input_field main_form.dimensionality_of_the_system %}
                   </div>
                 </div>
               </div>
@@ -334,7 +331,10 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-8">
-            <div class="row">
+            <div class="form-row">
+              <div class="form-group col-md-12">
+                {% input_field main_form.crystal_system %}
+              </div>
               <div class="col-md-7">
                 <div class="input-group">
                   <div class="input-group-prepend">
@@ -591,9 +591,13 @@
    });
    number_of_subsets.dispatchEvent(new Event('change'));
    // Prefill the data subsets from a previous instance of the form
-   {% for name_counter, label, values in main_form.get_subset %}
-   document.getElementById('id_subset_label_{{ name_counter }}').value = '{{ label|escapejs }}';
-   document.getElementById('id_subset_datapoints_{{ name_counter }}').value = '{{ values|escapejs }}';
+   {% for name_counter, crystal_system, label, values in main_form.get_subset %}
+   document.getElementById(
+     'id_crystal_system_{{ crystal_system }}_{{ name_counter }}').checked = true;
+   document.getElementById(
+     'id_subset_label_{{ name_counter }}').value = '{{ label|escapejs }}';
+   document.getElementById(
+     'id_subset_datapoints_{{ name_counter }}').value = '{{ values|escapejs }}';
    {% endfor %}
    // Prefill fixed properties from a previous instance of the form
    {% for subset_counter, name_counter, prop, unit, value in main_form.get_fixed_properties %}
