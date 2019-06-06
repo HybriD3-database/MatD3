@@ -354,10 +354,8 @@ class NumericalValueFixed(NumericalValueBase):
     """Values that are constant within a data subset."""
     physical_property = models.ForeignKey(Property, on_delete=models.PROTECT)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-    subset = models.ForeignKey(Subset,
-                               null=True,
-                               on_delete=models.CASCADE,
-                               related_name='fixed_values')
+    subset = models.ForeignKey(
+        Subset, on_delete=models.CASCADE, related_name='fixed_values')
     error = models.FloatField(null=True)
 
     def formatted(self):
