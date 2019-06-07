@@ -244,7 +244,6 @@
                     <span class="tooltiptext">Select to import all data (all subsets) from a single file. Use the ampersand ("&") as a delimiter between different data subsets.</span>
                   </i>
                 </div>
-                <br>
                 <div id="data-subset"></div>
               </div>
             </div>
@@ -334,6 +333,9 @@
             <div class="form-row">
               <div class="form-group col-md-12">
                 {% input_field main_form.crystal_system %}
+                <div class="phase-transition-input" hidden="true">
+                    {% input_field main_form.phase_transition_crystal_system_final %}
+                </div>
               </div>
               <div class="col-md-7">
                 <div class="input-group">
@@ -394,6 +396,25 @@
               </div>
               <div class="form-group">
                 {% input_field main_form.atomic_coordinates %}
+              </div>
+            </div>
+            <div class="phase-transition-input" hidden="true">
+              <div class="form-row">
+                <div class="form-group">
+                  {% input_field main_form.phase_transition_space_group_initial %}
+                </div>
+                <div class="form-group">
+                  {% input_field main_form.phase_transition_space_group_final %}
+                </div>
+                <div class="form-group">
+                  {% input_field main_form.phase_transition_direction %}
+                </div>
+                <div class="form-group">
+                  {% input_field main_form.phase_transition_hysteresis %}
+                </div>
+                <div class="form-group">
+                  {% input_field main_form.phase_transition_value %}
+                </div>
               </div>
             </div>
           </div>
@@ -520,6 +541,11 @@
      copy.getElementsByClassName('card-header')[0].innerHTML = 'Subset #' + i_subset;
      var elements = copy.querySelectorAll('input, textarea');
      for (var i = 0; i < elements.length; i++) {
+       // Set the defaults of radio buttons from the first subset
+       if (i_subset > 1 && elements[i].type === 'radio') {
+         var el = document.getElementById(elements[i].id + '_' + 1);
+         elements[i].checked = el.checked;
+       }
        elements[i].id += '_' + i_subset;
        elements[i].name += '_' + i_subset;
      }
@@ -726,30 +752,50 @@
    });
   </script>
   <script>
+   {# Hide special property fields under subsets and show only normal input #}
+   function reset_subset_fields() {
+     $('.atomic-structure-input').attr('hidden', true);
+     $('.phase-transition-input').attr('hidden', true);
+     $('.normal-input').show();
+     if (document.getElementById('id_is_figure').readOnly) {
+       set_checkbox('id_is_figure', false, false);
+       set_checkbox('id_two_axes', false, false);
+     }
+     $('input[name^="lattice_constant_"]').each(function() {
+       $(this).prop('required', false);
+     });
+     $('input[name^="phase_transition_"]').each(function() {
+       $(this).prop('required', false);
+     });
+     $('textarea[name^="subset_datapoints_"]').each(function() {
+       $(this).prop('required', true);
+     });
+     crystal_system_labels = document.querySelectorAll('.card-subset legend');
+     for (var i = 0; i < crystal_system_labels.length; i++) {
+       crystal_system_labels[i].innerHTML =
+         crystal_system_labels[i].innerHTML.replace(
+           /Initial crystal system/, 'Crystal system');
+     }
+   }
+  </script>
+  <script>
    // Atomic structure specific
    $('#id_primary_property').change(function() {
-     var is_atomic_structure =
-       $('#id_primary_property').find(':selected').text() === 'atomic structure';
-     if (is_atomic_structure) {
+     if ($('#id_primary_property').find(':selected').text() ===
+       'atomic structure') {
+       reset_subset_fields();
        $('.atomic-structure-input').attr('hidden', false);
        $('.normal-input').hide();
        set_checkbox('id_is_figure', false, true);
        set_checkbox('id_two_axes', false, true);
-     } else {
-       $('.atomic-structure-input').attr('hidden', true);
-       $('.normal-input').show();
-       if (document.getElementById('id_is_figure').readOnly) {
-         set_checkbox('id_is_figure', false, false);
-         set_checkbox('id_two_axes', false, false);
-       }
+       // Make atomic structure related fields required only if this property has been selected
+       $('input[name^="lattice_constant_"]').each(function() {
+         $(this).prop('required', true);
+       });
+       $('textarea[name^="subset_datapoints_"]').each(function() {
+         $(this).prop('required', false);
+       });
      }
-     // Make atomic structure related fields required only if this property has been selected
-     $('input[name^="lattice_constant_"]').each(function() {
-       $(this).prop('required', is_atomic_structure);
-     });
-     $('textarea[name^="subset_datapoints_"]').each(function() {
-       $(this).prop('required', !is_atomic_structure);
-     });
    });
    function import_lattice_parameters(el) {
      var i_subset = $(el).attr('id').split('import-lattice-parameters_')[1];
@@ -858,7 +904,7 @@
    {% endfor %}
   </script>
   <script>
-   // Band structures
+   // Band structure specific
    var band_structure_selected = false;
    $('#id_primary_property').change(function() {
      primary_unit = $(this).parent().next();
@@ -908,6 +954,53 @@
            document.getElementById('id_subset_datapoints_1').value = result;
          }).fail(function(result) {});
        }
+     }
+   });
+  </script>
+  <script>
+   // Phase transition specific
+   $('#id_primary_property').change(function() {
+     if ($('#id_primary_property').find(':selected').text()
+                                  .startsWith('phase transition ')) {
+       reset_subset_fields();
+       $('.phase-transition-input').attr('hidden', false);
+       $('.normal-input').hide();
+       set_checkbox('id_is_figure', false, true);
+       set_checkbox('id_two_axes', false, true);
+       crystal_system_labels = document.querySelectorAll('.card-subset legend');
+       for (var i = 0; i < crystal_system_labels.length; i++) {
+         crystal_system_labels[i].innerHTML =
+           crystal_system_labels[i].innerHTML.replace(
+             /^\s*Crystal system/, 'Initial crystal system');
+       }
+       $('input[name^="phase_transition_crystal_system_final"]').each(function() {
+         $(this).prop('required', true);
+       });
+       $('input[name^="phase_transition_value"]').each(function() {
+         $(this).prop('required', true);
+       });
+       $('textarea[name^="subset_datapoints_"]').each(function() {
+         $(this).prop('required', false);
+       });
+     }
+   });
+   // Prefill from a previous instance of the form
+   {% for subset_counter, cs_f, sg_i, sg_f, dir, hysteresis, value in main_form.get_phase_transitions %}
+   document.getElementById('id_phase_transition_crystal_system_final_{{ cs_f }}_{{ subset_counter }}')
+           .checked = true;
+   $('#id_phase_transition_space_group_initial_{{ subset_counter }}').val('{{ sg_i|escapejs }}');
+   $('#id_phase_transition_space_group_final_{{ subset_counter }}').val('{{ sg_f|escapejs }}');
+   $('#id_phase_transition_direction_{{ subset_counter }}').val('{{ dir|escapejs }}');
+   $('#id_phase_transition_hysteresis_{{ subset_counter }}').val('{{ hysteresis|escapejs }}');
+   $('#id_phase_transition_value_{{ subset_counter }}').val('{{ value|escapejs }}');
+   {% endfor %}
+  </script>
+  <script>
+   $('#id_primary_property').change(function() {
+     var selected = $('#id_primary_property').find(':selected').text();
+     if (selected !== 'atomic structure' &&
+         !selected.startsWith('phase transition ')) {
+       reset_subset_fields();
      }
    });
   </script>

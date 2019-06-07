@@ -476,6 +476,43 @@ class AddDataForm(forms.Form):
         'the coordinate, followed by the element name. For the case of '
         'absolute coordinates ("atom"), the units are given by "Primary unit" '
         'above. Note: to resize this box, drag from the corner.')
+    phase_transition_crystal_system_final = forms.ChoiceField(
+        label='Final crystal system',
+        required=False,
+        initial=models.Subset.CRYSTAL_SYSTEMS[0],
+        choices=(models.Subset.CRYSTAL_SYSTEMS),
+        widget=forms.RadioSelect(),
+        help_text='Select the final crystal system.')
+    phase_transition_space_group_initial = forms.CharField(
+        label='Initial space group',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+    )
+    phase_transition_space_group_final = forms.CharField(
+        label='Final space group',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+    )
+    phase_transition_direction = forms.CharField(
+        label='Direction',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+    )
+    phase_transition_hysteresis = forms.CharField(
+        label='Hysteresis',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+    )
+    phase_transition_value = forms.CharField(
+        label='Value',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+    )
 
     # Uploads
     uploaded_files = forms.FileField(
@@ -500,7 +537,6 @@ class AddDataForm(forms.Form):
                                                        initial=value)
                 elif key.startswith('crystal_system_'):
                     self.fields[key] = forms.ChoiceField(
-                        required=False,
                         initial=value,
                         choices=(models.Subset.CRYSTAL_SYSTEMS),
                         widget=forms.RadioSelect())
@@ -519,6 +555,27 @@ class AddDataForm(forms.Form):
                 elif key.startswith('atomic_coordinates_'):
                     self.fields[key] = forms.CharField(
                         required=False, widget=forms.Textarea, initial=value)
+                elif key.startswith('phase_transition_crystal_system_final_'):
+                    self.fields[key] = forms.ChoiceField(
+                        required=False,
+                        initial=value,
+                        choices=(models.Subset.CRYSTAL_SYSTEMS),
+                        widget=forms.RadioSelect())
+                elif key.startswith('phase_transition_space_group_initial_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
+                elif key.startswith('phase_transition_space_group_final_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
+                elif key.startswith('phase_transition_direction_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
+                elif key.startswith('phase_transition_hysteresis_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
+                elif key.startswith('phase_transition_value_'):
+                    self.fields[key] = forms.CharField(required=False,
+                                                       initial=value)
 
     def clean(self):
         """Set secondary property conditionally required."""
@@ -539,7 +596,7 @@ class AddDataForm(forms.Form):
                 crystal_system = self.fields[
                     'crystal_system_' + counter].initial
                 if 'subset_label_' + counter in self.fields:
-                    label = self.fields['subset_label_' + counter].initial
+                    label = self.fields[f'subset_label_{counter}'].initial
                 else:
                     label = ''
                 datapoints = self.fields[field].initial
@@ -555,8 +612,8 @@ class AddDataForm(forms.Form):
                 subset, counter = suffix.split('_')
                 results.append([subset, counter,
                                 self.fields[field].initial,
-                                self.fields['fixed_unit_' + suffix].initial,
-                                self.fields['fixed_value_' + suffix].initial])
+                                self.fields[f'fixed_unit_{suffix}'].initial,
+                                self.fields[f'fixed_value_{suffix}'].initial])
         return results
 
     def get_lattice_parameters(self):
@@ -566,12 +623,29 @@ class AddDataForm(forms.Form):
                 subset = field.split('lattice_constant_a_')[1]
                 results.append([
                     subset,
-                    self.fields['lattice_constant_a_' + subset].initial,
-                    self.fields['lattice_constant_b_' + subset].initial,
-                    self.fields['lattice_constant_c_' + subset].initial,
-                    self.fields['lattice_constant_alpha_' + subset].initial,
-                    self.fields['lattice_constant_beta_' + subset].initial,
-                    self.fields['lattice_constant_gamma_' + subset].initial,
-                    self.fields['atomic_coordinates_' + subset].initial,
+                    self.fields[f'lattice_constant_a_{subset}'].initial,
+                    self.fields[f'lattice_constant_b_{subset}'].initial,
+                    self.fields[f'lattice_constant_c_{subset}'].initial,
+                    self.fields[f'lattice_constant_alpha_{subset}'].initial,
+                    self.fields[f'lattice_constant_beta_{subset}'].initial,
+                    self.fields[f'lattice_constant_gamma_{subset}'].initial,
+                    self.fields[f'atomic_coordinates_{subset}'].initial,
+                ])
+        return results
+
+    def get_phase_transitions(self):
+        results = []
+        for field in self.fields:
+            if field.startswith('phase_transition_value_'):
+                subset = field.split('phase_transition_value_')[1]
+                p = 'phase_transition'
+                results.append([
+                    subset,
+                    self.fields[f'{p}_crystal_system_final_{subset}'].initial,
+                    self.fields[f'{p}_space_group_initial_{subset}'].initial,
+                    self.fields[f'{p}_space_group_final_{subset}'].initial,
+                    self.fields[f'{p}_direction_{subset}'].initial,
+                    self.fields[f'{p}_hysteresis_{subset}'].initial,
+                    self.fields[f'{p}_value_{subset}'].initial,
                 ])
         return results

@@ -106,6 +106,72 @@ the "with ..." syntax to include certain parts.
   <footer class="reference">
     {% include 'materials/reference_format.html' with ref=dataset.reference %}
   </footer>
+{% elif 'phase transition ' in dataset.primary_property.name  %}
+  {# Phase transitions #}
+  {% for subset in dataset.subsets.all %}
+    <div class="card">
+      <div class="card-header">
+        Phase transition
+        {% if dataset.subsets.count > 1 %}
+          #{{ forloop.counter }}{% if subset.label %} - {{ subset.label }}{% endif %}
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% with subset.phase_transitions.first as phase_transition %}
+          <table class="table table-sm phase-transition">
+            <tr>
+              <td>Initial crystal system</td>
+              <td>{{ subset.get_crystal_system_display }}</td>
+            </tr>
+            {% if phase_transition.crystal_system_final %}
+              <tr>
+                <td>Final crystal system</td>
+                <td>{{ phase_transition.get_crystal_system_final_display }}</td>
+              </tr>
+            {% endif %}
+            {% if phase_transition.space_group_initial %}
+              <tr>
+                <td>Initial space group</td>
+                <td>{{ phase_transition.space_group_initial }}</td>
+              </tr>
+            {% endif %}
+            {% if phase_transition.space_group_final %}
+              <tr>
+                <td>Final space group</td>
+                <td>{{ phase_transition.space_group_final }}</td>
+              </tr>
+            {% endif %}
+            {% if phase_transition.direction %}
+              <tr>
+                <td>Direction</td>
+                <td>{{ phase_transition.direction }}</td>
+              </tr>
+            {% endif %}
+            <tr>
+              <td>{{ dataset.primary_property|capfirst }}</td>
+              <td>{{ phase_transition.formatted }}
+                {% if dataset.primary_unit %}{{ dataset.primary_unit }}{% endif %}
+              </td>
+            </tr>
+          </table>
+          {% if phase_transition.hysteresis %}
+            <p><strong>Hysteresis</strong>: {{ phase_transition.hysteresis }}</p>
+          {% endif %}
+        {% endwith %}
+        {% if subset.fixed_values.exists %}
+          Fixed parameters:
+          <ul style="margin-bottom:0;">
+            {% for property, value, unit in subset.get_fixed_values %}
+              <li>{{ property }} = {{ value }} {{ unit }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <footer class="reference">
+        {% include 'materials/reference_format.html' with ref=dataset.reference %}
+      </footer>
+    </div>
+  {% endfor %}
 {% else %}
   {# Tabulated data #}
   {% for subset in dataset.subsets.all %}
@@ -205,7 +271,7 @@ the "with ..." syntax to include certain parts.
             <p><strong>Description:</strong> {{ synthesis.description }}</p>
           {% endif %}
           {% if synthesis.comment %}
-            <p><i><strong>Comment:</strong></i> {{ synthesis.comment }}</i></p>
+            <p><i><strong>Comment:</strong> {{ synthesis.comment }}</i></p>
           {% endif %}
         {% endwith %}
       </div>
@@ -254,8 +320,7 @@ the "with ..." syntax to include certain parts.
             <p><strong>Code:</strong> {{ comp.code }}</p>
           {% endif %}
           {% if comp.level_of_theory %}
-            <p><strong>Level of theory:</strong>
-              {{ comp.level_of_theory }}</p>
+            <p><strong>Level of theory:</strong> {{ comp.level_of_theory }}</p>
           {% endif %}
           {% if comp.xc_functional %}
             <p><strong>Exchange-correlation functional:</strong> {{ comp.xc_functional }}</p>
@@ -263,8 +328,8 @@ the "with ..." syntax to include certain parts.
           {% if comp.kgrid %}
             <p><strong>K-point grid:</strong> {{ comp.kgrid }}</p>
           {% endif %}
-          {% if comp.relativity_level %}
-            <p><strong>Level of relativity:</strong> {{ comp.relativity_level }}</p>
+          {% if comp.level_of_relativity %}
+            <p><strong>Level of relativity:</strong> {{ comp.level_of_relativity }}</p>
           {% endif %}
           {% if comp.basis %}
             <p><strong>Basis set definition:</strong> {{ comp.basis }}</p>

@@ -163,3 +163,7 @@ footer.reference {
 .collapsing {
     transition: 0.1s;
 }
+
+table.phase-transition > tbody > tr > td:first-child {
+    font-weight: bold;
+}

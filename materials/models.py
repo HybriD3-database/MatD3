@@ -447,3 +447,29 @@ class DatasetFile(Base):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
                                 related_name='files')
     dataset_file = models.FileField(upload_to=dataset_file_path)
+
+
+class PhaseTransition(NumericalValueBase):
+    """Model for all phase transitions.
+
+    E.g., phase transition temperature or pressure. Basically,
+    includes any property that describes a change in the crystal
+    structure.
+
+    """
+    subset = models.ForeignKey(
+        Subset, on_delete=models.CASCADE, related_name='phase_transitions')
+    crystal_system_final = models.PositiveSmallIntegerField(
+        choices=Subset.CRYSTAL_SYSTEMS)
+    space_group_initial = models.CharField(blank=True, max_length=50)
+    space_group_final = models.CharField(blank=True, max_length=50)
+    direction = models.CharField(blank=True, max_length=50)
+    hysteresis = models.CharField(blank=True, max_length=50)
+    error = models.FloatField(null=True)
+
+    def formatted(self):
+        """Same as for NumericalValue but error is now a class member."""
+        value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value}'
+        if self.error:
+            value_str += f' (±{self.error})'
+        return value_str

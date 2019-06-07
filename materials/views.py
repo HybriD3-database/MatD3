@@ -579,10 +579,11 @@ def submit_data(request):
     dataset.primary_unit = form.cleaned_data['primary_unit']
     dataset.primary_property_label = form.cleaned_data[
         'primary_property_label']
-    dataset.secondary_property = form.cleaned_data['secondary_property']
-    dataset.secondary_unit = form.cleaned_data['secondary_unit']
-    dataset.secondary_property_label = form.cleaned_data[
-        'secondary_property_label']
+    if form.cleaned_data['two_axes']:
+        dataset.secondary_property = form.cleaned_data['secondary_property']
+        dataset.secondary_unit = form.cleaned_data['secondary_unit']
+        dataset.secondary_property_label = form.cleaned_data[
+            'secondary_property_label']
     dataset.visible = form.cleaned_data['visible_to_public']
     dataset.is_figure = form.cleaned_data['is_figure']
     dataset.is_experimental = (
@@ -635,7 +636,7 @@ def submit_data(request):
         computational.level_of_theory = form.cleaned_data['level_of_theory']
         computational.xc_functional = form.cleaned_data['xc_functional']
         computational.kgrid = form.cleaned_data['k_point_grid']
-        computational.relativity_level = form.cleaned_data[
+        computational.level_of_relativity = form.cleaned_data[
             'level_of_relativity']
         computational.basis = form.cleaned_data['basis_set_definition']
         computational.numerical_accuracy = form.cleaned_data[
@@ -756,6 +757,24 @@ def submit_data(request):
                     if files[i].name > files[j].name:
                         files[i], files[j] = files[j], files[i]
             utils.plot_band_structure(k_labels, files, dataset)
+        elif dataset.primary_property.name.startswith('phase transition '):
+            value, value_type, error = clean_value(
+                form.cleaned_data[f'phase_transition_value_{i_subset}'])
+            crystal_f = f'phase_transition_crystal_system_final_{i_subset}'
+            space_group_i = f'phase_transition_space_group_initial_{i_subset}'
+            space_group_f = f'phase_transition_space_group_final_{i_subset}'
+            direction = f'phase_transition_direction_{i_subset}'
+            hysteresis = f'phase_transition_hysteresis_{i_subset}'
+            subset.phase_transitions.create(
+                created_by=request.user,
+                crystal_system_final=form.cleaned_data[crystal_f],
+                space_group_initial=form.cleaned_data[space_group_i],
+                space_group_final=form.cleaned_data[space_group_f],
+                direction=form.cleaned_data[direction],
+                hysteresis=form.cleaned_data[hysteresis],
+                value=value,
+                value_type=value_type,
+                error=error)
         elif form.cleaned_data['two_axes']:
             try:
                 for line in form.cleaned_data[

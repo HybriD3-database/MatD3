@@ -1,4 +1,4 @@
-{% if dataset.primary_property.name != 'band structure' and dataset.primary_property.name != 'atomic structure' %}
+{% if dataset.secondary_property %}
   <a href="{% url 'materials:toggle_is_figure' pk=dataset.pk view_name=request.resolver_match.url_name %}">
     <button type="button" class="btn btn-success">
       {% if dataset.is_figure %}
