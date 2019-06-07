@@ -1,0 +1,27 @@
+[
+  {
+    "model": "materials.dataset",
+    "pk": 1,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "label": "",
+      "system": 1,
+      "primary_property": 1,
+      "primary_unit": 1,
+      "primary_property_label": "",
+      "secondary_property": null,
+      "secondary_unit": null,
+      "secondary_property_label": "",
+      "reference": 1,
+      "visible": true,
+      "is_figure": false,
+      "is_experimental": true,
+      "dimensionality": 3,
+      "sample_type": 0,
+      "extraction_method": "",
+      "representative": true,
+      "linked_to": []
+    }
+  }
+]

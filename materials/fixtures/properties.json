@@ -1,0 +1,47 @@
+[
+  {
+    "model": "materials.property",
+    "pk": 1,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "name": "band gap"
+    }
+  },
+  {
+    "model": "materials.property",
+    "pk": 2,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "name": "pressure"
+    }
+  },
+  {
+    "model": "materials.property",
+    "pk": 3,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "name": "atomic structure"
+    }
+  },
+  {
+    "model": "materials.property",
+    "pk": 4,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "name": "phase transition temperature"
+    }
+  },
+  {
+    "model": "materials.property",
+    "pk": 5,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "name": "dielectric constant"
+    }
+  }
+]

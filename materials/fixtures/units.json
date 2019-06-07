@@ -1,0 +1,38 @@
+[
+  {
+    "model": "materials.unit",
+    "pk": 1,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "label": "eV"
+    }
+  },
+  {
+    "model": "materials.unit",
+    "pk": 2,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "label": "Å"
+    }
+  },
+  {
+    "model": "materials.unit",
+    "pk": 3,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "label": "GPa"
+    }
+  },
+  {
+    "model": "materials.unit",
+    "pk": 4,
+    "fields": {
+      "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
+      "created_by": 1, "updated_by": 1,
+      "label": "K"
+    }
+  }
+]

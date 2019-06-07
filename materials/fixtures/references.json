@@ -1,0 +1,14 @@
+[
+  {
+    "model": "materials.reference", "pk": 1, "fields": {
+      "author_count": 1,
+      "title": "title",
+      "journal": "journal",
+      "vol": "1",
+      "pages_start": "1",
+      "pages_end": "2",
+      "year": "2000",
+      "doi_isbn": "0-000-00000-0"
+    }
+  }
+]

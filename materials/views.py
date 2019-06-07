@@ -427,7 +427,7 @@ def add_property(request):
     models.Property.objects.create(created_by=request.user, name=name)
     messages.success(request,
                      f'New property "{name}" successfully added to '
-                     'the database!')
+                     'the database.')
     return redirect(reverse('materials:add_data'))
 
 
@@ -437,7 +437,7 @@ def add_unit(request):
     models.Unit.objects.create(created_by=request.user, label=label)
     messages.success(request,
                      f'New unit "{label}" successfully added to '
-                     'the database!')
+                     'the database.')
     return redirect(reverse('materials:add_data'))
 
 
@@ -698,9 +698,9 @@ def submit_data(request):
             for line in form.cleaned_data[
                     f'atomic_coordinates_{i_subset}'].split('\n'):
                 try:
-                    if line.startswith('lattice_vector'):
-                        m = re.match(r'\s*lattice_vector' +
-                                     3*r'\s+(-?\d+(?:\.\d+)?)' + r'\b', line)
+                    m = re.match(r'\s*lattice_vector' +
+                                 3*r'\s+(-?\d+(?:\.\d+)?)' + r'\b', line)
+                    if m:
                         coords = m.groups()
                         models.Datapoint.objects.create(
                             created_by=request.user, subset=subset)
@@ -808,18 +808,17 @@ def submit_data(request):
         for key in form.cleaned_data:
             if key.startswith(f'fixed_property_{i_subset}_'):
                 suffix = key.split('fixed_property_')[1]
-                fixed_value = models.NumericalValueFixed(
-                    created_by=request.user, subset=subset, counter=counter)
-                fixed_value.physical_property = (
-                    form.cleaned_data['fixed_property_' + suffix])
-                fixed_value.unit = form.cleaned_data['fixed_unit_' + suffix]
                 value, value_type, error = clean_value(
                     form.cleaned_data['fixed_value_' + suffix])
-                fixed_value.value = value
-                fixed_value.value_type = value_type
-                if error:
-                    fixed_value.error = error
-                fixed_value.save()
+                subset.fixed_values.create(
+                    created_by=request.user,
+                    counter=counter,
+                    physical_property=form.cleaned_data[
+                        'fixed_property_' + suffix],
+                    unit=form.cleaned_data['fixed_unit_' + suffix],
+                    value=value,
+                    value_type=value_type,
+                    error=error)
                 counter += 1
     # Insert the main data into the database
     models.Datapoint.objects.bulk_create(datapoints)
@@ -874,6 +873,8 @@ def resolve_return_url(pk, view_name):
         return redirect(reverse(
             'materials:property_all_entries',
             kwargs={'system_pk': sys_pk, 'prop_pk': prop_pk}))
+    elif view_name == 'linked_data':
+        return redirect(reverse('materials:linked_data', kwargs={'pk': pk}))
     else:
         return Http404
 

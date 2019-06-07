@@ -1,0 +1,12 @@
+[
+  {
+    "model": "materials.author",
+    "pk": 1,
+    "fields": {
+      "first_name": "First",
+      "last_name": "Last",
+      "institution": "Institute",
+      "reference": [1]
+    }
+  }
+]

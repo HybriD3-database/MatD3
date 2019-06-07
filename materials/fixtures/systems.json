@@ -1,0 +1,16 @@
+[
+  {
+    "model": "materials.system",
+    "pk": 1,
+    "fields": {
+      "compound_name": "MAPbCl3",
+      "formula": "(CH3NH3)PbCl3",
+      "group": "MAPbCl3",
+      "organic": "CH3NH3",
+      "inorganic": "PbCl3",
+      "last_update": "2000-01-01",
+      "description": "",
+      "tags": []
+    }
+  }
+]
