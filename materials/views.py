@@ -1,8 +1,10 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
+from functools import reduce
 import io
 import logging
 import matplotlib
 import numpy
+import operator
 import os
 import re
 import requests
@@ -163,7 +165,25 @@ class SearchFormView(generic.TemplateView):
             search_text = form.cleaned_data['search_text']
             search_term = request.POST.get('search_term')
             systems_info = []
-            systems = utils.search_result(search_term, search_text)
+            if search_term == 'formula':
+                systems = models.System.objects.filter(
+                    Q(formula__icontains=search_text) |
+                    Q(group__icontains=search_text) |
+                    Q(compound_name__icontains=search_text)).order_by('formula')
+            elif search_term == 'organic':
+                systems = models.System.objects.filter(
+                    organic__icontains=search_text).order_by('organic')
+            elif search_term == 'inorganic':
+                systems = models.System.objects.filter(
+                    inorganic__icontains=search_text).order_by('inorganic')
+            elif search_term == 'author':
+                keywords = search_text.split()
+                query = reduce(operator.or_, (
+                    Q(dataset__reference__author__last_name__icontains=x) for
+                    x in keywords))
+                systems = models.System.objects.filter(query).distinct()
+            else:
+                raise KeyError('Invalid search term.')
 
         args = {
             'systems': systems,

@@ -1,13 +1,10 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
 """Helper functions for this project."""
-import functools
 import io
-import operator
 import matplotlib
 import numpy
 import re
 
-from django.db.models import Q
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from . import models
@@ -175,46 +172,3 @@ def plot_band_structure(k_labels, files, dataset):
     ax.set_ylim(bottom=ENERGY_SMALL_MIN, top=ENERGY_SMALL_MAX)
     save_plot('band_structure_small.png')
     pyplot.close()
-
-
-def makeCorrections(form):
-    # alter user input if necessary
-    try:
-        temp = form.temperature
-        if temp.endswith('K') or temp.endswith('C'):
-            temp = temp[:-1].strip()
-            form.temperature = temp
-        return form
-    except Exception:  # just in case
-        return form
-
-
-def getAuthorSearchResult(search_text):
-    keyWords = search_text.split()
-    results = models.System.objects.\
-        filter(functools.reduce(operator.or_, (
-            Q(synthesismethodold__reference__author__last_name__icontains=x)
-            for x in keyWords)) | functools.reduce(operator.or_, (Q(
-                    excitonemission__reference__author__last_name__icontains=x
-            ) for x in keyWords)) | functools.reduce(operator.or_, (Q(
-                bandstructure__reference__author__last_name__icontains=x
-            ) for x in keyWords))).distinct()
-    return results
-
-
-def search_result(search_term, search_text):
-    if search_term == 'formula':
-        return models.System.objects.filter(
-            Q(formula__icontains=search_text) |
-            Q(group__icontains=search_text) |
-            Q(compound_name__icontains=search_text)).order_by('formula')
-    elif search_term == 'organic':
-        return models.System.objects.filter(
-            organic__icontains=search_text).order_by('organic')
-    elif search_term == 'inorganic':
-        return models.System.objects.filter(
-            inorganic__icontains=search_text).order_by('inorganic')
-    elif search_term == 'author':
-        return getAuthorSearchResult(search_text)
-    else:
-        raise KeyError('Invalid search term.')
