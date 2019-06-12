@@ -46,7 +46,7 @@ function SelectEntryHandler(entry_type, label_name, post_url) {
            for (let select_name in selectized) {
              if (select_name.includes(this.entry_type)) {
                selectized[select_name][0].selectize.addOption({
-                 pk: response['data']['pk'],
+                 pk: response.data.pk,
                  [label_name]: form_data.get(label_name)
                });
                selectized[select_name][0].selectize.refreshOptions;
@@ -109,7 +109,7 @@ axios.get('/materials/get-dropdown-options/reference').then(response => {
     maxOptions: 500,
     sortField: 'text',
     items: [initial_reference],
-    options: response['data'],
+    options: response.data,
   });
 });
 axios.get('/materials/get-dropdown-options/system').then(response => {
@@ -117,14 +117,14 @@ axios.get('/materials/get-dropdown-options/system').then(response => {
     maxOptions: 500,
     sortField: 'text',
     items: [initial_system],
-    options: response['data'],
+    options: response.data,
   });
 });
 axios.get('/materials/properties/').then(response => {
   selectize_wrapper(
-    'primary_property', response['data'], initial_primary_property, 'name');
+    'primary_property', response.data, initial_primary_property, 'name');
   selectize_wrapper(
-    'secondary_property', response['data'], initial_secondary_property, 'name');
+    'secondary_property', response.data, initial_secondary_property, 'name');
   document.getElementById('id_primary_property')
           .dispatchEvent(new Event('change'));
   document.getElementById('id_two_axes')
@@ -138,9 +138,9 @@ axios.get('/materials/units/').then(response => {
   document.getElementById('id_secondary_unit')
           .setAttribute('placeholder', '--select or add--');
   selectize_wrapper(
-    'primary_unit', response['data'], initial_primary_unit, 'label');
+    'primary_unit', response.data, initial_primary_unit, 'label');
   selectize_wrapper(
-    'secondary_unit', response['data'], initial_secondary_unit, 'label');
+    'secondary_unit', response.data, initial_secondary_unit, 'label');
   new_unit_handler.toggle_visibility('id_primary_unit');
   new_unit_handler.toggle_visibility('id_secondary_unit');
 });
@@ -158,8 +158,8 @@ const autofill_data = element => {
   element.value = '';  // Clear the file list
   axios.post('/materials/autofill-input-data', form_data)
        .then(response => {
-         let result = response['data'];
-         result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+         const result = response.data.replace(/\n\r/g, '\n')
+                                .replace(/\r/g, '\n'); // Windows
          const data = result.split(/&/);
          if (global_fill) {
            const n_subsets = document.getElementById('id_number_of_subsets');
@@ -253,13 +253,13 @@ const add_fixed_property =
     edit_id_and_name('property');
     const property_name = name;
     axios.get('/materials/properties/').then(response => {
-      selectize_wrapper(property_name, response['data'], prop_initial, 'name');
+      selectize_wrapper(property_name, response.data, prop_initial, 'name');
       new_property_handler.toggle_visibility('id_' + property_name);
     });
     edit_id_and_name('unit');
     const unit_name = name;
     axios.get('/materials/units/').then(response => {
-      selectize_wrapper(unit_name, response['data'], unit_initial, 'label');
+      selectize_wrapper(unit_name, response.data, unit_initial, 'label');
       new_unit_handler.toggle_visibility('id_' + unit_name);
     });
     edit_id_and_name('value');
@@ -378,7 +378,7 @@ prefill_button.addEventListener('click', event => {
   const prefill_input = document.getElementById('prefill');
   axios.get('/materials/prefilled-form/' + prefill_input.value)
        .then(response => {
-         const values = response['data']['values'];
+         const values = response.data['values'];
          for (const key in values) {
            const el = document.getElementById('id_' + key);
            if (el) {
@@ -489,7 +489,7 @@ var import_lattice_parameters = element => {
   element.value = '';  // Clear the file list
   axios.post('/materials/autofill-input-data', form_data)
        .then(response => {
-         let data = response['data'];
+         let data = response.data;
          let a, b, c, alpha, beta, gamma;
          const process_batch = (input_data, dest_suffix) => {
            const lines = input_data.split('\n');
@@ -586,6 +586,7 @@ let band_structure_selected = false;
 $('#id_primary_property').change(function() {
   const primary_unit = $(this).parent().next();
   if ($(this).find(':selected').text() === 'band structure') {
+    reset_subset_fields();
     primary_unit.hide();
     number_of_subsets.readOnly = true;
     number_of_subsets.value = 1;
@@ -623,8 +624,8 @@ uploaded_files.addEventListener('change', function() {
       form_data.append('file', control_file);
       axios.post('/materials/extract-k-from-control-in', form_data)
            .then(response => {
-             let result = response['data'];
-             result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+             const result = response.data.replace(/\n\r/g, '\n')
+                                    .replace(/\r/g, '\n'); // Windows
              document.getElementById('id_subset_datapoints_1').value = result;
            });
     }
