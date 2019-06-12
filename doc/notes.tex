@@ -268,12 +268,12 @@ All experimental and theoretical results are contained in data sets. A data set 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Dataset(Base)]
   \begin{itemize}
   \item \texttt{label} --- description of the data set
-  \item \texttt{system} --- reference to the primary key of System
-  \item \texttt{primary\_property} --- reference to the primary key of Property
-  \item \texttt{primary\_unit} --- reference to the primary key of Unit
-  \item \texttt{secondary\_property} --- reference to the primary key of Property
-  \item \texttt{secondary\_unit} --- reference to the primary key of Unit
-  \item \texttt{reference} --- reference to the primary key of Reference
+  \item \texttt{system} --- foreign key for System
+  \item \texttt{primary\_property} --- foreign key for Property
+  \item \texttt{primary\_unit} --- foreign key for Unit
+  \item \texttt{secondary\_property} --- foreign key for Property
+  \item \texttt{secondary\_unit} --- foreign key for Unit
+  \item \texttt{reference} --- foreign key for Reference
   \item \texttt{visible} --- whether the data is visible on the website
   \item \texttt{plotted} --- whether data is plotted by default
   \item \texttt{experimental} --- whether the data is of experimental origin (theoretical if false)
@@ -288,7 +288,7 @@ All experimental and theoretical results are contained in data sets. A data set 
 A data set consists of one or more data subsets. One is always present but there could be several if it is possible to logically group the data somehow. For instance, different curves in a figure would correspond to separate data subsets.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Subset(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Dataset
+  \item \texttt{dataset} --- foreign key for Dataset
   \item \texttt{label} --- short description of this subset
   \end{itemize}
 \end{tcolorbox}
@@ -296,14 +296,14 @@ A data set consists of one or more data subsets. One is always present but there
 A data subset consists of one or more data points. When describing a single value such as the band gap of a material with no additional dependencies, the whole data set would consist of one subset with only one data point with one numerical value.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Datapoint(Base)]
   \begin{itemize}
-  \item \texttt{subset} --- reference to the primary key of Subset
+  \item \texttt{subset} --- foreign key for Subset
   \end{itemize}
 \end{tcolorbox}
 
 Finally, the actual data is stored in the \texttt{NumericalValue} table.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValue(Base)]
   \begin{itemize}
-  \item \texttt{datapoint} --- reference to the primary key of Datapoint
+  \item \texttt{datapoint} --- foreign key for Datapoint
   \item \texttt{qualifier} --- ``primary'', ``secondary''
   \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
   \item \texttt{value} --- floating point number
@@ -314,7 +314,7 @@ Finally, the actual data is stored in the \texttt{NumericalValue} table.
 Any errors (uncertainties) associated with a numerical value are stored in a separate table. In the code, the errors are then retrieved from the database by querying for numerical values with the \verb+select_related('error')+ function and checking if a value has an associated error (\verb+if hasattr(value, 'error')+).
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Error(Base)]
   \begin{itemize}
-  \item \texttt{numerical\_value} --- reference to the primary key of NumericalValue
+  \item \texttt{numerical\_value} --- foreign key for NumericalValue
   \item \texttt{value} --- floating point number
   \end{itemize}
 \end{tcolorbox}
@@ -322,10 +322,10 @@ Any errors (uncertainties) associated with a numerical value are stored in a sep
 A separate table is used for values that are fixed across a data subset. For instance, if the curves of band gap vs dopant density were measured for different temperatures, then ``band gap'', ``dopant density'', and ``temperature'' would be ``primary'', ``secondary'', and ``fixed'', respectively. Unlike regular numerical values, the fixed values are far lesser in number so that we can attach the errors directly to the values without a performance penalty.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=NumericalValueFixed(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Dataset
-  \item \texttt{subset} --- reference to the primary key of Subset
-  \item \texttt{physical\_property} --- reference to the primary key of Property
-  \item \texttt{unit} --- reference to the primary key of Unit
+  \item \texttt{dataset} --- foreign key for Dataset
+  \item \texttt{subset} --- foreign key for Subset
+  \item \texttt{physical\_property} --- foreign key for Property
+  \item \texttt{unit} --- foreign key for Unit
   \item \texttt{value} --- floating point number
   \item \texttt{type} --- ``accurate'', ``approximate'', ``lower/upper bound'', ``error''
   \item \texttt{error} --- floating point number (optional)
@@ -335,7 +335,7 @@ A separate table is used for values that are fixed across a data subset. For ins
 If the dependence of the primary property is on something that cannot be stored as a floating point number, it is stored in the \texttt{Symbol} table. Example: the user enters band gap values a function of phase. The phases are then stored as strings in the following table.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Symbol(Base)]
   \begin{itemize}
-  \item \texttt{datapoint} --- reference to the primary key of Datapoint
+  \item \texttt{datapoint} --- foreign key for Datapoint
   \item \texttt{value} --- a string
   \item \texttt{counter} --- counts the number of symbols attached to a given data point
   \end{itemize}
@@ -344,7 +344,7 @@ If the dependence of the primary property is on something that cannot be stored 
 In case of an experimental study, the details of the synthesis method and the experiment can be stored in the following tables.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=SynthesisMethod(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{dataset} --- foreign key for Datapoint
   \item \texttt{starting\_materials}
   \item \texttt{product}
   \item \texttt{description}
@@ -354,7 +354,7 @@ In case of an experimental study, the details of the synthesis method and the ex
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=ExperimentalDetails(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{dataset} --- foreign key for Datapoint
   \item \texttt{method}
   \item \texttt{description}
   \item \texttt{comments}
@@ -364,7 +364,7 @@ In case of an experimental study, the details of the synthesis method and the ex
 Similarly, in case of a theoretical study, the computational details are recorded in a separate table.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=ComputationalDetails(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Datapoint
+  \item \texttt{dataset} --- foreign key for Datapoint
   \item \texttt{code}
   \item \texttt{level\_of\_theory}
   \item \texttt{xc\_functional}
@@ -378,7 +378,7 @@ Similarly, in case of a theoretical study, the computational details are recorde
 If a numerical value comes with an error or uncertainty (experimental or theoretical), then this value is stored separately.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Error(Base)]
   \begin{itemize}
-  \item \texttt{numerical\_value} --- reference to the primary key of NumericalValue
+  \item \texttt{numerical\_value} --- foreign key for NumericalValue
   \item \texttt{value} --- floating point number
   \end{itemize}
 \end{tcolorbox}
@@ -386,7 +386,7 @@ If a numerical value comes with an error or uncertainty (experimental or theoret
 User uploaded files are stored in \texttt{DatasetFile}.
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=DatasetFile(Base)]
   \begin{itemize}
-  \item \texttt{dataset} --- reference to the primary key of Dataset
+  \item \texttt{dataset} --- foreign key for Dataset
   \item \texttt{dataset\_file} --- a file upload field
   \end{itemize}
 \end{tcolorbox}
