@@ -3270,13 +3270,14 @@
       }
 
       // render markup
-      if (templateName == 'item' && data.text.length > MAX_DISPLAY_LENGTH) {
-        saved_title = data.text;
-        data.text = data.text.substring(0, MAX_DISPLAY_LENGTH) + '...';
+      var itemLabel = data[self.settings.labelField];
+      if (templateName == 'item' && itemLabel.length > MAX_DISPLAY_LENGTH) {
+        saved_title = itemLabel;
+        itemLabel = itemLabel.substring(0, MAX_DISPLAY_LENGTH) + '...';
       }
-        html = $(self.settings.render[templateName].apply(this, [data, escape_html]));
-      if (templateName == 'item' && data.text.length > MAX_DISPLAY_LENGTH) {
-        data.text = saved_title;
+      html = $(self.settings.render[templateName].apply(this, [data, escape_html]));
+      if (templateName == 'item' && itemLabel.length > MAX_DISPLAY_LENGTH) {
+        itemLabel = saved_title;
       }
 
       // add mandatory attributes

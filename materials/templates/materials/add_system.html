@@ -7,21 +7,32 @@
       <h4>Add System</h4>
     </div>
     <div class="card-body">
-      <form id="add-system" method="post" action="/materials/add-system">
+      <form id="add-system" method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Add new system</button>
       </form>
-      <div id="results">
-      </div>
     </div>
   </div>
 {% endblock %}
 
 {% block script %}
-  {% load static %}
-  <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
-  <script type="text/javascript">
-   alert_submit($('#add-system'), $('#results'));
+  <script>
+   let add_system = document.getElementById('add-system');
+   add_system.addEventListener('submit', function(event) {
+     event.preventDefault();
+     var form_data = new FormData(this);
+     axios.post("/materials/add-system", form_data)
+          .then(response => {
+            this.reset();
+            const flex = document.createElement('div');
+            flex.classList.add('d-flex');
+            const alert = document.createElement('div');
+            alert.classList.add('alert', 'alert-success');
+            alert.innerHTML = 'Save success';
+            flex.appendChild(alert);
+            document.getElementById('dynamic-messages').appendChild(flex);
+          });
+   });
   </script>
 {% endblock %}

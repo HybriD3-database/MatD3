@@ -24,18 +24,55 @@
             Add new system
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#properties" role="tab">
-            Define new property
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#units" role="tab">
-            Define new unit
-          </a>
-        </li>
       </ul>
       <div class="tab-content">
+
+        <!-- ADD NEW PROPERTY -->
+        <div id="new-property-card" class="card mt-3 new-entry-card" hidden="true">
+          <div class="card-header">
+            Add new property
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <form id="property-form" method="post">
+                  {{ property_form.name.label_tag }}
+                  {{ property_form.name.help_text|tooltip }}
+                  <div class="input-group">
+                    {{ property_form.name }}
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" type="submit">Add</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD NEW UNIT -->
+        <div id="new-unit-card" class="card mt-3 new-entry-card" hidden="true">
+          <div class="card-header">
+            Add new unit
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <form id="unit-form" method="post">
+                  {{ unit_form.label.label_tag }}
+                  {{ unit_form.label.help_text|tooltip }}
+                  <div class="input-group">
+                    {{ unit_form.label }}
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" type="submit">Add</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ADD NEW RESULTS -->
         <div class="tab-pane show active" id="results" role="tabpanel">
           <br>
@@ -292,32 +329,6 @@
           </div>
         </div>
 
-        <!-- ADD NEW PROPERTY -->
-        <div class="tab-pane" id="properties" role="tabpanel">
-          <br>
-          <form method="post" action="{% url 'materials:add_property' %}">
-            {% csrf_token %}
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                {% input_field property_form.property_name %}
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-        </div>
-        <!-- ADD NEW UNIT -->
-        <div class="tab-pane" id="units" role="tabpanel">
-          <br>
-          <form method="post" action="{% url 'materials:add_unit' %}">
-            {% csrf_token %}
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                {% input_field unit_form.unit_label %}
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-        </div>
       </div>
     </div>
   </div>
@@ -428,19 +439,18 @@
   <div class="form-row fixed-property-template d-none">
     <div class="col-md-4 mb-3">
       <label for="fixed_property">Property</label>
-      <select id="fixed_property" name="fixed_property" placeholder="--none--"></select>
+      <select id="fixed_property" name="fixed_property" placeholder="--select or add new--"></select>
     </div>
     <div class="col-md-4 mb-3">
       <label for="fixed_unit">Unit</label>
-      <select id="fixed_unit" name="fixed_unit" placeholder="--none--"></select>
+      <select id="fixed_unit" name="fixed_unit" placeholder="--select or add new--"></select>
     </div>
     <div class="col-md-4 mb-3">
       <label for="fixed_value">Fixed value</label>
       <div class="input-group">
         <input class="form-control" name="fixed_value" type="text" maxlength="50" required>
         <div class="input-group-append">
-          <button class="close-fixed-property btn btn-danger fa fa-times"
-                  type="button" ></button>
+          <button class="close-fixed-property btn btn-danger fa fa-times" type="button" ></button>
         </div>
       </div>
     </div>
@@ -450,172 +460,18 @@
 
 {% block script %}
   {% load static %}
-  <script src="{% static 'materials/javascript/ajax_csrf_setup.js' %}"></script>
   <script src="{% static 'materials/javascript/selectize.js' %}"></script>
   <script>
-   // All dropdown menus are filled with data from a JSON request
-   var selectized = {};
-   function fill_selectize(name, initial_value) {
-     var id = 'id_' + name;
-     $.getJSON('/materials/get-dropdown-options/' + name, function(options) {
-       selectized[name] =  $('#' + id).selectize({
-         maxOptions: 500,
-         sortField: 'text',
-         items: [initial_value],
-         options: options,
-       });
-       // Some events can only be triggered once certain dropdowns have loaded
-       if (id === 'id_primary_property') {
-         document.getElementById('id_primary_property').dispatchEvent(new Event('change'));
-         document.getElementById('id_two_axes').dispatchEvent(new Event('change'));
-       }
-     });
-   }
+   // Initial values for selectize elements
+   let initial_reference = '{{ main_form.select_reference.value }}';
+   let initial_system = '{{ main_form.select_system.value }}';
+   let initial_primary_property = '{{ main_form.primary_property.value }}';
+   let initial_primary_unit = '{{ main_form.primary_unit.value }}';
+   let initial_secondary_property = '{{ main_form.secondary_property.value }}';
+   let initial_secondary_unit = '{{ main_form.secondary_unit.value }}';
   </script>
+  <script src="{% static 'materials/javascript/add_data.js' %}"></script>
   <script>
-   // Use selectize on all dropdown menus
-   {% for field in main_form.visible_fields %}
-   {% if field.field.widget.input_type == 'select' %}
-   fill_selectize('{{ field.name }}', {{ field.value|default_if_none:'' }});
-   {% endif %}
-   {% endfor %}
-  </script>
-  <script>
-   // When entering data with multiple columns, set "Is figure" to true. Do this only once.
-   var is_figure_untested = true;
-   // Autofill the main input data textarea
-   function autofill_data(el) {
-     var i_subset = $(el).attr('id').split('import-data-file_')[1];
-     var form_data = new FormData();
-     form_data.append('file', el.files[0]);
-     $(el).val('');  // Clear the file list
-     $.ajax({
-       url: "{% url 'materials:autofill_input_data' %}",
-       type: 'POST',
-       processData: false,
-       contentType: false,
-       dataType: 'text',
-       data: form_data,
-     }).done(function(result) {
-       result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-       var data = result.split(/&/);
-       if (i_subset) {
-         $('#id_subset_datapoints_' + i_subset).val(result);
-       } else { // fill globally
-         for (var i = 1; i <= $('#id_number_of_subsets').val(); i++) {
-           $('#id_subset_datapoints_' + i).val(data[i-1].replace(/^\n/, ''));
-         }
-       }
-       var is_figure = document.getElementById('id_is_figure');
-       if (is_figure_untested && !is_figure.readOnly) {
-         // If the are multiple lines and multiple columns, this is likely a figure.
-         lines = data[0].split('\n', 2);
-         if (lines.length > 1 && lines[0].split(' ').length > 1) {
-           if (!is_figure.checked) {
-             is_figure.checked = true;
-             is_figure.dispatchEvent(new Event('change'));
-           }
-         }
-         is_figure_untested = false;
-       }
-     }).fail(function(result) {
-       if (!i_subset) i_subset = 1;
-       $('#id_subset_datapoints_' + i_subset).val(result);
-     });
-   }
-   $('#import-all-data').change(function() {
-     if ($('#id_primary_property').find(':selected').text() === 'atomic structure') {
-       import_lattice_parameters(this);
-     } else {
-       autofill_data(this);
-     }
-   });
-  </script>
-  <script>
-   // Create a new data subset
-   var counter_fixed = 0;
-   function add_subset(i_subset) {
-     // The name and id of each input is appended by _<i_subset>
-     var copy = document.getElementsByClassName('data-subset-template')[0].cloneNode(true);
-     copy.classList.remove('d-none', 'data-subset-template');
-     copy.getElementsByClassName('card-header')[0].innerHTML = 'Subset #' + i_subset;
-     var elements = copy.querySelectorAll('input, textarea');
-     for (var i = 0; i < elements.length; i++) {
-       // Set the defaults of radio buttons from the first subset
-       if (i_subset > 1 && elements[i].type === 'radio') {
-         var el = document.getElementById(elements[i].id + '_' + 1);
-         elements[i].checked = el.checked;
-       }
-       elements[i].id += '_' + i_subset;
-       elements[i].name += '_' + i_subset;
-     }
-     elements = copy.getElementsByTagName('label');
-     for (var i = 0; i < elements.length; i++) {
-       elements[i].htmlFor += '_' + i_subset;
-     }
-     copy.getElementsByClassName('fixed-properties')[0].id = 'fixed-properties-' + i_subset;
-     var fixed_prop_btn = copy.getElementsByClassName('add-fixed-property')[0]
-     fixed_prop_btn.id += 'add-fixed-property-' + i_subset;
-     // Add a fixed property
-     fixed_prop_btn.addEventListener('click', function() {
-       add_fixed_property(i_subset, counter_fixed++);
-     });
-     copy.getElementsByClassName('import-data-file')[0].addEventListener('change', function() {
-       autofill_data(this);
-     });
-     document.getElementById('data-subset').appendChild(copy);
-   }
-   // Create a new set of fixed property fields
-   function add_fixed_property(subset, counter, prop_initial='', unit_initial='',
-                               value_initial='') {
-     var copy = document.getElementsByClassName('fixed-property-template')[0].cloneNode(true);
-     var suffix = subset + '_' + counter;
-     var el, name;
-     copy.classList.remove('d-none', 'fixed-property-template');
-     const edit_id_and_name = type => {
-       name = 'fixed_' + type + '_' + suffix;
-       el = copy.querySelector('[name="fixed_' + type + '"]');
-       el.id = 'id_' + name;
-       el.name = name;
-     }
-     edit_id_and_name('property');
-     fill_selectize(name, prop_initial);
-     edit_id_and_name('unit');
-     fill_selectize(name, unit_initial);
-     edit_id_and_name('value');
-     if (value_initial) {
-       copy.querySelector('[name="fixed_value_' + suffix + '"]').value = value_initial;
-     }
-     // Remove a fixed property
-     copy.getElementsByClassName('close-fixed-property')[0].addEventListener('click', function() {
-       row = this.parentNode.parentNode.parentNode.parentNode;
-       row.parentNode.removeChild(row);
-     });
-     document.getElementById('fixed-properties-' + subset).appendChild(copy);
-   }
-   var number_of_subsets = document.getElementById('id_number_of_subsets');
-   number_of_subsets.addEventListener('change', function() {
-     var data_subset = document.getElementById('data-subset');
-     var n_subset_current = data_subset.children.length;
-     var n_subset_requested = this.value;
-     var n_to_add = n_subset_requested - n_subset_current;
-     if (n_to_add > 0) {
-       for (var i = 1; i <= n_to_add; i++) {
-         add_subset(n_subset_current+i);
-       }
-     }
-     if (n_to_add < 0) {
-       for (var i = n_to_add; i < 0; i++) {
-         data_subset.removeChild(data_subset.lastChild);
-       }
-     }
-     if (data_subset.hasChildNodes()) {
-       data_subset.firstChild.getElementsByClassName('subset-label-class')[0].disabled =
-         n_subset_requested == 1;
-     }
-     document.getElementById('import-all-data').disabled = n_subset_requested == 0;
-   });
-   number_of_subsets.dispatchEvent(new Event('change'));
    // Prefill the data subsets from a previous instance of the form
    {% for name_counter, crystal_system, label, values in main_form.get_subset %}
    document.getElementById(
@@ -632,267 +488,7 @@
    {% endfor %}
   </script>
   <script>
-   // Collapsable sections of the input
-   function toggleSectionInclusivity(button, hidden_field) {
-     $(button).click(function() {
-       if ($(hidden_field).val() === 'True') {
-         $(hidden_field).val('False');
-         $(this).attr('aria-expanded', true);
-         $(this).css({'background': '#dce9ff'});
-         $(this).html($(this).html().split('remove)')[0] + 'add)');
-       } else {
-         $(hidden_field).val('True');
-         $(this).attr('aria-expanded', false);
-         $(this).css({'background': '#f3ebff'});
-         $(this).html($(this).html().split('add)')[0] + 'remove)');
-       }
-     });
-     $(button).attr('aria-expanded', $(hidden_field).val() === 'True');
-     if ($(hidden_field).val() === 'True') {
-       $(hidden_field).val('False');
-       $(button).click();
-     }
-   }
-   toggleSectionInclusivity('#synthesis-button', '#id_with_synthesis_details');
-   toggleSectionInclusivity('#experimental-button', '#id_with_experimental_details');
-   toggleSectionInclusivity('#computational-button', '#id_with_computational_details');
-  </script>
-  <script>
-   // Helper function for setting the value and freezing/unfreezing a checkbox
-   function set_checkbox(id, value, freeze) {
-     var el = document.getElementById(id);
-     el.checked = value;
-     if (freeze) {
-       el.readOnly = true;
-       el.onclick = function(event) { event.preventDefault(); };
-     } else {
-       el.readOnly = false;
-       el.onclick = null;
-     }
-     el.dispatchEvent(new Event('change'));
-   }
-  </script>
-  <script>
-   $('#id_two_axes').change(function(event, force_hide=false) {
-     if ($(this).is(':checked') && !force_hide) {
-       $('#id_secondary_property').parent().show();
-       $('#id_secondary_unit').parent().show();
-       $('#id_secondary_property_label').parent().show();
-       $('label[for="id_primary_property-selectized"]').html('Primary property (y-axis)');
-       $('.subset-datapoints').attr('placeholder', 'x1 y1\nx2 y2\n...');
-     } else {
-       $('#id_secondary_property').parent().hide();
-       $('#id_secondary_unit').parent().hide();
-       $('#id_secondary_property_label').parent().hide();
-       $('label[for="id_primary_property-selectized"]').html('Primary property');
-       $('.subset-datapoints').attr('placeholder', 'value_1 value_2 ...');
-     }
-   });
-  </script>
-  <script>
-   // If figure then "Two axes" must be enabled
-   var is_figure = document.getElementById('id_is_figure');
-   is_figure.addEventListener('change', function() {
-     set_checkbox('id_two_axes', this.checked, this.checked);
-   });
-   is_figure.dispatchEvent(new Event('change'));
-  </script>
-  <script>
-   // Prefill most of the form from an other data set
-   var prefill_input = document.getElementById('prefill');
-   var prefill_button = document.getElementById('prefill-button');
-   prefill_button.addEventListener('click', function(event) {
-     event.preventDefault();
-     axios.get('/materials/prefilled-form/' + prefill_input.value)
-          .then(response => {
-            var values = response['data']['values'];
-            for (var key in values) {
-              var el = document.getElementById('id_' + key);
-              if (el) {
-                if (el.type === 'select-one') {
-                  selectized[key][0].selectize.setValue(values[key]);
-                } else if (el.type === 'checkbox') {
-                  el.checked = values[key];
-                } else {
-                  el.value = values[key];
-                }
-              } else { // radio buttons
-                document.querySelector('.form-check-input[name="' + key +
-                                       '"][value="' + values[key] + '"]')
-                        .checked = true;
-              }
-            }
-            var expandables = ['synthesis', 'experimental', 'computational'];
-            for (var i = 0; i < expandables.length; i++) {
-              var button = '#' + expandables[i] + '-button';
-              var hidden_field = '#id_with_' + expandables[i] + '_details';
-              // Django renders the value of hidden_field as a string of 'True'
-              // or 'False', which is different from the aria-expanded value of
-              // 'true' or 'false' as set by Bootstrap, which leads to the messy conditional.
-              var cond = ($(button).attr('aria-expanded') === 'false' &&
-                          $(hidden_field).val() === 'True') ||
-                         ($(button).attr('aria-expanded') === 'true' &&
-                          $(hidden_field).val() === 'False');
-              if (cond) {
-                if ($(hidden_field).val() === 'True') {
-                  $(hidden_field).val('False');
-                } else {
-                  $(hidden_field).val('True');
-                }
-                $(button).click();
-              }
-            }
-            document.getElementById('id_primary_property').dispatchEvent(new Event('change'));
-            document.getElementById('id_two_axes').dispatchEvent(new Event('change'));
-            prefill_input.value = '';
-          })
-          .catch(response => {
-            console.log('Error in prefilling the form');
-          });
-   });
-  </script>
-  <script>
-   {# Hide special property fields under subsets and show only normal input #}
-   function reset_subset_fields() {
-     $('.atomic-structure-input').attr('hidden', true);
-     $('.phase-transition-input').attr('hidden', true);
-     $('.normal-input').show();
-     if (document.getElementById('id_is_figure').readOnly) {
-       set_checkbox('id_is_figure', false, false);
-       set_checkbox('id_two_axes', false, false);
-     }
-     $('input[name^="lattice_constant_"]').each(function() {
-       $(this).prop('required', false);
-     });
-     $('input[name^="phase_transition_"]').each(function() {
-       $(this).prop('required', false);
-     });
-     $('textarea[name^="subset_datapoints_"]').each(function() {
-       $(this).prop('required', true);
-     });
-     crystal_system_labels = document.querySelectorAll('.card-subset legend');
-     for (var i = 0; i < crystal_system_labels.length; i++) {
-       crystal_system_labels[i].innerHTML =
-         crystal_system_labels[i].innerHTML.replace(
-           /Initial crystal system/, 'Crystal system');
-     }
-   }
-  </script>
-  <script>
-   // Atomic structure specific
-   $('#id_primary_property').change(function() {
-     if ($('#id_primary_property').find(':selected').text() ===
-       'atomic structure') {
-       reset_subset_fields();
-       $('.atomic-structure-input').attr('hidden', false);
-       $('.normal-input').hide();
-       set_checkbox('id_is_figure', false, true);
-       set_checkbox('id_two_axes', false, true);
-       // Make atomic structure related fields required only if this property has been selected
-       $('input[name^="lattice_constant_"]').each(function() {
-         $(this).prop('required', true);
-       });
-       $('textarea[name^="subset_datapoints_"]').each(function() {
-         $(this).prop('required', false);
-       });
-     }
-   });
-   function import_lattice_parameters(el) {
-     var i_subset = $(el).attr('id').split('import-lattice-parameters_')[1];
-     var form_data = new FormData();
-     form_data.append('file', el.files[0]);
-     $(el).val('');  // Clear the file list
-     $.ajax({
-       url: "{% url 'materials:autofill_input_data' %}",
-       type: 'POST',
-       processData: false,
-       contentType: false,
-       dataType: 'text',
-       data: form_data,
-     }).done(function(response) {
-       var a, b, c, alpha, beta, gamma;
-       function process_batch(input_data, dest_suffix) {
-         lines = input_data.split('\n');
-         var aims_format = false;
-         for (var i = 0; i < lines.length; i++) {
-           if (lines[i].match(/^ *lattice_vector/)) {
-             aims_format = true;
-             break;
-           }
-         }
-         if (aims_format) {
-           // Generate the atomic structure (lattice constants and angles)
-           // from lattice vectors
-           lattice_vectors = [];
-           var regex = /^ *lattice_vector\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\b/;
-           var match_;
-           for (var i = 0; i < lines.length; i++) {
-             match_ = lines[i].match(regex);
-             if (match_) {
-               lattice_vectors.push([match_[1], match_[2], match_[3]]);
-             }
-           }
-           var norm = vector =>
-             Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
-           var get_angle = (v1, v2, norm1, norm2) =>
-             Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
-           if (lattice_vectors.length < 3) {
-             throw 'Unable to read in three lattice vectors!';
-           }
-           a = norm(lattice_vectors[0]);
-           b = norm(lattice_vectors[1]);
-           c = norm(lattice_vectors[2]);
-           alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
-           beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
-           gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
-         } else {
-           // Read the atomic structure directly from an input file
-           var nr_reg = /\b([a-z]+)\s+(-?(?:\d+(?:\.\d+)?|\.\d+)(?:\(\d+(?:\.\d+)?\)|\b))/g;
-           var matches = [];
-           while (matches = nr_reg.exec(input_data)) {
-             switch(matches[1]) {
-               case 'a': a = matches[2]; break;
-               case 'b': b = matches[2]; break;
-               case 'c': c = matches[2]; break;
-               case 'alpha': alpha = matches[2]; break;
-               case 'beta': beta = matches[2]; break;
-               case 'gamma': gamma = matches[2]; break;
-             }
-           }
-           input_data = '';
-         }
-         $('#id_lattice_constant_a_' + dest_suffix).val(a);
-         $('#id_lattice_constant_b_' + dest_suffix).val(b);
-         $('#id_lattice_constant_c_' + dest_suffix).val(c);
-         $('#id_lattice_constant_alpha_' + dest_suffix).val(alpha);
-         $('#id_lattice_constant_beta_' + dest_suffix).val(beta);
-         $('#id_lattice_constant_gamma_' + dest_suffix).val(gamma);
-         $('#id_atomic_coordinates_' + dest_suffix).val(input_data);
-       }
-       try {
-         if (i_subset) {
-           process_batch(response, i_subset);
-         } else {
-           response = response.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-           var data = response.split('&');
-           for (var i = 0; i < data.length; i++) {
-             if (data[i]) {
-               process_batch(data[i].replace(/^\n/, ''), i+1);
-             }
-           }
-         }
-       } catch(e) {
-         $('#id_atomic_coordinates_1').val(e);
-       }
-     }).fail(function(response) {
-       if (!i_subset) i_subset = 1;
-       $('#id_atomic_coordinates_' + i_subset).html(response);
-     });
-   }
-   $('.import-lattice-parameters').change(function() {
-     import_lattice_parameters(this);
-   });
-   // Prefill from a previous instance of the form
+   // Prefill atomic structure from a previous instance of the form
    {% for subset_counter, a, b, c, alpha, beta, gamma, coordinates in main_form.get_lattice_parameters %}
    $('#id_lattice_constant_a_{{ subset_counter }}').val('{{ a|escapejs }}');
    $('#id_lattice_constant_b_{{ subset_counter }}').val('{{ b|escapejs }}');
@@ -904,86 +500,6 @@
    {% endfor %}
   </script>
   <script>
-   // Band structure specific
-   var band_structure_selected = false;
-   $('#id_primary_property').change(function() {
-     primary_unit = $(this).parent().next();
-     if ($(this).find(':selected').text() === 'band structure') {
-       primary_unit.hide();
-       $('#id_two_axes').trigger('change', force_hide=true).prop('disabled', true);
-       number_of_subsets.readOnly = true;
-       number_of_subsets.value = 1;
-       number_of_subsets.dispatchEvent(new Event('change'));
-       band_structure_selected = true;
-       set_checkbox('id_is_figure', false, true);
-       set_checkbox('id_two_axes', false, true);
-       $('.subset-datapoints').attr('placeholder', '# K-point path\nX L\nL Gamma\n...');
-     } else if (band_structure_selected) {
-       primary_unit.show();
-       $('#id_two_axes').trigger('change').prop('disabled', false);
-       number_of_subsets.readOnly = false;
-       band_structure_selected = false;
-       set_checkbox('id_is_figure', false, false);
-       set_checkbox('id_two_axes', false, false);
-     }
-   });
-   // Attempt to autofill the k-path textarea from control.in if present
-   document.getElementById('id_uploaded_files').addEventListener('change', function() {
-     var primary_prop = document.getElementById('id_primary_property');
-     if (primary_prop.options[primary_prop.selectedIndex].text === 'band structure' &&
-         !document.getElementById('id_subset_datapoints_1').value) {
-       var control_file = null;
-       for (var i = 0; i < this.files.length; i++) {
-         if (this.files[i].name === 'control.in') {
-           control_file = this.files[i];
-           break;
-         }
-       }
-       if (control_file) {
-         var form_data = new FormData();
-         form_data.append('file', control_file);
-         $.ajax({
-           url: "{% url 'materials:extract_k_from_control_in' %}",
-           type: 'POST',
-           processData: false,
-           contentType: false,
-           dataType: 'text',
-           data: form_data,
-         }).done(function(result) {
-           result = result.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-           document.getElementById('id_subset_datapoints_1').value = result;
-         }).fail(function(result) {});
-       }
-     }
-   });
-  </script>
-  <script>
-   // Phase transition specific
-   $('#id_primary_property').change(function() {
-     if ($('#id_primary_property').find(':selected').text()
-                                  .startsWith('phase transition ')) {
-       reset_subset_fields();
-       $('.phase-transition-input').attr('hidden', false);
-       $('.normal-input').hide();
-       set_checkbox('id_is_figure', false, true);
-       set_checkbox('id_two_axes', false, true);
-       crystal_system_labels = document.querySelectorAll('.card-subset legend');
-       for (var i = 0; i < crystal_system_labels.length; i++) {
-         crystal_system_labels[i].innerHTML =
-           crystal_system_labels[i].innerHTML.replace(
-             /^\s*Crystal system/, 'Initial crystal system');
-       }
-       $('input[name^="phase_transition_crystal_system_final"]').each(function() {
-         $(this).prop('required', true);
-       });
-       $('input[name^="phase_transition_value"]').each(function() {
-         $(this).prop('required', true);
-       });
-       $('textarea[name^="subset_datapoints_"]').each(function() {
-         $(this).prop('required', false);
-       });
-     }
-   });
    // Prefill from a previous instance of the form
    {% for subset_counter, cs_f, sg_i, sg_f, dir, hysteresis, value in main_form.get_phase_transitions %}
    document.getElementById('id_phase_transition_crystal_system_final_{{ cs_f }}_{{ subset_counter }}')
@@ -994,14 +510,5 @@
    $('#id_phase_transition_hysteresis_{{ subset_counter }}').val('{{ hysteresis|escapejs }}');
    $('#id_phase_transition_value_{{ subset_counter }}').val('{{ value|escapejs }}');
    {% endfor %}
-  </script>
-  <script>
-   $('#id_primary_property').change(function() {
-     var selected = $('#id_primary_property').find(':selected').text();
-     if (selected !== 'atomic structure' &&
-         !selected.startsWith('phase transition ')) {
-       reset_subset_fields();
-     }
-   });
   </script>
 {% endblock %}

@@ -1,20 +1,23 @@
 {% extends 'materials/base.html' %}
 
 {% block body %}
-  <br>
   <div class="card card-default">
     <div class="card-header">
       <h4>Add Reference</h4>
     </div>
     <div class="card-body">
-      <form id="author-count" method="post" action="{% url 'materials:author_count' %}">
+      <form id="author-count" method="post">
         {% csrf_token %}
         <label for="id_author_count">Number of authors:</label>
-        <input type="number" name="author_count" autofocus="true" class="form-control" id="id_author_count" min="1" max="50" placeholder="Please enter the number of authors associated with this reference" required>
+        <input type="number" name="author_count" autofocus="true" class="form-control"
+               id="id_author_count" min="1"
+               placeholder="Please enter the number of authors associated with this reference"
+               required>
         <button type="submit" class="btn btn-info">Enter</button>
       </form>
 
-      <form id="add-reference" method="post" action="{% url 'materials:add_reference' %}" class="form-group invisible">
+      <form id="add-reference" method="post" action=
+            class="form-group" hidden="true">
         {% csrf_token %}
         <p>
           <div id="entered-authors">
@@ -24,21 +27,37 @@
         <button type="submit" class="btn btn-info">Submit new reference</button>
       </form>
       {{text}}
-      <div id="feedback">
-      </div>
     </div>
   </div>
 {% endblock %}
 
 {% block script %}
-  {% load static %}
-  <script src="{% static 'materials/javascript/ajax_submit.js' %}"></script>
-  <script src="{% static 'materials/javascript/ajax_alert_form_submit.js' %}"></script>
   <script>
-   $('#author-count').submit(function() {
-     $('#add-reference').removeClass('invisible');
+   let author_count = document.getElementById('author-count');
+   author_count.addEventListener('submit', function(event) {
+     event.preventDefault();
+     document.getElementById('add-reference').hidden = false;
+     const form_data = new FormData(this);
+     axios.post("{% url 'materials:author_count' %}", form_data)
+          .then(response => {
+            document.getElementById('entered-authors').innerHTML = response['data'];
+          });
    });
-   ajax_submit($('#author-count'), $('#entered-authors'));
-   alert_submit($('#add-reference'), $('#feedback'));
+   let add_reference = document.getElementById('add-reference');
+   add_reference.addEventListener('submit', function(event) {
+     event.preventDefault();
+     const form_data = new FormData(this);
+     axios.post("{% url 'materials:add_reference' %}", form_data)
+          .then(response => {
+            this.reset();
+            const flex = document.createElement('div');
+            flex.classList.add('d-flex');
+            const alert = document.createElement('div');
+            alert.classList.add('alert', 'alert-success');
+            alert.innerHTML = 'Save success';
+            flex.appendChild(alert);
+            document.getElementById('dynamic-messages').appendChild(flex);
+          });
+   });
   </script>
 {% endblock %}

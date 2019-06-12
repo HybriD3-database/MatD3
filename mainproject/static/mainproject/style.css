@@ -167,3 +167,11 @@ footer.reference {
 table.phase-transition > tbody > tr > td:first-child {
     font-weight: bold;
 }
+
+.new-entry-card > .card-header {
+    background-color: rgba(43, 255, 118, 0.18);
+}
+
+.new-entry-card > .card-body {
+    background-color: rgba(43, 255, 118, 0.05);
+}

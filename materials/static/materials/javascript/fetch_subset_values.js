@@ -1,20 +1,25 @@
-Array.from(document.querySelectorAll('tbody[class="tabulated-data"]')).forEach(function(table_body) {
-  var subset_pk = table_body.id.split('-')[1];
-  $.getJSON('/materials/get-subset-values/' + subset_pk, function(data) {
-    var table = document.createElement('table');
-    var fragment = document.createDocumentFragment();
-    for (var i=0; i<data.length; i++) {
-      var tr = document.createElement('tr');
-      var td = document.createElement('td');
-      if ('x' in data[i]) {
-        td.innerHTML = data[i]['x'];
-        tr.appendChild(td);
-      }
-      td = document.createElement('td');
-      td.innerHTML = data[i]['y'];
-      tr.appendChild(td);
-      fragment.appendChild(tr);
-    }
-    table_body.append(fragment);
-  });
-});
+'use strict';
+
+for (let table_body of
+  document.querySelectorAll('tbody[class="tabulated-data"]')) {
+  const subset_pk = table_body.id.split('-')[1];
+  axios.get('/materials/get-subset-values/' + subset_pk)
+       .then(response => {
+         let data = response['data'];
+         const table = document.createElement('table');
+         const fragment = document.createDocumentFragment();
+         for (let value of data) {
+           let tr = document.createElement('tr');
+           let td = document.createElement('td');
+           if ('x' in value) {
+             td.innerHTML = value['x'];
+             tr.appendChild(td);
+           }
+           td = document.createElement('td');
+           td.innerHTML = value['y'];
+           tr.appendChild(td);
+           fragment.appendChild(tr);
+         }
+         table_body.append(fragment);
+       });
+}

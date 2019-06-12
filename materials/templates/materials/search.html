@@ -37,9 +37,7 @@
 {% endblock %}
 
 {% block script %}
-  {% load static %}
-  <script src="{% static 'materials/javascript/ajax_submit.js' %}"></script>
-  <script type="text/javascript">
+  <script>
    $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
    $('#search_term').change(function() {
      if(this.value == "exciton_emission") {
@@ -64,6 +62,14 @@
        $('#explanatory_text').text(text);
      }
    });
-   ajax_submit($('#search-system'), $('#results'));
+   let search_system = document.getElementById('search-system');
+   search_system.addEventListener('submit', function(event) {
+     event.preventDefault();
+     const form_data = new FormData(this);
+     axios.post('{% url 'materials:search' %}', form_data)
+          .then(response => {
+            document.getElementById('results').innerHTML = response['data'];
+          });
+   });
   </script>
 {% endblock %}

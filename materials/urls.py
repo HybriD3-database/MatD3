@@ -1,10 +1,17 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
+from django.urls import include
 from django.urls import path
+from rest_framework import routers
 
 from . import views
 
+router = routers.DefaultRouter()
+router.register('properties', views.PropertyViewSet)
+router.register('units', views.UnitViewSet)
+
 app_name = 'materials'
 urlpatterns = [
+    path('', include(router.urls)),
     path('search', views.SearchFormView.as_view(), name='search'),
     path('<int:pk>', views.SystemView.as_view(), name='system'),
     path('dataset/<int:pk>', views.DatasetView.as_view(), name='dataset'),
@@ -19,28 +26,16 @@ urlpatterns = [
     path('dataset/<int:pk>/image.png', views.dataset_image,
          name='dataset_image'),
     path('add-pub', views.AddPubView.as_view(), name='add_reference'),
-    path('search-pub', views.SearchPubView.as_view(),
-         name='search_reference'),
-    path('search-system', views.SearchSystemView.as_view(),
-         name='search_system'),
     path('add-system', views.AddSystemView.as_view(), name='add_system'),
-    path('add-author', views.AddAuthorView.as_view(), name='add_author'),
-    path('search-author', views.SearchAuthorView.as_view(),
-         name='search_author'),
     path('author-count', views.AddAuthorsToReferenceView.as_view(),
          name='author_count'),
     path('add-data', views.AddDataView.as_view(), name='add_data'),
-    path('add-property', views.add_property, name='add_property'),
-    path('add-unit', views.add_unit, name='add_unit'),
     path('submit-data', views.submit_data, name='submit_data'),
     path('update-system/<int:pk>', views.SystemUpdateView.as_view(),
          name='update_system'),
-    path('reference-data/<int:pk>', views.reference_data,
-         name='reference_data'),
     path('reference/<int:pk>', views.ReferenceDetailView.as_view(),
          name='reference'),
-    path('autofill-input-data', views.autofill_input_data,
-         name='autofill_input_data'),
+    path('autofill-input-data', views.autofill_input_data),
     path('<int:system_pk>/property-all-entries/<int:prop_pk>',
          views.PropertyAllEntriesView.as_view(), name='property_all_entries'),
     path('data-for-chart/<int:pk>', views.data_for_chart,
@@ -52,10 +47,9 @@ urlpatterns = [
     path('get-subset-values/<int:pk>', views.get_subset_values,
          name='get_subset_values'),
     path('get-jsmol-input/<int:pk>', views.get_jsmol_input,
-         name="get_jsmol_input"),
-    path('report-issue', views.report_issue, name="report_issue"),
-    path('extract-k-from-control-in', views.extract_k_from_control_in,
-         name="extract_k_from_control_in"),
+         name='get_jsmol_input'),
+    path('report-issue', views.report_issue, name='report_issue'),
+    path('extract-k-from-control-in', views.extract_k_from_control_in),
     path('linked-data/<int:pk>', views.LinkedDataView.as_view(),
          name='linked_data'),
     path('prefilled-form/<int:pk>', views.prefilled_form,

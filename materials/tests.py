@@ -1,5 +1,4 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
-from copy import deepcopy
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -111,15 +110,23 @@ class SeleniumTestCase(LiveServerTestCase):
         self.selenium.find_element_by_name('password').send_keys(PASSWORD)
         self.selenium.find_element_by_xpath('//button[@type="submit"]').click()
 
-    def set_property(self, selectize_name, property_name):
+    def set_property(self, selectize_name, property_name=None):
         """Shortcut for setting physical properties with selectize"""
-        pk = models.Property.objects.get(name=property_name).pk
+        if property_name:
+            pk = models.Property.objects.get(name=property_name).pk
+        else:
+            pk = 0
+        self.selenium.find_element_by_id(f'id_{selectize_name}-selectized')
         self.selenium.execute_script(
             f"selectized['{selectize_name}'][0].selectize.setValue({pk})")
 
-    def set_unit(self, selectize_name, unit_label):
+    def set_unit(self, selectize_name, unit_label=None):
         """Shortcut for setting units with selectize"""
-        pk = models.Unit.objects.get(label=unit_label).pk
+        if unit_label:
+            pk = models.Unit.objects.get(label=unit_label).pk
+        else:
+            pk = 0
+        self.selenium.find_element_by_id(f'id_{selectize_name}-selectized')
         self.selenium.execute_script(
             f"selectized['{selectize_name}'][0].selectize.setValue({pk})")
 
@@ -130,34 +137,46 @@ class SeleniumTestCase(LiveServerTestCase):
         models.Unit.objects.all().delete()
         S = self.selenium
         S.get(self.live_server_url + reverse('materials:add_data'))
-        for property_ in ['band gap', 'atomic structure']:
-            S.find_element_by_link_text('Define new property').click()
-            S.find_element_by_name('property_name').send_keys(property_)
-            property_link = reverse("materials:add_property")
-            property_submit = S.find_element_by_xpath(
-                f'//form[@action="{property_link}"]//button[@type="submit"]')
-            property_submit.click()
-        for unit in ['eV', 'Å']:
-            S.find_element_by_link_text('Define new unit').click()
-            S.find_element_by_name('unit_label').send_keys(unit)
-            unit_link = reverse("materials:add_unit")
-            unit_submit = S.find_element_by_xpath(
-                f'//form[@action="{unit_link}"]//button[@type="submit"]')
-            unit_submit.click()
+        S.find_element_by_id('id_secondary_unit-selectized')
+        # New property via primary property
+        self.set_property('primary_property')
+        S.find_element_by_id('id_name').send_keys('band gap')
+        S.find_element_by_xpath(
+            '//div[@id="new-property-card"]//button[@type="submit"]').click()
+        # New unit via secondary unit
+        S.find_element_by_id('id_two_axes').click()
+        self.set_unit('secondary_unit')
+        S.find_element_by_id('id_label').send_keys('eV')
+        S.find_element_by_xpath(
+            '//div[@id="new-unit-card"]//button[@type="submit"]').click()
+        # New property via first fixed property
+        S.find_element_by_id('add-fixed-property-1').click()
+        self.set_property('fixed_property_1_0')
+        S.find_element_by_id('id_name').send_keys('atomic structure')
+        S.find_element_by_xpath(
+            '//div[@id="new-property-card"]//button[@type="submit"]').click()
+        # New unit via fixed unit of subset 2
+        S.find_element_by_id('id_number_of_subsets').send_keys(Keys.ARROW_UP)
+        S.find_element_by_id('add-fixed-property-2').click()
+        self.set_unit('fixed_unit_2_1')
+        S.find_element_by_id('id_label').send_keys('Å')
+        S.find_element_by_xpath(
+            '//div[@id="new-unit-card"]//button[@type="submit"]').click()
 
     def test_normal_property(self):
         self.login()
         S = self.selenium
         S.get(self.live_server_url + reverse('materials:add_data'))
-        # Set system
-        S.execute_script(
-            f"selectized['select_system'][0].selectize.setValue(1)")
+        S.find_element_by_id('id_secondary_unit-selectized')
         # Set properties
         self.set_property('primary_property', 'band gap')
         self.set_unit('primary_unit', 'eV')
         S.find_element_by_id('id_is_figure').click()
         self.set_property('secondary_property', 'pressure')
         self.set_unit('secondary_unit', 'GPa')
+        # Set system
+        S.execute_script(
+            f"selectized['select_system'][0].selectize.setValue(1)")
         # General
         S.find_element_by_id('id_origin_of_data_1').click()
         S.find_element_by_id('id_sample_type_4').click()
@@ -244,17 +263,13 @@ class SeleniumTestCase(LiveServerTestCase):
         self.login()
         S = self.selenium
         S.get(self.live_server_url + reverse('materials:add_data'))
+        S.find_element_by_id('id_secondary_unit-selectized')
+        # Set property and unit
+        self.set_property('primary_property', 'atomic structure')
+        self.set_unit('primary_unit', 'Å')
         # Set system
         S.execute_script(
             f"selectized['select_system'][0].selectize.setValue(1)")
-        # Set property
-        pk = models.Property.objects.get(name='atomic structure').pk
-        S.execute_script(
-            f"selectized['primary_property'][0].selectize.setValue({pk})")
-        # Set unit
-        pk = models.Unit.objects.get(label='Å').pk
-        S.execute_script(
-            f"selectized['primary_unit'][0].selectize.setValue({pk})")
         # Input first atomic structure
         S.execute_script('window.scrollTo(0, document.body.scrollHeight)')
         S.find_element_by_id('id_lattice_constant_a_1').send_keys('9.64')
@@ -288,19 +303,11 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_xpath(
             f'//form[@action="{submit_link}"]//button[@type="submit"]').click()
         # Fill in fixed properties
-        pk = models.Property.objects.get(name='pressure').pk
-        S.execute_script(
-            f"selectized['fixed_property_2_0'][0].selectize.setValue({pk})")
-        pk = models.Unit.objects.get(label='Å').pk
-        S.execute_script(
-            f"selectized['fixed_unit_2_0'][0].selectize.setValue({pk})")
+        self.set_property('fixed_property_2_0', 'pressure')
+        self.set_unit('fixed_unit_2_0', 'Å')
         S.find_element_by_id('id_fixed_value_2_1').send_keys('9(3)')
-        pk = models.Property.objects.get(name='band gap').pk
-        S.execute_script(
-            f"selectized['fixed_property_2_1'][0].selectize.setValue({pk})")
-        pk = models.Unit.objects.get(label='eV').pk
-        S.execute_script(
-            f"selectized['fixed_unit_2_1'][0].selectize.setValue({pk})")
+        self.set_property('fixed_property_2_1', 'band gap')
+        self.set_unit('fixed_unit_2_1', 'eV')
         S.find_element_by_id('id_fixed_value_2_0').send_keys('4.5')
         # Create data set
         submit_link = reverse("materials:submit_data")

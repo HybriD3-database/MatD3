@@ -27,19 +27,6 @@ class AddAuthor(forms.ModelForm):
             self.fields[fieldname].widget.attrs['class'] = 'form-control'
 
 
-class AddTag(forms.ModelForm):
-    all_fields = ('tag',)
-
-    class Meta:
-        model = models.Tag
-        fields = ('tag',)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
 class AddReference(forms.ModelForm):
     all_fields = ('title', 'journal', 'vol', 'pages_start', 'pages_end',
                   'year', 'doi_isbn')
@@ -106,14 +93,14 @@ class AutoCharField(forms.CharField):
 
 
 class AddPropertyForm(forms.Form):
-    property_name = AutoCharField(
+    name = AutoCharField(
         model=models.Property, field='name',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Name of the physical property.')
 
 
 class AddUnitForm(forms.Form):
-    unit_label = AutoCharField(
+    label = AutoCharField(
         model=models.Unit, field='label',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text='Label of the unit.')

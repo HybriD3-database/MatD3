@@ -32,7 +32,8 @@
     {{ field.help_text|tooltip }}
     {% if inline %}</div>{% endif %}
     {% if field.field.widget.input_type == 'select' %}
-      <select id="{{ field.id_for_label }}" name="{{ field.name }}" placeholder="--none--" hidden>
+      <select id="{{ field.id_for_label }}" name="{{ field.name }}"
+              placeholder="--select or add new--" hidden>
       </select>
     {% else %}
       {{ field }}

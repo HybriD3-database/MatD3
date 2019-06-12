@@ -1,5 +1,4 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
-import datetime
 import io
 import logging
 import matplotlib
@@ -33,11 +32,13 @@ from django.shortcuts import render
 from django.shortcuts import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
+from rest_framework import viewsets
 
 from . import forms
 from . import models
+from . import permissions
+from . import serializers
 from . import utils
-from mainproject import settings
 
 matplotlib.use('Agg')
 
@@ -254,30 +255,6 @@ class AddPubView(LoginRequiredMixin, generic.TemplateView):
         return JsonResponse(args)
 
 
-class SearchPubView(generic.TemplateView):
-    template_name = 'materials/dropdown_list_pub.html'
-
-    def post(self, request):
-        search_form = forms.SearchForm(request.POST)
-        search_text = ''
-        if search_form.is_valid():
-            search_text = search_form.cleaned_data['search_text']
-            author_search = (
-                models.Reference.objects.filter(
-                    Q(author__first_name__icontains=search_text) |
-                    Q(author__last_name__icontains=search_text) |
-                    Q(author__institution__icontains=search_text)).distinct())
-            if len(author_search) > 0:
-                search_result = author_search
-            else:
-                search_result = models.Reference.objects.filter(
-                    Q(title__icontains=search_text) |
-                    Q(journal__icontains=search_text)
-                )
-        return render(request, self.template_name,
-                      {'search_result': search_result})
-
-
 class AddAuthorsToReferenceView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'materials/add_authors_to_reference.html'
 
@@ -289,84 +266,6 @@ class AddAuthorsToReferenceView(LoginRequiredMixin, generic.TemplateView):
         return render(request, self.template_name,
                       {'entered_author_count': author_count,
                        'author_formset': author_formset})
-
-
-class SearchAuthorView(generic.TemplateView):
-    """This is for add reference page"""
-    template_name = 'materials/dropdown_list_author.html'
-
-    def post(self, request):
-        search_form = forms.SearchForm(request.POST)
-        search_text = ''
-        if search_form.is_valid():
-            search_text = search_form.cleaned_data['search_text']
-            search_result = models.Author.objects.filter(
-                Q(first_name__icontains=search_text) |
-                Q(last_name__icontains=search_text) |
-                Q(institution__icontains=search_text))
-        return render(request, self.template_name,
-                      {'search_result': search_result})
-
-
-class AddAuthorView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_author.html'
-
-    def get(self, request):
-        input_form = forms.AddAuthor()
-        return render(request, self.template_name, {
-            'input_form': input_form,
-        })
-
-    def post(self, request):
-        # search_form = forms.SearchForm()
-        input_form = forms.AddAuthor(request.POST)
-        if input_form.is_valid():
-            first_name = input_form.cleaned_data['first_name'].lower()
-            last_name = input_form.cleaned_data['last_name'].lower()
-            institution = input_form.cleaned_data['institution'].lower()
-            # checks to see if the author is already in database
-            q_set_len = len(
-                models.Author.objects.filter(first_name__iexact=first_name)
-                .filter(last_name__iexact=last_name)
-                .filter(institution__icontains=institution)
-                )
-            if q_set_len == 0:
-                input_form.save()
-                text = 'Author successfully added!'
-                feedback = 'success'
-            else:
-                text = 'Failed to submit, author is already in database.'
-                feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-        args = {
-                # 'input_form': input_form,
-                'feedback': feedback,
-                'text': text
-                }
-        return JsonResponse(args)
-
-
-class SearchSystemView(generic.TemplateView):
-    template_name = 'materials/dropdown_list_system.html'
-
-    def post(self, request):
-        form = forms.SearchForm(request.POST)
-        related_synthesis = ('related_synthesis' in request.POST and
-                             request.POST['related_synthesis'] == 'True')
-        search_text = ''
-        if form.is_valid():
-            search_text = form.cleaned_data['search_text']
-        search_result = models.System.objects.filter(
-            Q(compound_name__icontains=search_text) |
-            Q(group__icontains=search_text) |
-            Q(formula__icontains=search_text)
-        )
-        # ajax version
-        return render(request, self.template_name,
-                      {'search_result': search_result,
-                       'related_synthesis': related_synthesis})
 
 
 class AddSystemView(LoginRequiredMixin, generic.TemplateView):
@@ -421,24 +320,22 @@ class SystemUpdateView(generic.UpdateView):
     success_url = '/materials/{pk}'
 
 
-@login_required
-def add_property(request):
-    name = request.POST['property_name']
-    models.Property.objects.create(created_by=request.user, name=name)
-    messages.success(request,
-                     f'New property "{name}" successfully added to '
-                     'the database.')
-    return redirect(reverse('materials:add_data'))
+class PropertyViewSet(viewsets.ModelViewSet):
+    queryset = models.Property.objects.all()
+    serializer_class = serializers.PropertySerializer
+    permission_classes = (permissions.IsStaffOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
-@login_required
-def add_unit(request):
-    label = request.POST['unit_label']
-    models.Unit.objects.create(created_by=request.user, label=label)
-    messages.success(request,
-                     f'New unit "{label}" successfully added to '
-                     'the database.')
-    return redirect(reverse('materials:add_data'))
+class UnitViewSet(viewsets.ModelViewSet):
+    queryset = models.Unit.objects.all()
+    serializer_class = serializers.UnitSerializer
+    permission_classes = (permissions.IsStaffOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
 @staff_status_required
@@ -1126,87 +1023,6 @@ def report_issue(request):
         messages.error(request,
                        'You must be logged in to perform this action.')
     return redirect(request.POST['return-path'])
-
-
-def reference_data(request, pk):
-    """Return a key-value representation of the data set.
-
-    The representation conforms to the one used in Qresp
-    (http://qresp.org/).
-
-    """
-    data = {}
-    data['info'] = {
-        'downloadPath': request.get_host(),
-        'fileServerPath': '',
-        'folderAbsolutePath': '',
-        'insertedBy': {
-            'firstName': '',
-            'lastName': '',
-            'middleName': ''
-        },
-        'isPublic': 'true',
-        'notebookFile': '',
-        'notebookPath': '',
-        'serverPath': request.get_host(),
-        'timeStamp': datetime.datetime.now()
-    }
-    reference = models.Reference.objects.get(pk=pk)
-    data['reference'] = {}
-    data['reference']['journal'] = {
-        'abbrevName': reference.journal,
-        'fullName': reference.journal,
-        'kind': 'journal',
-        'page': reference.pages_start,
-        'publishedAbstract': '',
-        'publishedDate': '',
-        'receivedDate': '',
-        'title': reference.title,
-        'volume': reference.vol,
-        'year': reference.year,
-    }
-    data['reference']['authors'] = []
-    for author in reference.author_set.all():
-        data['reference']['authors'].append({
-            'firstname': author.first_name,
-            'lastname': author.last_name,
-        })
-    data['PIs'] = []
-    data['PIs'].append({'firstname': '', 'lastname': ''})
-    data['collections'] = []
-    data['collections'].append('')
-    datasets = reference.dataset_set.all()
-    data['charts'] = []
-    dataset_counter = 1
-    for dataset in datasets:
-        chart = {
-            'caption': dataset.label,
-            'files': [f'/materials/dataset-{dataset.pk}/data.txt'],
-            'id': '',
-            'imageFile': f'/materials/dataset-{dataset.pk}/image.png',
-            'kind': 'figure' if dataset.is_figure else 'table',
-            'notebookFile': '',
-            'number': dataset_counter,
-            'properties': [],
-        }
-        if dataset.secondary_property:
-            chart['properties'].append(dataset.secondary_property.name)
-        if dataset.primary_property:
-            chart['properties'].append(dataset.primary_property.name)
-        loc = os.path.join(settings.MEDIA_ROOT,
-                           f'uploads/dataset_{dataset.pk}')
-        if os.path.isdir(loc):
-            for file_ in os.listdir(loc):
-                chart['files'].append(settings.MEDIA_URL +
-                                      f'uploads/dataset_{dataset.pk}/{file_}')
-        data['charts'].append(chart)
-        dataset_counter += 1
-    response = JsonResponse(data)
-    response["Access-Control-Allow-Origin"] = "*"
-    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-    response["Access-Control-Max-Age"] = "1000"
-    response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
-    return response
 
 
 def extract_k_from_control_in(request):
