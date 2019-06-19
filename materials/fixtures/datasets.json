@@ -5,7 +5,7 @@
     "fields": {
       "created": "2000-01-01T00:00:00Z", "updated": "2000-01-01T00:00:00Z",
       "created_by": 1, "updated_by": 1,
-      "label": "",
+      "caption": "",
       "system": 1,
       "primary_property": 1,
       "primary_unit": 1,

@@ -7,7 +7,7 @@ the "with ..." syntax to include certain parts.
 {% endcomment %}
 
 <!-- MAIN DATA -->
-<h5>{{ dataset.label }}</h5>
+<h5>{{ dataset.caption }}</h5>
 <h5>Origin: {% if dataset.is_experimental %}experimental{% else %}computational{% endif %}
   {{ dataset.get_all_fixed_temperatures }}
 </h5>

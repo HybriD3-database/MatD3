@@ -150,7 +150,7 @@ class Dataset(Base):
         (3, 3),
         (2, 2),
     )
-    label = models.TextField(blank=True, max_length=1000)
+    caption = models.TextField(blank=True, max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)
     primary_property = models.ForeignKey(
         Property, on_delete=models.PROTECT, related_name='primary_property')

@@ -134,8 +134,8 @@ class AddDataForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Select the system that is associated with the inserted data.')
-    label = AutoCharField(
-        model=models.Dataset, field='label',
+    caption = AutoCharField(
+        model=models.Dataset, field='caption',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
         'Main description of the data. This can include an explanation of the '

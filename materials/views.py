@@ -491,7 +491,7 @@ def submit_data(request):
     dataset = models.Dataset(created_by=request.user)
     dataset.system = form.cleaned_data['select_system']
     dataset.reference = form.cleaned_data['select_reference']
-    dataset.label = form.cleaned_data['label']
+    dataset.caption = form.cleaned_data['caption']
     dataset.primary_property = form.cleaned_data['primary_property']
     dataset.primary_unit = form.cleaned_data['primary_unit']
     dataset.primary_property_label = form.cleaned_data[
@@ -865,7 +865,7 @@ def dataset_image(request, pk):
         y_value = datapoint.values.get(qualifier=models.NumericalValue.PRIMARY)
         y_values[i_dp] = y_value.value
     pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3)
-    pyplot.title(dataset.label)
+    pyplot.title(dataset.caption)
     pyplot.ylabel(f'{dataset.primary_property.name}, '
                   f'{dataset.primary_unit.label}')
     pyplot.xlabel(f'{dataset.secondary_property.name}, '
@@ -1087,7 +1087,7 @@ def prefilled_form(request, pk):
             'primary_unit': pk_or_none(dataset.primary_unit),
             'secondary_property': pk_or_none(dataset.secondary_property),
             'secondary_unit': pk_or_none(dataset.secondary_unit),
-            'label': dataset.label,
+            'caption': dataset.caption,
             'extraction_method': dataset.extraction_method,
             'primary_property_label': dataset.primary_property_label,
             'secondary_property_label': dataset.secondary_property_label,

@@ -193,7 +193,7 @@ class FilesInline(BaseMixin, nested_admin.NestedStackedInline):
 
 
 class DatasetAdmin(BaseAdmin):
-    list_display = ('id', 'primary_property', 'label', 'created_by',
+    list_display = ('id', 'primary_property', 'caption', 'created_by',
                     'updated_by', 'updated')
     list_filter = ('updated',)
     ordering = ('-updated',)
