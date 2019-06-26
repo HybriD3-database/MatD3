@@ -378,7 +378,6 @@ def dataset_to_text(dataset, server):
         '# Origin: '
         f'{"experimental" if dataset.experimental else "theoretical"}\n')
     data.write(f'# Dimensionality: {dataset.dimensionality}D\n')
-    print('this sample', type(dataset.sample_type))
     sample = models.Dataset.SAMPLE_TYPES[dataset.sample_type][1]
     data.write(f'# Sample type: {sample}\n')
     data.write('#\n')
@@ -411,7 +410,7 @@ def dataset_to_text(dataset, server):
                 for coord in coord_data['coordinates']:
                     data.write(f'{coord_data["coord-type"]} {coord[1]} '
                                f'{coord[2]} {coord[3]} {coord[0]}\n')
-        if dataset.primary_property.name.startswith('phase transition '):
+        elif dataset.primary_property.name.startswith('phase transition '):
             pt = subset.phase_transitions.first()
             CS = models.Subset.CRYSTAL_SYSTEMS
             data.write('Initial crystal system: '
