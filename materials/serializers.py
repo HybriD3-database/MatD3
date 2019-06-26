@@ -14,3 +14,7 @@ class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Unit
         fields = ('pk', 'label')
+class DatasetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Dataset
+        fields = ([f.name for f in models.Dataset._meta.local_fields])

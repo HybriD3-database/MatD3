@@ -8,6 +8,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register('properties', views.PropertyViewSet)
 router.register('units', views.UnitViewSet)
+router.register('datasets', views.DatasetViewSet)
 
 app_name = 'materials'
 urlpatterns = [
@@ -21,10 +22,6 @@ urlpatterns = [
          views.toggle_is_figure, name='toggle_is_figure'),
     path('dataset/<int:pk>/delete/<str:view_name>',
          views.delete_dataset, name='delete_dataset'),
-    path('dataset/<int:pk>/files', views.dataset_files, name='dataset_files'),
-    path('dataset/<int:pk>/data.txt', views.dataset_data, name='dataset_data'),
-    path('dataset/<int:pk>/image.png', views.dataset_image,
-         name='dataset_image'),
     path('add-pub', views.AddPubView.as_view(), name='add_reference'),
     path('add-system', views.AddSystemView.as_view(), name='add_system'),
     path('author-count', views.AddAuthorsToReferenceView.as_view(),

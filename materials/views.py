@@ -35,6 +35,7 @@ from django.shortcuts import reverse
 from django.utils.safestring import mark_safe
 from django.views import generic
 from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from . import forms
 from . import models
@@ -169,7 +170,8 @@ class SearchFormView(generic.TemplateView):
                 systems = models.System.objects.filter(
                     Q(formula__icontains=search_text) |
                     Q(group__icontains=search_text) |
-                    Q(compound_name__icontains=search_text)).order_by('formula')
+                    Q(compound_name__icontains=search_text)).order_by(
+                        'formula')
             elif search_term == 'organic':
                 systems = models.System.objects.filter(
                     organic__icontains=search_text).order_by('organic')
@@ -358,6 +360,114 @@ class UnitViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user)
 
 
+def dataset_to_text(dataset, server):
+    """Return the data set contents as human-readable plain text."""
+    data = io.StringIO()
+    data.write(
+        f'# Data available at {server}/materials/dataset/{dataset.pk}\n')
+    data.write('#\n')
+    if dataset.reference:
+        ref = dataset.reference
+        data.write(f'# Reference: {ref.getAuthorsAsString()} "{ref.title}", '
+                   f'{ref.journal} {ref.vol}')
+        if ref.pages_start:
+            data.write(f', {ref.pages_start} ')
+        data.write(f' ({ref.year})\n')
+        data.write('#\n')
+    data.write(
+        '# Origin: '
+        f'{"experimental" if dataset.experimental else "theoretical"}\n')
+    data.write(f'# Dimensionality: {dataset.dimensionality}D\n')
+    print('this sample', type(dataset.sample_type))
+    sample = models.Dataset.SAMPLE_TYPES[dataset.sample_type][1]
+    data.write(f'# Sample type: {sample}\n')
+    data.write('#\n')
+    if dataset.secondary_property:
+        data.write(f'# Column 1: {dataset.secondary_property}')
+        if dataset.secondary_unit:
+            data.write(f', {dataset.secondary_unit}')
+        data.write('\n')
+        data.write('# Column 2: ')
+    else:
+        data.write('# Physical property: ')
+    data.write(dataset.primary_property.name)
+    if dataset.primary_unit:
+        data.write(f', {dataset.primary_unit}')
+    data.write('\n')
+    data.write('#\n')
+    for subset in dataset.subsets.all():
+        if subset.label:
+            data.write(f'# {subset.label}\n')
+        fixed_values = subset.fixed_values.all()
+        if fixed_values:
+            data.write('# Fixed parameters:\n')
+        for v in fixed_values:
+            data.write(f'#  {v.physical_property} = {v.value} {v.unit}\n')
+        if dataset.primary_property.name == 'atomic structure':
+            for symbol, value, unit in subset.get_lattice_constants():
+                data.write(f'{symbol} {value}{unit}\n')
+            if subset.datapoints.count() > 6:
+                coord_data = utils.atomic_coordinates_as_json(subset.pk)
+                for coord in coord_data['coordinates']:
+                    data.write(f'{coord_data["coord-type"]} {coord[1]} '
+                               f'{coord[2]} {coord[3]} {coord[0]}\n')
+        if dataset.primary_property.name.startswith('phase transition '):
+            pt = subset.phase_transitions.first()
+            CS = models.Subset.CRYSTAL_SYSTEMS
+            data.write('Initial crystal system: '
+                       f'{CS[subset.crystal_system][1]}\n')
+            if pt.crystal_system_final:
+                data.write('Final crystal system: '
+                           f'{CS[pt.crystal_system_final][1]}\n')
+            if pt.space_group_initial:
+                data.write(f'Space group initial: {pt.space_group_initial}\n')
+            if pt.space_group_final:
+                data.write(f'Space group final: {pt.space_group_final}\n')
+            if pt.direction:
+                data.write(f'Direction: {pt.direction}\n')
+            if pt.hysteresis:
+                data.write(f'Hysteresis: {pt.hysteresis}\n')
+            data.write(f'Value: {pt.formatted()}\n')
+        else:
+            values = models.NumericalValue.objects.filter(
+                datapoint__subset=subset).select_related(
+                    'error').order_by('qualifier', 'datapoint__pk')
+            if dataset.secondary_property:
+                half_len = len(values)//2
+                for i_value in range(half_len):
+                    data.write(f'{values[half_len+i_value].formatted()} '
+                               f'{values[i_value].formatted()}\n')
+            else:
+                for i_value in range(len(values)):
+                    data.write(f'{values[i_value].formatted()}\n')
+        data.write('\n\n')
+    return data.getvalue()
+
+
+class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = models.Dataset.objects.all()
+    serializer_class = serializers.DatasetSerializer
+
+    @action(detail=True)
+    def files(self, request, pk):
+        """Retrieve data set contents and uploaded files as zip."""
+        dataset = self.get_object()
+        in_memory_object = io.BytesIO()
+        zf = zipfile.ZipFile(in_memory_object, 'w')
+        # Main data
+        zf.writestr('files/data.txt',
+                    dataset_to_text(dataset, request.get_host()))
+        # Additional files
+        for file_ in (f.dataset_file.path for f in dataset.files.all()):
+            zf.write(file_,
+                     os.path.join('files/additional', os.path.basename(file_)))
+        zf.close()
+        response = HttpResponse(in_memory_object.getvalue(),
+                                content_type='application/x-zip-compressed')
+        response['Content-Disposition'] = f'attachment; filename=files.zip'
+        return response
+
+
 @staff_status_required
 @transaction.atomic
 def submit_data(request):
@@ -466,11 +576,17 @@ def submit_data(request):
                                                   value=array[i]))
         return filtered_list
 
-    def error_and_return(dataset, text, form):
+    def error_and_return(form, dataset=None, text=None):
         """Shortcut for returning with info about the error."""
-        messages.error(request, text)
-        dataset.delete()
-        return render(request, 'materials/add_data.html', {'main_form': form})
+        if dataset:
+            dataset.delete()
+        if text:
+            messages.error(request, text)
+        return render(request, AddDataView.template_name, {
+            'main_form': form,
+            'property_form': forms.AddPropertyForm(),
+            'unit_form': forms.AddUnitForm(),
+        })
 
     def skip_this_line(line):
         """Test whether the line is empty or a comment."""
@@ -486,7 +602,7 @@ def submit_data(request):
                 form._errors[field.label] = form._errors.pop(field.name)
         messages.error(request, form.errors)
         form._errors = errors_save
-        return render(request, 'materials/add_data.html', {'main_form': form})
+        return error_and_return(form)
     # Create data set
     dataset = models.Dataset(created_by=request.user)
     dataset.system = form.cleaned_data['select_system']
@@ -568,10 +684,9 @@ def submit_data(request):
         if form.cleaned_data['external_repositories']:
             for url in form.cleaned_data['external_repositories'].split():
                 if not requests.head(url).ok:
-                    return error_and_return(dataset,
+                    return error_and_return(form, dataset,
                                             'Could not process url for the '
-                                            f'external repository: "{url}"',
-                                            form)
+                                            f'external repository: "{url}"')
                 models.ExternalRepository.objects.create(
                     computational_details=computational,
                     created_by=request.user,
@@ -645,7 +760,7 @@ def submit_data(request):
                     # Skip comments and empty lines
                     if not re.match(r'(?:\r?$|#|//)', line):
                         return error_and_return(
-                            dataset, f'Could not process line: {line}', form)
+                            form, dataset, f'Could not process line: {line}')
             add_datapoint_ids(lattice_vectors, 9, 3)
             models.NumericalValue.objects.bulk_create(lattice_vectors)
         elif dataset.primary_property.name == 'band structure':
@@ -665,9 +780,9 @@ def submit_data(request):
                 if os.path.basename(f.dataset_file.name) in [
                         'band_structure_full.png', 'band_structure_small.png']:
                     return error_and_return(
-                        dataset,
+                        form, dataset,
                         f'Rename {os.path.basename(f.dataset_file.name)} '
-                        '(this name is reserved)', form)
+                        '(this name is reserved)')
             # The band files need to be alphabeticaly sorted
             for i in range(len(files)):
                 for j in range(i+1, len(files)):
@@ -706,7 +821,7 @@ def submit_data(request):
                     add_numerical_value(numerical_values, errors, y_value)
             except ValueError:
                 return error_and_return(
-                    dataset, f'Could not process line: {line}', form)
+                    form, dataset, f'Could not process line: {line}')
         else:
             try:
                 for line in form.cleaned_data[
@@ -719,7 +834,7 @@ def submit_data(request):
                         add_numerical_value(numerical_values, errors, value)
             except ValueError:
                 return error_and_return(
-                    dataset, f'Could not process line: {line}', form)
+                    form, dataset, f'Could not process line: {line}')
         # Fixed properties
         counter = 0
         for key in form.cleaned_data:
@@ -750,7 +865,7 @@ def submit_data(request):
             dataset.linked_to.add(models.Dataset.objects.get(pk=pk))
         except models.Dataset.DoesNotExist:
             return error_and_return(
-                dataset, f'Related data set {pk} does not exist', form)
+                form, dataset, f'Related data set {pk} does not exist')
     # If all went well, let the user know how much data was
     # successfully added
     n_data_points = 0
@@ -819,63 +934,6 @@ def delete_dataset(request, pk, view_name):
     dataset = models.Dataset.objects.get(pk=pk)
     dataset.delete()
     return return_url
-
-
-def dataset_files(request, pk):
-    dataset = models.Dataset.objects.get(pk=pk)
-    in_memory_object = io.BytesIO()
-    zf = zipfile.ZipFile(in_memory_object, 'w')
-    for file_ in (f.dataset_file.path for f in dataset.files.all()):
-        zf.write(file_, os.path.join('files', os.path.basename(file_)))
-    zf.close()
-    response = HttpResponse(in_memory_object.getvalue(),
-                            content_type='application/x-zip-compressed')
-    response['Content-Disposition'] = f'attachment; filename=files.zip'
-    return response
-
-
-def dataset_data(request, pk):
-    """Return the data set as a text file."""
-    dataset = models.Dataset.objects.get(pk=pk)
-    subset = dataset.subsets.first()
-    text = ''
-    x_value = ''
-    y_value = ''
-    for datapoint in subset.datapoints.all():
-        for value in datapoint.values.all():
-            if value.qualifier == models.NumericalValue.SECONDARY:
-                x_value = value.value
-            elif value.qualifier == models.NumericalValue.PRIMARY:
-                y_value = value.value
-        text += f'{x_value} {y_value}\n'
-    return HttpResponse(text, content_type='text/plain')
-
-
-def dataset_image(request, pk):
-    """Return a png image of the data set."""
-    dataset = models.Dataset.objects.get(pk=pk)
-    subset = dataset.subsets.first()
-    datapoints = subset.datapoints.all()
-    x_values = numpy.zeros(len(datapoints))
-    y_values = numpy.zeros(len(datapoints))
-    for i_dp, datapoint in enumerate(datapoints):
-        x_value = datapoint.values.get(
-            qualifier=models.NumericalValue.SECONDARY)
-        x_values[i_dp] = x_value.value
-        y_value = datapoint.values.get(qualifier=models.NumericalValue.PRIMARY)
-        y_values[i_dp] = y_value.value
-    pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3)
-    pyplot.title(dataset.caption)
-    pyplot.ylabel(f'{dataset.primary_property.name}, '
-                  f'{dataset.primary_unit.label}')
-    pyplot.xlabel(f'{dataset.secondary_property.name}, '
-                  f'{dataset.secondary_unit.label}')
-    in_memory_object = io.BytesIO()
-    pyplot.savefig(in_memory_object, format='png')
-    image = in_memory_object.getvalue()
-    pyplot.close()
-    in_memory_object.close()
-    return HttpResponse(image, content_type='image/png')
 
 
 def autofill_input_data(request):

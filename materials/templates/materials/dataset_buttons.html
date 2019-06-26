@@ -1,27 +1,23 @@
 {% if dataset.secondary_property %}
-  <a href="{% url 'materials:toggle_is_figure' pk=dataset.pk view_name=request.resolver_match.url_name %}">
-    <button type="button" class="btn btn-success">
-      {% if dataset.is_figure %}
-        Show table
-      {% else %}
-        Show figure
-      {% endif %}
-    </button>
+  <a href="{% url 'materials:toggle_is_figure' pk=dataset.pk view_name=request.resolver_match.url_name %}"
+     class="btn btn-success">
+    {% if dataset.is_figure %}
+      Show table
+    {% else %}
+      Show figure
+    {% endif %}
   </a>
 {% endif %}
-<a href="{% url 'materials:toggle_visibility' pk=dataset.pk view_name=request.resolver_match.url_name %}">
-  <button type="button" class="btn btn-success">
-    {% if dataset.visible %}
-      Unpublish
-    {% else %}
-      Publish
-    {% endif %}
-  </button>
+<a href="{% url 'materials:toggle_visibility' pk=dataset.pk view_name=request.resolver_match.url_name %}"
+   class="btn btn-success">
+  {% if dataset.visible %}
+    Unpublish
+  {% else %}
+    Publish
+  {% endif %}
 </a>
-<a href="{% url 'admin:materials_dataset_change' dataset.pk %}">
-  <button type="button" class="btn btn-success">
-    Edit
-  </button>
+<a href="{% url 'admin:materials_dataset_change' dataset.pk %}" class="btn btn-success">
+  Edit
 </a>
 <button data-reverse-url=
         "{% url 'materials:delete_dataset' pk=dataset.pk view_name=request.resolver_match.url_name %}"

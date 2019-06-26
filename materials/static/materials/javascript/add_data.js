@@ -63,8 +63,8 @@ function SelectEntryHandler(entry_type, label_name, post_url) {
              'alert-danger',
              'Conflict: ' + this.entry_type + ' "' + form_data.get(label_name) +
              '" already exists.');
-           console.log(error['message']);
-           console.log(error['response']['statusText']);
+           console.log(error.message);
+           console.log(error.response.statusText);
          });
   }
 
@@ -161,15 +161,19 @@ const autofill_data = element => {
          const result = response.data.replace(/\n\r/g, '\n')
                                 .replace(/\r/g, '\n'); // Windows
          const data = result.split(/&/);
-         if (global_fill) {
+         if (global_fill && data.length > 1) {
            const n_subsets = document.getElementById('id_number_of_subsets');
            for (let i = 1; i <= n_subsets.value; i++) {
              document.getElementById('id_subset_datapoints_' + i).value =
                data[i-1].replace(/^\n/, '');
            }
          } else {
-           document.getElementById('id_subset_datapoints_' + i_subset).value =
-             result;
+           if (i_subset) {
+             document.getElementById('id_subset_datapoints_' + i_subset).value =
+               result;
+           } else {
+             document.getElementById('id_subset_datapoints_1').value = result;
+           }
          }
          let is_figure = document.getElementById('id_is_figure');
          if (is_figure_untested && !is_figure.readOnly) {
@@ -422,8 +426,8 @@ prefill_button.addEventListener('click', event => {
        }).catch(error => {
          create_message('alert-danger',
                         'Data set #' + prefill_input.value + ' does not exist');
-         console.log(error['message']);
-         console.log(error['response']['statusText']);
+         console.log(error.message);
+         console.log(error.response.statusText);
        });
 });
 
@@ -514,7 +518,8 @@ var import_lattice_parameters = element => {
                if (lattice_vectors.length == 3) break;
              }
              const norm = vector =>
-               Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)+Math.pow(vector[2],2));
+               Math.sqrt(Math.pow(vector[0],2) + Math.pow(vector[1],2) +
+                         Math.pow(vector[2],2));
              const get_angle = (v1, v2, norm1, norm2) =>
                Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
              if (lattice_vectors.length < 3) {
