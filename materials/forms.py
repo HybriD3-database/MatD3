@@ -109,6 +109,8 @@ class AddUnitForm(forms.Form):
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
 
+    # Where to redirect after successfully submitting data
+    return_url = forms.CharField(required=False, widget=forms.HiddenInput())
     # General
     related_data_sets = forms.CharField(
         required=False,
@@ -128,6 +130,11 @@ class AddDataForm(forms.Form):
         help_text=''
         'Select the reference that is associated with the inserted data. If '
         'the data is unpublished or no reference is applicable, leave empty.')
+    # If set, the reference field becomes readonly.
+    fixed_reference = forms.ModelChoiceField(
+        queryset=models.Reference.objects.all(),
+        required=False,
+        widget=forms.HiddenInput())
     select_system = forms.ModelChoiceField(
         queryset=models.System.objects.all(),
         required=True,
@@ -509,6 +516,12 @@ class AddDataForm(forms.Form):
         'Upload files containing anything that is relevant to the current '
         'data (input files to a calculation, image of the sample, ...). '
         'Multiple files can be selected here.')
+
+    # Qresp related
+    qresp_fetch_url = forms.CharField(required=False,
+                                      widget=forms.HiddenInput())
+    qresp_chart_nr = forms.IntegerField(required=False,
+                                        widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         """Dynamically add subsets and fixed properties."""

@@ -6,6 +6,7 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
+router.register('references', views.ReferenceViewSet)
 router.register('properties', views.PropertyViewSet)
 router.register('units', views.UnitViewSet)
 router.register('datasets', views.DatasetViewSet)

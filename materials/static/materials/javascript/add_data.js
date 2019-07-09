@@ -91,7 +91,7 @@ const new_unit_handler =
   new SelectEntryHandler('unit', 'label', '/materials/units/');
 
 // All dropdown menus are filled asynchronously
-var selectized = {};
+let selectized = {};
 const selectize_wrapper = (name, data, initial_value, label_name) => {
   data.push({pk: 0, [label_name]: ' --add new--'});
   selectized[name] = $('#id_' + name).selectize({
@@ -111,6 +111,11 @@ axios.get('/materials/get-dropdown-options/reference').then(response => {
     items: [initial_reference],
     options: response.data,
   });
+  let fixed_ref = document.getElementById('id_fixed_reference');
+  if (fixed_ref.value) {
+    selectized['select_reference'][0].selectize.setValue(fixed_ref.value);
+    selectized['select_reference'][0].selectize.disable();
+  }
 });
 axios.get('/materials/get-dropdown-options/system').then(response => {
   selectized['select_system'] = $('#id_select_system').selectize({
@@ -486,7 +491,7 @@ $('#id_primary_property').change(function() {
     }
   }
 });
-var import_lattice_parameters = element => {
+let import_lattice_parameters = element => {
   const i_subset = element.id.split('import-lattice-parameters_')[1];
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
@@ -655,7 +660,7 @@ $('#id_primary_property').change(function() {
         label.innerHTML.replace(/^\s*Crystal system/, 'Initial crystal system');
     }
     for (let element of document.querySelectorAll(
-      'input[name^="phase_transition_crystal_system_final"]',
+      'input[name="phase_transition_crystal_system_final"]',
       'input[name="phase_transition_value"]')) {
       element.required = true;
     }

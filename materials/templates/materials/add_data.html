@@ -1,4 +1,4 @@
-{% extends 'materials/base.html' %}
+{% extends base_template %}
 
 {% load materials_tags %}
 
@@ -103,6 +103,7 @@
                     {% input_field main_form.related_data_sets inline=True %}
                   </div>
                   <div class="form-group col-md-6">
+                    {{ main_form.fixed_reference }}
                     {% input_field main_form.select_reference %}
                   </div>
                   <div class="form-group col-md-6">
@@ -299,6 +300,9 @@
 
             <br>
 
+            {{ main_form.return_url }}
+            {{ main_form.qresp_fetch_url }}
+            {{ main_form.qresp_chart_nr }}
             <div class="float-right">
               <button type="submit" name="submit-results" class="btn btn-primary">
                 Submit

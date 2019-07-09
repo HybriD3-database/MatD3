@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.uploadedfile import UploadedFile
 from django.core.mail import send_mail
 from django.db import transaction
@@ -36,12 +37,14 @@ from django.utils.safestring import mark_safe
 from django.views import generic
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from . import forms
 from . import models
 from . import permissions
 from . import serializers
 from . import utils
+from mainproject import settings
 
 matplotlib.use('Agg')
 
@@ -325,13 +328,38 @@ class AddSystemView(LoginRequiredMixin, generic.TemplateView):
 
 
 class AddDataView(StaffStatusMixin, generic.TemplateView):
+    """View for submitting user data.
+
+    The arguments are used when this view is called from external
+    sites. Fields such as the reference can be prefilled then.
+
+    """
     template_name = 'materials/add_data.html'
 
     def get(self, request, *args, **kwargs):
+        main_form = forms.AddDataForm()
+        if request.GET.get('return-url'):
+            base_template = 'mainproject/base.html'
+            main_form.fields['return_url'].initial = request.GET.get(
+                'return-url')
+        else:
+            base_template = 'materials/base.html'
+        if request.GET.get('reference'):
+            main_form.fields['fixed_reference'].initial = (
+                models.Reference.objects.get(pk=request.GET.get('reference')))
+        if request.GET.get('qresp-fetch-url'):
+            qresp_fetch_url = request.GET.get('qresp-fetch-url')
+            paper_detail = requests.get(qresp_fetch_url).json()
+            main_form.fields['qresp_fetch_url'].initial = qresp_fetch_url
+            chart_nr = int(request.GET.get('qresp-chart-nr'))
+            main_form.fields['qresp_chart_nr'].initial = chart_nr
+            main_form.fields['caption'].initial = (
+                paper_detail['_PaperDetails__charts'][chart_nr]['caption'])
         return render(request, self.template_name, {
-            'main_form': forms.AddDataForm(),
+            'main_form': main_form,
             'property_form': forms.AddPropertyForm(),
             'unit_form': forms.AddUnitForm(),
+            'base_template': base_template,
         })
 
 
@@ -340,6 +368,15 @@ class SystemUpdateView(generic.UpdateView):
     template_name = 'materials/system_update_form.html'
     form_class = forms.AddSystem
     success_url = '/materials/{pk}'
+
+
+class ReferenceViewSet(viewsets.ModelViewSet):
+    queryset = models.Reference.objects.all()
+    serializer_class = serializers.ReferenceSerializer
+    permission_classes = (permissions.IsStaffOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -446,6 +483,12 @@ def dataset_to_text(dataset, server):
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all()
     serializer_class = serializers.DatasetSerializer
+
+    @action(detail=True)
+    def info(self, request, pk):
+        dataset = self.get_object()
+        serializer = serializers.DatasetSerializerInfo(dataset)
+        return Response(serializer.data)
 
     @action(detail=True)
     def files(self, request, pk):
@@ -577,6 +620,10 @@ def submit_data(request):
 
     def error_and_return(form, dataset=None, text=None):
         """Shortcut for returning with info about the error."""
+        if form.cleaned_data['return_url']:
+            base_template = 'mainproject/base.html'
+        else:
+            base_template = 'materials/base.html'
         if dataset:
             dataset.delete()
         if text:
@@ -585,6 +632,7 @@ def submit_data(request):
             'main_form': form,
             'property_form': forms.AddPropertyForm(),
             'unit_form': forms.AddUnitForm(),
+            'base_template': base_template
         })
 
     def skip_this_line(line):
@@ -865,6 +913,54 @@ def submit_data(request):
         except models.Dataset.DoesNotExist:
             return error_and_return(
                 form, dataset, f'Related data set {pk} does not exist')
+    # Create static files for Qresp
+    qresp_loc = os.path.join(settings.MEDIA_ROOT,
+                             f'qresp/dataset_{dataset.pk}')
+    os.makedirs(qresp_loc)
+    if form.cleaned_data['two_axes']:
+        for subset in dataset.subsets.all():
+            values = models.NumericalValue.objects.filter(
+                datapoint__subset=subset).order_by(
+                    'qualifier', 'datapoint__pk').values_list(
+                        'value', flat=True)
+            y_values = values[:len(values)//2]
+            x_values = values[len(values)//2:len(values)]
+            fixed_values = []
+            for v in subset.fixed_values.all():
+                fixed_values.append(
+                    f'{v.physical_property} = {v.value} {v.unit}')
+            sub_label = ''
+            if fixed_values:
+                sub_label = ', '.join(fixed_values)
+            if subset.label:
+                sub_label = subset.label + ' ' + sub_label
+            pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3,
+                        label=sub_label)
+        pyplot.title(dataset.caption)
+        pyplot.ylabel(f'{dataset.primary_property.name}, '
+                      f'{dataset.primary_unit.label}')
+        pyplot.xlabel(f'{dataset.secondary_property.name}, '
+                      f'{dataset.secondary_unit.label}')
+        pyplot.legend(loc='upper left')
+        pyplot.savefig(os.path.join(qresp_loc, 'figure.png'))
+        pyplot.close()
+    with open(os.path.join(qresp_loc, 'data.txt'), 'w') as data_file:
+        # Need to re-fetch the data set from the database, else some
+        # integer fields may appear as strings (possibly a bug)
+        _ = models.Dataset.objects.get(pk=dataset.pk)
+        data_file.write(dataset_to_text(_, request.get_host()))
+    # Import data from Qresp
+    if form.cleaned_data['qresp_fetch_url']:
+        paper_detail = requests.get(
+            form.cleaned_data['qresp_fetch_url']).json()
+        download_url = paper_detail['_PaperDetails__fileServerPath']
+        chart_detail = (paper_detail['_PaperDetails__charts']
+                        [form.cleaned_data['qresp_chart_nr']])
+        chart = requests.get(f'{download_url}/{chart_detail["imageFile"]}',
+                             verify=False)
+        file_name = chart_detail["imageFile"].replace('/', '_')
+        f = SimpleUploadedFile(file_name, chart.content)
+        dataset.files.create(created_by=dataset.created_by, dataset_file=f)
     # If all went well, let the user know how much data was
     # successfully added
     n_data_points = 0
@@ -879,8 +975,12 @@ def submit_data(request):
     dataset_url = reverse('materials:dataset', kwargs={'pk': dataset.pk})
     message = mark_safe(message +
                         f' <a href="{dataset_url}">View</a> the data set.')
-    messages.success(request, message)
-    return redirect(reverse('materials:add_data'))
+    if form.cleaned_data['return_url']:
+        return redirect(
+            f'{form.cleaned_data["return_url"]}?pk={dataset.pk}')
+    else:
+        messages.success(request, message)
+        return redirect(reverse('materials:add_data'))
 
 
 def resolve_return_url(pk, view_name):
