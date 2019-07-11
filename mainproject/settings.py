@@ -1,5 +1,16 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
-"""Django settings for HybriD3.
+"""Project configuration.
+
+This file includes all project settings that are version control
+safe. The rest are in .env in the root directory created by the
+administrator (person responsible for deploying the website). In
+particular, whenever you see call to "config", those variables are
+expected to reside in .env (unless you are happy with the default
+values).
+
+Note: you will notice a default value for the secret key below. This
+is clearly just for quickly getting the website running for testing
+purposes. Do not use it in production.
 
 """
 from decouple import config
