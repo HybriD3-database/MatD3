@@ -39,33 +39,33 @@ function SelectEntryHandler(entry_type, label_name, post_url) {
     const form_data = new FormData(this.form);
     const label_name = this.selectize_label_name;
     if (!form_data.get(label_name)) return;
-    axios.post(this.post_url, form_data)
-         .then(response => {
-           this.card.hidden = true;
-           // Update all dropdowns of the current type
-           for (let select_name in selectized) {
-             if (select_name.includes(this.entry_type)) {
-               selectized[select_name][0].selectize.addOption({
-                 pk: response.data.pk,
-                 [label_name]: form_data.get(label_name)
-               });
-               selectized[select_name][0].selectize.refreshOptions;
-               selectized[select_name][0].selectize.clear();
-             }
-           }
-           create_message('alert-success',
-                          'New ' + this.entry_type + ' "' +
-                          form_data.get(label_name) +
-                          '" successfully added to the database.');
-           this.form.reset();
-        }).catch(error => {
-           create_message(
-             'alert-danger',
-             'Conflict: ' + this.entry_type + ' "' + form_data.get(label_name) +
-             '" already exists.');
-           console.log(error.message);
-           console.log(error.response.statusText);
-         });
+    axios
+      .post(this.post_url, form_data)
+      .then(response => {
+        this.card.hidden = true;
+        // Update all dropdowns of the current type
+        for (let select_name in selectized) {
+          if (select_name.includes(this.entry_type)) {
+            selectized[select_name][0].selectize.addOption({
+              pk: response.data.pk, [label_name]: form_data.get(label_name),
+            });
+            selectized[select_name][0].selectize.refreshOptions;
+            selectized[select_name][0].selectize.clear();
+          }
+        }
+        create_message(
+          'alert-success',
+          `New ${this.entry_type} "${form_data.get(label_name)}" ` +
+          'successfully added to the database.');
+        this.form.reset();
+      }).catch(error => {
+        create_message(
+          'alert-danger',
+          `Conflict: ${this.entry_type} "${form_data.get(label_name)}" ` +
+          'already exists.');
+        console.log(error.message);
+        console.log(error.response.statusText);
+      });
   }
 
   this.form.addEventListener('submit', event => {
@@ -101,7 +101,7 @@ const selectize_wrapper = (name, data, initial_value, label_name) => {
     sortField: label_name,
     searchField: label_name,
     items: [initial_value],
-    options: data
+    options: data,
   });
 }
 axios.get('/materials/get-dropdown-options/reference').then(response => {
@@ -130,18 +130,22 @@ axios.get('/materials/properties/').then(response => {
     'primary_property', response.data, initial_primary_property, 'name');
   selectize_wrapper(
     'secondary_property', response.data, initial_secondary_property, 'name');
-  document.getElementById('id_primary_property')
-          .dispatchEvent(new Event('change'));
-  document.getElementById('id_two_axes')
-          .dispatchEvent(new Event('change'));
+  document
+    .getElementById('id_primary_property')
+    .dispatchEvent(new Event('change'));
+  document
+    .getElementById('id_two_axes')
+    .dispatchEvent(new Event('change'));
   new_property_handler.toggle_visibility('id_primary_property');
   new_property_handler.toggle_visibility('id_secondary_property');
 });
 axios.get('/materials/units/').then(response => {
-  document.getElementById('id_primary_unit')
-          .setAttribute('placeholder', '--select or add--');
-  document.getElementById('id_secondary_unit')
-          .setAttribute('placeholder', '--select or add--');
+  document
+    .getElementById('id_primary_unit')
+    .setAttribute('placeholder', '--select or add--');
+  document
+    .getElementById('id_secondary_unit')
+    .setAttribute('placeholder', '--select or add--');
   selectize_wrapper(
     'primary_unit', response.data, initial_primary_unit, 'label');
   selectize_wrapper(
@@ -161,53 +165,55 @@ const autofill_data = element => {
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
   element.value = '';  // Clear the file list
-  axios.post('/materials/autofill-input-data', form_data)
-       .then(response => {
-         const result = response.data.replace(/\n\r/g, '\n')
-                                .replace(/\r/g, '\n'); // Windows
-         const data = result.split(/&/);
-         if (global_fill && data.length > 1) {
-           const n_subsets = document.getElementById('id_number_of_subsets');
-           for (let i = 1; i <= n_subsets.value; i++) {
-             document.getElementById('id_subset_datapoints_' + i).value =
-               data[i-1].replace(/^\n/, '');
-           }
-         } else {
-           if (i_subset) {
-             document.getElementById('id_subset_datapoints_' + i_subset).value =
-               result;
-           } else {
-             document.getElementById('id_subset_datapoints_1').value = result;
-           }
-         }
-         let is_figure = document.getElementById('id_is_figure');
-         if (is_figure_untested && !is_figure.readOnly) {
-           // If the are multiple lines and multiple columns, it is likely a
-           // figure.
-           let lines = data[0].split('\n', 2);
-           if (lines.length > 1 && lines[0].split(' ').length > 1) {
-             if (!is_figure.checked) {
-               is_figure.checked = true;
-               is_figure.dispatchEvent(new Event('change'));
-             }
-           }
-           is_figure_untested = false;
-         }
-       }).catch(error => {
-         if (!i_subset) i_subset = 1;
-         document.getElementById('id_subset_datapoints_' + i_subset).value =
-           error;
-       });
-}
-document.getElementById('import-all-data')
-        .addEventListener('change', function() {
-          if ($('#id_primary_property').find(':selected').text() ===
-            'atomic structure') {
-            import_lattice_parameters(this);
-          } else {
-            autofill_data(this);
+  axios
+    .post('/materials/autofill-input-data', form_data)
+    .then(response => {
+      const result =
+        response.data.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+      const data = result.split(/&/);
+      if (global_fill && data.length > 1) {
+        const n_subsets = document.getElementById('id_number_of_subsets');
+        for (let i = 1; i <= n_subsets.value; i++) {
+          document.getElementById('id_subset_datapoints_' + i).value =
+            data[i-1].replace(/^\n/, '');
+        }
+      } else {
+        if (i_subset) {
+          document.getElementById('id_subset_datapoints_' + i_subset).value =
+            result;
+        } else {
+          document.getElementById('id_subset_datapoints_1').value = result;
+        }
+      }
+      let is_figure = document.getElementById('id_is_figure');
+      if (is_figure_untested && !is_figure.readOnly) {
+        // If the are multiple lines and multiple columns, it is likely a
+        // figure.
+        let lines = data[0].split('\n', 2);
+        if (lines.length > 1 && lines[0].split(' ').length > 1) {
+          if (!is_figure.checked) {
+            is_figure.checked = true;
+            is_figure.dispatchEvent(new Event('change'));
           }
-        });
+        }
+        is_figure_untested = false;
+      }
+    })
+    .catch(error => {
+      if (!i_subset) i_subset = 1;
+      document.getElementById('id_subset_datapoints_' + i_subset).value = error;
+    });
+}
+document
+  .getElementById('import-all-data')
+  .addEventListener('change', function() {
+    if ($('#id_primary_property').find(':selected').text() ===
+      'atomic structure') {
+      import_lattice_parameters(this);
+    } else {
+      autofill_data(this);
+    }
+  });
 
 // Create a new data subset
 let counter_fixed = 0;
@@ -238,10 +244,11 @@ const add_subset = i_subset => {
   fixed_prop_btn.addEventListener('click', function() {
     add_fixed_property(i_subset, counter_fixed++);
   });
-  copy.getElementsByClassName('import-data-file')[0]
-      .addEventListener('change', function() {
-        autofill_data(this);
-      });
+  copy
+    .getElementsByClassName('import-data-file')[0]
+    .addEventListener('change', function() {
+      autofill_data(this);
+    });
   document.getElementById('data-subset').appendChild(copy);
 }
 
@@ -277,11 +284,12 @@ const add_fixed_property =
         value_initial;
     }
     // Remove a fixed property
-    copy.getElementsByClassName('close-fixed-property')[0]
-        .addEventListener('click', function() {
-          let row = this.parentNode.parentNode.parentNode.parentNode;
-          row.parentNode.removeChild(row);
-        });
+    copy
+      .getElementsByClassName('close-fixed-property')[0]
+      .addEventListener('click', function() {
+        let row = this.parentNode.parentNode.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+      });
     document.getElementById('fixed-properties-' + subset).appendChild(copy);
   }
 const number_of_subsets = document.getElementById('id_number_of_subsets');
@@ -330,12 +338,12 @@ const toggle_section_visibility = (button, hidden_field_id) => {
     $(button).click();
   }
 }
-toggle_section_visibility('#synthesis-button',
-                          'id_with_synthesis_details');
-toggle_section_visibility('#experimental-button',
-                          'id_with_experimental_details');
-toggle_section_visibility('#computational-button',
-                          'id_with_computational_details');
+toggle_section_visibility(
+  '#synthesis-button', 'id_with_synthesis_details');
+toggle_section_visibility(
+  '#experimental-button', 'id_with_experimental_details');
+toggle_section_visibility(
+  '#computational-button', 'id_with_computational_details');
 
 // Helper function for setting the value and freezing/unfreezing a checkbox
 const set_checkbox = (id, value, freeze) => {
@@ -385,55 +393,57 @@ const prefill_button = document.getElementById('prefill-button');
 prefill_button.addEventListener('click', event => {
   event.preventDefault();
   const prefill_input = document.getElementById('prefill');
-  axios.get('/materials/prefilled-form/' + prefill_input.value)
-       .then(response => {
-         const values = response.data['values'];
-         for (const key in values) {
-           const el = document.getElementById('id_' + key);
-           if (el) {
-             if (el.type === 'select-one') {
-               selectized[key][0].selectize.setValue(values[key]);
-             } else if (el.type === 'checkbox') {
-               el.checked = values[key];
-             } else {
-               el.value = values[key];
-             }
-           } else { // radio buttons
-             document.querySelector('.form-check-input[name="' + key +
-                                    '"][value="' + values[key] + '"]')
-                     .checked = true;
-           }
-         }
-         const expandables = ['synthesis', 'experimental', 'computational'];
-         for (let section of expandables) {
-           const button = '#' + section + '-button';
-           const hidden_field = document.getElementById('id_with_' + section + '_details');
-           // Django renders the value of hidden_field as a string of 'True'
-           // or 'False', which is different from the aria-expanded value of
-           // 'true' or 'false' as set by Bootstrap, which leads to the messy conditional.
-           const cond = ($(button).attr('aria-expanded') === 'false' &&
-                         hidden_field.value === 'True') ||
-                        ($(button).attr('aria-expanded') === 'true' &&
-                         hidden_field.value === 'False');
-           if (cond) {
-             if (hidden_field.value === 'True') {
-               hidden_field.value = 'False';
-             } else {
-               hidden_field.value = 'True';
-             }
-             $(button).click();
-           }
-         }
-         document.getElementById('id_primary_property').dispatchEvent(new Event('change'));
-         document.getElementById('id_two_axes').dispatchEvent(new Event('change'));
-         document.getElementById('id_is_figure').dispatchEvent(new Event('change'));
-         prefill_input.value = '';
-       }).catch(error => {
-         create_message('alert-danger',
-                        'Data set #' + prefill_input.value + ' does not exist');
-         console.log(error.message);
-         console.log(error.response.statusText);
-       });
+  axios
+    .get('/materials/prefilled-form/' + prefill_input.value)
+    .then(response => {
+      const values = response.data['values'];
+      for (const key in values) {
+        const el = document.getElementById('id_' + key);
+        if (el) {
+          if (el.type === 'select-one') {
+            selectized[key][0].selectize.setValue(values[key]);
+          } else if (el.type === 'checkbox') {
+            el.checked = values[key];
+          } else {
+            el.value = values[key];
+          }
+        } else { // radio buttons
+          document.querySelector('.form-check-input[name="' + key +
+                                 '"][value="' + values[key] + '"]')
+                  .checked = true;
+        }
+      }
+      const expandables = ['synthesis', 'experimental', 'computational'];
+      for (let section of expandables) {
+        const button = '#' + section + '-button';
+        const hidden_field = document.getElementById('id_with_' + section + '_details');
+        // Django renders the value of hidden_field as a string of 'True'
+        // or 'False', which is different from the aria-expanded value of
+        // 'true' or 'false' as set by Bootstrap, which leads to the messy conditional.
+        const cond = ($(button).attr('aria-expanded') === 'false' &&
+                      hidden_field.value === 'True') ||
+                     ($(button).attr('aria-expanded') === 'true' &&
+                      hidden_field.value === 'False');
+        if (cond) {
+          if (hidden_field.value === 'True') {
+            hidden_field.value = 'False';
+          } else {
+            hidden_field.value = 'True';
+          }
+          $(button).click();
+        }
+      }
+      document.getElementById('id_primary_property').dispatchEvent(new Event('change'));
+      document.getElementById('id_two_axes').dispatchEvent(new Event('change'));
+      document.getElementById('id_is_figure').dispatchEvent(new Event('change'));
+      prefill_input.value = '';
+    }).
+     catch(error => {
+       create_message('alert-danger',
+                      'Data set #' + prefill_input.value + ' does not exist');
+       console.log(error.message);
+       console.log(error.response.statusText);
+     });
 });
 
 // Hide special property fields under subsets and show only normal input
@@ -496,94 +506,99 @@ let import_lattice_parameters = element => {
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
   element.value = '';  // Clear the file list
-  axios.post('/materials/autofill-input-data', form_data)
-       .then(response => {
-         let data = response.data;
-         let a, b, c, alpha, beta, gamma;
-         const process_batch = (input_data, dest_suffix) => {
-           const lines = input_data.split('\n');
-           let aims_format = false;
-           for (let line of lines) {
-             if (line.match(/^ *lattice_vector/)) {
-               aims_format = true;
-               break;
-             }
-           }
-           if (aims_format) {
-             // Generate the atomic structure (lattice constants and angles)
-             // from lattice vectors
-             let lattice_vectors = [];
-             const regex = /^ *lattice_vector\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\b/;
-             let match_;
-             for (let line of lines) {
-               match_ = line.match(regex);
-               if (match_) {
-                 lattice_vectors.push([match_[1], match_[2], match_[3]]);
-               }
-               if (lattice_vectors.length == 3) break;
-             }
-             const norm = vector =>
-               Math.sqrt(Math.pow(vector[0],2) + Math.pow(vector[1],2) +
-                         Math.pow(vector[2],2));
-             const get_angle = (v1, v2, norm1, norm2) =>
-               Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
-             if (lattice_vectors.length < 3) {
-               throw 'Unable to find three lattice vectors';
-             }
-             a = norm(lattice_vectors[0]);
-             b = norm(lattice_vectors[1]);
-             c = norm(lattice_vectors[2]);
-             alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
-             beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
-             gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
-           } else {
-             // Read the atomic structure directly from an input file
-             const nr_reg = /\b([a-z]+)\s+(-?(?:\d+(?:\.\d+)?|\.\d+)(?:\(\d+(?:\.\d+)?\)|\b))/g;
-             let matches = [];
-             while (matches = nr_reg.exec(input_data)) {
-               switch(matches[1]) {
-                 case 'a':     a     = matches[2]; break;
-                 case 'b':     b     = matches[2]; break;
-                 case 'c':     c     = matches[2]; break;
-                 case 'alpha': alpha = matches[2]; break;
-                 case 'beta':  beta  = matches[2]; break;
-                 case 'gamma': gamma = matches[2]; break;
-               }
-             }
-             input_data = '';
-           }
-           const set_value = (part_id, value) => {
-             document.getElementById(part_id + dest_suffix).value = value;
-           }
-           set_value('id_lattice_constant_a_', a);
-           set_value('id_lattice_constant_a_', a);
-           set_value('id_lattice_constant_b_', b);
-           set_value('id_lattice_constant_c_', c);
-           set_value('id_lattice_constant_alpha_', alpha);
-           set_value('id_lattice_constant_beta_', beta);
-           set_value('id_lattice_constant_gamma_', gamma);
-           set_value('id_atomic_coordinates_', input_data);
-         }
-         try {
-           if (i_subset) {
-             process_batch(data, i_subset);
-           } else {
-             data = data.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
-             const subsets = data.split('&');
-             for (let i = 0; i < subsets.length; i++) {
-               if (subsets[i]) {
-                 process_batch(subsets[i].replace(/^\n/, ''), i+1);
-               }
-             }
-           }
-         } catch(error) {
-           document.getElementById('id_atomic_coordinates_1').value = error;
-         }
-       }).catch(error => {
-         if (!i_subset) i_subset = 1;
-         document.getElementById('id_atomic_coordinates_' + i_subset)
-                 .innerHTML = error;
-       });
+  axios
+    .post('/materials/autofill-input-data', form_data)
+    .then(response => {
+      let data = response.data;
+      let a, b, c, alpha, beta, gamma;
+      const process_batch = (input_data, dest_suffix) => {
+        const lines = input_data.split('\n');
+        let aims_format = false;
+        for (let line of lines) {
+          if (line.match(/^ *lattice_vector/)) {
+            aims_format = true;
+            break;
+          }
+        }
+        if (aims_format) {
+          // Generate the atomic structure (lattice constants and angles)
+          // from lattice vectors
+          let lattice_vectors = [];
+          const regex =
+            /^ *lattice_vector\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\b/;
+          let match_;
+          for (let line of lines) {
+            match_ = line.match(regex);
+            if (match_) {
+              lattice_vectors.push([match_[1], match_[2], match_[3]]);
+            }
+            if (lattice_vectors.length == 3) break;
+          }
+          const norm = vector =>
+            Math.sqrt(Math.pow(vector[0],2) +
+                      Math.pow(vector[1],2) +
+                      Math.pow(vector[2],2));
+          const get_angle = (v1, v2, norm1, norm2) =>
+            Math.acos((v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/norm1/norm2)*360/2/Math.PI;
+          if (lattice_vectors.length < 3) {
+            throw 'Unable to find three lattice vectors';
+          }
+          a = norm(lattice_vectors[0]);
+          b = norm(lattice_vectors[1]);
+          c = norm(lattice_vectors[2]);
+          alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
+          beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
+          gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
+        } else {
+          // Read the atomic structure directly from an input file
+          const nr_reg =
+            /\b([a-z]+)\s+(-?(?:\d+(?:\.\d+)?|\.\d+)(?:\(\d+(?:\.\d+)?\)|\b))/g;
+          let matches = [];
+          while (matches = nr_reg.exec(input_data)) {
+            switch(matches[1]) {
+              case 'a':     a     = matches[2]; break;
+              case 'b':     b     = matches[2]; break;
+              case 'c':     c     = matches[2]; break;
+              case 'alpha': alpha = matches[2]; break;
+              case 'beta':  beta  = matches[2]; break;
+              case 'gamma': gamma = matches[2]; break;
+            }
+          }
+          input_data = '';
+        }
+        const set_value = (part_id, value) => {
+          document.getElementById(part_id + dest_suffix).value = value;
+        }
+        set_value('id_lattice_constant_a_', a);
+        set_value('id_lattice_constant_a_', a);
+        set_value('id_lattice_constant_b_', b);
+        set_value('id_lattice_constant_c_', c);
+        set_value('id_lattice_constant_alpha_', alpha);
+        set_value('id_lattice_constant_beta_', beta);
+        set_value('id_lattice_constant_gamma_', gamma);
+        set_value('id_atomic_coordinates_', input_data);
+      }
+      try {
+        if (i_subset) {
+          process_batch(data, i_subset);
+        } else {
+          data = data.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+          const subsets = data.split('&');
+          for (let i = 0; i < subsets.length; i++) {
+            if (subsets[i]) {
+              process_batch(subsets[i].replace(/^\n/, ''), i+1);
+            }
+          }
+        }
+      } catch(error) {
+        document.getElementById('id_atomic_coordinates_1').value = error;
+      }
+    }).
+     catch(error => {
+       if (!i_subset) i_subset = 1;
+       document
+         .getElementById('id_atomic_coordinates_' + i_subset).innerHTML = error;
+     });
 }
 for (let btn of document.getElementsByClassName('import-lattice-parameters')) {
   btn.addEventListener('change', function() {
@@ -632,12 +647,13 @@ uploaded_files.addEventListener('change', function() {
     if (control_file) {
       const form_data = new FormData();
       form_data.append('file', control_file);
-      axios.post('/materials/extract-k-from-control-in', form_data)
-           .then(response => {
-             const result = response.data.replace(/\n\r/g, '\n')
-                                    .replace(/\r/g, '\n'); // Windows
-             document.getElementById('id_subset_datapoints_1').value = result;
-           });
+      axios
+        .post('/materials/extract-k-from-control-in', form_data)
+        .then(response => {
+          const result =
+            response.data.replace(/\n\r/g, '\n').replace(/\r/g, '\n'); // Windows
+          document.getElementById('id_subset_datapoints_1').value = result;
+        });
     }
   }
 });

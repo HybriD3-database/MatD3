@@ -47,12 +47,13 @@ function plot_data(element, data, x_property, x_unit, y_property, y_unit) {
 for (let element of document.getElementsByTagName('canvas')) {
   const plot_id = element.id;
   const plot_pk = plot_id.split('_')[1];
-  axios.get('/materials/data-for-chart/' + plot_pk)
-      .then(response => {
-        plot_data(plot_id, response['data']['data'],
-                  response['data']['secondary-property'],
-                  response['data']['secondary-unit'],
-                  response['data']['primary-property'],
-                  response['data']['primary-unit']);
-      });
+  axios
+    .get('/materials/data-for-chart/' + plot_pk)
+    .then(response => {
+      plot_data(plot_id, response['data']['data'],
+                response['data']['secondary-property'],
+                response['data']['secondary-unit'],
+                response['data']['primary-property'],
+                response['data']['primary-unit']);
+    });
 }
