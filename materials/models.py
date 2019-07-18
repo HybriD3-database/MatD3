@@ -54,7 +54,6 @@ class Unit(Base):
 
 
 class Reference(models.Model):
-    author_count = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=1000)
     journal = models.CharField(max_length=500, blank=True)
     vol = models.CharField(max_length=100)
@@ -62,6 +61,9 @@ class Reference(models.Model):
     pages_end = models.CharField(max_length=10)
     year = models.CharField(max_length=4)
     doi_isbn = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        unique_together = ('journal', 'vol', 'pages_start')
 
     def __str__(self):
         text = (f'{self.year} {"- " if self.year else ""} '
@@ -72,20 +74,20 @@ class Reference(models.Model):
 
     def getAuthorsAsString(self):
         names = ', '.join([f'{x.first_name[0]}. {x.last_name}' for
-                           x in self.author_set.all()])
+                           x in self.authors.all()])
         if names:
             names += ','
         return names
 
     def getAuthors(self):
-        return self.author_set.all()
+        return self.authors.all()
 
 
 class Author(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     institution = models.CharField(max_length=600, blank=True)
-    reference = models.ManyToManyField(Reference)
+    references = models.ManyToManyField(Reference, related_name='authors')
 
     def __str__(self):
         value = (self.first_name + ' ' + self.last_name + ', ' +

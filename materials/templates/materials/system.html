@@ -10,8 +10,9 @@ data sets corresponding to each property are shown.
   <div class="card card-default">
     <div class="card-header">
       {% if user.is_superuser and dataset_list.first %}
-        <a href="{% url 'materials:update_system' pk=dataset_list.first.system.pk %}">
-          <button type="button" class="btn btn-success" style="float: right">Edit System Data
+        <a href="/admin/materials/system/{{ dataset_list.first.system.pk }}/change/">
+          <button type="button" class="btn btn-success" style="float: right">
+            Edit System Data
           </button>
         </a>
       {% endif %}

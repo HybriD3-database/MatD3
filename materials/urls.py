@@ -7,6 +7,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register('references', views.ReferenceViewSet)
+router.register('systems', views.SystemViewSet)
 router.register('properties', views.PropertyViewSet)
 router.register('units', views.UnitViewSet)
 router.register('datasets', views.DatasetViewSet)
@@ -23,14 +24,8 @@ urlpatterns = [
          views.toggle_is_figure, name='toggle_is_figure'),
     path('dataset/<int:pk>/delete/<str:view_name>',
          views.delete_dataset, name='delete_dataset'),
-    path('add-pub', views.AddPubView.as_view(), name='add_reference'),
-    path('add-system', views.AddSystemView.as_view(), name='add_system'),
-    path('author-count', views.AddAuthorsToReferenceView.as_view(),
-         name='author_count'),
     path('add-data', views.AddDataView.as_view(), name='add_data'),
     path('submit-data', views.submit_data, name='submit_data'),
-    path('update-system/<int:pk>', views.SystemUpdateView.as_view(),
-         name='update_system'),
     path('reference/<int:pk>', views.ReferenceDetailView.as_view(),
          name='reference'),
     path('autofill-input-data', views.autofill_input_data),
@@ -40,8 +35,6 @@ urlpatterns = [
          name='data_for_chart'),
     path('get-atomic-coordinates/<int:pk>', views.get_atomic_coordinates,
          name='get_atomic_coordinates'),
-    path('get-dropdown-options/<str:name>', views.get_dropdown_options,
-         name='get_dropdown_options'),
     path('get-subset-values/<int:pk>', views.get_subset_values,
          name='get_subset_values'),
     path('get-jsmol-input/<int:pk>', views.get_jsmol_input,

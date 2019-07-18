@@ -22,6 +22,15 @@ const delete_all_messages = () => {
   }
 }
 
+// Helper function for building up part of the reference string
+const authors_as_string = (authors) => {
+  let authors_formatted = [];
+  for (let author of authors) {
+    authors_formatted.push(`${author.first_name[0]}. ${author.last_name}`);
+  }
+  return authors_formatted.join(', ');
+}
+
 // Extend any of the dropdown menus with a new entry
 // (reference, material, property, ...)
 function SelectEntryHandler(entry_type, label_name, post_url) {
@@ -38,7 +47,6 @@ function SelectEntryHandler(entry_type, label_name, post_url) {
     delete_all_messages();
     const form_data = new FormData(this.form);
     const label_name = this.selectize_label_name;
-    if (!form_data.get(label_name)) return;
     axios
       .post(this.post_url, form_data)
       .then(response => {
@@ -46,11 +54,20 @@ function SelectEntryHandler(entry_type, label_name, post_url) {
         // Update all dropdowns of the current type
         for (let select_name in selectized) {
           if (select_name.includes(this.entry_type)) {
+            if (this.entry_type === 'reference') {
+              let article = response.data;
+              let text =
+                `${article.year} - ${authors_as_string(article.authors)}, ` +
+                `${article.journal} ${article.vol}`;
+              if (article.vol && article.pages_start) text += ',';
+              text += ` ${article.pages_start} "${article.title}"`;
+              form_data.set('text', text);
+            }
             selectized[select_name][0].selectize.addOption({
               pk: response.data.pk, [label_name]: form_data.get(label_name),
             });
             selectized[select_name][0].selectize.refreshOptions;
-            selectized[select_name][0].selectize.clear();
+            selectized[select_name][0].selectize.setValue(response.data.pk, 0);
           }
         }
         create_message(
@@ -85,13 +102,17 @@ function SelectEntryHandler(entry_type, label_name, post_url) {
     });
   }
 }
+const new_reference_handler =
+  new SelectEntryHandler('reference', 'text', '/materials/references/');
+const new_system_handler =
+  new SelectEntryHandler('system', 'compound_name', '/materials/systems/');
 const new_property_handler =
   new SelectEntryHandler('property', 'name', '/materials/properties/');
 const new_unit_handler =
   new SelectEntryHandler('unit', 'label', '/materials/units/');
 
 // All dropdown menus are filled asynchronously
-let selectized = {};
+var selectized = {};  // Must use 'var' here for Selenium
 const selectize_wrapper = (name, data, initial_value, label_name) => {
   data.push({pk: 0, [label_name]: ' --add new--'});
   selectized[name] = $('#id_' + name).selectize({
@@ -104,26 +125,35 @@ const selectize_wrapper = (name, data, initial_value, label_name) => {
     options: data,
   });
 }
-axios.get('/materials/get-dropdown-options/reference').then(response => {
-  selectized['select_reference'] = $('#id_select_reference').selectize({
-    maxOptions: 500,
-    sortField: 'text',
-    items: [initial_reference],
-    options: response.data,
+axios
+  .get('/materials/references/', {
+    transformResponse: [function(data) {
+      // Transform each article object into a string
+      let articles = JSON.parse(data);
+      for (let article of articles) {
+        article.text =
+          `${article.year} - ${authors_as_string(article.authors)}, ` +
+          `${article.journal} ${article.vol}`;
+        if (article.vol && article.pages_start) article.text += ',';
+        article.text += ` ${article.pages_start} "${article.title}"`;
+      }
+      return articles;
+    }],
+  })
+  .then(response => {
+    selectize_wrapper(
+      'select_reference', response.data, initial_reference, 'text');
+    let fixed_ref = document.getElementById('id_fixed_reference');
+    if (fixed_ref.value) {
+      selectized['select_reference'][0].selectize.setValue(fixed_ref.value);
+      selectized['select_reference'][0].selectize.disable();
+    }
+    new_reference_handler.toggle_visibility('id_select_reference');
   });
-  let fixed_ref = document.getElementById('id_fixed_reference');
-  if (fixed_ref.value) {
-    selectized['select_reference'][0].selectize.setValue(fixed_ref.value);
-    selectized['select_reference'][0].selectize.disable();
-  }
-});
-axios.get('/materials/get-dropdown-options/system').then(response => {
-  selectized['select_system'] = $('#id_select_system').selectize({
-    maxOptions: 500,
-    sortField: 'text',
-    items: [initial_system],
-    options: response.data,
-  });
+axios.get('/materials/systems/').then(response => {
+  selectize_wrapper(
+    'select_system', response.data, initial_system, 'compound_name');
+  new_system_handler.toggle_visibility('id_select_system');
 });
 axios.get('/materials/properties/').then(response => {
   selectize_wrapper(
@@ -445,6 +475,54 @@ prefill_button.addEventListener('click', event => {
        console.log(error.response.statusText);
      });
 });
+
+// Adding and removing authors on the new reference form
+document
+  .getElementById('add-more-authors-btn')
+  .addEventListener('click', () => {
+    const latest_first_name =
+      document.getElementById('first-names').lastElementChild;
+    const latest_last_name =
+      document.getElementById('last-names').lastElementChild;
+    const latest_institution =
+      document.getElementById('institutions').lastElementChild;
+    const first_name_copy = latest_first_name.cloneNode(true);
+    const last_name_copy = latest_last_name.cloneNode(true);
+    const institution_copy = latest_institution.cloneNode(true);
+    first_name_copy.hidden = false;
+    last_name_copy.hidden = false;
+    institution_copy.hidden = false;
+    const institution_input = institution_copy.getElementsByTagName('input')[0];
+    let input_counter;
+    if (latest_first_name.hasAttribute('name')) {
+      input_counter =
+        Number(latest_first_name.name.split('first-name-')[1]) + 1;
+    } else {
+      input_counter = 1;
+    }
+    first_name_copy.name = `first-name-${input_counter}`;
+    last_name_copy.name = `last-name-${input_counter}`;
+    institution_input.name = `institution-${input_counter}`;
+    first_name_copy.id = `first-name-${input_counter}`;
+    last_name_copy.id = `last-name-${input_counter}`;
+    institution_copy.id = `institution-${input_counter}`;
+    first_name_copy.value = '';
+    last_name_copy.value = '';
+    institution_input.value = '';
+    institution_copy
+      .getElementsByTagName('button')[0]
+      .addEventListener('click', () => {
+        document.getElementById('first-names').removeChild(first_name_copy);
+        document.getElementById('last-names').removeChild(last_name_copy);
+        document.getElementById('institutions').removeChild(institution_copy);
+      });
+    document.getElementById('first-names').appendChild(first_name_copy);
+    document.getElementById('last-names').appendChild(last_name_copy);
+    document.getElementById('institutions').appendChild(institution_copy);
+  });
+document
+  .getElementById('add-more-authors-btn')
+  .dispatchEvent(new Event('click'));
 
 // Hide special property fields under subsets and show only normal input
 function reset_subset_fields() {

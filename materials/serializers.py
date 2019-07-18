@@ -7,18 +7,16 @@ from . import models
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Author
-        fields = ('first_name',
-                  'last_name',
-                  'institution')
+        fields = ('first_name', 'last_name', 'institution')
 
 
 class ReferenceSerializer(serializers.ModelSerializer):
-    author_set = AuthorSerializer(many=True, read_only=True)
+    authors = AuthorSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Reference
         fields = ('pk',
-                  'author_set',
+                  'authors',
                   'title',
                   'journal',
                   'vol',
@@ -26,6 +24,18 @@ class ReferenceSerializer(serializers.ModelSerializer):
                   'pages_end',
                   'year',
                   'doi_isbn')
+
+
+class SystemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.System
+        fields = ('pk',
+                  'compound_name',
+                  'formula',
+                  'group',
+                  'inorganic',
+                  'last_update',
+                  'description')
 
 
 class PropertySerializer(serializers.ModelSerializer):

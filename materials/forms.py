@@ -13,74 +13,6 @@ class SearchForm(forms.Form):
         self.fields['search_text'].widget.attrs['class'] = 'form-control'
 
 
-class AddAuthor(forms.ModelForm):
-    all_fields = ('first_name', 'last_name', 'institution')
-
-    class Meta:
-        model = models.Author
-        fields = ('first_name', 'last_name', 'institution', 'reference')
-        exclude = ('reference',)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
-class AddReference(forms.ModelForm):
-    all_fields = ('title', 'journal', 'vol', 'pages_start', 'pages_end',
-                  'year', 'doi_isbn')
-
-    class Meta:
-        model = models.Reference
-        exclude = ('author',
-                   'author_count')
-        labels = {
-            'journal': 'Journal or Publisher',
-            'vol': 'Volume',
-            'doi_isbn': 'doi or ISBN',
-            'author_count': 'Number of Authors'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
-class AddSystem(forms.ModelForm):
-    all_fields = ('compound_name', 'formula', 'group', 'organic', 'inorganic',
-                  'description', 'tags')
-
-    class Meta:
-        model = models.System
-        exclude = ('last_update',)
-        labels = {
-            'compound_name': 'Compound name (most common name)',
-            'formula': 'Chemical formula',
-            'group': 'Alternate Names',
-            'organic': 'Organic component',
-            'inorganic': 'Inorganic component',
-        }
-        help_texts = {
-            'group': 'Please list all possible variations of this compound '
-            '(besides those entered above), including different uses of '
-            'parentheses -- this is necessary to make this compound easily '
-            'searchable.'
-        }
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 4}),
-            'group': forms.TextInput(attrs={
-                'placeholder': 'List alternate names, e.g. AEQTPbI4, '
-                '(AEQT)PbI4, AE4TPbI4, (AE4T)PbI4 ...'})
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for fieldname in self.all_fields:
-            self.fields[fieldname].widget.attrs['class'] = 'form-control'
-
-
 class AutoCharField(forms.CharField):
     """Like regular CharField but max_length is automatically determined."""
     def __init__(self, model=None, field=None, *args, **kwargs):
@@ -92,18 +24,92 @@ class AutoCharField(forms.CharField):
                          *args, **kwargs)
 
 
-class AddPropertyForm(forms.Form):
-    name = AutoCharField(
-        model=models.Property, field='name',
+class AddReferenceForm(forms.Form):
+    title = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Name of the physical property.')
+        max_length=1000,
+        help_text='Article title')
+    journal = forms.CharField(
+        label='Journal or Publisher',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Full name of the journal or publisher')
+    vol = forms.CharField(
+        required=False,
+        label='Volume',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='')
+    pages_start = forms.CharField(
+        label='Starting page',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Number of the first page of the publication')
+    pages_end = forms.CharField(
+        label='Starting page',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Number of the last page of the publication')
+    year = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Year of publication')
+    doi_isbn = forms.CharField(
+        required=False,
+        label='DOI or ISBN',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Enter DOI or ISBN if applicable.')
+
+
+class AddSystemForm(forms.Form):
+    compound_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Compound name (most common name)')
+    formula = forms.CharField(
+        label='Chemical formula',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=200,
+        help_text='Chemical formula')
+    group = forms.CharField(
+        required=False,
+        label='Alternate names',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text=''
+        'Please list all possible variations of this compound (besides '
+        'those entered above), including different uses of parentheses - '
+        'this makes the compound more easily searchable.')
+    organic = forms.CharField(
+        label='organic component',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Enter organic component')
+    inorganic = forms.CharField(
+        label='inorganic component',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Enter inorganic component')
+    description = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=1000,
+        help_text='Description of the compound (optional)')
+
+
+class AddPropertyForm(forms.Form):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Name of the physical property')
 
 
 class AddUnitForm(forms.Form):
-    label = AutoCharField(
-        model=models.Unit, field='label',
+    label = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        help_text='Label of the unit.')
+        max_length=100,
+        help_text='Label of the unit')
 
 
 class AddDataForm(forms.Form):

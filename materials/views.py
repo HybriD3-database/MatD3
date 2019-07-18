@@ -24,7 +24,6 @@ from django.db.models import Q
 from django.db.models import Value
 from django.db.models import When
 from django.db.models.fields import TextField
-from django.forms import formset_factory
 from django.http import Http404
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
@@ -198,135 +197,6 @@ class SearchFormView(generic.TemplateView):
         return render(request, template_name, args)
 
 
-class AddPubView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_reference.html'
-
-    def get(self, request):
-        search_form = forms.SearchForm()
-        pub_form = forms.AddReference()
-        return render(request, self.template_name, {
-            'search_form': search_form,
-            'pub_form': pub_form,
-            'initial_state': True
-        })
-
-    def post(self, request):
-        authors_info = {}
-        for key in request.POST:
-            if key.startswith('form-'):
-                value = request.POST[key].strip()
-                authors_info[key] = value
-                if value == '':
-                    return JsonResponse(
-                        {'feedback': 'failure',
-                         'text': ('Failed to submit, '
-                                  'author information is incomplete.')})
-        # sanity check: each author must have first name, last name,
-        # institution
-        assert(len(authors_info) % 3 == 0)
-        author_count = len(authors_info) // 3
-        pub_form = forms.AddReference(request.POST)
-        if pub_form.is_valid():
-            form = pub_form.save(commit=False)
-            doi_isbn = pub_form.cleaned_data['doi_isbn']
-            # check if doi_isbn is unique/valid, except when field is empty
-            if len(doi_isbn) == 0 or len(
-                    models.Reference.objects.filter(doi_isbn=doi_isbn)) == 0:
-                form.author_count = author_count
-                form.save()
-                newPub = form
-                text = 'Save success!'
-                feedback = 'success'
-            else:
-                text = 'Failed to submit, reference is already in database.'
-                feedback = 'failure'
-        else:
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-        if feedback == 'failure':
-            return JsonResponse({'feedback': feedback, 'text': text})
-        # create and save new author objects, linking them to the
-        # saved reference
-        for i in range(author_count):  # for each author
-            data = {}
-            data['first_name'] = authors_info['form-%d-first_name' % i]
-            data['last_name'] = authors_info['form-%d-last_name' % i]
-            data['institution'] = authors_info['form-%d-institution' % i]
-            preexistingAuthors = (
-                models.Author.objects.filter(
-                    first_name__iexact=data['first_name']).filter(
-                        last_name__iexact=data['last_name']).filter(
-                            institution__iexact=data['institution']))
-            if preexistingAuthors.count() > 0:
-                # use the prexisting author object
-                preexistingAuthors[0].reference.add(newPub)
-            else:  # this is a new author, so create a new object
-                author_form = forms.AddAuthor(data)
-                if(not author_form.is_valid()):
-                    text = ('Failed to submit, author not valid. '
-                            'Please fix the errors, and try again.')
-                    feedback = 'failure'
-                    break
-                else:  # author_form is valid
-                    form = author_form.save()
-                    form.reference.add(newPub)
-                    form.save()
-                    text = 'Save success!'
-                    feedback = 'success'
-        args = {
-                'feedback': feedback,
-                'text': text,
-                }
-        return JsonResponse(args)
-
-
-class AddAuthorsToReferenceView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_authors_to_reference.html'
-
-    def post(self, request):
-        author_count = request.POST['author_count']
-        # variable number of author forms
-        author_formset = formset_factory(
-            forms.AddAuthor, extra=int(author_count))
-        return render(request, self.template_name,
-                      {'entered_author_count': author_count,
-                       'author_formset': author_formset})
-
-
-class AddSystemView(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'materials/add_system.html'
-
-    def get(self, request):
-        form = forms.AddSystem()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = forms.AddSystem(request.POST)
-        if form.is_valid():
-            compound_name = form.cleaned_data['compound_name'].lower()
-            formula = form.cleaned_data['formula'].lower()
-            # checks to see if the author is already in database
-            q_set_len = len(
-                models.System.objects.filter(
-                    Q(compound_name__iexact=compound_name) |
-                    Q(formula__iexact=formula)
-                )
-            )
-            if q_set_len == 0:
-                form.save()
-                text = 'System successfully added!'
-                feedback = 'success'
-            else:
-                text = 'Failed to submit, system is already in database.'
-                feedback = 'failure'
-        else:
-            # return render(request, self.template_name, {'form': form})
-            text = 'Failed to submit, please fix the errors, and try again.'
-            feedback = 'failure'
-        args = {'feedback': feedback, 'text': text}
-        return JsonResponse(args)
-
-
 class AddDataView(StaffStatusMixin, generic.TemplateView):
     """View for submitting user data.
 
@@ -357,17 +227,12 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
                 paper_detail['_PaperDetails__charts'][chart_nr]['caption'])
         return render(request, self.template_name, {
             'main_form': main_form,
+            'reference_form': forms.AddReferenceForm(),
+            'system_form': forms.AddSystemForm(),
             'property_form': forms.AddPropertyForm(),
             'unit_form': forms.AddUnitForm(),
             'base_template': base_template,
         })
-
-
-class SystemUpdateView(generic.UpdateView):
-    model = models.System
-    template_name = 'materials/system_update_form.html'
-    form_class = forms.AddSystem
-    success_url = '/materials/{pk}'
 
 
 class ReferenceViewSet(viewsets.ModelViewSet):
@@ -375,8 +240,41 @@ class ReferenceViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ReferenceSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
 
+    @transaction.atomic
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        """Save reference and optionally create authors.
+
+        The combination first name/last name/institution must be
+        unique. If not, the given author is not in the database
+        yet. Note that this constraint can't be enforced at the
+        database level because of the limitations of the length of the
+        key.
+
+        """
+        reference = serializer.save()
+        for name in self.request.POST:
+            if name.startswith('first-name-'):
+                counter = name.split('first-name-')[1]
+                first_name = self.request.POST[name]
+                last_name = self.request.POST[f'last-name-{counter}']
+                institution = self.request.POST[f'institution-{counter}']
+                authors = models.Author.objects.filter(
+                    first_name=first_name).filter(last_name=last_name).filter(
+                        institution=institution)
+                if authors:
+                    author = authors[0]
+                else:
+                    author = models.Author.objects.create(
+                        first_name=first_name,
+                        last_name=last_name,
+                        institution=institution)
+                author.references.add(reference)
+
+
+class SystemViewSet(viewsets.ModelViewSet):
+    queryset = models.System.objects.all()
+    serializer_class = serializers.SystemSerializer
+    permission_classes = (permissions.IsStaffOrReadOnly,)
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -1160,21 +1058,6 @@ def get_jsmol_input(request, pk):
         except (KeyError, ValueError):
             pass
     return HttpResponse()
-
-
-def get_dropdown_options(request, name):
-    """Return a list of options for Selectize."""
-    model_types = {
-        'reference': models.Reference,
-        'system': models.System,
-        'property': models.Property,
-        'unit': models.Unit,
-    }
-    model = re.sub(r'^.*(reference|system|property|unit).*$', r'\1', name)
-    data = []
-    for obj in model_types[model].objects.all():
-        data.append({'value': obj.pk, 'text': str(obj)})
-    return JsonResponse(data, safe=False)
 
 
 def report_issue(request):

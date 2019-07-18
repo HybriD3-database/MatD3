@@ -1,7 +1,6 @@
 [
   {
     "model": "materials.reference", "pk": 1, "fields": {
-      "author_count": 1,
       "title": "title",
       "journal": "journal",
       "vol": "1",

@@ -6,7 +6,7 @@
       "first_name": "First",
       "last_name": "Last",
       "institution": "Institute",
-      "reference": [1]
+      "references": [1]
     }
   }
 ]
