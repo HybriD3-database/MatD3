@@ -374,3 +374,34 @@ class SeleniumTestCase(LiveServerTestCase):
         S.switch_to_alert().accept()
         S.get(self.live_server_url + reverse('materials:add_data'))
         self.assertEqual(models.Dataset.objects.count(), 1)
+
+    def test_phase_transition(self):
+        self.login()
+        S = self.selenium
+        S.get(self.live_server_url + reverse('materials:add_data'))
+        S.find_element_by_id('id_secondary_unit-selectized')
+        # Set property and unit
+        self.selectize_set('primary_property', 'phase transition temperature')
+        self.selectize_set('primary_unit', 'K')
+        # Set system
+        S.execute_script(
+            f"selectized['select_system'][0].selectize.setValue(1)")
+        # Input data
+        S.find_element_by_id(
+            'id_phase_transition_space_group_initial_1').send_keys('C1')
+        S.find_element_by_id(
+            'id_phase_transition_space_group_final_1').send_keys('C2')
+        S.find_element_by_id(
+            'id_phase_transition_direction_1').send_keys('increasing')
+        S.find_element_by_id(
+            'id_phase_transition_hysteresis_1').send_keys('none')
+        S.find_element_by_id(
+            'id_phase_transition_value_1').send_keys('300...301')
+        # Create data set
+        submit_link = reverse("materials:submit_data")
+        S.find_element_by_xpath(
+            f'//form[@action="{submit_link}"]//button[@type="submit"]').click()
+        # Test if the temperature range was correctly captured
+        pt_instance = models.PhaseTransition.objects.last()
+        self.assertEqual(pt_instance.value, 300)
+        self.assertEqual(pt_instance.upper_bound, 301)

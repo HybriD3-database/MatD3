@@ -120,12 +120,19 @@ class ErrorInline(BaseMixin, nested_admin.NestedStackedInline):
     fields = ['value']
 
 
+class UpperBoundInline(BaseMixin, nested_admin.NestedStackedInline):
+    model = models.UpperBound
+    extra = 0
+    verbose_name_plural = ''
+    fields = ['value']
+
+
 class NumericalValueInline(BaseMixin, nested_admin.NestedTabularInline):
     model = models.NumericalValue
     extra = 0
     verbose_name_plural = ''
     fields = ['qualifier', 'value_type', 'value']
-    inlines = [ErrorInline]
+    inlines = [ErrorInline, UpperBoundInline]
 
 
 class DatapointInline(BaseMixin, nested_admin.NestedStackedInline):
@@ -139,6 +146,7 @@ class DatapointInline(BaseMixin, nested_admin.NestedStackedInline):
 class NumericalValueFixedForm(forms.ModelForm):
     """Needed to make the error field non-mandatory."""
     error = forms.FloatField(required=False)
+    upper_bound = forms.FloatField(required=False)
 
 
 class NumericalValueFixedInline(nested_admin.NestedTabularInline):
@@ -146,7 +154,8 @@ class NumericalValueFixedInline(nested_admin.NestedTabularInline):
     form = NumericalValueFixedForm
     extra = 0
     verbose_name_plural = 'Fixed parameters'
-    fields = ('physical_property', 'value_type', 'value', 'error', 'unit')
+    fields = ('physical_property', 'value_type', 'value', 'error',
+              'upper_bound', 'unit')
 
 
 class SubsetAdmin(BaseAdmin):

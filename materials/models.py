@@ -281,7 +281,8 @@ class Subset(Base):
         values_float = NumericalValue.objects.filter(
             datapoint__subset=self).annotate(
                 num=models.Count('datapoint__values')).filter(
-                    num=1).select_related('error').order_by('datapoint_id')
+                    num=1).select_related('error').select_related(
+                        'upperbound').order_by('datapoint_id')
         if self.dataset.primary_unit:
             units = 3*[f' {self.dataset.primary_unit.label}'] + 3*['°']
         else:
@@ -346,6 +347,8 @@ class NumericalValue(NumericalValueBase):
         value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value:{F}}'
         if hasattr(self, 'error'):
             value_str += f' (±{self.error.value:{F}})'
+        if hasattr(self, 'upperbound'):
+            value_str += f'...{self.upperbound.value:{F}}'
         return value_str
 
 
@@ -356,12 +359,15 @@ class NumericalValueFixed(NumericalValueBase):
     subset = models.ForeignKey(
         Subset, on_delete=models.CASCADE, related_name='fixed_values')
     error = models.FloatField(null=True)
+    upper_bound = models.FloatField(null=True)
 
     def formatted(self):
         """Same as for NumericalValue but error is now a class member."""
         value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value}'
         if self.error:
             value_str += f' (±{self.error})'
+        if self.upper_bound:
+            value_str += f'...{self.upper_bound}'
         return value_str
 
 
@@ -438,6 +444,13 @@ class Error(Base):
     value = models.FloatField()
 
 
+class UpperBound(Base):
+    """Store the upper bound of a range."""
+    numerical_value = models.OneToOneField(
+        NumericalValue, on_delete=models.CASCADE, primary_key=True)
+    value = models.FloatField()
+
+
 def dataset_file_path(instance, filename):
     return os.path.join('uploads', f'dataset_{instance.dataset.pk}', filename)
 
@@ -465,10 +478,13 @@ class PhaseTransition(NumericalValueBase):
     direction = models.CharField(blank=True, max_length=50)
     hysteresis = models.CharField(blank=True, max_length=50)
     error = models.FloatField(null=True)
+    upper_bound = models.FloatField(null=True)
 
     def formatted(self):
-        """Same as for NumericalValue but error is now a class member."""
+        """Same as for NumericalValue but some fields are now class members."""
         value_str = f'{self.VALUE_TYPES[self.value_type][1]}{self.value}'
         if self.error:
             value_str += f' (±{self.error})'
+        if self.upper_bound:
+            value_str += f'...{self.upper_bound}'
         return value_str

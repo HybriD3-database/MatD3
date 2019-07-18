@@ -421,6 +421,7 @@ def submit_data(request):
 
         """
         error = None
+        upper_bound = None
         if re.match(r'[-\d]', value):
             value_type = models.NumericalValue.ACCURATE
         elif value.startswith('<'):
@@ -444,9 +445,11 @@ def submit_data(request):
             value = value[:left_paren_start]
         elif '±' in value:
             value, error = value.split('±')
-        return float(value), value_type, error
+        elif '...' in value:
+            value, upper_bound = value.split('...')
+        return float(value), value_type, error, upper_bound
 
-    def add_numerical_value(numerical_values, errors, value,
+    def add_numerical_value(numerical_values, errors, upper_bounds, value,
                             is_secondary=False, counter=0):
         """Clean and add a numerical value to a list.
 
@@ -469,11 +472,12 @@ def submit_data(request):
             numerical_value.qualifier = models.NumericalValue.SECONDARY
         if counter > 0:
             numerical_value.counter = counter
-        value, value_type, error = clean_value(value)
+        value, value_type, error, upper_bound = clean_value(value)
         numerical_value.value = value
         numerical_value.value_type = value_type
         numerical_values.append(numerical_value)
         errors.append(error)
+        upper_bounds.append(upper_bound)
 
     def add_datapoint_ids(values, n_values, n_datapoints):
         """Set datapoint_id for all elements in an array.
@@ -497,7 +501,7 @@ def submit_data(request):
             for i_step in range(step):
                 values[step*i_pk+i_step].datapoint_id = pk
 
-    def generate_numerical_value_ids(array):
+    def generate_numerical_value_ids(array, model):
         """Set numerical_value_id for all elements in array.
 
         This is similar to add_datapoint_ids, except the structure of
@@ -511,9 +515,9 @@ def submit_data(request):
         filtered_list = []
         for i, pk in enumerate(reversed(pks)):
             if array[i]:
-                filtered_list.append(models.Error(created_by=request.user,
-                                                  numerical_value_id=pk,
-                                                  value=array[i]))
+                filtered_list.append(model(created_by=request.user,
+                                           numerical_value_id=pk,
+                                           value=array[i]))
         return filtered_list
 
     def error_and_return(form, dataset=None, text=None):
@@ -644,6 +648,7 @@ def submit_data(request):
     symbols = []
     numerical_values = []
     errors = []
+    upper_bounds = []
     for i_subset in range(1, int(form.cleaned_data['number_of_subsets']) + 1):
         # Create data subset
         subset = models.Subset(created_by=request.user, dataset=dataset)
@@ -660,7 +665,8 @@ def submit_data(request):
                     created_by=request.user, subset=subset)
                 datapoint.symbols.create(created_by=request.user, value=symbol)
                 name = f'lattice_constant_{key}_{i_subset}'
-                value, value_type, error = clean_value(form.cleaned_data[name])
+                value, value_type, error, upper_bound = clean_value(
+                    form.cleaned_data[name])
                 models.NumericalValue.objects.create(created_by=request.user,
                                                      datapoint=datapoint,
                                                      value_type=value_type,
@@ -670,8 +676,14 @@ def submit_data(request):
                         created_by=request.user,
                         numerical_value=models.NumericalValue.objects.last(),
                         value=float(error))
+                if upper_bound:
+                    models.UpperBound.objects.create(
+                        created_by=request.user,
+                        numerical_value=models.NumericalValue.objects.last(),
+                        value=float(upper_bound))
             lattice_vectors = []
             lattice_errors = []  # dummy
+            lattice_upper_bounds = []  # dummy
             for line in form.cleaned_data[
                     f'atomic_coordinates_{i_subset}'].split('\n'):
                 try:
@@ -684,6 +696,7 @@ def submit_data(request):
                         for i_coord, coord in enumerate(coords):
                             add_numerical_value(lattice_vectors,
                                                 lattice_errors,
+                                                lattice_upper_bounds,
                                                 coord,
                                                 counter=i_coord)
                     else:
@@ -699,8 +712,11 @@ def submit_data(request):
                         symbols.append(models.Symbol(created_by=request.user,
                                                      value=element, counter=1))
                         for i_coord, coord in enumerate(coords):
-                            add_numerical_value(numerical_values, errors,
-                                                coord, counter=i_coord)
+                            add_numerical_value(numerical_values,
+                                                errors,
+                                                upper_bounds,
+                                                coord,
+                                                counter=i_coord)
                 except AttributeError:
                     # Skip comments and empty lines
                     if not re.match(r'(?:\r?$|#|//)', line):
@@ -735,7 +751,7 @@ def submit_data(request):
                         files[i], files[j] = files[j], files[i]
             utils.plot_band_structure(k_labels, files, dataset)
         elif dataset.primary_property.name.startswith('phase transition '):
-            value, value_type, error = clean_value(
+            value, value_type, error, upper_bound = clean_value(
                 form.cleaned_data[f'phase_transition_value_{i_subset}'])
             crystal_f = f'phase_transition_crystal_system_final_{i_subset}'
             space_group_i = f'phase_transition_space_group_initial_{i_subset}'
@@ -751,7 +767,8 @@ def submit_data(request):
                 hysteresis=form.cleaned_data[hysteresis],
                 value=value,
                 value_type=value_type,
-                error=error)
+                error=error,
+                upper_bound=upper_bound)
         elif form.cleaned_data['two_axes']:
             try:
                 for line in form.cleaned_data[
@@ -761,9 +778,13 @@ def submit_data(request):
                     x_value, y_value = line.split()[:2]
                     datapoints.append(models.Datapoint(
                         created_by=request.user, subset=subset))
-                    add_numerical_value(numerical_values, errors, x_value,
+                    add_numerical_value(numerical_values,
+                                        errors,
+                                        upper_bounds,
+                                        x_value,
                                         is_secondary=True)
-                    add_numerical_value(numerical_values, errors, y_value)
+                    add_numerical_value(
+                        numerical_values, errors, upper_bounds, y_value)
             except ValueError:
                 return error_and_return(
                     form, dataset, f'Could not process line: {line}')
@@ -776,7 +797,8 @@ def submit_data(request):
                     for value in line.split():
                         datapoints.append(models.Datapoint(
                             created_by=request.user, subset=subset))
-                        add_numerical_value(numerical_values, errors, value)
+                        add_numerical_value(
+                            numerical_values, errors, upper_bounds, value)
             except ValueError:
                 return error_and_return(
                     form, dataset, f'Could not process line: {line}')
@@ -785,7 +807,7 @@ def submit_data(request):
         for key in form.cleaned_data:
             if key.startswith(f'fixed_property_{i_subset}_'):
                 suffix = key.split('fixed_property_')[1]
-                value, value_type, error = clean_value(
+                value, value_type, error, upper_bound = clean_value(
                     form.cleaned_data['fixed_value_' + suffix])
                 subset.fixed_values.create(
                     created_by=request.user,
@@ -795,13 +817,17 @@ def submit_data(request):
                     unit=form.cleaned_data['fixed_unit_' + suffix],
                     value=value,
                     value_type=value_type,
-                    error=error)
+                    error=error,
+                    upper_bound=upper_bound)
                 counter += 1
     # Insert the main data into the database
     models.Datapoint.objects.bulk_create(datapoints)
     add_datapoint_ids(numerical_values, len(numerical_values), len(datapoints))
     models.NumericalValue.objects.bulk_create(numerical_values)
-    models.Error.objects.bulk_create(generate_numerical_value_ids(errors))
+    models.Error.objects.bulk_create(
+        generate_numerical_value_ids(errors, models.Error))
+    models.UpperBound.objects.bulk_create(
+        generate_numerical_value_ids(upper_bounds, models.UpperBound))
     add_datapoint_ids(symbols, len(symbols), len(datapoints))
     models.Symbol.objects.bulk_create(symbols)
     # Linked data sets
@@ -835,10 +861,17 @@ def submit_data(request):
             pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3,
                         label=sub_label)
         pyplot.title(dataset.caption)
-        pyplot.ylabel(f'{dataset.primary_property.name}, '
-                      f'{dataset.primary_unit.label}')
+        if dataset.primary_unit:
+            primary_unit_label = dataset.primary_unit.label
+        else:
+            primary_unit_label = ''
+        pyplot.ylabel(f'{dataset.primary_property.name}, {primary_unit_label}')
+        if dataset.secondary_unit:
+            secondary_unit_label = dataset.secondary_unit.label
+        else:
+            secondary_unit_label = ''
         pyplot.xlabel(f'{dataset.secondary_property.name}, '
-                      f'{dataset.secondary_unit.label}')
+                      f'{secondary_unit_label}')
         pyplot.legend(loc='upper left')
         pyplot.savefig(os.path.join(qresp_loc, 'figure.png'))
         pyplot.close()
@@ -992,7 +1025,8 @@ def get_subset_values(request, pk):
     """Return the numerical values of a subset as a formatted list."""
     values = models.NumericalValue.objects.filter(
         datapoint__subset__pk=pk).select_related(
-            'error').order_by('qualifier', 'datapoint__pk')
+            'error').select_related('upperbound').order_by(
+                'qualifier', 'datapoint__pk')
     total_len = len(values)
     y_len = total_len
     # With both x- and y-values, the y-values make up half the list.
