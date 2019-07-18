@@ -19,10 +19,6 @@ class Migration(migrations.Migration):
             name='references',
             field=models.ManyToManyField(related_name='authors', to='materials.Reference'),
         ),
-        migrations.AlterUniqueTogether(
-            name='reference',
-            unique_together={('journal', 'vol', 'pages_start')},
-        ),
         migrations.RemoveField(
             model_name='reference',
             name='author_count',

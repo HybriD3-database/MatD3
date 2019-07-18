@@ -62,9 +62,6 @@ class Reference(models.Model):
     year = models.CharField(max_length=4)
     doi_isbn = models.CharField(max_length=100, blank=True)
 
-    class Meta:
-        unique_together = ('journal', 'vol', 'pages_start')
-
     def __str__(self):
         text = (f'{self.year} {"- " if self.year else ""} '
                 f'{self.getAuthorsAsString()} {self.journal} {self.vol} '
