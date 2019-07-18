@@ -579,8 +579,8 @@ $('#id_primary_property').change(function() {
     }
   }
 });
-let import_lattice_parameters = element => {
-  const i_subset = element.id.split('import-lattice-parameters_')[1];
+const import_lattice_parameters = element => {
+  let i_subset = element.id.split('import-lattice-parameters_')[1];
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
   element.value = '';  // Clear the file list
@@ -669,7 +669,7 @@ let import_lattice_parameters = element => {
           }
         }
       } catch(error) {
-        document.getElementById('id_atomic_coordinates_1').value = error;
+        document.getElementById('id_atomic_coordinates_' + i_subset).value = error;
       }
     }).
      catch(error => {
