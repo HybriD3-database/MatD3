@@ -1,4 +1,4 @@
-{% for author in ref.author_set.all %}
+{% for author in ref.authors.all %}
   {% if forloop.last and not forloop.first %}and{% endif %}
 
   {% for fn in author.splitFirstName %}

@@ -183,7 +183,7 @@ class SearchFormView(generic.TemplateView):
             elif search_term == 'author':
                 keywords = search_text.split()
                 query = reduce(operator.or_, (
-                    Q(dataset__reference__author__last_name__icontains=x) for
+                    Q(dataset__reference__authors__last_name__icontains=x) for
                     x in keywords))
                 systems = models.System.objects.filter(query).distinct()
             else:
@@ -200,8 +200,9 @@ class SearchFormView(generic.TemplateView):
 class AddDataView(StaffStatusMixin, generic.TemplateView):
     """View for submitting user data.
 
-    The arguments are used when this view is called from external
-    sites. Fields such as the reference can be prefilled then.
+    The arguments are only meant to be used when this view is called
+    from external sites. Fields such as the reference can be prefilled
+    then.
 
     """
     template_name = 'materials/add_data.html'
