@@ -2,8 +2,6 @@
 from functools import reduce
 import io
 import logging
-import matplotlib
-import numpy
 import operator
 import os
 import re
@@ -41,13 +39,9 @@ from rest_framework.response import Response
 from . import forms
 from . import models
 from . import permissions
+from . import qresp
 from . import serializers
 from . import utils
-from mainproject import settings
-
-matplotlib.use('Agg')
-
-from matplotlib import pyplot  # noqa
 
 logger = logging.getLogger(__name__)
 
@@ -296,89 +290,6 @@ class UnitViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user)
 
 
-def dataset_to_text(dataset, server):
-    """Return the data set contents as human-readable plain text."""
-    data = io.StringIO()
-    data.write(
-        f'# Data available at {server}/materials/dataset/{dataset.pk}\n')
-    data.write('#\n')
-    if dataset.reference:
-        ref = dataset.reference
-        data.write(f'# Reference: {ref.getAuthorsAsString()} "{ref.title}", '
-                   f'{ref.journal} {ref.vol}')
-        if ref.pages_start:
-            data.write(f', {ref.pages_start} ')
-        data.write(f' ({ref.year})\n')
-        data.write('#\n')
-    data.write(
-        '# Origin: '
-        f'{"experimental" if dataset.experimental else "theoretical"}\n')
-    data.write(f'# Dimensionality: {dataset.dimensionality}D\n')
-    sample = models.Dataset.SAMPLE_TYPES[dataset.sample_type][1]
-    data.write(f'# Sample type: {sample}\n')
-    data.write('#\n')
-    if dataset.secondary_property:
-        data.write(f'# Column 1: {dataset.secondary_property}')
-        if dataset.secondary_unit:
-            data.write(f', {dataset.secondary_unit}')
-        data.write('\n')
-        data.write('# Column 2: ')
-    else:
-        data.write('# Physical property: ')
-    data.write(dataset.primary_property.name)
-    if dataset.primary_unit:
-        data.write(f', {dataset.primary_unit}')
-    data.write('\n')
-    data.write('#\n')
-    for subset in dataset.subsets.all():
-        if subset.label:
-            data.write(f'# {subset.label}\n')
-        fixed_values = subset.fixed_values.all()
-        if fixed_values:
-            data.write('# Fixed parameters:\n')
-        for v in fixed_values:
-            data.write(f'#  {v.physical_property} = {v.value} {v.unit}\n')
-        if dataset.primary_property.name == 'atomic structure':
-            for symbol, value, unit in subset.get_lattice_constants():
-                data.write(f'{symbol} {value}{unit}\n')
-            if subset.datapoints.count() > 6:
-                coord_data = utils.atomic_coordinates_as_json(subset.pk)
-                for coord in coord_data['coordinates']:
-                    data.write(f'{coord_data["coord-type"]} {coord[1]} '
-                               f'{coord[2]} {coord[3]} {coord[0]}\n')
-        elif dataset.primary_property.name.startswith('phase transition '):
-            pt = subset.phase_transitions.first()
-            CS = models.Subset.CRYSTAL_SYSTEMS
-            data.write('Initial crystal system: '
-                       f'{CS[subset.crystal_system][1]}\n')
-            if pt.crystal_system_final:
-                data.write('Final crystal system: '
-                           f'{CS[pt.crystal_system_final][1]}\n')
-            if pt.space_group_initial:
-                data.write(f'Space group initial: {pt.space_group_initial}\n')
-            if pt.space_group_final:
-                data.write(f'Space group final: {pt.space_group_final}\n')
-            if pt.direction:
-                data.write(f'Direction: {pt.direction}\n')
-            if pt.hysteresis:
-                data.write(f'Hysteresis: {pt.hysteresis}\n')
-            data.write(f'Value: {pt.formatted()}\n')
-        else:
-            values = models.NumericalValue.objects.filter(
-                datapoint__subset=subset).select_related(
-                    'error').order_by('qualifier', 'datapoint__pk')
-            if dataset.secondary_property:
-                half_len = len(values)//2
-                for i_value in range(half_len):
-                    data.write(f'{values[half_len+i_value].formatted()} '
-                               f'{values[i_value].formatted()}\n')
-            else:
-                for i_value in range(len(values)):
-                    data.write(f'{values[i_value].formatted()}\n')
-        data.write('\n\n')
-    return data.getvalue()
-
-
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all()
     serializer_class = serializers.DatasetSerializer
@@ -397,7 +308,7 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
         zf = zipfile.ZipFile(in_memory_object, 'w')
         # Main data
         zf.writestr('files/data.txt',
-                    dataset_to_text(dataset, request.get_host()))
+                    utils.dataset_to_text(dataset, request.get_host()))
         # Additional files
         for file_ in (f.dataset_file.path for f in dataset.files.all()):
             zf.write(file_,
@@ -839,48 +750,7 @@ def submit_data(request):
             return error_and_return(
                 form, dataset, f'Related data set {pk} does not exist')
     # Create static files for Qresp
-    qresp_loc = os.path.join(settings.MEDIA_ROOT,
-                             f'qresp/dataset_{dataset.pk}')
-    os.makedirs(qresp_loc)
-    if form.cleaned_data['two_axes']:
-        for subset in dataset.subsets.all():
-            values = models.NumericalValue.objects.filter(
-                datapoint__subset=subset).order_by(
-                    'qualifier', 'datapoint__pk').values_list(
-                        'value', flat=True)
-            y_values = values[:len(values)//2]
-            x_values = values[len(values)//2:len(values)]
-            fixed_values = []
-            for v in subset.fixed_values.all():
-                fixed_values.append(
-                    f'{v.physical_property} = {v.value} {v.unit}')
-            sub_label = ''
-            if fixed_values:
-                sub_label = ', '.join(fixed_values)
-            if subset.label:
-                sub_label = subset.label + ' ' + sub_label
-            pyplot.plot(x_values, y_values, '-o', linewidth=0.5, ms=3,
-                        label=sub_label)
-        pyplot.title(dataset.caption)
-        if dataset.primary_unit:
-            primary_unit_label = dataset.primary_unit.label
-        else:
-            primary_unit_label = ''
-        pyplot.ylabel(f'{dataset.primary_property.name}, {primary_unit_label}')
-        if dataset.secondary_unit:
-            secondary_unit_label = dataset.secondary_unit.label
-        else:
-            secondary_unit_label = ''
-        pyplot.xlabel(f'{dataset.secondary_property.name}, '
-                      f'{secondary_unit_label}')
-        pyplot.legend(loc='upper left')
-        pyplot.savefig(os.path.join(qresp_loc, 'figure.png'))
-        pyplot.close()
-    with open(os.path.join(qresp_loc, 'data.txt'), 'w') as data_file:
-        # Need to re-fetch the data set from the database, else some
-        # integer fields may appear as strings (possibly a bug)
-        _ = models.Dataset.objects.get(pk=dataset.pk)
-        data_file.write(dataset_to_text(_, request.get_host()))
+    qresp.create_static_files(request, dataset)
     # Import data from Qresp
     if form.cleaned_data['qresp_fetch_url']:
         paper_detail = requests.get(
