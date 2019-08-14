@@ -19,6 +19,9 @@
                 <div class="card-header">
                   <h5><a href="{% url 'materials:system' pk=dataset.system.pk %}">
                     {{ dataset.system.compound_name }}</a>: {{ dataset.primary_property }}
+                    {% if dataset.verified_by.exists %}
+                      <span class="badge badge-success">Verified</span>
+                    {% endif %}
                   </h5>
                   {% if user == dataset.created_by %}
                     {% include 'materials/dataset_buttons.html' with system=dataset.system %}

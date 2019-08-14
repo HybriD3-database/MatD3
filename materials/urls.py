@@ -24,6 +24,8 @@ urlpatterns = [
          views.toggle_is_figure, name='toggle_is_figure'),
     path('dataset/<int:pk>/delete/<str:view_name>',
          views.delete_dataset, name='delete_dataset'),
+    path('dataset/<int:pk>/verify/<str:view_name>',
+         views.verify_dataset, name='verify_dataset'),
     path('add-data', views.AddDataView.as_view(), name='add_data'),
     path('submit-data', views.submit_data, name='submit_data'),
     path('reference/<int:pk>', views.ReferenceDetailView.as_view(),

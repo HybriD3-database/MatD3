@@ -87,6 +87,23 @@ class ModelsTestCase(TestCase):
         models.Dataset.objects.last().delete()
         self.assertEqual(models.Dataset.linked_to.through.objects.count(), 12)
 
+    def test_verifiction(self):
+        user1 = User.objects.get(pk=1)
+        user2 = User.objects.get(pk=2)
+        dataset = models.Dataset.objects.last()
+        self.client.force_login(user1)
+        verify_url = reverse('materials:verify_dataset', kwargs={
+            'pk': dataset.pk, 'view_name': 'dataset',
+        })
+        self.client.post(verify_url)
+        self.client.force_login(user2)
+        self.client.post(verify_url)
+        self.assertEqual(dataset.verified_by.count(), 2)
+        redirect = self.client.post(verify_url)
+        self.assertEqual(dataset.verified_by.count(), 1)
+        response = self.client.get(redirect.url)
+        self.assertContains(response, 'Verified')
+
 
 class SeleniumTestCase(LiveServerTestCase):
     fixtures = ['users.json',
@@ -370,7 +387,7 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_xpath(
             '//table[contains(@class, "table-atomic-coordinates")]/'
             'tr/td[contains(text(), "Ga")]')
-        S.find_element_by_class_name('delete_button').click()
+        S.find_element_by_class_name('delete-button').click()
         S.switch_to_alert().accept()
         S.get(self.live_server_url + reverse('materials:add_data'))
         self.assertEqual(models.Dataset.objects.count(), 1)

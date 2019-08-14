@@ -393,6 +393,18 @@ the "with ..." syntax to include certain parts.
       {% endif %}
       <strong>Entry added:</strong> {{ dataset.created }}<br>
       <strong>Last updated:</strong> {{ dataset.updated }}<br>
+      {% if dataset.verified_by.exists %}
+        <strong>Data quality verified by:</strong>
+        <ul>
+          {% for verifier in dataset.verified_by.all %}
+            <li>
+              {{ verifier.first_name }}
+              {{ verifier.last_name }}
+              <i>{{ verifier.userprofile.institution }}</i>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -403,6 +415,23 @@ the "with ..." syntax to include certain parts.
   <span class="fa fa-download" aria-hidden="true"></span>
   Download data
 </a>
+
+<!-- VERIFICATION BUTTON -->
+{% if user.is_staff %}
+  <div class="float-right">
+    {% if user in dataset.verified_by.all %}
+      <a class="btn btn-purple" href=
+         "{% url 'materials:verify_dataset' pk=dataset.pk view_name=request.resolver_match.url_name %}">
+        Unverify
+      </a>
+    {% else %}
+      <button class="btn btn-purple verify-button" data-reverse-url=
+              "{% url 'materials:verify_dataset' pk=dataset.pk view_name=request.resolver_match.url_name %}">
+        Verify data
+      </button>
+    {% endif %}
+  </div>
+{% endif %}
 
 <!-- BUTTON FOR VIEWING ALL ENTRIES -->
 {% if with_all_entries and dataset.primary_property.pk %}

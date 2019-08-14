@@ -95,8 +95,8 @@ table.main-data {
 }
 
 .details {
-  font-size: 16px;
-  font-weight: bold;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .nav-tabs-band-structure {
@@ -177,7 +177,7 @@ table.phase-transition > tbody > tr > td:first-child {
 }
 
 .authors-card {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .authors-card > .card-header {
@@ -186,4 +186,14 @@ table.phase-transition > tbody > tr > td:first-child {
 
 .authors-card > .card-body {
     background-color: rgba(0, 255, 191, 0.05);
+}
+
+.btn-purple {
+    color: #fff;
+    background-color: #b6f;
+}
+
+.btn-purple:hover {
+    color: #fff;
+    background-color: #a5e;
 }

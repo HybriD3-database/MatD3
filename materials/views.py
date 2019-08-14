@@ -967,6 +967,18 @@ def delete_dataset(request, pk, view_name):
     return return_url
 
 
+@staff_status_required
+def verify_dataset(request, pk, view_name):
+    """Verify the correctness of the data."""
+    return_url = resolve_return_url(pk, view_name)
+    dataset = models.Dataset.objects.get(pk=pk)
+    if request.user in dataset.verified_by.all():
+        dataset.verified_by.remove(request.user)
+    else:
+        dataset.verified_by.add(request.user)
+    return return_url
+
+
 def autofill_input_data(request):
     """Process an AJAX request to autofill the data textareas."""
     content = UploadedFile(request.FILES['file']).read().decode('utf-8')

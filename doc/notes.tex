@@ -449,7 +449,11 @@ If you are unsure about any rule described in this section, see the source code 
   \begin{lstlisting}
     coverage run manage.py test && coverage report -m
   \end{lstlisting}
-  In order to save time and not rebuild the test database every time, use the \texttt{--keepdb} flag with test.
+  Note that the tests are run with \texttt{DEBUG=False}, which means that the CSS and JS files are only searched for in the directory specified by \verb+STATIC_ROOT+. Thus, it is in general necessary to run
+  \begin{lstlisting}
+    ./manage.py collectstatic
+  \end{lstlisting}
+  before running the tests. In order to save time and not rebuild the test database every time, use the \texttt{--keepdb} flag with \texttt{./manage.py test}.
 \end{itemize}
 
 \end{document}

@@ -17,7 +17,12 @@
                   <div style="background:#fadb9b">
                 {% endif %}
                 <div class="card-header">
-                  <h5>{{ dataset.primary_property.name|capfirst }}</h5>
+                  <h5>
+                    {{ dataset.primary_property.name|capfirst }}
+                    {% if dataset.verified_by.exists %}
+                      <span class="badge badge-success">Verified</span>
+                    {% endif %}
+                  </h5>
                   {% if user == dataset.created_by %}
                     {% include 'materials/dataset_buttons.html' with system=dataset.system %}
                   {% endif %}

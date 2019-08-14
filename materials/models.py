@@ -177,6 +177,7 @@ class Dataset(Base):
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
     linked_to = models.ManyToManyField('self', blank=True)
+    verified_by = models.ManyToManyField(get_user_model())
 
     class Meta:
         verbose_name_plural = 'data sets'
