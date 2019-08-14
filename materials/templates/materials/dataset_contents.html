@@ -424,6 +424,9 @@ the "with ..." syntax to include certain parts.
          "{% url 'materials:verify_dataset' pk=dataset.pk view_name=request.resolver_match.url_name %}">
         Unverify
       </a>
+    {% elif user == dataset.created_by %}
+      <!-- Cannot verify own data -->
+      <button class="btn btn-secondary" disabled>Verify data</button>
     {% else %}
       <button class="btn btn-purple verify-button" data-reverse-url=
               "{% url 'materials:verify_dataset' pk=dataset.pk view_name=request.resolver_match.url_name %}">
