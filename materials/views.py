@@ -482,7 +482,8 @@ def submit_data(request):
     dataset.is_figure = form.cleaned_data['is_figure']
     dataset.is_experimental = (
         form.cleaned_data['origin_of_data'] == 'is_experimental')
-    dataset.dimensionality = form.cleaned_data['dimensionality_of_the_system']
+    dataset.dimensionality = form.cleaned_data[
+        'dimensionality_of_the_inorganic_component']
     dataset.sample_type = form.cleaned_data['sample_type']
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
@@ -1054,7 +1055,8 @@ def prefilled_form(request, pk):
             'origin_of_data': ('is_experimental' if dataset.is_experimental
                                else 'is_theoretical'),
             'sample_type': dataset.sample_type,
-            'dimensionality_of_the_system': dataset.dimensionality,
+            'dimensionality_of_the_inorganic_component': (
+                dataset.dimensionality),
             'with_synthesis_details': bool_to_text(dataset.synthesis.exists()),
             'with_experimental_details': bool_to_text(
                 dataset.experimental.exists()),

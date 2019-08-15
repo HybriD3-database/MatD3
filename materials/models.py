@@ -148,6 +148,8 @@ class Dataset(Base):
     DIMENSIONALITIES = (
         (3, 3),
         (2, 2),
+        (1, 1),
+        (0, 0),
     )
     caption = models.TextField(blank=True, max_length=1000)
     system = models.ForeignKey(System, on_delete=models.PROTECT)

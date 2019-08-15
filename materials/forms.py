@@ -243,11 +243,16 @@ class AddDataForm(forms.Form):
         widget=forms.RadioSelect(),
         help_text=''
         'Select whether the origin of data is experimental or theoretical.')
-    dimensionality_of_the_system = forms.ChoiceField(
+    dimensionality_of_the_inorganic_component = forms.ChoiceField(
         initial=models.Dataset.DIMENSIONALITIES[0],
         choices=(models.Dataset.DIMENSIONALITIES),
         widget=forms.RadioSelect(),
-        help_text='Select the dimensionality of the system.')
+        help_text=''
+        'Here the term dimensionality refers to the one typically used in the '
+        'context of organic-inorganic perovskites (a certain arrangement of '
+        'organic and inorganic components). This is not the standard '
+        'definition of the dimensionality of a system (single crystal, '
+        'film, ...). See "sample type" for that.')
     sample_type = forms.ChoiceField(
         initial=models.Dataset.SAMPLE_TYPES[0],
         choices=(models.Dataset.SAMPLE_TYPES),
