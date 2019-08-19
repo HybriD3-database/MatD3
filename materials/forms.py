@@ -46,7 +46,7 @@ class AddReferenceForm(forms.Form):
         max_length=1000,
         help_text='Number of the first page of the publication')
     pages_end = forms.CharField(
-        label='Starting page',
+        label='Ending page',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=1000,
         help_text='Number of the last page of the publication')
