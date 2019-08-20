@@ -12,7 +12,8 @@ class BaseMixin:
     readonly_fields = ('id', 'created_by', 'created', 'updated_by', 'updated')
 
     def check_perm(self, user, obj=None):
-        return user.is_superuser or obj and obj.created_by == user
+        return user.is_superuser or obj and (
+            not hasattr(obj, 'created_by') or obj.created_by == user)
 
     def has_change_permission(self, request, obj=None):
         return self.check_perm(request.user, obj)
