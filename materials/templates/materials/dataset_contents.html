@@ -391,8 +391,14 @@ the "with ..." syntax to include certain parts.
       {% if dataset.extraction_method %}
         <strong>Extraction method:</strong> {{ dataset.extraction_method }}<br>
       {% endif %}
-      <strong>Entry added:</strong> {{ dataset.created }}<br>
-      <strong>Last updated:</strong> {{ dataset.updated }}<br>
+      <strong>Entry added on:</strong> {{ dataset.created }} <br>
+      <strong>Entry added by:</strong> {{ dataset.created_by.first_name }}
+      {{ dataset.created_by.last_name }}
+      <i>{{ dataset.created_by.userprofile.institution }}</i><br>
+      <strong>Last updated on:</strong> {{ dataset.updated }}<br>
+      <strong>Last updated by:</strong> {{ dataset.updated_by.first_name }}
+      {{ dataset.updated_by.last_name }}
+      <i>{{ dataset.updated_by.userprofile.institution }}</i><br>
       {% if dataset.verified_by.exists %}
         <strong>Data quality verified by:</strong>
         <ul>
