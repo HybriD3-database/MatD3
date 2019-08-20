@@ -25,6 +25,7 @@ SECRET_KEY = config(
     'SECRET_KEY', default='GF#QhIU%}4;auyFdIr]6>$_~|=."9qB%[Oj;.<^$IkNAgp0E{d')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
+HYBRID3_URL = config('HYBRID3_URL', default='')
 
 # Application definition
 

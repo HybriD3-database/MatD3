@@ -58,7 +58,7 @@ def activate(request, uid, token):
         # Notify all superusers of the new user
         email_addresses = list(User.objects.filter(
             is_superuser=True).values_list('email', flat=True))
-        send_mail('HybriD3 database: new user created', '', 'report@hybrid3',
+        send_mail('HybriD3 database: new user created', '', 'hybrid3info',
                   email_addresses,
                   fail_silently=False,
                   html_message=(f'The account of "{user.username}" is '

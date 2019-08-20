@@ -4,8 +4,10 @@ import os
 import shutil
 
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
+from django.utils.html import escape
 
 from mainproject import settings
 
@@ -194,6 +196,32 @@ class Dataset(Base):
             Dataset.objects.filter(system=self.system).filter(
                 primary_property=self.primary_property).update(
                     representative=False)
+        if self.pk and self.verified_by.exists():
+            email_addresses = self.verified_by.all().values_list('email',
+                                                                 flat=True)
+            dataset_location = (
+                f'{settings.HYBRID3_URL}/materials/dataset/{self.pk}')
+            body = (
+                f'A data set with ID = <a href="{dataset_location}">{self.pk}'
+                '</a> that you have previously verified has been modified by '
+                f'{escape(self.updated_by.first_name)} '
+                f'{escape(self.updated_by.last_name)} '
+                f'({escape(self.updated_by.email)}). As a result, its '
+                'verified status has been revoked. See the '
+                f'<a href="{settings.HYBRID3_URL}/admin/materials/dataset/'
+                f'{self.pk}/history/">history</a> of what has been changed. '
+                f'If you consider the entered data to be correct, you may '
+                're-verify it.')
+            send_mail(
+                f'HybriD3 data set verified by you has been modified',
+                '',
+                'hybrid3info',
+                email_addresses,
+                fail_silently=False,
+                html_message=body,
+            )
+            for user in self.verified_by.all():
+                self.verified_by.remove(user)
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

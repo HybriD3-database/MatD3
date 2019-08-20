@@ -30,6 +30,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.shortcuts import reverse
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.views import generic
 from rest_framework import viewsets
@@ -985,13 +986,13 @@ def report_issue(request):
     if user.is_authenticated:
         body = (f'Description:\n\n<blockquote>{description}</blockquote>'
                 'This report was issued by the user '
-                f'{user.username} ({user.email})')
+                f'{escape(user.username)} ({escape(user.email)})')
         email_addresses = list(User.objects.filter(
             is_superuser=True).values_list('email', flat=True))
         send_mail(
             f'Issue report about dataset {pk}',
             '',
-            'report@hybrid3',
+            'hybrid3info',
             email_addresses,
             fail_silently=False,
             html_message=body,

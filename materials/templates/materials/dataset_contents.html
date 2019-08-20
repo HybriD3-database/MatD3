@@ -400,7 +400,7 @@ the "with ..." syntax to include certain parts.
       {{ dataset.updated_by.last_name }}
       <i>{{ dataset.updated_by.userprofile.institution }}</i><br>
       {% if dataset.verified_by.exists %}
-        <strong>Data quality verified by:</strong>
+        <strong>Data correctness verified by:</strong>
         <ul>
           {% for verifier in dataset.verified_by.all %}
             <li>
