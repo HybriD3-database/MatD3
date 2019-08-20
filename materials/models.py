@@ -202,16 +202,17 @@ class Dataset(Base):
             dataset_location = (
                 f'{settings.HYBRID3_URL}/materials/dataset/{self.pk}')
             body = (
-                f'A data set with ID = <a href="{dataset_location}">{self.pk}'
-                '</a> that you have previously verified has been modified by '
-                f'{escape(self.updated_by.first_name)} '
+                f'<p>A data set with ID = <a href="{dataset_location}">'
+                f'{self.pk}</a>, which you have previously verified, has been '
+                f'modified by {escape(self.updated_by.first_name)} '
                 f'{escape(self.updated_by.last_name)} '
                 f'({escape(self.updated_by.email)}). As a result, its '
                 'verified status has been revoked. See the '
                 f'<a href="{settings.HYBRID3_URL}/admin/materials/dataset/'
                 f'{self.pk}/history/">history</a> of what has been changed. '
-                f'If you consider the entered data to be correct, you may '
-                're-verify it.')
+                f'If you consider the entered data to be correct, please go '
+                'to the website and re-verify the data.</p>'
+                '<p>This is an automated email. Please do not respond!</p>')
             send_mail(
                 f'HybriD3 data set verified by you has been modified',
                 '',
