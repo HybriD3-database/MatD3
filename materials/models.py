@@ -290,7 +290,7 @@ class Subset(Base):
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
 
     class Meta:
-        verbose_name_plural = 'data subsets'
+        verbose_name_plural = 'data subsets (read-only)'
 
     def __str__(self):
         return f'ID: {self.pk} ({self.datapoints.count()} data points)'

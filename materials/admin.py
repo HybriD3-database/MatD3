@@ -3,9 +3,13 @@ import nested_admin
 
 from django import forms
 from django.contrib import admin
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 
 from . import models
+
+admin.site.site_header = mark_safe('HybriD&sup3; database')
 
 
 class BaseMixin:
@@ -159,15 +163,6 @@ class NumericalValueFixedInline(nested_admin.NestedTabularInline):
               'upper_bound', 'unit')
 
 
-class SubsetAdmin(BaseAdmin):
-    list_display = ('id', 'created_by', 'updated_by', 'updated')
-    fields = [f.name for f in models.Subset._meta.local_fields]
-    inlines = [DatapointInline, NumericalValueFixedInline]
-
-
-admin.site.register(models.Subset, SubsetAdmin)
-
-
 class SynthesisInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.SynthesisMethod
     fields = SynthesisAdmin.fields
@@ -212,6 +207,9 @@ class DatasetAdmin(BaseAdmin):
     inlines = (SynthesisInline, ExperimentalInline, ComputationalInline,
                SubsetInline, FilesInline)
     filter_horizontal = ['linked_to']
+
+    def view_on_site(self, obj):
+        return reverse('materials:dataset', kwargs={'pk': obj.pk})
 
 
 admin.site.register(models.Dataset, DatasetAdmin)
