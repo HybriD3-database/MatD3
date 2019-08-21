@@ -986,7 +986,8 @@ def get_jsmol_input(request, pk):
         filename = os.path.basename(
             dataset.input_files.first().dataset_file.path)
         return HttpResponse(
-            f'load /media/data_files/dataset_{dataset.pk}/{filename}')
+            f'load /media/data_files/dataset_{dataset.pk}/{filename} '
+            '{1 1 1}')
     return HttpResponse()
 
 
