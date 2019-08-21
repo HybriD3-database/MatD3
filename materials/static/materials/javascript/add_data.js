@@ -583,6 +583,7 @@ const import_lattice_parameters = element => {
   let i_subset = element.id.split('import-lattice-parameters_')[1];
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
+  const is_cif_format = element.files[0].name.match(/\.cif$/) !== null;
   element.value = '';  // Clear the file list
   axios
     .post('/materials/autofill-input-data', form_data)
@@ -592,15 +593,20 @@ const import_lattice_parameters = element => {
       const process_batch = (input_data, dest_suffix) => {
         const lines = input_data.split('\n');
         let aims_format = false;
-        for (let line of lines) {
-          if (line.match(/^ *lattice_vector/)) {
-            aims_format = true;
-            break;
+        if (!is_cif_format) {
+          for (let line of lines) {
+            if (line.match(/^ *lattice_vector/)) {
+              aims_format = true;
+              break;
+            }
           }
         }
+        const geometry_format =
+          document.getElementById(`id_geometry_format_${i_subset}`);
         if (aims_format) {
           // Generate the atomic structure (lattice constants and angles)
           // from lattice vectors
+          geometry_format.value = 'aims';
           let lattice_vectors = [];
           const regex =
             /^ *lattice_vector\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\b/;
@@ -627,6 +633,23 @@ const import_lattice_parameters = element => {
           alpha = get_angle(lattice_vectors[1], lattice_vectors[2], b, c);
           beta = get_angle(lattice_vectors[0], lattice_vectors[2], a, c);
           gamma = get_angle(lattice_vectors[0], lattice_vectors[1], a, b);
+        } else if (is_cif_format) {
+          geometry_format.value = 'cif';
+          let match_;
+          let matches = {};
+          for (let line of lines) {
+            match_ = line.match(
+              /^_cell_(?:length|angle)_([a-c]|alpha|beta|gamma) +(.*)/);
+            if (match_) matches[match_[1]] = match_[2];
+            if ('gamma' in matches && 'beta' in matches && 'alpha' in matches &&
+                'c' in matches && 'b' in matches && 'a' in matches) break;
+          }
+          a = matches['a'];
+          b = matches['b'];
+          c = matches['c'];
+          alpha = matches['alpha'];
+          beta = matches['beta'];
+          gamma = matches['gamma'];
         } else {
           // Read the atomic structure directly from an input file
           const nr_reg =
@@ -647,7 +670,6 @@ const import_lattice_parameters = element => {
         const set_value = (part_id, value) => {
           document.getElementById(part_id + dest_suffix).value = value;
         }
-        set_value('id_lattice_constant_a_', a);
         set_value('id_lattice_constant_a_', a);
         set_value('id_lattice_constant_b_', b);
         set_value('id_lattice_constant_c_', c);

@@ -159,8 +159,3 @@ def create_static_files(request, dataset):
         fig.tight_layout()
         pyplot.savefig(os.path.join(qresp_loc, 'figure.png'))
         pyplot.close()
-    with open(os.path.join(qresp_loc, 'data.txt'), 'w') as data_file:
-        # Need to re-fetch the data set from the database, else some
-        # integer fields may appear as strings (possibly a bug)
-        _ = models.Dataset.objects.get(pk=dataset.pk)
-        data_file.write(utils.dataset_to_text(_, request.get_host()))

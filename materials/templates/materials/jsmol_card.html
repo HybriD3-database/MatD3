@@ -5,7 +5,7 @@
     <div id="jmol"></div>
     <br>
     {% for subset in dataset.subsets.all %}
-      {% if subset.datapoints.count > 6 %}
+      {% if subset.first_with_atomic_coordinates %}
         <div class="text-center">
           <button class="text-center btn btn-default expand-hide-button"
                   data-toggle="collapse"

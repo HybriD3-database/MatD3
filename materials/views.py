@@ -307,9 +307,13 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
         dataset = self.get_object()
         in_memory_object = io.BytesIO()
         zf = zipfile.ZipFile(in_memory_object, 'w')
+        # Header file to the data
+        zf.writestr('files/info.txt',
+                    utils.dataset_info(dataset, request.get_host()))
         # Main data
-        zf.writestr('files/data.txt',
-                    utils.dataset_to_text(dataset, request.get_host()))
+        for file_ in (f.dataset_file.path for f in dataset.input_files.all()):
+            zf.write(file_,
+                     os.path.join('files', os.path.basename(file_)))
         # Additional files
         for file_ in (f.dataset_file.path for f in dataset.files.all()):
             zf.write(file_,
@@ -454,6 +458,23 @@ def submit_data(request):
         """Test whether the line is empty or a comment."""
         return re.match(r'\s*#', line) or not line or line == '\r'
 
+    def create_input_file(dataset, data_as_str, i_subset, multiple_subsets):
+        """Read data points from the input form and save as file.
+
+        If multiple_subsets, then the files are named data1.txt,
+        data2.txt, etc. Otherwise, a single file called data.txt is
+        created and i_subset is ignored.
+
+        """
+        if data_as_str:
+            if multiple_subsets:
+                file_name = f'data{i_subset}.txt'
+            else:
+                file_name = 'data.txt'
+            f = SimpleUploadedFile(file_name, data_as_str.encode())
+            dataset.input_files.create(created_by=dataset.created_by,
+                                       dataset_file=f)
+
     form = forms.AddDataForm(request.POST)
     if not form.is_valid():
         # Show formatted field labels in the error message, not the
@@ -563,6 +584,7 @@ def submit_data(request):
     numerical_values = []
     errors = []
     upper_bounds = []
+    multiple_subsets = int(form.cleaned_data['number_of_subsets']) > 1
     for i_subset in range(1, int(form.cleaned_data['number_of_subsets']) + 1):
         # Create data subset
         subset = models.Subset(created_by=request.user, dataset=dataset)
@@ -573,6 +595,11 @@ def submit_data(request):
         # Go through exceptional cases first. Some properties such as
         # "atomic structure" require special treatment.
         if dataset.primary_property.name == 'atomic structure':
+            create_input_file(
+                dataset,
+                form.cleaned_data[f'atomic_coordinates_{i_subset}'],
+                i_subset,
+                multiple_subsets)
             for symbol, key in (('a', 'a'), ('b', 'b'), ('c', 'c'),
                                 ('α', 'alpha'), ('β', 'beta'), ('γ', 'gamma')):
                 datapoint = models.Datapoint.objects.create(
@@ -600,6 +627,8 @@ def submit_data(request):
             lattice_upper_bounds = []  # dummy
             for line in form.cleaned_data[
                     f'atomic_coordinates_{i_subset}'].split('\n'):
+                if form.cleaned_data[f'geometry_format_{i_subset}'] == 'cif':
+                    break
                 try:
                     m = re.match(r'\s*lattice_vector' +
                                  3*r'\s+(-?\d+(?:\.\d+)?)' + r'\b', line)
@@ -684,6 +713,11 @@ def submit_data(request):
                 error=error,
                 upper_bound=upper_bound)
         elif form.cleaned_data['two_axes']:
+            create_input_file(
+                dataset,
+                form.cleaned_data[f'subset_datapoints_{i_subset}'],
+                i_subset,
+                multiple_subsets)
             try:
                 for line in form.cleaned_data[
                         f'subset_datapoints_{i_subset}'].splitlines():
@@ -703,6 +737,11 @@ def submit_data(request):
                 return error_and_return(
                     form, dataset, f'Could not process line: {line}')
         else:
+            create_input_file(
+                dataset,
+                form.cleaned_data[f'subset_datapoints_{i_subset}'],
+                i_subset,
+                multiple_subsets)
             try:
                 for line in form.cleaned_data[
                         f'subset_datapoints_{i_subset}'].splitlines():
@@ -933,13 +972,9 @@ def get_jsmol_input(request, pk):
     """Return a statement to be executed by JSmol.
 
     Go through the atomic structure data subsets of the representative
-    data set of the given system. Pick the first one where the lattice
-    vectors and atomic coordinates are present and can be converted to
-    floats. Construct the "load data ..." inline statement suitable
-    for JSmol. If there are no atomic structure data or none of the
-    data sets are usable (some lattice parameters or atomic
-    coordinates missing or not valid numbers) return an empty
-    response.
+    data set of the given system. Pick the first one that comes with a
+    geometry file and construct the "load data ..." statement for
+    JSmol. If there are no geometry files return an empty response.
 
     """
     datasets = models.Dataset.objects.filter(system__pk=pk).filter(
@@ -947,35 +982,11 @@ def get_jsmol_input(request, pk):
     if not datasets:
         return HttpResponse()
     dataset = datasets.get(representative=True)
-    for subset in dataset.subsets.all():
-        data = utils.atomic_coordinates_as_json(subset.pk)
-        lattice_vectors = []
-        try:
-            for vector in data['vectors']:
-                lattice_vectors.append([float(x) for x in vector])
-            if len(lattice_vectors) == 3:
-                coord_type = data['coord-type']
-                response = io.StringIO()
-                response.write("load data 'model'|#AIMS|")
-                if coord_type == 'atom_frac':
-                    for symbol, *coords in data['coordinates']:
-                        coords_f = [float(x) for x in coords]
-                        x, y, z = [sum(
-                            [coords_f[i_dir]*lattice_vectors[i_dir][comp]
-                             for i_dir in range(3)]) for comp in range(3)]
-                        response.write(f'atom {x} {y} {z} {symbol}|')
-                else:
-                    for symbol, coord_x, coord_y, coord_z in data[
-                            'coordinates']:
-                        response.write(
-                            f'atom {coord_x} {coord_y} {coord_z} {symbol}|')
-                response.write("end 'model' unitcell [")
-                for x, y, z in data['vectors']:
-                    response.write(f' {x} {y} {z}')
-                response.write(']')
-                return HttpResponse(response.getvalue())
-        except (KeyError, ValueError):
-            pass
+    if dataset.input_files.exists():
+        filename = os.path.basename(
+            dataset.input_files.first().dataset_file.path)
+        return HttpResponse(
+            f'load /media/data_files/dataset_{dataset.pk}/{filename}')
     return HttpResponse()
 
 

@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('dataset_file', models.FileField(upload_to=materials.models.dataset_file_path)),
+                ('dataset_file', models.FileField(upload_to=materials.models.additional_file_path)),
                 ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='materials_datasetfile_created_by', to=settings.AUTH_USER_MODEL)),
                 ('dataset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='files', to='materials.Dataset')),
                 ('updated_by', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='materials_datasetfile_updated_by', to=settings.AUTH_USER_MODEL)),

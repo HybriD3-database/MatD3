@@ -192,8 +192,8 @@ class SubsetInline(BaseMixin, nested_admin.NestedStackedInline):
 
 
 class FilesInline(BaseMixin, nested_admin.NestedStackedInline):
-    model = models.DatasetFile
-    fields = [f.name for f in models.DatasetFile._meta.local_fields]
+    model = models.AdditionalFile
+    fields = [f.name for f in models.AdditionalFile._meta.local_fields]
     extra = 0
 
 

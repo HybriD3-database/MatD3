@@ -481,6 +481,8 @@ class AddDataForm(forms.Form):
         'the coordinate, followed by the element name. For the case of '
         'absolute coordinates ("atom"), the units are given by "Primary unit" '
         'above. Note: to resize this box, drag from the corner.')
+    geometry_format = forms.CharField(
+        required=False, widget=forms.HiddenInput())
     phase_transition_crystal_system_final = forms.ChoiceField(
         label='Final crystal system',
         required=False,
@@ -566,6 +568,11 @@ class AddDataForm(forms.Form):
                 elif key.startswith('atomic_coordinates_'):
                     self.fields[key] = forms.CharField(
                         required=False, widget=forms.Textarea, initial=value)
+                elif key.startswith('geometry_format_'):
+                    self.fields[key] = forms.CharField(
+                        required=False,
+                        widget=forms.HiddenInput(),
+                        initial=value)
                 elif key.startswith('phase_transition_crystal_system_final_'):
                     self.fields[key] = forms.ChoiceField(
                         required=False,
@@ -641,6 +648,7 @@ class AddDataForm(forms.Form):
                     self.fields[f'lattice_constant_beta_{subset}'].initial,
                     self.fields[f'lattice_constant_gamma_{subset}'].initial,
                     self.fields[f'atomic_coordinates_{subset}'].initial,
+                    self.fields[f'geometry_format_{subset}'].initial,
                 ])
         return results
 

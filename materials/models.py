@@ -226,10 +226,13 @@ class Dataset(Base):
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        """Additionally remove any files uploaded by the user."""
+        """Additionally remove all files uploaded by the user."""
         if self.files.exists():
             shutil.rmtree(
                 os.path.dirname(self.files.first().dataset_file.path))
+        if self.input_files.exists():
+            shutil.rmtree(
+                os.path.dirname(self.input_files.first().dataset_file.path))
         if self.representative:
             Dataset.objects.filter(system=self.system).filter(
                 primary_property=self.primary_property).exclude(
@@ -323,6 +326,20 @@ class Subset(Base):
         for value in values_float:
             values.append(value.formatted('.10g'))
         return zip(symbols, values, units)
+
+    def first_with_atomic_coordinates(self):
+        """Whether this is the first subset to contain atomic coordinates.
+
+        Return True if out of all subsets belonging to a given data
+        set, this is the first one to contain the full set of atomic
+        coordinates (lattice vectors and absolute/fractional
+        coordinates).
+
+        """
+        for subset in self.dataset.subsets.all():
+            if subset.datapoints.count() > 6:
+                return subset.pk == self.pk
+        return False
 
 
 class Datapoint(Base):
@@ -483,14 +500,27 @@ class UpperBound(Base):
     value = models.FloatField()
 
 
-def dataset_file_path(instance, filename):
+def data_file_path(instance, filename):
+    return os.path.join(
+        'data_files', f'dataset_{instance.dataset.pk}', filename)
+
+
+class InputDataFile(Base):
+    """Stores the main data of the data set."""
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
+                                related_name='input_files')
+    dataset_file = models.FileField(upload_to=data_file_path)
+
+
+def additional_file_path(instance, filename):
     return os.path.join('uploads', f'dataset_{instance.dataset.pk}', filename)
 
 
-class DatasetFile(Base):
+class AdditionalFile(Base):
+    """Additional files uploaded with the data set."""
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
                                 related_name='files')
-    dataset_file = models.FileField(upload_to=dataset_file_path)
+    dataset_file = models.FileField(upload_to=additional_file_path)
 
 
 class PhaseTransition(NumericalValueBase):

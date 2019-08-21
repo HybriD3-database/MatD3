@@ -473,6 +473,7 @@
               <div class="form-group">
                 {% input_field main_form.atomic_coordinates %}
               </div>
+              {{ main_form.geometry_format }}
             </div>
             <div class="phase-transition-input" hidden="true">
               <div class="form-row">
@@ -554,7 +555,7 @@
   </script>
   <script>
    // Prefill atomic structure from a previous instance of the form
-   {% for subset_counter, a, b, c, alpha, beta, gamma, coordinates in main_form.get_lattice_parameters %}
+   {% for subset_counter, a, b, c, alpha, beta, gamma, coordinates, geometry_format in main_form.get_lattice_parameters %}
    $('#id_lattice_constant_a_{{ subset_counter }}').val('{{ a|escapejs }}');
    $('#id_lattice_constant_b_{{ subset_counter }}').val('{{ b|escapejs }}');
    $('#id_lattice_constant_c_{{ subset_counter }}').val('{{ c|escapejs }}');
@@ -562,6 +563,7 @@
    $('#id_lattice_constant_beta_{{ subset_counter }}').val('{{ beta|escapejs }}');
    $('#id_lattice_constant_gamma_{{ subset_counter }}').val('{{ gamma|escapejs }}');
    $('#id_atomic_coordinates_{{ subset_counter }}').val('{{ coordinates|escapejs }}');
+   $('#id_geometry_format_{{ subset_counter }}').val('{{ geometry_format|escapejs }}');
    {% endfor %}
   </script>
   <script>

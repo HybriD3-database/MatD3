@@ -174,56 +174,50 @@ def plot_band_structure(k_labels, files, dataset):
     pyplot.close()
 
 
-def dataset_to_text(dataset, server):
+def dataset_info(dataset, server):
     """Return the data set contents as human-readable plain text."""
     data = io.StringIO()
     data.write(
-        f'# Data available at {server}/materials/dataset/{dataset.pk}\n')
-    data.write('#\n')
+        f'Data available at {server}/materials/dataset/{dataset.pk}\n')
+    data.write('\n')
     if dataset.reference:
         ref = dataset.reference
-        data.write(f'# Reference: {ref.getAuthorsAsString()} "{ref.title}", '
+        data.write(f'Reference: {ref.getAuthorsAsString()} "{ref.title}", '
                    f'{ref.journal} {ref.vol}')
         if ref.pages_start:
             data.write(f', {ref.pages_start} ')
         data.write(f' ({ref.year})\n')
-        data.write('#\n')
+        data.write('\n')
     data.write(
-        '# Origin: '
+        'Origin: '
         f'{"experimental" if dataset.experimental else "theoretical"}\n')
-    data.write(f'# Dimensionality: {dataset.dimensionality}D\n')
+    data.write(f'Dimensionality: {dataset.dimensionality}D\n')
     sample = models.Dataset.SAMPLE_TYPES[dataset.sample_type][1]
-    data.write(f'# Sample type: {sample}\n')
-    data.write('#\n')
+    data.write(f'Sample type: {sample}\n')
+    data.write('\n')
     if dataset.secondary_property:
-        data.write(f'# Column 1: {dataset.secondary_property}')
+        data.write(f'Column 1: {dataset.secondary_property}')
         if dataset.secondary_unit:
             data.write(f', {dataset.secondary_unit}')
         data.write('\n')
-        data.write('# Column 2: ')
+        data.write('Column 2: ')
     else:
-        data.write('# Physical property: ')
+        data.write('Physical property: ')
     data.write(dataset.primary_property.name)
     if dataset.primary_unit:
         data.write(f', {dataset.primary_unit}')
-    data.write('\n')
-    data.write('#\n')
+    data.write('\n\n')
     for subset in dataset.subsets.all():
         if subset.label:
-            data.write(f'# {subset.label}\n')
+            data.write(f'{subset.label}\n')
         fixed_values = subset.fixed_values.all()
         if fixed_values:
-            data.write('# Fixed parameters:\n')
+            data.write('Fixed parameters:\n')
         for v in fixed_values:
-            data.write(f'#  {v.physical_property} = {v.value} {v.unit}\n')
+            data.write(f'  {v.physical_property} = {v.value} {v.unit}\n')
         if dataset.primary_property.name == 'atomic structure':
             for symbol, value, unit in subset.get_lattice_constants():
                 data.write(f'{symbol} {value}{unit}\n')
-            if subset.datapoints.count() > 6:
-                coord_data = atomic_coordinates_as_json(subset.pk)
-                for coord in coord_data['coordinates']:
-                    data.write(f'{coord_data["coord-type"]} {coord[1]} '
-                               f'{coord[2]} {coord[3]} {coord[0]}\n')
         elif dataset.primary_property.name.startswith('phase transition '):
             pt = subset.phase_transitions.first()
             CS = models.Subset.CRYSTAL_SYSTEMS
@@ -241,17 +235,5 @@ def dataset_to_text(dataset, server):
             if pt.hysteresis:
                 data.write(f'Hysteresis: {pt.hysteresis}\n')
             data.write(f'Value: {pt.formatted()}\n')
-        else:
-            values = models.NumericalValue.objects.filter(
-                datapoint__subset=subset).select_related(
-                    'error').order_by('qualifier', 'datapoint__pk')
-            if dataset.secondary_property:
-                half_len = len(values)//2
-                for i_value in range(half_len):
-                    data.write(f'{values[half_len+i_value].formatted()} '
-                               f'{values[i_value].formatted()}\n')
-            else:
-                for i_value in range(len(values)):
-                    data.write(f'{values[i_value].formatted()}\n')
         data.write('\n\n')
     return data.getvalue()
