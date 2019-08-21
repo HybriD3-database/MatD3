@@ -482,7 +482,7 @@ class AddDataForm(forms.Form):
         'absolute coordinates ("atom"), the units are given by "Primary unit" '
         'above. Note: to resize this box, drag from the corner.')
     geometry_format = forms.CharField(
-        required=False, widget=forms.HiddenInput())
+        required=False, initial='aims', widget=forms.HiddenInput())
     phase_transition_crystal_system_final = forms.ChoiceField(
         label='Final crystal system',
         required=False,

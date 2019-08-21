@@ -279,6 +279,11 @@ const add_subset = i_subset => {
     .addEventListener('change', function() {
       autofill_data(this);
     });
+  copy
+    .getElementsByClassName('import-lattice-parameters')[0]
+    .addEventListener('change', function() {
+      import_lattice_parameters(this);
+    });
   document.getElementById('data-subset').appendChild(copy);
 }
 
@@ -601,8 +606,9 @@ const import_lattice_parameters = element => {
             }
           }
         }
+        const i_subset_loc = i_subset ? i_subset : '1';
         const geometry_format =
-          document.getElementById(`id_geometry_format_${i_subset}`);
+          document.getElementById(`id_geometry_format_${i_subset_loc}`);
         if (aims_format) {
           // Generate the atomic structure (lattice constants and angles)
           // from lattice vectors
@@ -665,7 +671,11 @@ const import_lattice_parameters = element => {
               case 'gamma': gamma = matches[2]; break;
             }
           }
-          input_data = '';
+          if (a && b && c && alpha && beta && gamma) {
+            input_data = '';
+          } else {
+            a = b = c = alpha = beta = gamma = '';
+          }
         }
         const set_value = (part_id, value) => {
           document.getElementById(part_id + dest_suffix).value = value;
@@ -699,11 +709,6 @@ const import_lattice_parameters = element => {
        document
          .getElementById('id_atomic_coordinates_' + i_subset).innerHTML = error;
      });
-}
-for (let btn of document.getElementsByClassName('import-lattice-parameters')) {
-  btn.addEventListener('change', function() {
-    import_lattice_parameters(this);
-  });
 }
 
 // Band structure specific

@@ -627,7 +627,7 @@ def submit_data(request):
             lattice_upper_bounds = []  # dummy
             for line in form.cleaned_data[
                     f'atomic_coordinates_{i_subset}'].split('\n'):
-                if form.cleaned_data[f'geometry_format_{i_subset}'] == 'cif':
+                if form.cleaned_data[f'geometry_format_{i_subset}'] != 'aims':
                     break
                 try:
                     m = re.match(r'\s*lattice_vector' +
