@@ -458,16 +458,21 @@ def submit_data(request):
         """Test whether the line is empty or a comment."""
         return re.match(r'\s*#', line) or not line or line == '\r'
 
-    def create_input_file(dataset, data_as_str, i_subset, multiple_subsets):
+    def create_input_file(dataset, import_file_name, data_as_str, i_subset,
+                          multiple_subsets):
         """Read data points from the input form and save as file.
 
-        If multiple_subsets, then the files are named data1.txt,
-        data2.txt, etc. Otherwise, a single file called data.txt is
-        created and i_subset is ignored.
+        If the name of the original file from which the data was
+        imported is on the form, use that name for creating the
+        file. If not and if multiple_subsets, then the files are named
+        data1.txt, data2.txt, etc. Otherwise, a single file called
+        data.txt is created and i_subset is ignored.
 
         """
         if data_as_str:
-            if multiple_subsets:
+            if import_file_name:
+                file_name = import_file_name
+            elif multiple_subsets:
                 file_name = f'data{i_subset}.txt'
             else:
                 file_name = 'data.txt'
@@ -597,6 +602,7 @@ def submit_data(request):
         if dataset.primary_property.name == 'atomic structure':
             create_input_file(
                 dataset,
+                form.cleaned_data[f'import_file_name_{i_subset}'],
                 form.cleaned_data[f'atomic_coordinates_{i_subset}'],
                 i_subset,
                 multiple_subsets)
@@ -715,6 +721,7 @@ def submit_data(request):
         elif form.cleaned_data['two_axes']:
             create_input_file(
                 dataset,
+                form.cleaned_data[f'import_file_name_{i_subset}'],
                 form.cleaned_data[f'subset_datapoints_{i_subset}'],
                 i_subset,
                 multiple_subsets)
@@ -739,6 +746,7 @@ def submit_data(request):
         else:
             create_input_file(
                 dataset,
+                form.cleaned_data[f'import_file_name_{i_subset}'],
                 form.cleaned_data[f'subset_datapoints_{i_subset}'],
                 i_subset,
                 multiple_subsets)

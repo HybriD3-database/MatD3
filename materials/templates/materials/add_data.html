@@ -436,6 +436,7 @@
             <div class="fixed-properties"></div>
           </div>
           <div class="col-md-4">
+            {{ main_form.import_file_name }}
             <div class="normal-input">
               {{ main_form.subset_datapoints.label_tag }}
               {{ main_form.subset_datapoints.help_text|tooltip }}
@@ -539,7 +540,9 @@
   <script src="{% static 'materials/javascript/add_data.js' %}"></script>
   <script>
    // Prefill the data subsets from a previous instance of the form
-   {% for name_counter, crystal_system, label, values in main_form.get_subset %}
+   {% for name_counter, import_file_name, crystal_system, label, values in main_form.get_subset %}
+   document.getElementById(
+     'id_import_file_name_{{ name_counter }}').value = '{{ import_file_name|escapejs }}';
    document.getElementById(
      'id_crystal_system_{{ crystal_system }}_{{ name_counter }}').checked = true;
    document.getElementById(

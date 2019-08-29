@@ -397,6 +397,8 @@ class AddDataForm(forms.Form):
         'typically fixed (see the help text for "Add fixed property"). In '
         'case of a figure, each curve is typically considered a separate data '
         'subset.')
+    import_file_name = forms.CharField(
+        required=False, widget=forms.HiddenInput())
     crystal_system = forms.ChoiceField(
         required=False,
         initial=models.Subset.CRYSTAL_SYSTEMS[0],
@@ -465,22 +467,15 @@ class AddDataForm(forms.Form):
             attrs={'class': 'form-control', 'placeholder': 'γ'})
     )
     placeholder_ = (
-        'lattice_vector &lt;x&gt; &lt;y&gt; &lt;z&gt;&#10;...&#10;'
-        'atom &lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;element&gt;&#10;...')
+        '# Enter data here in any format\n# that JMol can read')
     atomic_coordinates = forms.CharField(
         required=False,
         widget=forms.Textarea(
             attrs={'class': 'form-control', 'rows': '3',
                    'placeholder': mark_safe(placeholder_)}),
         help_text=''
-        'Enter a list of lattice vectors and atomic coordinates (optional). '
-        'Each of the three lattice vectors starts with the word '
-        '"lattice_vector" followed by three coordinates. Each line for the '
-        'atomic coordinates starts with "atom" (absolute coordinates) or '
-        '"atom_frac" (fractional coordinates), followed by three numbers for '
-        'the coordinate, followed by the element name. For the case of '
-        'absolute coordinates ("atom"), the units are given by "Primary unit" '
-        'above. Note: to resize this box, drag from the corner.')
+        'Enter atomic structure data in any format accepted by JMol. Note: to '
+        'resize this box, drag from the corner.')
     geometry_format = forms.CharField(
         required=False, initial='aims', widget=forms.HiddenInput())
     phase_transition_crystal_system_final = forms.ChoiceField(
@@ -548,6 +543,11 @@ class AddDataForm(forms.Form):
                 elif key.startswith('subset_label_'):
                     self.fields[key] = forms.CharField(required=False,
                                                        initial=value)
+                elif key.startswith('import_file_name_'):
+                    self.fields[key] = forms.CharField(
+                        required=False,
+                        initial=value,
+                        widget=forms.HiddenInput())
                 elif key.startswith('crystal_system_'):
                     self.fields[key] = forms.ChoiceField(
                         initial=value,
@@ -613,12 +613,18 @@ class AddDataForm(forms.Form):
                 counter = field.split('subset_datapoints_')[1]
                 crystal_system = self.fields[
                     'crystal_system_' + counter].initial
+                import_file_name = self.fields[
+                    'import_file_name_' + counter].initial
                 if 'subset_label_' + counter in self.fields:
                     label = self.fields[f'subset_label_{counter}'].initial
                 else:
                     label = ''
                 datapoints = self.fields[field].initial
-                results.append([counter, crystal_system, label, datapoints])
+                results.append([counter,
+                                import_file_name,
+                                crystal_system,
+                                label,
+                                datapoints])
         return results
 
     def get_fixed_properties(self):

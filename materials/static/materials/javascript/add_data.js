@@ -194,6 +194,12 @@ const autofill_data = element => {
   const global_fill = i_subset == null;
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
+  if (!global_fill) {
+    // Save the name of the original file for later use
+    document
+      .getElementById(`id_import_file_name_${i_subset}`)
+      .value = element.files[0].name;
+  }
   element.value = '';  // Clear the file list
   axios
     .post('/materials/autofill-input-data', form_data)
@@ -589,6 +595,12 @@ const import_lattice_parameters = element => {
   const form_data = new FormData();
   form_data.append('file', element.files[0]);
   const is_cif_format = element.files[0].name.match(/\.cif$/) !== null;
+  if (i_subset) {
+    // Save the name of the original file for later use
+    document
+      .getElementById(`id_import_file_name_${i_subset}`)
+      .value = element.files[0].name;
+  }
   element.value = '';  // Clear the file list
   axios
     .post('/materials/autofill-input-data', form_data)
