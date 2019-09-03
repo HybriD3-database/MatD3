@@ -4,6 +4,19 @@ from rest_framework import serializers
 from . import models
 
 
+class BaseSerializer(serializers.ModelSerializer):
+    created_by = serializers.StringRelatedField()
+    updated_by = serializers.StringRelatedField()
+
+    class Meta:
+        fields = (
+            'created',
+            'created_by',
+            'updated',
+            'updated_by',
+            )
+
+
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Author
@@ -51,15 +64,11 @@ class UnitSerializer(serializers.ModelSerializer):
 
 
 class DatasetSerializerInfo(serializers.ModelSerializer):
-    system = serializers.StringRelatedField()
-    primary_property = serializers.StringRelatedField()
-    primary_unit = serializers.StringRelatedField()
-    secondary_property = serializers.StringRelatedField()
-    secondary_unit = serializers.StringRelatedField()
     sample_type = serializers.CharField(source='get_sample_type_display')
 
     class Meta:
         model = models.Dataset
+        depth = 1
         fields = ('pk',
                   'caption',
                   'system',
@@ -74,7 +83,129 @@ class DatasetSerializerInfo(serializers.ModelSerializer):
                   'extraction_method')
 
 
-class DatasetSerializer(serializers.ModelSerializer):
+class ComputationalSerializer(BaseSerializer):
+    comment = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.ComputationalDetails
+        fields = BaseSerializer.Meta.fields + (
+            'pk',
+            'code',
+            'level_of_theory',
+            'xc_functional',
+            'k_point_grid',
+            'level_of_relativity',
+            'basis_set_definition',
+            'numerical_accuracy',
+            'comment',
+        )
+
+
+class SynthesisSerializer(BaseSerializer):
+    comment = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.SynthesisMethod
+        fields = BaseSerializer.Meta.fields + (
+            'pk',
+            'starting_materials',
+            'product',
+            'description',
+            'comment',
+        )
+
+
+class ExperimentalSerializer(BaseSerializer):
+    comment = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.ExperimentalDetails
+        fields = BaseSerializer.Meta.fields + (
+            'pk',
+            'method',
+            'description',
+            'comment',
+        )
+
+
+class NumericalValueSerializer(BaseSerializer):
+    qualifier = serializers.CharField(source='get_qualifier_display')
+
+    class Meta:
+        model = models.NumericalValue
+        fields = (
+            'qualifier',
+            'formatted',
+        )
+
+
+class DatapointSerializer(BaseSerializer):
+    values = NumericalValueSerializer(many=True)
+
+    class Meta:
+        model = models.Datapoint
+        fields = (
+            'values',
+            )
+
+
+class FixedValueSerializer(BaseSerializer):
+    class Meta:
+        model = models.NumericalValueFixed
+        depth = 1
+        fields = (
+            'physical_property',
+            'unit',
+            'subset',
+            'error',
+            'upper_bound',
+            'formatted',
+            )
+
+
+class SubsetSerializer(BaseSerializer):
+    crystal_system = serializers.CharField(source='get_crystal_system_display')
+    datapoints = DatapointSerializer(many=True)
+    fixed_values = FixedValueSerializer(many=True)
+
+    class Meta:
+        model = models.Subset
+        depth = 1
+        fields = (
+            'pk',
+            'label',
+            'crystal_system',
+            'fixed_values',
+            'datapoints',
+        )
+
+
+class DatasetSerializer(BaseSerializer):
+    sample_type = serializers.CharField(source='get_sample_type_display')
+    subsets = SubsetSerializer(many=True)
+
     class Meta:
         model = models.Dataset
-        fields = ([f.name for f in models.Dataset._meta.local_fields])
+        depth = 1
+        fields = BaseSerializer.Meta.fields + (
+            'pk',
+            'caption',
+            'system',
+            'primary_property',
+            'primary_unit',
+            'secondary_property',
+            'secondary_unit',
+            'reference',
+            'visible',
+            'is_experimental',
+            'dimensionality',
+            'sample_type',
+            'extraction_method',
+            'representative',
+            'linked_to',
+            'verified_by',
+            'computational',
+            'synthesis',
+            'experimental',
+            'subsets',
+        )
