@@ -7,8 +7,8 @@ from django.dispatch.dispatcher import receiver
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    description = models.CharField(max_length=100, blank=True)
-    institution = models.CharField(max_length=100, blank=True)
+    description = models.CharField(max_length=200, blank=True)
+    institution = models.CharField(max_length=200, blank=True)
     website = models.URLField(blank=True)
     image = models.ImageField(upload_to='profile_image', blank=True)
 
