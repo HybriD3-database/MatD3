@@ -1,0 +1,46 @@
+{% extends 'materials/base.html' %}
+
+{% block body %}
+  <div class="card card-default">
+    <div class="card-body">
+      <h1>Contributors</h1>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h2>Design of the database</h2>
+          <dl>
+            {% for user in designers  %}
+              <dt>
+                <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+              </dt>
+              <dd>
+                {{ user.userprofile.institution }}
+                <i>({{ user.userprofile.description }})</i>
+              </dd>
+            {% endfor %}
+          </dl>
+        </div>
+
+        <div class="col-md-6">
+          <h2>Data contributors</h2>
+          <ul>
+            {% for user in contributors  %}
+              {% if user.num_created > 0 or user.num_updated > 0 %}
+                <li>
+                  <strong>{{ user.first_name }} {{ user.last_name }}</strong> -
+                  {{ user.userprofile.institution }}
+                  {% if user.userprofile.description %}
+                    <i>({{ user.userprofile.description }})</i>
+                  {% endif %}
+                  <br>
+                  Data sets contributed: {{ user.num_created }}<br>
+                  Data sets edited: {{ user.num_updated }}<br>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
