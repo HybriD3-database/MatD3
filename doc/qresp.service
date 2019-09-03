@@ -1,0 +1,18 @@
+# /etc/systemd/system/qresp.service
+
+[Unit]
+Description = qresp daemon
+Requires = qresp.socket
+After = network.target
+
+[Service]
+User = apache
+Group = apache
+WorkingDirectory = /var/www/qresp/web
+ExecStart = /var/www/qresp/web/venv/bin/gunicorn \
+          --workers 2 \
+          --bind unix:/run/qresp.sock \
+          project:app
+
+[Install]
+WantedBy = multi-user.target

@@ -4,3 +4,4 @@ venv/*
 /static
 .env
 .coverage
+doc/_build

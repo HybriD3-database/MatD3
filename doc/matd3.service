@@ -1,0 +1,18 @@
+# /etc/systemd/system/matd3.service
+
+[Unit]
+Description = matd3 daemon
+Requires = matd3.socket
+After = network.target
+
+[Service]
+User = nginx
+Group = nginx
+WorkingDirectory = /var/www/matd3-database
+ExecStart = /var/www/matd3-database/venv/bin/gunicorn \
+          --workers 2 \
+          --bind unix:/run/matd3.sock \
+          mainproject.wsgi
+
+[Install]
+WantedBy = multi-user.target

@@ -1,0 +1,10 @@
+# /etc/systemd/system/matd3.socket
+
+[Unit]
+Description = matd3 socket
+
+[Socket]
+ListenStream = /run/matd3.sock
+
+[Install]
+WantedBy = sockets.target

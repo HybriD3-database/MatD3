@@ -1,0 +1,10 @@
+# /etc/systemd/system/qresp.service
+
+[Unit]
+Description = qresp socket
+
+[Socket]
+ListenStream = /run/qresp.sock
+
+[Install]
+WantedBy = sockets.target
