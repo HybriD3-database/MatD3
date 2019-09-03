@@ -1,5 +1,5 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
-"""HybriD3 URL Configuration.
+"""MatD3 URL Configuration.
 
 """
 from django.conf import settings

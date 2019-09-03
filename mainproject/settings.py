@@ -19,13 +19,15 @@ import os
 import raven
 
 from django.contrib.messages import constants as messages
+from django.utils.safestring import mark_safe
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config(
     'SECRET_KEY', default='GF#QhIU%}4;auyFdIr]6>$_~|=."9qB%[Oj;.<^$IkNAgp0E{d')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
-HYBRID3_URL = config('HYBRID3_URL', default='')
+MATD3_NAME = mark_safe(config('MATD3_NAME', default='MatD&#xb3;'))
+MATD3_URL = config('MATD3_URL', default='')
 
 # Application definition
 
@@ -66,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'mainproject.context_processors.title',
             ],
         },
     },
