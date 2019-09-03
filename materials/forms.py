@@ -131,7 +131,7 @@ class AddDataForm(forms.Form):
     )
     select_reference = forms.ModelChoiceField(
         queryset=models.Reference.objects.all(),
-        required=False,
+        required=True,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Select the reference that is associated with the inserted data. If '

@@ -168,11 +168,8 @@ class Dataset(Base):
         Unit, null=True, blank=True, on_delete=models.PROTECT,
         related_name='secondary_unit')
     secondary_property_label = models.TextField(blank=True, max_length=50)
-    reference = models.ForeignKey(Reference,
-                                  null=True,
-                                  blank=True,
-                                  on_delete=models.PROTECT,
-                                  related_name='datasets')
+    reference = models.ForeignKey(
+        Reference, on_delete=models.PROTECT, related_name='datasets')
     visible = models.BooleanField()
     is_figure = models.BooleanField()
     is_experimental = models.BooleanField()  # theoretical if false

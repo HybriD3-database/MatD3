@@ -232,6 +232,8 @@ class SeleniumTestCase(LiveServerTestCase):
         S = self.selenium
         S.get(self.live_server_url + reverse('materials:add_data'))
         S.find_element_by_id('id_secondary_unit-selectized')
+        # Set reference
+        self.selectize_set('select_reference', '2000')
         # Set properties
         self.selectize_set('primary_property', 'band gap')
         self.selectize_set('primary_unit', 'eV')
@@ -328,6 +330,8 @@ class SeleniumTestCase(LiveServerTestCase):
         S = self.selenium
         S.get(self.live_server_url + reverse('materials:add_data'))
         S.find_element_by_id('id_secondary_unit-selectized')
+        # Set reference
+        self.selectize_set('select_reference', '2000')
         # Set property and unit
         self.selectize_set('primary_property', 'atomic structure')
         self.selectize_set('primary_unit', 'Å')
@@ -397,6 +401,8 @@ class SeleniumTestCase(LiveServerTestCase):
         S = self.selenium
         S.get(self.live_server_url + reverse('materials:add_data'))
         S.find_element_by_id('id_secondary_unit-selectized')
+        # Set reference
+        self.selectize_set('select_reference', '2000')
         # Set property and unit
         self.selectize_set('primary_property', 'phase transition temperature')
         self.selectize_set('primary_unit', 'K')
