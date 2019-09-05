@@ -111,8 +111,8 @@ class System(models.Model):
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
     group = models.CharField(max_length=100, blank=True)  # aka Alternate names
-    organic = models.CharField(max_length=100)
-    inorganic = models.CharField(max_length=100)
+    organic = models.CharField(max_length=100, blank=True)
+    inorganic = models.CharField(max_length=100, blank=True)
     last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)

@@ -46,6 +46,7 @@ class SystemSerializer(serializers.ModelSerializer):
                   'compound_name',
                   'formula',
                   'group',
+                  'organic',
                   'inorganic',
                   'last_update',
                   'description')
