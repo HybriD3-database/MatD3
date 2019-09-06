@@ -557,10 +557,11 @@ def submit_data(request):
         computational.code = form.cleaned_data['code']
         computational.level_of_theory = form.cleaned_data['level_of_theory']
         computational.xc_functional = form.cleaned_data['xc_functional']
-        computational.kgrid = form.cleaned_data['k_point_grid']
+        computational.k_point_grid = form.cleaned_data['k_point_grid']
         computational.level_of_relativity = form.cleaned_data[
             'level_of_relativity']
-        computational.basis = form.cleaned_data['basis_set_definition']
+        computational.basis_set_definition = form.cleaned_data[
+            'basis_set_definition']
         computational.numerical_accuracy = form.cleaned_data[
             'numerical_accuracy']
         computational.save()

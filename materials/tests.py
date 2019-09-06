@@ -324,6 +324,15 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_xpath(
             f'//div[contains(@class, "card-body")]/table/'
             f'tbody/tr/td[contains(text(), "16.7 (±1.3)")]')
+        # Test presence of all fields in computational details
+        comp = models.ComputationalDetails.objects.first()
+        self.assertEqual(comp.code, 'abinit')
+        self.assertEqual(comp.level_of_theory, 'DFT')
+        self.assertEqual(comp.xc_functional, 'PBE')
+        self.assertEqual(comp.k_point_grid, '4x4x4')
+        self.assertEqual(comp.level_of_relativity, 'non-relativistic')
+        self.assertEqual(comp.basis_set_definition, 'pseudopotentials')
+        self.assertEqual(comp.numerical_accuracy, '1 meV/atom')
 
     def test_atomic_structure(self):
         self.login()
