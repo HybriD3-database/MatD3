@@ -1,12 +1,12 @@
 MatD3 database software
 =======================
 
-MatD3 is a database and a web application for experimental and theoretical data on solid materials. The objective is to ensure better access and reproducibility of research data and it is intended to be used by any research group wishing to publish their scientific results.
+MatD3 is a database and a web application for experimental and theoretical data on solid materials. The objective is to ensure better access and reproducibility of research data and it is intended to be used by any research group wishing to make their scientific results publicly available.
 
 Installation
 ------------
 
-These are instructions for quickly setting up a local server on your personal computer. For setting up a real server, see the full documentation at https://hybrid3-database.readthedocs.io/en/latest/.
+These instructions are for quickly setting up a local server on your personal computer. For setting up a real server, see the full documentation at https://hybrid3-database.readthedocs.io/en/latest/.
 
 * In the root directory of the project, create a virtual Python environment
 
