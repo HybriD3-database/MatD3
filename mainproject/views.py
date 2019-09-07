@@ -18,13 +18,16 @@ def contributors(request):
     contributors = User.objects.all().annotate(
         num_created=num_created).annotate(
             num_updated=num_updated).order_by('-num_created', '-num_updated')
-    designers = [
-        User.objects.get(username='volkerblum'),
-        User.objects.get(username='xd24'),
-        User.objects.get(username='raul_l'),
-        User.objects.get(username='matti'),
-        User.objects.get(username='cbclayto'),
-    ]
+    try:
+        designers = [
+            User.objects.get(username='volkerblum'),
+            User.objects.get(username='xd24'),
+            User.objects.get(username='raul_l'),
+            User.objects.get(username='matti'),
+            User.objects.get(username='cbclayto'),
+        ]
+    except User.DoesNotExist:
+        designers = []
     return render(request, 'mainproject/contributors.html', {
         'designers': designers, 'contributors': contributors,
     })
