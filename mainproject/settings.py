@@ -77,17 +77,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mainproject.wsgi.application'
 
 # Database
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'materials',
-        'USER': config('DB_USER', default=''),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': 'localhost',
-        'PORT': '',
+USE_SQLITE = config('USE_SQLITE', default=False, cast=bool)
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'materials',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'materials',
+            'USER': config('DB_USER', default=''),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
 
 # Password validation
 

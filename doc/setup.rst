@@ -60,3 +60,7 @@ Before starting the server, it is necessary to configure it in order to reflect 
     Username to use for the SMTP server defined in EMAIL_HOST
   **EMAIL_HOST_PASSWORD**
     Password to use for the SMTP server defined in EMAIL_HOST
+  **USE_SQLITE**
+    Whether to use the SQLite database. If false or not present, mySQL is used instead.
+  **DEBUG**
+    Whether to run MatD\ :sup:`3` in debug mode. This is useful for quickly setting up and testing the website but should be removed when serving on a production server.
