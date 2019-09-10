@@ -8,6 +8,13 @@ Installation
 
 These instructions are for quickly setting up a local server on your personal computer. For setting up a real server, see the full documentation at https://hybrid3-database.readthedocs.io/en/latest/.
 
+* Clone the project
+
+  ```
+  git clone git@gitlab.com:raul_l/hybrid3-database.git
+  cd hybrid3-database
+  ```
+
 * In the root directory of the project, create a virtual Python environment
 
    ```
@@ -21,7 +28,7 @@ These instructions are for quickly setting up a local server on your personal co
    pip install -r requirements.txt
    ```
 
-* Define you environment in .env in the root directory of the project
+* Define your environment in .env in the root directory of the project
 
   ```
   cp env.example .env
@@ -35,6 +42,12 @@ These instructions are for quickly setting up a local server on your personal co
   ```
   ./manage.py collectstatic
   ./manage.py migrate
+  ```
+
+* Run tests
+
+  ```
+  ./manage.py test
   ```
 
 * Create a superuser

@@ -82,7 +82,7 @@ if USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'materials',
+            'NAME': os.path.join(BASE_DIR, 'materials.db'),
         }
     }
 else:
