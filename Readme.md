@@ -11,7 +11,7 @@ These instructions are for quickly setting up a local server on your personal co
 * Clone the project
 
   ```
-  git clone git@gitlab.com:raul_l/hybrid3-database.git
+  git clone https://gitlab.com/raul_l/hybrid3-database.git
   cd hybrid3-database
   ```
 
@@ -26,6 +26,17 @@ These instructions are for quickly setting up a local server on your personal co
 
    ```
    pip install -r requirements.txt
+   ```
+
+   If you run into any issues, install the prerequisites as requested
+   by the error messages. On Ubuntu specifically, it might be
+   necessary to install the following packages first:
+
+   ```
+   sudo apt install libexpat1-dev
+   sudo apt install python3-dev
+   sudo apt install libmysqlclient-dev
+   sudo apt install firefox-geckodriver
    ```
 
 * Define your environment in .env in the root directory of the project
