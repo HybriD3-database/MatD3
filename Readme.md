@@ -22,20 +22,21 @@ These instructions are for quickly setting up a local server on your personal co
    source venv/bin/activate
    ```
 
-* Install all the requirements
+* Upgrade pip and install all the requirements
 
    ```
-   pip install -r requirements.txt
+   pip install --upgrade pip
+   pip install -v mod_wsgi-httpd==2.4.39.1  # needs to be installed separately
+   pip install -vr requirements.txt
    ```
 
-   If you run into any issues, install the prerequisites as requested
-   by the error messages. On Ubuntu specifically, it might be
-   necessary to install the following packages first:
+   If you run into any issues, install the prerequisites as requested by the error messages. On Ubuntu, it might be necessary to install the following packages first:
 
    ```
    sudo apt install libexpat1-dev
-   sudo apt install python3-dev
+   sudo apt install apache2-dev
    sudo apt install libmysqlclient-dev
+   sudo apt install python3-dev
    sudo apt install firefox-geckodriver
    ```
 
