@@ -18,7 +18,7 @@ These instructions are for quickly setting up a local server on your personal co
 * In the root directory of the project, create a virtual Python environment
 
    ```
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate
    ```
 
