@@ -5,6 +5,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
+    atomic = False
+
     dependencies = [
         ('accounts', '0003_auto_20180123_0354'),
         ('materials', '0041_dataset_plotted'),

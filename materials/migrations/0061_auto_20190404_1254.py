@@ -6,6 +6,8 @@ from django.db import models
 
 class Migration(migrations.Migration):
 
+    atomic = False
+
     dependencies = [
         ('materials', '0060_numericalvaluefixed_counter'),
     ]
