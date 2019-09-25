@@ -23,6 +23,7 @@ def contributors(request):
             User.objects.get(username='volkerblum'),
             User.objects.get(username='xd24'),
             User.objects.get(username='raul_l'),
+            User.objects.get(username='smj64'),
             User.objects.get(username='matti'),
             User.objects.get(username='cbclayto'),
         ]
