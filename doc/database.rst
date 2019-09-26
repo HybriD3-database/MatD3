@@ -31,7 +31,7 @@ All units are stored in a table that contains the label field.
   **label**
     "nm", "cm\ :sup:`2` V\ :sup:`-1` s\ :sup:`-1`", ...
 
-The table of systems includes, among other things, fields for the organic and inorganic components. These fields are mandatory, which ensures that only organic/inorganic perovskites can be entered into the database.
+A solid system is defined by the following properties.
 
 .. admonition:: System
 

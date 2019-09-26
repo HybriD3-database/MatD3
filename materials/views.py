@@ -205,9 +205,11 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
     def get(self, request, *args, **kwargs):
         main_form = forms.AddDataForm()
         if request.GET.get('return-url'):
+            return_url = request.META['HTTP_REFERER'].replace('/curate', '')
+            return_url = return_url + request.GET.get('return-url')
+            print('RETURN URL:', return_url)
             base_template = 'mainproject/base.html'
-            main_form.fields['return_url'].initial = request.GET.get(
-                'return-url')
+            main_form.fields['return_url'].initial = return_url
         else:
             base_template = 'materials/base.html'
         if request.GET.get('reference'):

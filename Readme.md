@@ -11,8 +11,8 @@ These instructions are for quickly setting up a local server on your personal co
 * Clone the project
 
   ```
-  git clone https://gitlab.com/raul_l/hybrid3-database.git
-  cd hybrid3-database
+  git clone https://github.com/HybriD3-database/MatD3.git
+  cd MatD3
   ```
 
 * In the root directory of the project, create a virtual Python environment
@@ -26,15 +26,12 @@ These instructions are for quickly setting up a local server on your personal co
 
    ```
    pip install --upgrade pip
-   pip install -v mod_wsgi-httpd==2.4.39.1  # needs to be installed separately
    pip install -vr requirements.txt
    ```
 
    If you run into any issues, install the prerequisites as requested by the error messages. On Ubuntu, it might be necessary to install the following packages first:
 
    ```
-   sudo apt install libexpat1-dev
-   sudo apt install apache2-dev
    sudo apt install libmysqlclient-dev
    sudo apt install python3-dev
    sudo apt install firefox-geckodriver
