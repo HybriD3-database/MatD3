@@ -1,4 +1,4 @@
-# /etc/systemd/system/qresp.service
+# /etc/systemd/system/qresp.socket
 
 [Unit]
 Description = qresp socket
