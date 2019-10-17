@@ -14,4 +14,4 @@ coverage==4.5.3
 selenium==3.141.0
 requests==2.22.0
 Sphinx==2.2.0
-gunicorn=19.9.0
+gunicorn==19.9.0
