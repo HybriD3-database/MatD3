@@ -4,7 +4,6 @@ import os
 import shutil
 
 from . import models
-from . import utils
 from mainproject import settings
 
 matplotlib.use('Agg')

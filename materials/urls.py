@@ -27,6 +27,7 @@ urlpatterns = [
     path('dataset/<int:pk>/verify/<str:view_name>',
          views.verify_dataset, name='verify_dataset'),
     path('add-data', views.AddDataView.as_view(), name='add_data'),
+    path('import-data', views.ImportDataView.as_view(), name='import_data'),
     path('submit-data', views.submit_data, name='submit_data'),
     path('reference/<int:pk>', views.ReferenceDetailView.as_view(),
          name='reference'),

@@ -1,0 +1,90 @@
+{% extends base_template %}
+
+{% block body %}
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Import data from a Qresp server</h4>
+    </div>
+    <div class="card-body">
+      <form id="qresp-url-form">
+        <label for="qresp-url">Enter the URL of a publication at a Qresp server</label>
+        <input id="qresp-url" name="qresp_url" class="form-control" type="text"
+               placeholder="Copy-paste the full URL here">
+        <br>
+        <button type="submit" name="submit" class="btn btn-primary">Submit</button>
+      </form>
+
+      <h5 id="paper-title" class="m-3 font-weight-bold"></h5>
+      <p id="paper-authors" class="ml-3"></p>
+      <p id="paper-reference" class="ml-3 font-italic"></p>
+
+      <div id="paper-charts"></div>
+
+    </div>
+  </div>
+
+  <template id="chart-template">
+    <hr>
+    <div class="card card-default">
+      <div class="card-header">
+        <h5></h5>
+        <div id="caption"></div>
+      </div>
+      <div class="card-body">
+        <img src="">
+        <div class="float-right">
+          <button class="btn btn-primary">Import</button>
+        </div>
+      </div>
+    </div>
+  </template>
+{% endblock %}
+
+{% block script %}
+  <script>
+   document
+     .getElementById('qresp-url-form')
+     .addEventListener('submit', function(event) {
+       event.preventDefault();
+       const full_url = this.qresp_url.value;
+       const paper_id = full_url.match(/\/paperdetails\/(\w+)\?/)[1];
+       const server_url = full_url
+         .match(/\/paperdetails\/\w+\?servers=(.*)$/)[1]
+         .replace(/%3A/, ':')
+         .replace(/%2F/g, '/');
+       axios
+         .get(`${server_url}/api/paper/${paper_id}`)
+         .then(response => {
+           const paper = response.data;
+           document.getElementById('paper-title').innerHTML = `"${paper.title}"`;
+           document.getElementById('paper-authors').innerHTML = paper.authors;
+           document.getElementById('paper-reference').innerHTML = paper.publication;
+
+           const file_server_path = paper.fileServerPath;
+           const charts_el = document.getElementById('paper-charts');
+           const chart_template = document.getElementById('chart-template');
+           charts_el.innerHTML = '';
+
+           for (const [index, chart] of paper.charts.entries()) {
+             const chart_contents = chart_template.content.cloneNode(true);
+             chart_contents.querySelector('h5').innerHTML = `Chart #${index+1}`;
+             chart_contents.getElementById('caption').innerHTML = chart.caption;
+             chart_contents.querySelector('img').src =
+               `${file_server_path}/${chart.imageFile}`;
+             const import_btn = chart_contents.querySelector('button');
+             import_btn
+               .addEventListener('click', () => {
+                 window.location.href =
+                   '/materials/add-data' +
+                   '?return-url=/materials/import-data' +
+                   `&qresp-server-url=${server_url}` +
+                   `&qresp-paper-id=${paper_id}` +
+                   `&qresp-chart-nr=${index}` +
+                   `&qresp-search-url="${this.qresp_url.value}"`;
+               });
+             charts_el.append(chart_contents);
+           }
+         });
+     });
+  </script>
+{% endblock %}

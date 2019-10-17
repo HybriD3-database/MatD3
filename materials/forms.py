@@ -530,6 +530,8 @@ class AddDataForm(forms.Form):
                                       widget=forms.HiddenInput())
     qresp_chart_nr = forms.IntegerField(required=False,
                                         widget=forms.HiddenInput())
+    qresp_search_url = forms.CharField(required=False,
+                                       widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         """Dynamically add subsets and fixed properties."""

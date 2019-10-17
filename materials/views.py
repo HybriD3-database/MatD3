@@ -205,9 +205,9 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
     def get(self, request, *args, **kwargs):
         main_form = forms.AddDataForm()
         if request.GET.get('return-url'):
-            return_url = request.META['HTTP_REFERER'].replace('/curate', '')
+            return_url = request.META['HTTP_REFERER'].replace('/qrespcurator',
+                                                              '')
             return_url = return_url + request.GET.get('return-url')
-            print('RETURN URL:', return_url)
             base_template = 'mainproject/base.html'
             main_form.fields['return_url'].initial = return_url
         else:
@@ -215,14 +215,19 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
         if request.GET.get('reference'):
             main_form.fields['fixed_reference'].initial = (
                 models.Reference.objects.get(pk=request.GET.get('reference')))
-        if request.GET.get('qresp-fetch-url'):
-            qresp_fetch_url = request.GET.get('qresp-fetch-url')
-            paper_detail = requests.get(qresp_fetch_url).json()
+        if request.GET.get('qresp-server-url'):
+            qresp_paper_id = request.GET.get('qresp-paper-id')
+            qresp_fetch_url = request.GET.get("qresp-server-url")
+            qresp_fetch_url += f'/api/paper/{qresp_paper_id}'
+            qresp_chart_nr = int(request.GET.get('qresp-chart-nr'))
+            paper_detail = requests.get(qresp_fetch_url, verify=False).json()
             main_form.fields['qresp_fetch_url'].initial = qresp_fetch_url
-            chart_nr = int(request.GET.get('qresp-chart-nr'))
-            main_form.fields['qresp_chart_nr'].initial = chart_nr
+            main_form.fields['qresp_chart_nr'].initial = qresp_chart_nr
             main_form.fields['caption'].initial = (
-                paper_detail['_PaperDetails__charts'][chart_nr]['caption'])
+                paper_detail['charts'][qresp_chart_nr]['caption'])
+        if request.GET.get('qresp-search-url'):
+            qresp_search_url = request.GET.get('qresp-search-url')
+            main_form.fields['qresp_search_url'].initial = qresp_search_url
         return render(request, self.template_name, {
             'main_form': main_form,
             'reference_form': forms.AddReferenceForm(),
@@ -230,6 +235,15 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
             'property_form': forms.AddPropertyForm(),
             'unit_form': forms.AddUnitForm(),
             'base_template': base_template,
+        })
+
+
+class ImportDataView(StaffStatusMixin, generic.TemplateView):
+    template_name = 'materials/import_data.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {
+            'base_template': 'materials/base.html',
         })
 
 
@@ -806,10 +820,10 @@ def submit_data(request):
     # Import data from Qresp
     if form.cleaned_data['qresp_fetch_url']:
         paper_detail = requests.get(
-            form.cleaned_data['qresp_fetch_url']).json()
-        download_url = paper_detail['_PaperDetails__fileServerPath']
-        chart_detail = (paper_detail['_PaperDetails__charts']
-                        [form.cleaned_data['qresp_chart_nr']])
+            form.cleaned_data['qresp_fetch_url'], verify=False).json()
+        download_url = paper_detail['fileServerPath']
+        chart_detail = paper_detail['charts'][
+            form.cleaned_data['qresp_chart_nr']]
         chart = requests.get(f'{download_url}/{chart_detail["imageFile"]}',
                              verify=False)
         file_name = chart_detail["imageFile"].replace('/', '_')
@@ -829,7 +843,13 @@ def submit_data(request):
     dataset_url = reverse('materials:dataset', kwargs={'pk': dataset.pk})
     message = mark_safe(message +
                         f' <a href="{dataset_url}">View</a> the data set.')
-    if form.cleaned_data['return_url']:
+    if form.cleaned_data['qresp_search_url']:
+        messages.success(request, message)
+        return redirect('/materials/import-data', kwargs={
+            'qresp_search_url': form.cleaned_data['qresp_search_url'],
+            'qresp_chart_nr': form.cleaned_data['qresp_chart_nr'],
+        })
+    elif form.cleaned_data['return_url']:
         return redirect(
             f'{form.cleaned_data["return_url"]}?pk={dataset.pk}')
     else:
