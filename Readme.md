@@ -6,6 +6,8 @@ MatD3 is a database and a web application for experimental and theoretical data 
 Installation
 ------------
 
+**From source code**
+
 These instructions are for quickly setting up a local server on your personal computer. For setting up a real server, see the full documentation at https://hybrid3-database.readthedocs.io/en/latest/.
 
 * Clone the project
@@ -73,6 +75,34 @@ These instructions are for quickly setting up a local server on your personal co
 
 * Open a web browser and go to http://127.0.0.1:8000/.
 
+**Using Docker**
+
+* Run the MatD3 Docker container in detached mode:
+
+  ```
+  docker run -d --rm --name matd3 --env-file=env_file -p 80:80 matd3/matd3:1.0.0 python manage.py runserver 0.0.0.0:80
+  ```
+
+  where `env_file` (rename if you like) contains the necessary enrironment variables. See [here](https://github.com/HybriD3-database/MatD3/blob/master/env.example) for example contents.
+
+* Initialize static files and perform database migrations
+
+  ```
+  docker exec matd3 python manage.py collectstatic --noinput
+  docker exec matd3 python manage.py migrate
+  ```
+
+* Create super user
+
+  ```
+  docker exec -it matd3 python manage.py createsuperuser
+  ```
+
+* You can stop the container with
+
+  ```
+  docker container stop matd3
+  ```
 
 Usage
 -----
