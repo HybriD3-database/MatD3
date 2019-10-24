@@ -39,6 +39,14 @@ These instructions are for quickly setting up a local server on your personal co
    sudo apt install firefox-geckodriver
    ```
 
+   On a Mac, it might be necessary to run
+
+   ```
+   brew install mariadb
+   ```
+
+   If there are issues with installing MySQL/MariaDB and you only plan to use SQLite, remove the line `mysqlclient==1.4.2` from requirements.txt and proceed with the installation.
+
 * Define your environment in .env in the root directory of the project
 
   ```
@@ -60,6 +68,14 @@ These instructions are for quickly setting up a local server on your personal co
   ```
   ./manage.py test
   ```
+
+  Make sure the line
+
+  ```
+  127.0.0.1 localhost
+  ```
+
+  is in your `/etc/hosts`.
 
 * Create a superuser
 
