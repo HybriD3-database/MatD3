@@ -4,4 +4,4 @@ from .settings import MATD3_NAME
 
 
 def title(request):
-    return {'mat3d_name': MATD3_NAME}
+    return {'matd3_name': MATD3_NAME}
