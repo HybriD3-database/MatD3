@@ -1,5 +1,5 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'MatD<sup>3</sup>: A Database and Online Presentation Package for Research Data Supporting Materials Discovery, Design, and Dissemination'
 tags:
   - Python
   - Django
