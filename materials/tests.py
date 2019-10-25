@@ -117,7 +117,10 @@ class SeleniumTestCase(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = webdriver.Firefox(service_log_path='/dev/null')
+        if settings.SELENIUM_DRIVER == 'firefox':
+            cls.selenium = webdriver.Firefox(service_log_path='/dev/null')
+        elif settings.SELENIUM_DRIVER in ['chrome', 'chromium']:
+            cls.selenium = webdriver.Chrome(service_log_path='/dev/null')
         cls.selenium.maximize_window()
         cls.selenium.implicitly_wait(1)
 
@@ -214,6 +217,7 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_id('id_doi_isbn').send_keys('doi')
         S.find_element_by_xpath(
             '//div[@id="new-reference-card"]//button[@type="submit"]').click()
+        S.find_element_by_xpath('//div[@id="dynamic-messages"]//div')
         self.assertEqual(models.Reference.objects.count(), 2)
         # New system
         self.selectize_set('select_system')
@@ -225,6 +229,8 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_id('id_description').send_keys('description')
         S.find_element_by_xpath(
             '//div[@id="new-system-card"]//button[@type="submit"]').click()
+        S.find_element_by_xpath('//div[@id="dynamic-messages"]'
+                                '//div[contains(text(), "compound")]')
         self.assertEqual(models.System.objects.count(), 2)
 
     def test_normal_property(self):
