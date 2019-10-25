@@ -215,3 +215,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
 }
+
+# Tests
+
+SELENIUM_DRIVER = config('SELENIUM_DRIVER', default='firefox').lower()

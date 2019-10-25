@@ -99,7 +99,7 @@ These instructions are for quickly setting up a local server on your personal co
   docker run -d --rm --name matd3 --env-file=env_file -p 80:80 matd3/matd3:1.0.0 python manage.py runserver 0.0.0.0:80
   ```
 
-  where `env_file` (rename if you like) contains the necessary enrironment variables. See [here](https://github.com/HybriD3-database/MatD3/blob/master/env.example) for example contents. You can view the website by opening 0.0.0.0 in a web browser.
+  where `env_file` (rename if you like) contains the necessary enrironment variables. See [here](https://github.com/HybriD3-database/MatD3/blob/master/env.example) for example contents. You can view the website by opening 0.0.0.0 in a web browser. If you wish to run the container on a different port, replace 80 in the command with the number of that port.
 
 * Initialize static files and perform database migrations
 

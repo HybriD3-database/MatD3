@@ -60,6 +60,8 @@ Before starting the server, it is necessary to configure it in order to reflect 
     Username to use for the SMTP server defined in EMAIL_HOST
   **EMAIL_HOST_PASSWORD**
     Password to use for the SMTP server defined in EMAIL_HOST
+  **SELENIUM_DRIVER**
+    Which driver to use for running tests with Selenium. Options are "Firefox" and "Chrome" (case insensitive). If not present, Firefox is used.
   **USE_SQLITE**
     Whether to use the SQLite database. If false or not present, mySQL is used instead.
   **DEBUG**
