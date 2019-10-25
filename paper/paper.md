@@ -27,11 +27,11 @@ authors:
 affiliations:
  - name: Department of Mechanical Engineering and Materials Science, Duke University
    index: 1
- - name: Institute for Molecular Engineering, University of Chicago
+ - name: Pritzker School of Molecular Engineering, University of Chicago
    index: 2
  - name: Carnegie Mellon University
    index: 3
- - name: Institute for Molecular Engineering and Materials Science Division, Argonne National Laboratory
+ - name: Materials Science Division and Center for Molecular Engineering, Argonne National Laboratory
    index: 4
  - name: Department of Chemistry, University of Chicago
    index: 5
