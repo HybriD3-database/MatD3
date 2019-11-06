@@ -58,6 +58,6 @@ In summary, the MatD3 software provides a convenient, flexible, and complete sol
 
 # Acknowledgements
 
-This work was financially supported by the NSF under Award No. DMR-1729297. G.G., M.G. anf A.T. acknowledge support by MICCoM, as part of the Computational Materials Sciences Program funded by the U.S. Department of Energy, Office of Science, Basic Energy Sciences, Materials Sciences and Engineering Division.
+This work was financially supported by the NSF under Award No. DMR-1729297. G.G., M.G. and A.T. acknowledge support by MICCoM, as part of the Computational Materials Sciences Program funded by the U.S. Department of Energy, Office of Science, Basic Energy Sciences, Materials Sciences and Engineering Division.
 
 # References
