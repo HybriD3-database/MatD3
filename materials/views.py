@@ -1,6 +1,8 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
 from functools import reduce
+import hashlib
 import io
+import json
 import logging
 import operator
 import os
@@ -307,6 +309,25 @@ class UnitViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user)
 
 
+def dataset_to_zip(request, dataset):
+    """Generate a zip file from data set contents."""
+    in_memory_object = io.BytesIO()
+    zf = zipfile.ZipFile(in_memory_object, 'w')
+    # Header file to the data
+    zf.writestr('files/info.txt',
+                utils.dataset_info(dataset, request.get_host()))
+    # Main data
+    for file_ in (f.dataset_file.path for f in dataset.input_files.all()):
+        zf.write(file_,
+                 os.path.join('files', os.path.basename(file_)))
+    # Additional files
+    for file_ in (f.dataset_file.path for f in dataset.files.all()):
+        zf.write(file_,
+                 os.path.join('files/additional', os.path.basename(file_)))
+    zf.close()
+    return in_memory_object
+
+
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all()
     serializer_class = serializers.DatasetSerializer
@@ -321,20 +342,7 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     def files(self, request, pk):
         """Retrieve data set contents and uploaded files as zip."""
         dataset = self.get_object()
-        in_memory_object = io.BytesIO()
-        zf = zipfile.ZipFile(in_memory_object, 'w')
-        # Header file to the data
-        zf.writestr('files/info.txt',
-                    utils.dataset_info(dataset, request.get_host()))
-        # Main data
-        for file_ in (f.dataset_file.path for f in dataset.input_files.all()):
-            zf.write(file_,
-                     os.path.join('files', os.path.basename(file_)))
-        # Additional files
-        for file_ in (f.dataset_file.path for f in dataset.files.all()):
-            zf.write(file_,
-                     os.path.join('files/additional', os.path.basename(file_)))
-        zf.close()
+        in_memory_object = dataset_to_zip(request, dataset)
         response = HttpResponse(in_memory_object.getvalue(),
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = f'attachment; filename=files.zip'
@@ -1138,3 +1146,74 @@ def prefilled_form(request, pk):
         if hasattr(comp, 'comment'):
             form['values']['computational_comment'] = comp.comment.text
     return JsonResponse(form)
+
+
+class MintDoiView(StaffStatusMixin, generic.TemplateView):
+    """Authenticate user on Figshare."""
+
+    def get(self, request, *args, **kwargs):
+        request.session['MINT_DOI_RETURN_URL'] = request.META.get(
+            'HTTP_REFERER')
+        request.session['MINT_DOI_DATASET_PK'] = self.kwargs['pk']
+        if 'FIGSHARE_ACCESS_TOKEN' in request.session:
+            return redirect(reverse('materials:figshare_callback'))
+        else:
+            return render(request, 'materials/figshare_client_id.html', {
+                'callback_url':
+                f'{request.get_host()}/materials/figshare-callback'
+            })
+
+    def post(self, request, *args, **kwargs):
+        return redirect(
+            'https://figshare.com/account/applications/authorize?'
+            'response_type=token&'
+            f'client_id={request.POST["consumer-id"]}')
+
+
+def figshare_callback(request):
+    """"Upload data to Figshare and generate a DOI."""
+    if 'FIGSHARE_ACCESS_TOKEN' not in request.session:
+        request.session['FIGSHARE_ACCESS_TOKEN'] = request.GET['access_token']
+    headers = {
+        'Authorization': 'token ' + request.session['FIGSHARE_ACCESS_TOKEN']
+    }
+    dataset = models.Dataset.objects.get(
+        pk=request.session['MINT_DOI_DATASET_PK'])
+    title = dataset.caption
+    data = {
+        'title': title if title else f'Data set {dataset.pk}',
+        'description': 'data set',
+        'keywords': [dataset.primary_property.name],
+        'categories': [110],
+        'defined_type': 'dataset',
+    }
+    result = requests.post('https://api.figshare.com/v2/account/articles',
+                           headers=headers,
+                           data=json.dumps(data))
+    # Create and upload data set contents as zip file
+    article_location = result.json()['location']
+    in_memory_object = dataset_to_zip(request, dataset)
+    zip_file = in_memory_object.getvalue()
+    md5 = hashlib.md5()
+    md5.update(zip_file)
+    data = {'name': 'files.zip', 'md5': md5.hexdigest(), 'size': len(zip_file)}
+    result = requests.post(
+        f'{article_location}/files', headers=headers, data=json.dumps(data))
+    upload_location = result.json()['location']
+    result = requests.get(upload_location, headers=headers)
+    upload_url = result.json()['upload_url']
+    result = requests.get(upload_url, headers=headers)
+    for part in result.json()['parts']:
+        in_memory_object.seek(part['startOffset'])
+        data = in_memory_object.read(
+            part['endOffset'] - part['startOffset'] + 1)
+        requests.put(
+            f'{upload_url}/{part["partNo"]}', headers=headers, data=data)
+    # Generate and publish DOI
+    result = requests.post(f'{article_location}/reserve_doi', headers=headers)
+    dataset.doi = result.json()['doi']
+    dataset.save()
+    result = requests.post(f'{article_location}/publish', headers=headers)
+    messages.success(request,
+                     'A DOI was generated and the data set was published.')
+    return redirect(request.session['MINT_DOI_RETURN_URL'])

@@ -1,0 +1,34 @@
+{% extends 'materials/base.html' %}
+
+{% block body %}
+  <div class="card card-default">
+    <div class="card-header">
+      <h4>Mint DOI with Figshare</h4>
+    </div>
+    <div class="card-body">
+      <ul>
+        <li>
+          In order to generate a DOI and publish the data set, register an account at <a href="https://figshare.com/account/home">Figshare</a>.
+        </li>
+        <li>
+          Create a new application called "HybriD3" at <a href="https://figshare.com/account/applications">figshare/applications</a>. The callback URL is <strong>{{ callback_url }}</strong>.
+        </li>
+        <li>
+          Find Consumer ID and paste it here.
+        </li>
+      </ul>
+      <form class="form-inline" method="post">
+        {% csrf_token %}
+        <div class="form-group mx-sm-3 mb-2">
+          <label class="m-2" for="consumer-id"><strong>Consumer ID</strong></label>
+          <input id="consumer-id" name="consumer-id" type="text" class="form-control">
+        </div>
+        <button class="btn btn-primary mb-2" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

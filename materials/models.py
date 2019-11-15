@@ -179,6 +179,7 @@ class Dataset(Base):
     representative = models.BooleanField(default=False)
     linked_to = models.ManyToManyField('self', blank=True)
     verified_by = models.ManyToManyField(get_user_model())
+    doi = models.CharField(max_length=50, blank=True)
 
     class Meta:
         verbose_name_plural = 'data sets'
@@ -197,7 +198,7 @@ class Dataset(Base):
             email_addresses = self.verified_by.all().values_list('email',
                                                                  flat=True)
             dataset_location = (
-                f'{settings.HYBRID3_URL}/materials/dataset/{self.pk}')
+                f'{settings.MATD3_URL}/materials/dataset/{self.pk}')
             body = (
                 f'<p>A data set with ID = <a href="{dataset_location}">'
                 f'{self.pk}</a>, which you have previously verified, has been '
@@ -205,7 +206,7 @@ class Dataset(Base):
                 f'{escape(self.updated_by.last_name)} '
                 f'({escape(self.updated_by.email)}). As a result, its '
                 'verified status has been revoked. See the '
-                f'<a href="{settings.HYBRID3_URL}/admin/materials/dataset/'
+                f'<a href="{settings.MATD3_URL}/admin/materials/dataset/'
                 f'{self.pk}/history/">history</a> of what has been changed. '
                 f'If you consider the entered data to be correct, please go '
                 'to the website and re-verify the data.</p>'

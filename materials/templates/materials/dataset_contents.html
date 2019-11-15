@@ -421,6 +421,11 @@ the "with ..." syntax to include certain parts.
   <span class="fa fa-download" aria-hidden="true"></span>
   Download data
 </a>
+<!-- DOI ON FIGSHARE -->
+<a href="{% url 'materials:mint_doi' dataset.pk %}" class="btn btn-primary">
+  <i class="fas fa-fingerprint"></i>
+  Mint DOI
+</a>
 
 <!-- VERIFICATION BUTTON -->
 {% if user.is_staff %}
@@ -456,6 +461,11 @@ the "with ..." syntax to include certain parts.
 {% endif %}
 
 <div class="text-center" style="margin-top:10px">
+  {% if dataset.doi %}
+    <p>
+      DOI for this data set: <a href="{{ dataset.doi }}">{{ dataset.doi }}</a>
+    </p>
+  {% endif %}
   <strong style="margin-right:10px">Data set ID: {{ dataset.pk }}</strong>
   <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
           data-target="#issue-report-{{ dataset.pk }}">

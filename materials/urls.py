@@ -48,4 +48,7 @@ urlpatterns = [
          name='linked_data'),
     path('prefilled-form/<int:pk>', views.prefilled_form,
          name='prefilled_form'),
+    path('mint-doi/<int:pk>', views.MintDoiView.as_view(), name='mint_doi'),
+    path('figshare-callback', views.figshare_callback,
+         name='figshare_callback'),
 ]
