@@ -1,6 +1,7 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from time import sleep
 import os
 import shutil
 
@@ -308,8 +309,10 @@ class SeleniumTestCase(LiveServerTestCase):
         # View the other data set
         S.find_element_by_xpath(
             f'//button[@data-target="#synthesis-body-{last_pk}"]').click()
+        sleep(0.2)
         S.find_element_by_xpath(
             f'//button[@data-target="#experimental-body-{last_pk}"]').click()
+        sleep(0.2)
         S.find_element_by_xpath(
             f'//button[@data-target="#computational-body-{last_pk}"]').click()
         for test_string in ('starting material',
