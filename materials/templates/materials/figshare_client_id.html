@@ -11,7 +11,7 @@
           In order to generate a DOI and publish the data set, register an account at <a href="https://figshare.com/account/home">Figshare</a>.
         </li>
         <li>
-          Create a new application called "HybriD3" at <a href="https://figshare.com/account/applications">figshare/applications</a>. The callback URL is <strong>{{ callback_url }}</strong>.
+          Create a new application called "HybriD3" at <a href="https://figshare.com/account/applications">figshare/applications</a>. Application URL is <strong>https://{{ host_url }}</strong> and Callback URL is <strong>https://{{ host_url }}/materials/figshare-callback</strong>.
         </li>
         <li>
           Find Consumer ID and paste it here.
@@ -27,8 +27,4 @@
       </form>
     </div>
   </div>
-{% endblock %}
-
-{% block script %}
-
 {% endblock %}

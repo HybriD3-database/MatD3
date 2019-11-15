@@ -463,7 +463,7 @@ the "with ..." syntax to include certain parts.
 <div class="text-center" style="margin-top:10px">
   {% if dataset.doi %}
     <p>
-      DOI for this data set: <a href="{{ dataset.doi }}">{{ dataset.doi }}</a>
+      DOI for this data set: <a href="https://doi.org/{{ dataset.doi }}">{{ dataset.doi }}</a>
     </p>
   {% endif %}
   <strong style="margin-right:10px">Data set ID: {{ dataset.pk }}</strong>

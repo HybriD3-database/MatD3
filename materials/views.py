@@ -1,6 +1,5 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
 from functools import reduce
-import hashlib
 import io
 import json
 import logging
@@ -1159,8 +1158,7 @@ class MintDoiView(StaffStatusMixin, generic.TemplateView):
             return redirect(reverse('materials:figshare_callback'))
         else:
             return render(request, 'materials/figshare_client_id.html', {
-                'callback_url':
-                f'{request.get_host()}/materials/figshare-callback'
+                'host_url': request.get_host()
             })
 
     def post(self, request, *args, **kwargs):
@@ -1172,17 +1170,23 @@ class MintDoiView(StaffStatusMixin, generic.TemplateView):
 
 def figshare_callback(request):
     """"Upload data to Figshare and generate a DOI."""
+    def error_and_return(result):
+        messages.error(request, result.json())
+        return redirect(request.session['MINT_DOI_RETURN_URL'])
+
     if 'FIGSHARE_ACCESS_TOKEN' not in request.session:
         request.session['FIGSHARE_ACCESS_TOKEN'] = request.GET['access_token']
     headers = {
-        'Authorization': 'token ' + request.session['FIGSHARE_ACCESS_TOKEN']
+        'Authorization': f'token {request.session["FIGSHARE_ACCESS_TOKEN"]}'
     }
     dataset = models.Dataset.objects.get(
         pk=request.session['MINT_DOI_DATASET_PK'])
     title = dataset.caption
+    data_location = (
+        f'https://{request.get_host()}/materials/dataset/{dataset.pk}')
     data = {
         'title': title if title else f'Data set {dataset.pk}',
-        'description': 'data set',
+        'description': f'Data location: {data_location}',
         'keywords': [dataset.primary_property.name],
         'categories': [110],
         'defined_type': 'dataset',
@@ -1190,30 +1194,21 @@ def figshare_callback(request):
     result = requests.post('https://api.figshare.com/v2/account/articles',
                            headers=headers,
                            data=json.dumps(data))
-    # Create and upload data set contents as zip file
+    if result.status_code >= 400:
+        return error_and_return(result)
     article_location = result.json()['location']
-    in_memory_object = dataset_to_zip(request, dataset)
-    zip_file = in_memory_object.getvalue()
-    md5 = hashlib.md5()
-    md5.update(zip_file)
-    data = {'name': 'files.zip', 'md5': md5.hexdigest(), 'size': len(zip_file)}
+    data = {'link': data_location}
     result = requests.post(
         f'{article_location}/files', headers=headers, data=json.dumps(data))
-    upload_location = result.json()['location']
-    result = requests.get(upload_location, headers=headers)
-    upload_url = result.json()['upload_url']
-    result = requests.get(upload_url, headers=headers)
-    for part in result.json()['parts']:
-        in_memory_object.seek(part['startOffset'])
-        data = in_memory_object.read(
-            part['endOffset'] - part['startOffset'] + 1)
-        requests.put(
-            f'{upload_url}/{part["partNo"]}', headers=headers, data=data)
     # Generate and publish DOI
     result = requests.post(f'{article_location}/reserve_doi', headers=headers)
+    if result.status_code >= 400:
+        return error_and_return(result)
     dataset.doi = result.json()['doi']
     dataset.save()
     result = requests.post(f'{article_location}/publish', headers=headers)
+    if result.status_code >= 400:
+        return error_and_return(result)
     messages.success(request,
                      'A DOI was generated and the data set was published.')
     return redirect(request.session['MINT_DOI_RETURN_URL'])
