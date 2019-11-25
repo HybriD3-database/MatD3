@@ -13,7 +13,6 @@ for (let element of document.getElementsByClassName('expand-hide-button')) {
           let data = response['data'];
           let table = document.createElement('table');
           table.className = 'table-atomic-coordinates';
-          const fragment = document.createDocumentFragment();
           let tr, td;
           for (let vector of data['vectors']) {
             tr = document.createElement('tr');
@@ -26,9 +25,8 @@ for (let element of document.getElementsByClassName('expand-hide-button')) {
               td.innerHTML = vector_comp;
               tr.appendChild(td);
             }
-            fragment.appendChild(tr);
+            table.appendChild(tr);
           }
-          table.appendChild(fragment);
           target.append(table);
           let coord_type;
           if (data['coord-type'] == 'atom_frac') {
@@ -52,9 +50,8 @@ for (let element of document.getElementsByClassName('expand-hide-button')) {
             td.style = 'text-align:left';
             td.innerHTML = coordinate[0];
             tr.appendChild(td);
-            fragment.appendChild(tr);
+            table.appendChild(tr);
           }
-          table.appendChild(fragment);
           target.append(table);
         });
     }

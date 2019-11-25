@@ -8,19 +8,17 @@ for (let table_body of
     .then(response => {
       let data = response['data'];
       const table = document.createElement('table');
-      const fragment = document.createDocumentFragment();
       for (let value of data) {
         let tr = document.createElement('tr');
         let td = document.createElement('td');
         if ('x' in value) {
           td.innerHTML = value['x'];
-          tr.appendChild(td);
+          tr.append(td);
         }
         td = document.createElement('td');
         td.innerHTML = value['y'];
-        tr.appendChild(td);
-        fragment.appendChild(tr);
+        tr.append(td);
+        table_body.append(tr);
       }
-      table_body.append(fragment);
     });
 }
