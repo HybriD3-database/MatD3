@@ -12,13 +12,13 @@ const create_message = (message_type, message) => {
   const alert = document.createElement('div');
   alert.classList.add('alert', message_type);
   alert.innerHTML = message;
-  flex.appendChild(alert);
-  document.getElementById('dynamic-messages').appendChild(flex);
+  flex.append(alert);
+  document.getElementById('dynamic-messages').append(flex);
 }
 const delete_all_messages = () => {
   const messages = document.getElementById('dynamic-messages');
   while (messages.firstChild) {
-    messages.removeChild(messages.firstChild);
+    messages.firstChild.remove();
   }
 }
 
@@ -290,7 +290,7 @@ const add_subset = i_subset => {
     .addEventListener('change', function() {
       import_lattice_parameters(this);
     });
-  document.getElementById('data-subset').appendChild(copy);
+  document.getElementById('data-subset').append(copy);
 }
 
 // Create a new set of fixed property fields
@@ -329,9 +329,9 @@ const add_fixed_property =
       .getElementsByClassName('close-fixed-property')[0]
       .addEventListener('click', function() {
         let row = this.parentNode.parentNode.parentNode.parentNode;
-        row.parentNode.removeChild(row);
+        row.remove();
       });
-    document.getElementById('fixed-properties-' + subset).appendChild(copy);
+    document.getElementById('fixed-properties-' + subset).append(copy);
   }
 const number_of_subsets = document.getElementById('id_number_of_subsets');
 number_of_subsets.addEventListener('change', function() {
@@ -346,7 +346,7 @@ number_of_subsets.addEventListener('change', function() {
   }
   if (n_to_add < 0) {
     for (let i = n_to_add; i < 0; i++) {
-      data_subset.removeChild(data_subset.lastChild);
+      data_subset.lastChild.remove();
     }
   }
   if (data_subset.hasChildNodes()) {
@@ -523,13 +523,13 @@ document
     institution_copy
       .getElementsByTagName('button')[0]
       .addEventListener('click', () => {
-        document.getElementById('first-names').removeChild(first_name_copy);
-        document.getElementById('last-names').removeChild(last_name_copy);
-        document.getElementById('institutions').removeChild(institution_copy);
+        first_name_copy.remove();
+        last_name_copy.remove();
+        institution_copy.remove();
       });
-    document.getElementById('first-names').appendChild(first_name_copy);
-    document.getElementById('last-names').appendChild(last_name_copy);
-    document.getElementById('institutions').appendChild(institution_copy);
+    document.getElementById('first-names').append(first_name_copy);
+    document.getElementById('last-names').append(last_name_copy);
+    document.getElementById('institutions').append(institution_copy);
   });
 document
   .getElementById('add-more-authors-btn')

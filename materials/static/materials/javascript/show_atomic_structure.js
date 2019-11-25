@@ -19,13 +19,13 @@ for (let element of document.getElementsByClassName('expand-hide-button')) {
             td = document.createElement('td');
             td.innerHTML = 'lattice_vector';
             td.style = 'text-align:left';
-            tr.appendChild(td);
+            tr.append(td);
             for (let vector_comp of vector) {
               td = document.createElement('td');
               td.innerHTML = vector_comp;
-              tr.appendChild(td);
+              tr.append(td);
             }
-            table.appendChild(tr);
+            table.append(tr);
           }
           target.append(table);
           let coord_type;
@@ -40,17 +40,17 @@ for (let element of document.getElementsByClassName('expand-hide-button')) {
             tr = document.createElement('tr');
             td = document.createElement('td');
             td.innerHTML = coord_type;
-            tr.appendChild(td);
+            tr.append(td);
             for (let i=1; i<4; i++) {
               td = document.createElement('td');
               td.innerHTML = coordinate[i];
-              tr.appendChild(td);
+              tr.append(td);
             }
             td = document.createElement('td');
             td.style = 'text-align:left';
             td.innerHTML = coordinate[0];
-            tr.appendChild(td);
-            table.appendChild(tr);
+            tr.append(td);
+            table.append(tr);
           }
           target.append(table);
         });
