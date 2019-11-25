@@ -11,7 +11,7 @@ authors:
     orcid: 0000-0002-9714-1189
     affiliation: 1
   - name: Xiaochen Du
-    affiliation: 1
+    affiliation: "7, 8"
   - name: Aditya Tanikanti
     affiliation: 2
   - name: Connor Clayton
@@ -40,7 +40,9 @@ affiliations:
    index: 6
  - name: Department of Chemistry, Duke University
    index: 7
-date: 25 October 2019
+ - name: Department of Computer Science, Duke University
+   index: 7
+date: 22 November 2019
 bibliography: refs.bib
 ---
 
@@ -60,6 +62,6 @@ In summary, the MatD<sup>3</sup> software provides a convenient, flexible, and c
 
 # Acknowledgements
 
-This work was financially supported by the NSF under Award No. DMR-1729297. G.G., M.G. and A.T. acknowledge support by MICCoM, as part of the Computational Materials Sciences Program funded by the U.S. Department of Energy, Office of Science, Basic Energy Sciences, Materials Sciences and Engineering Division
+This work was financially supported by the NSF under Award No. DMR-1729297 and and a dedicated supplement, Award No. DMR-1841206. G.G., M.G. and A.T. acknowledge support by MICCoM, as part of the Computational Materials Sciences Program funded by the U.S. Department of Energy, Office of Science, Basic Energy Sciences, Materials Sciences and Engineering Division.
 
 # References
