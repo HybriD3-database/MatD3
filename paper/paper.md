@@ -41,7 +41,7 @@ affiliations:
  - name: Department of Chemistry, Duke University
    index: 7
  - name: Department of Computer Science, Duke University
-   index: 7
+   index: 8
 date: 22 November 2019
 bibliography: refs.bib
 ---
