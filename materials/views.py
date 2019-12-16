@@ -472,6 +472,8 @@ def submit_data(request):
             messages.error(request, text)
         return render(request, AddDataView.template_name, {
             'main_form': form,
+            'reference_form': forms.AddReferenceForm(),
+            'system_form': forms.AddSystemForm(),
             'property_form': forms.AddPropertyForm(),
             'unit_form': forms.AddUnitForm(),
             'base_template': base_template
