@@ -1,3 +1,5 @@
+![](https://github.com/hybrid3-database/matd3/workflows/main/badge.svg)
+
 MatD3 database software
 =======================
 
