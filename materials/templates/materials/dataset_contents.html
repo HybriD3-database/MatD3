@@ -423,10 +423,12 @@ the "with ..." syntax to include certain parts.
 </a>
 <!-- DOI ON FIGSHARE -->
 {% if not dataset.doi %}
-  <a href="{% url 'materials:mint_doi' dataset.pk %}" class="btn btn-primary">
-    <i class="fas fa-fingerprint"></i>
-    Mint DOI
-  </a>
+  {% if user == dataset.created_by or user.is_superuser %}
+    <a href="{% url 'materials:mint_doi' dataset.pk %}" class="btn btn-primary">
+      <i class="fas fa-fingerprint"></i>
+      Mint DOI
+    </a>
+  {% endif %}
 {% endif %}
 
 <!-- VERIFICATION BUTTON -->
