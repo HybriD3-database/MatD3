@@ -29,7 +29,6 @@
       <div class="alert alert-info" id="explanatory_text">
         Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
       </div>
-      <br>
       <ul id="results" class="list-group">
       </ul>
     </div>
@@ -38,27 +37,35 @@
 
 {% block script %}
   <script>
-   $('#search_text').attr("placeholder", "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3");
+   $('#search_text').attr('placeholder', 'Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3');
    $('#search_term').change(function() {
-     if(this.value == "exciton_emission") {
-       text = "Search by range using >, >=, <, <=, or a combination, e.g. >=400";
-       $('#search_text').attr("placeholder", text);
+     if (this.value == 'exciton_emission') {
+       text = 'Search by range using >, >=, <, <=, or a combination, e.g. >=400';
+       $('#search_text').attr('placeholder', text);
        $('#explanatory_text').text(text);
-     } else if(this.value == "formula") {
-       text = "Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3"
-       $('#search_text').attr("placeholder", text);
+     } else if (this.value == 'formula') {
+       text = 'Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3';
+       $('#search_text').attr('placeholder', text);
        $('#explanatory_text').text(text);
-     } else if(this.value == "organic") {
-       text = "Search for all or part of an organic component, e.g. CH3NH3";
+     } else if (this.value == 'physical_property') {
+       text = 'Search by physical property, e.g. "band gap"';
+       $('#search_text').attr('placeholder', text);
        $('#explanatory_text').text(text);
-       $('#search_text').attr("placeholder", text);
-     } else if(this.value == "inorganic") {
-       text = "Search for all or part of an inorganic component, e.g. PbI3";
-       $('#search_text').attr("placeholder", text);
+     } else if (this.value == 'organic') {
+       text = 'Search for all or part of an organic component, e.g. CH3NH3';
+       $('#explanatory_text').text(text);
+       $('#search_text').attr('placeholder', text);
+     } else if (this.value == 'inorganic') {
+       text = 'Search for all or part of an inorganic component, e.g. PbI3';
+       $('#search_text').attr('placeholder', text);
+       $('#explanatory_text').text(text);
+     } else if (this.value == 'author') {
+       text = "Search by author's name";
+       $('#search_text').attr('placeholder', text);
        $('#explanatory_text').text(text);
      } else {
-       text = "";
-       $('#search_text').attr("placeholder", text);
+       text = '';
+       $('#search_text').attr('placeholder', text);
        $('#explanatory_text').text(text);
      }
    });

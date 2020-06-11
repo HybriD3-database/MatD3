@@ -145,6 +145,7 @@ class SearchFormView(generic.TemplateView):
     template_name = 'materials/search.html'
     search_terms = [
         ['formula', 'Formula'],
+        ['physical_property', 'Physical property'],
         ['organic', 'Organic Component'],
         ['inorganic', 'Inorganic Component'],
         ['author', 'Author']
@@ -160,6 +161,7 @@ class SearchFormView(generic.TemplateView):
         search_text = ''
         # default search_term
         search_term = 'formula'
+        physical_properties = []
         if form.is_valid():
             search_text = form.cleaned_data['search_text']
             search_term = request.POST.get('search_term')
@@ -170,6 +172,11 @@ class SearchFormView(generic.TemplateView):
                     Q(group__icontains=search_text) |
                     Q(compound_name__icontains=search_text)).order_by(
                         'formula')
+            elif search_term == 'physical_property':
+                physical_properties = models.Property.objects.filter(
+                    name__icontains=search_text).values_list('name', flat=True)
+                systems = models.System.objects.filter(
+                    dataset__primary_property__name__icontains=search_text)
             elif search_term == 'organic':
                 systems = models.System.objects.filter(
                     organic__contains=search_text).order_by('organic')
@@ -184,11 +191,11 @@ class SearchFormView(generic.TemplateView):
                 systems = models.System.objects.filter(query).distinct()
             else:
                 raise KeyError('Invalid search term.')
-
         args = {
             'systems': systems,
             'search_term': search_term,
-            'systems_info': systems_info
+            'systems_info': systems_info,
+            'physical_properties': physical_properties,
         }
         return render(request, template_name, args)
 

@@ -1,4 +1,11 @@
 {% if systems.count > 0 %}
+  {% if physical_properties %}
+    <ul>
+      {% for prop in physical_properties %}
+        <li>{{ prop }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <table class="table table-hover table-sm">
     <thead>
       <tr>
