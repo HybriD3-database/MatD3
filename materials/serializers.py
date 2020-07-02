@@ -209,4 +209,5 @@ class DatasetSerializer(BaseSerializer):
             'synthesis',
             'experimental',
             'subsets',
+            'space_group',
         )
