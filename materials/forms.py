@@ -258,6 +258,14 @@ class AddDataForm(forms.Form):
         choices=(models.Dataset.SAMPLE_TYPES),
         widget=forms.RadioSelect(),
         help_text='Select the type of the sample.')
+    space_group = AutoCharField(
+        model=models.Dataset, field='space_group',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Optional'
+        }),
+        help_text=''
+        'Space group symbol.')
 
     # Synthesis
     with_synthesis_details = forms.BooleanField(

@@ -253,6 +253,7 @@ class SeleniumTestCase(LiveServerTestCase):
         # General
         S.find_element_by_id('id_origin_of_data_1').click()
         S.find_element_by_id('id_sample_type_4').click()
+        S.find_element_by_id('id_space_group').send_keys('F222')
         # Optional sections
         S.find_element_by_id('synthesis-button').click()
         S.find_element_by_id('id_starting_materials').send_keys(
@@ -288,6 +289,8 @@ class SeleniumTestCase(LiveServerTestCase):
         submit_link = reverse("materials:submit_data")
         S.find_element_by_xpath(
             f'//form[@action="{submit_link}"]//button[@type="submit"]').click()
+        self.assertEqual(
+            models.Dataset.objects.last().space_group, 'F222')
         # Second data set based on the first one
         last_pk = models.Dataset.objects.last().pk
         S.find_element_by_id('prefill').send_keys(last_pk)

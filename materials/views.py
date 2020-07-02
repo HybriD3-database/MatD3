@@ -544,6 +544,7 @@ def submit_data(request):
     dataset.dimensionality = form.cleaned_data[
         'dimensionality_of_the_inorganic_component']
     dataset.sample_type = form.cleaned_data['sample_type']
+    dataset.space_group = form.cleaned_data['space_group']
     dataset.extraction_method = form.cleaned_data['extraction_method']
     # Make representative by default if first entry of its kind
     dataset.representative = not bool(models.Dataset.objects.filter(

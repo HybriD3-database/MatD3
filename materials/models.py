@@ -180,6 +180,7 @@ class Dataset(Base):
     linked_to = models.ManyToManyField('self', blank=True)
     verified_by = models.ManyToManyField(get_user_model())
     doi = models.CharField(max_length=50, blank=True)
+    space_group = models.CharField(max_length=20, blank=True)
 
     class Meta:
         verbose_name_plural = 'data sets'
