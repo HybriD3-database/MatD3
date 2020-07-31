@@ -3,6 +3,7 @@
 {# List all data sets corresponding to a given material and property #}
 
 {% block body %}
+  {% load static %}
   <div class="card card-default">
     <div class="card-header">
       <h3>{{ object_list.first.system }}: {{ object_list.first.primary_property }}</h3>
@@ -11,7 +12,7 @@
       <div class="row">
         {% for dataset in object_list %}
           {% if user == dataset.created_by or dataset.visible %}
-            <div class="col-md-6">
+            <div class="col-md-{% if dataset.primary_property.name == 'atomic structure'%}12{% else %}6{% endif %}">
               <div class="card card-item">
                 {% if not dataset.visible %}
                   <div style="background:#fadb9b">
@@ -31,7 +32,20 @@
                   </div>
                 {% endif %}
                 <div class="card-body">
-                  {% include 'materials/dataset_contents.html' with with_reference=True %}
+                  {% if dataset.primary_property.name == 'atomic structure'%}
+                    <div class="row">
+                      <div class="col-md-6">
+                        {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True skip_atomic_structure=True %}
+                      </div>
+                      <div class="col-md-6">
+                        <div id="jsmol-{{ dataset.pk }}">
+                          {% include 'materials/jsmol_card.html' %}
+                        </div>
+                      </div>
+                    </div>
+                  {% else %}
+                    {% include 'materials/dataset_contents.html' with with_reference=True %}
+                  {% endif %}
                 </div>
               </div>
               <br>
@@ -45,5 +59,26 @@
 {% endblock %}
 
 {% block script %}
+  {% if object_list.first.primary_property.name == 'atomic structure'%}
+    <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
+    <script>
+     {% for dataset in object_list %}
+     $.get("{% url 'materials:get_jsmol_input' pk=dataset.system.pk %}", function(response) {
+       if (response) {
+         {% if forloop.first %}
+         $('#jsmol-{{ dataset.pk }} .jsmol').html(Jmol.getAppletHtml('jmol', {
+           script: response,
+           j2sPath: "{% static 'jsmol/j2s' %}",
+           height: 450,
+           width: 470,
+         }));
+         {% endif %}
+       } else {
+         $('#jsmol-{{ dataset.pk }} .jsmol').text('Atomic coordinates not available for this data set.');
+       }
+     });
+     {% endfor %}
+    </script>
+  {% endif %}
   {% include 'materials/dataset_scripts.html' with datasets=object_list %}
 {% endblock %}

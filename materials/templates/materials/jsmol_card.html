@@ -2,7 +2,7 @@
 <div class="card">
   <div class="card-header">Atomic coordinates</div>
   <div class="card-body">
-    <div id="jmol"></div>
+    <div id="jmol" class="jsmol"></div>
     <br>
     {% for subset in dataset.subsets.all %}
       {% if subset.first_with_atomic_coordinates %}
