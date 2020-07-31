@@ -19,7 +19,7 @@
                 {% endfor %}
               </select>
             </div>
-            <input id="search_text" class="form-control" type="text" name="search_text" required/>
+            <input id="search_text" class="form-control" type="text" name="search_text" required>
             <div class="input-group-append">
               <button type="submit" class="btn btn-primary">Submit</button>
             </div>
@@ -28,6 +28,32 @@
       </form>
       <div class="alert alert-info" id="explanatory_text">
         Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
+      </div>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span id="material_id_label" class="input-group-text">Material ID</span>
+        </div>
+        <select id='material_ids' name='material_ids' class="form-control">
+          {% for material in material_ids %}
+            <option value="{{ material.0 }}">{{ material.0 }} - {{ material.1 }}</option>
+          {% endfor %}
+        </select>
+        <div class="input-group-append">
+          <button id="material_id_submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span id="dataset_id_label" class="input-group-text">Data set ID</span>
+        </div>
+        <select id='dataset_ids' name='dataset_ids' class="form-control">
+          {% for dataset in dataset_ids %}
+            <option value="{{ dataset.0 }}">{{ dataset.0 }} - {{ dataset.1 }}, {{ dataset.2 }}</option>
+          {% endfor %}
+        </select>
+        <div class="input-group-append">
+          <button id="dataset_id_submit" class="btn btn-primary">Submit</button>
+        </div>
       </div>
       <ul id="results" class="list-group">
       </ul>
@@ -79,4 +105,16 @@
           });
    });
   </script>
+  <script>
+   const label_width = document.getElementById('search_term').offsetWidth;
+   document.getElementById('material_id_label').style.width = `${label_width}px`;
+   document.getElementById('dataset_id_label').style.width = `${label_width}px`;
+   document.getElementById('material_id_submit').addEventListener('click', () => {
+     window.location.href = document.getElementById('material_ids').value;
+   });
+   document.getElementById('dataset_id_submit').addEventListener('click', () => {
+     window.location.href = `dataset/${document.getElementById('dataset_ids').value}`;
+   });
+  </script>
+
 {% endblock %}

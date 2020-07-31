@@ -148,12 +148,19 @@ class SearchFormView(generic.TemplateView):
         ['physical_property', 'Physical property'],
         ['organic', 'Organic Component'],
         ['inorganic', 'Inorganic Component'],
-        ['author', 'Author']
+        ['author', 'Author'],
     ]
 
     def get(self, request):
-        return render(request, self.template_name,
-                      {'search_terms': self.search_terms})
+        material_ids = models.System.objects.all().values_list(
+            'pk', 'compound_name')
+        dataset_ids = models.Dataset.objects.all().values_list(
+            'pk', 'system__compound_name', 'primary_property__name')
+        return render(request, self.template_name, {
+            'search_terms': self.search_terms,
+            'material_ids': material_ids,
+            'dataset_ids': dataset_ids,
+        })
 
     def post(self, request):
         template_name = 'materials/search_results.html'
