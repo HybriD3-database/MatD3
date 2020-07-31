@@ -9,12 +9,12 @@
         <div class="text-center">
           <button class="text-center btn btn-default expand-hide-button"
                   data-toggle="collapse"
-                  data-target="#atomic-coordinates-body-{{ subset.pk }}">
+                  data-target="#atomic-coordinates-body-jsmol-{{ subset.pk }}">
             Atomic coordinates (click to expand)
           </button>
         </div>
       {% endif %}
-      <div class="collapse" id="atomic-coordinates-body-{{ subset.pk }}"></div>
+      <div class="collapse" id="atomic-coordinates-body-jsmol-{{ subset.pk }}"></div>
     {% endfor %}
   </div>
 </div>

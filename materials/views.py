@@ -1032,11 +1032,9 @@ def get_jsmol_input(request, pk):
     JSmol. If there are no geometry files return an empty response.
 
     """
-    datasets = models.Dataset.objects.filter(system__pk=pk).filter(
-        primary_property__name='atomic structure')
-    if not datasets:
+    dataset = models.Dataset.objects.get(pk=pk)
+    if not dataset:
         return HttpResponse()
-    dataset = datasets.get(representative=True)
     if dataset.input_files.exists():
         filename = os.path.basename(
             dataset.input_files.first().dataset_file.path)

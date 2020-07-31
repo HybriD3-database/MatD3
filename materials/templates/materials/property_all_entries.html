@@ -35,7 +35,7 @@
                   {% if dataset.primary_property.name == 'atomic structure'%}
                     <div class="row">
                       <div class="col-md-6">
-                        {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=True skip_atomic_structure=True %}
+                        {% include 'materials/dataset_contents.html' with with_reference=True with_all_entries=False skip_atomic_structure=False %}
                       </div>
                       <div class="col-md-6">
                         <div id="jsmol-{{ dataset.pk }}">
@@ -63,7 +63,7 @@
     <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
     <script>
      {% for dataset in object_list %}
-     $.get("{% url 'materials:get_jsmol_input' pk=dataset.system.pk %}", function(response) {
+     $.get("{% url 'materials:get_jsmol_input' pk=dataset.pk %}", function(response) {
        if (response) {
          {% if forloop.first %}
          $('#jsmol-{{ dataset.pk }} .jsmol').html(Jmol.getAppletHtml('jmol', {

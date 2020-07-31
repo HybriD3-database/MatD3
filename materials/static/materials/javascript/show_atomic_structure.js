@@ -6,7 +6,8 @@ for (let element of document.getElementsByClassName('expand-hide-button')) {
       document.getElementById(element.dataset.target.split('#')[1]);
     if (target.id.startsWith('atomic-coordinates-body-') &&
         target.innerHTML === '') {
-      const series_id = target.id.split('atomic-coordinates-body-')[1];
+      const series_id = target.id.split('atomic-coordinates-body-jsmol-')[1]
+                     || target.id.split('atomic-coordinates-body-')[1];
       axios
         .get('/materials/get-atomic-coordinates/' + series_id)
         .then(response => {
