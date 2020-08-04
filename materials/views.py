@@ -358,7 +358,7 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
         in_memory_object = dataset_to_zip(request, dataset)
         response = HttpResponse(in_memory_object.getvalue(),
                                 content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = f'attachment; filename=files.zip'
+        response['Content-Disposition'] = 'attachment; filename=files.zip'
         return response
 
 
@@ -1049,9 +1049,11 @@ def report_issue(request):
     description = request.POST['description']
     user = request.user
     if user.is_authenticated:
-        body = (f'Description:\n\n<blockquote>{description}</blockquote>'
-                'This report was issued by the user '
-                f'{escape(user.username)} ({escape(user.email)})')
+        body = (f'Description:<blockquote>{description}</blockquote>'
+                f'This report was issued by {escape(user.username)} '
+                f'({escape(user.email)}).<br>'
+                f'Data set location: {request.scheme}://'
+                f'{request.get_host()}/materials/dataset/{pk}.')
         email_addresses = list(User.objects.filter(
             is_superuser=True).values_list('email', flat=True))
         send_mail(
