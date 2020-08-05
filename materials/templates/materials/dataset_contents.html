@@ -6,6 +6,19 @@ sections are included by default. This file should be included using
 the "with ..." syntax to include certain parts.
 {% endcomment %}
 
+<!-- BUTTON FOR VIEWING ALL ENTRIES -->
+{% if with_all_entries and dataset.primary_property.pk %}
+  {% with dataset.num_all_entries as num %}
+    {% if num > 1 %}
+      <p class="m-1">
+        <a href="{% url 'materials:property_all_entries' system_pk=dataset.system.pk prop_pk=dataset.primary_property.pk %}">
+          See all entries for this property ({{ num }} total)
+        </a>
+      </p>
+    {% endif %}
+  {% endwith %}
+{% endif %}
+
 <!-- MAIN DATA -->
 <h5>{{ dataset.caption }}</h5>
 <h5>Origin: {% if dataset.is_experimental %}experimental{% else %}computational{% endif %}
@@ -452,19 +465,6 @@ the "with ..." syntax to include certain parts.
       </button>
     {% endif %}
   </div>
-{% endif %}
-
-<!-- BUTTON FOR VIEWING ALL ENTRIES -->
-{% if with_all_entries and dataset.primary_property.pk %}
-  {% with dataset.num_all_entries as num %}
-    {% if num > 1 %}
-      <p class="text-center m-1">
-        <a href="{% url 'materials:property_all_entries' system_pk=dataset.system.pk prop_pk=dataset.primary_property.pk %}">
-          See all entries for this property ({{ num }} total)
-        </a>
-      </p>
-    {% endif %}
-  {% endwith %}
 {% endif %}
 
 <div class="text-center" style="margin-top:10px">
