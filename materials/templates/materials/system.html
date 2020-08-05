@@ -78,8 +78,10 @@ data sets corresponding to each property are shown.
 {% block script %}
   <script src="{% static 'jsmol/JSmol.min.js' %}"></script>
   <script>
-   {% if dataset_list.first %}
-   $.get("{% url 'materials:get_jsmol_input' pk=dataset_list.first.pk %}", function(response) {
+   {% for dataset in dataset_list %}
+   {% if dataset.representative and dataset.primary_property.name == 'atomic structure' %}
+   {% if user == dataset.created_by or dataset.visible %}
+   $.get("{% url 'materials:get_jsmol_input' pk=dataset.pk %}", function(response) {
      if (response) {
        $('#jmol').html(Jmol.getAppletHtml('jmol', {
          script: response,
@@ -93,6 +95,8 @@ data sets corresponding to each property are shown.
      }
    });
    {% endif %}
+   {% endif %}
+   {% endfor %}
   </script>
   {% include 'materials/dataset_scripts.html' with datasets=dataset_list %}
 {% endblock %}
