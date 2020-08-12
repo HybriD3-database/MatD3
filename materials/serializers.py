@@ -14,7 +14,7 @@ class BaseSerializer(serializers.ModelSerializer):
             'created_by',
             'updated',
             'updated_by',
-            )
+        )
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -28,28 +28,32 @@ class ReferenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Reference
-        fields = ('pk',
-                  'authors',
-                  'title',
-                  'journal',
-                  'vol',
-                  'pages_start',
-                  'pages_end',
-                  'year',
-                  'doi_isbn')
+        fields = (
+            'pk',
+            'authors',
+            'title',
+            'journal',
+            'vol',
+            'pages_start',
+            'pages_end',
+            'year',
+            'doi_isbn',
+        )
 
 
 class SystemSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.System
-        fields = ('pk',
-                  'compound_name',
-                  'formula',
-                  'group',
-                  'organic',
-                  'inorganic',
-                  'last_update',
-                  'description')
+        fields = (
+            'pk',
+            'compound_name',
+            'formula',
+            'group',
+            'organic',
+            'inorganic',
+            'last_update',
+            'description',
+        )
 
 
 class PropertySerializer(serializers.ModelSerializer):
@@ -70,18 +74,20 @@ class DatasetSerializerInfo(serializers.ModelSerializer):
     class Meta:
         model = models.Dataset
         depth = 1
-        fields = ('pk',
-                  'caption',
-                  'system',
-                  'primary_property',
-                  'primary_unit',
-                  'secondary_property',
-                  'secondary_unit',
-                  'reference',
-                  'is_experimental',
-                  'dimensionality',
-                  'sample_type',
-                  'extraction_method')
+        fields = (
+            'pk',
+            'caption',
+            'system',
+            'primary_property',
+            'primary_unit',
+            'secondary_property',
+            'secondary_unit',
+            'reference',
+            'is_experimental',
+            'dimensionality',
+            'sample_type',
+            'extraction_method',
+        )
 
 
 class ComputationalSerializer(BaseSerializer):
@@ -210,4 +216,24 @@ class DatasetSerializer(BaseSerializer):
             'experimental',
             'subsets',
             'space_group',
+        )
+
+
+class DatasetSerializerSummary(serializers.ModelSerializer):
+    sample_type = serializers.CharField(source='get_sample_type_display')
+
+    class Meta:
+        model = models.Dataset
+        fields = (
+            'pk',
+            'caption',
+            'system',
+            'primary_property',
+            'primary_unit',
+            'secondary_property',
+            'secondary_unit',
+            'reference',
+            'is_experimental',
+            'dimensionality',
+            'sample_type',
         )

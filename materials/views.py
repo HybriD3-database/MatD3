@@ -351,6 +351,12 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = serializers.DatasetSerializerInfo(dataset)
         return Response(serializer.data)
 
+    @action(detail=False)
+    def summary(self, request):
+        serializer = serializers.DatasetSerializerSummary(self.queryset,
+                                                          many=True)
+        return Response(serializer.data)
+
     @action(detail=True)
     def files(self, request, pk):
         """Retrieve data set contents and uploaded files as zip."""
