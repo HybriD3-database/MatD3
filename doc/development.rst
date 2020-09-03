@@ -2,7 +2,7 @@
 Development notes
 =================
 
-The most important configuration file for the project is ``settings.py`` located under ``mainproject``. This file would need to be reviewed and edited for each instance of the server. Most settings in it are already at reasonable (or correct) values and those that are most likely to be edited are stored in a separate file called ``.env`` in the root directory. This file is part the Python Decouple tool, which allows you to organize the project's settings without having to edit the version controlled settings file and, most importantly, for keeping secrets out of version control. Each value in ``settings.py`` that is set using the ``config`` function should have a corresponding entry in ``.env``, unless you are satisfied with the default value. See ``env.example`` in the root directory for example contents.
+The most important configuration file for the project is ``settings.py`` located under ``mainproject``. This file would need to be reviewed and edited for each instance of the server. Most settings in it are already at reasonable (or correct) values and those that are most likely to be edited are stored in a separate file called ``.env`` in the root directory. This file is part of the Python Decouple tool, which allows you to organize the project's settings without having to edit the version controlled settings file and, most importantly, for keeping secrets out of version control. Each value in ``settings.py`` that is set using the ``config`` function should have a corresponding entry in ``.env``, unless you are satisfied with the default value. See ``env.example`` in the root directory for example contents.
 
 When this is set up, start the server with
 
