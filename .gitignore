@@ -6,3 +6,4 @@ venv/*
 .coverage
 doc/_build
 mainproject/templates/mainproject/home.html
+mainproject/static/mainproject/images

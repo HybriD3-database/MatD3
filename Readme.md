@@ -93,7 +93,7 @@ These instructions are for quickly setting up a local server on your personal co
   cp -v mainproject/templates/mainproject/home{_default,}.html
   ```
 
-  and edit accordingly.
+  and edit accordingly. Any images that `home.html` refers to should be placed in `mainproject/static/mainproject/images`.
 
 * Start the server
 
