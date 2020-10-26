@@ -1,4 +1,4 @@
-"""Functions related to the HybriD3/Qresp interface."""
+"""Functions related to the MatD3/Qresp interface."""
 import matplotlib
 import os
 import shutil

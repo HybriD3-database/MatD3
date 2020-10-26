@@ -8,8 +8,9 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from . import models
+from mainproject.settings import MATD3_NAME
 
-admin.site.site_header = mark_safe('HybriD&sup3; database')
+admin.site.site_header = mark_safe(f'{MATD3_NAME} database')
 
 
 class BaseMixin:

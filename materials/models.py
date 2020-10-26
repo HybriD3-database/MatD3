@@ -213,9 +213,10 @@ class Dataset(Base):
                 'to the website and re-verify the data.</p>'
                 '<p>This is an automated email. Please do not respond!</p>')
             send_mail(
-                f'HybriD3 data set verified by you has been modified',
+                f'{settings.MATD3_NAME} data set verified by you has been '
+                'modified',
                 '',
-                'hybrid3info',
+                'matd3info',
                 email_addresses,
                 fail_silently=False,
                 html_message=body,

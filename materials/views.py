@@ -1063,9 +1063,7 @@ def report_issue(request):
         email_addresses = list(User.objects.filter(
             is_superuser=True).values_list('email', flat=True))
         send_mail(
-            f'Issue report about dataset {pk}',
-            '',
-            'hybrid3info',
+            f'Issue report about dataset {pk}', '', 'matd3info',
             email_addresses,
             fail_silently=False,
             html_message=body,

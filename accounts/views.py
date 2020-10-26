@@ -20,6 +20,8 @@ from .forms import EditProfileForm
 from .forms import EditUserForm
 from .forms import RegistrationForm
 from .tokens import account_activation_token
+from mainproject.settings import MATD3_NAME
+from mainproject.settings import MATD3_URL
 
 
 def register(request):
@@ -30,7 +32,7 @@ def register(request):
             user.is_active = False
             user.save()
             user.email_user(
-                'Activate Your HybriD3 Account',
+                f'Activate Your {MATD3_NAME} Account',
                 render_to_string('accounts/activation_email.html', {
                     'user': user,
                     'domain': get_current_site(request),
@@ -59,7 +61,7 @@ def activate(request, uid, token):
         # Notify all superusers of the new user
         email_addresses = list(User.objects.filter(
             is_superuser=True).values_list('email', flat=True))
-        send_mail('HybriD3 database: new user created', '', 'hybrid3info',
+        send_mail(f'{MATD3_URL}: new user created', '', 'matd3info',
                   email_addresses,
                   fail_silently=False,
                   html_message=(f'The account of "{user.username}" is '
