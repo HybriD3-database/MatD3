@@ -6,7 +6,7 @@
     {% if user.is_authenticated %}
       <h2 class="text-center">Welcome, {{user.first_name}}, to the {{ matd3_name }} materials database</h2>
     {% else %}
-      <h2 class="text-center">Welcome to the HybriD&sup3; materials database</h2>
+      <h2 class="text-center">Welcome to the {{ matd3_name }} materials database</h2>
     {% endif %}
     {% if matd3_name == 'HybriD&#xb3;' %}
       <div class="d-none d-sm-block">
