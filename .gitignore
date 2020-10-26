@@ -5,3 +5,4 @@ venv/*
 .env
 .coverage
 doc/_build
+mainproject/templates/mainproject/home.html

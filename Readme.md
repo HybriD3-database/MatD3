@@ -87,6 +87,14 @@ These instructions are for quickly setting up a local server on your personal co
   ./manage.py createsuperuser
   ```
 
+* If you want to customize the index page, make a copy of `home_default.html`,
+
+  ```
+  cp -v mainproject/templates/mainproject/home{_default,}.html
+  ```
+
+  and edit accordingly.
+
 * Start the server
 
   ```

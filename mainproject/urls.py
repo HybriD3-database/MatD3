@@ -14,8 +14,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', generic.TemplateView.as_view(
-        template_name='mainproject/home.html'), name='index'),
+    path('', views.index, name='index'),
     path('contact/', generic.TemplateView.as_view(
         template_name='mainproject/contact.html'), name='contact'),
     path('contributors/', views.contributors, name='contributors'),

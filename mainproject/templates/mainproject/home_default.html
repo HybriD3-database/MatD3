@@ -8,23 +8,9 @@
     {% else %}
       <h2 class="text-center">Welcome to the {{ matd3_name }} materials database</h2>
     {% endif %}
-    {% if matd3_name == 'HybriD&#xb3;' %}
-      <div class="d-none d-sm-block">
-        <img src="{% static 'materials/images/perovskite_model.png' %}"
-             class="float-left" width=180 alt="perovskite_model">
-        <img src="{% static 'materials/images/AE4TPbI4_crystal.png' %}"
-             class="float-right p-2" width=140 alt="AE4TPbI4 crystal">
-        <img src="{% static 'materials/images/AE4TPbI4_liquid.png' %}"
-             class="float-right p-2" width=75 alt="AE4TPbI4 liquid">
-      </div>
-    {% endif %}
     <div class="text-justify">
       <p>
-        {% if matd3_name == 'HybriD&#xb3;' %}
-          The {{ matd3_name }} materials database provides a comprehensive collection of experimental and computational materials data for crystalline organic-inorganic compounds, predominantly based on the perovskite paradigm.
-        {% else %}
-          The {{ matd3_name }} materials database provides a comprehensive collection of experimental and computational curated materials data.
-        {% endif %}
+        The {{ matd3_name }} materials database provides a comprehensive collection of experimental and computational curated materials data.
       </p>
       <p>
         The data is available under the Creative Commons license with attribution clause, described <a href="https://creativecommons.org/licenses/by/4.0/">here</a> and, in its full text, <a href="https://creativecommons.org/licenses/by/4.0/legalcode">here</a>. We also intend to offer the data for inclusion in broader materials databases in order to maximize its accessibility.

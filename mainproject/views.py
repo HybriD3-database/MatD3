@@ -1,9 +1,16 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.db.models import F
 from django.db.models import Q
 from django.shortcuts import render
+from django.template import TemplateDoesNotExist
 
-from django.contrib.auth import get_user_model
+
+def index(request):
+    try:
+        return render(request, 'mainproject/home.html')
+    except TemplateDoesNotExist:
+        return render(request, 'mainproject/home_default.html')
 
 
 def contributors(request):
