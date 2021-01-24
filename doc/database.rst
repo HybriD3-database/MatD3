@@ -4,7 +4,7 @@ Database structure
 
 The web interface for the database is written in the Django web framework and the database itself is of SQL type. That is, any structured database should in principle be fine for hosting (mySQL, SQLite), but we recommend using mySQL/MariaDB. This section provides an overview of the Django models used for the website. The presentation focuses on how the models are defined in the Python source code and not the actual SQL tables. For example, even though fields such as the primary key are not listed in the following, it is understood that these are automatically created for the SQL tables.
 
-Most models inherit from a base model which records information of how each entry is created/updated. Since actual polymorphism is not supported in relational databases, Django explicitly copies these fields to any child models.
+Most models inherit from a base model which records information of how each entry is created/updated. Since actual inheritance is not supported in relational databases, Django explicitly copies these fields to any child models.
 
 .. admonition:: Base
 
