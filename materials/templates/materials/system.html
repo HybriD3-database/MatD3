@@ -16,7 +16,7 @@ data sets corresponding to each property are shown.
           </button>
         </a>
       {% endif %}
-      <h3>{{ dataset_list.first.system.compound_name }}</h3>
+      <h3>{{ dataset_list.first.system.compound_name }} (organic: {{ dataset_list.first.system.organic }}, inorganic: {{ dataset_list.first.system.inorganic }})</h3>
     </div>
 
     <div class="card-body">
