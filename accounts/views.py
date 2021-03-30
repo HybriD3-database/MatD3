@@ -64,8 +64,7 @@ def activate(request, uid, token):
         send_mail(f'{MATD3_URL}: new user created', '', 'matd3info',
                   email_addresses,
                   fail_silently=False,
-                  html_message=(f'The account of "{user.username}" is '
-                                'waiting to be elevated to staff status.'))
+                  html_message=(f'New account created: "{user.username}".'))
         messages.success(request, 'Account confirmed.')
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         messages.error(request, 'Activation link is invalid!')
