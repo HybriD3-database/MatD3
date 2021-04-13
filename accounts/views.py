@@ -61,10 +61,16 @@ def activate(request, uid, token):
         # Notify all superusers of the new user
         email_addresses = list(User.objects.filter(
             is_superuser=True).values_list('email', flat=True))
+        name_and_email = user.email
+        if user.last_name:
+            name_and_email = f'{user.last_name} {name_and_email}'
+        if user.first_name:
+            name_and_email = f'{user.first_name} {name_and_email}'
         send_mail(f'{MATD3_URL}: new user created', '', 'matd3info',
                   email_addresses,
                   fail_silently=False,
-                  html_message=(f'New account created: "{user.username}".'))
+                  html_message=(f'New account created: {user.username} '
+                                f'({name_and_email})'))
         messages.success(request, 'Account confirmed.')
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         messages.error(request, 'Activation link is invalid!')
