@@ -14,7 +14,9 @@ and open ``localhost:8000`` in your web browser. You can browse the site just li
 
 .. admonition:: Importing an existing database (optional)
 
-   When deploying a new MatD3 server, you can start with an empty database or import an existing one. Here we show the steps for copying the database over for the example of materials.hybrid3.duke.edu. Note that this particular server address functions as a placeholder here - in general, the process is intended to work with any MatD3 materials database and is not contingent on the specific data stored at materials.hybrid3.duke.edu.
+   When deploying a new MatD3 server, you can start with an empty database or import an existing one. Here we show the steps for copying the database over for the example of materials.hybrid3.duke.edu. 
+   
+   Note that the materials.hybrid3.duke.edu server address functions as a placeholder here - in general, the process is intended to work with any MatD3 materials database and is not contingent on the specific data stored at materials.hybrid3.duke.edu.
    
   - Install and start the MariaDB server on your computer. Create a database called "materials" for the user "user" (you can change the latter).
   - Copy the database contents from the public server. First, log in to the server, e.g.
