@@ -47,6 +47,7 @@ These instructions are for quickly setting up a local server on your personal co
 
    ```
    brew install mariadb
+   brew install geckodriver
    ```
 
    If there are issues with installing MySQL/MariaDB and you only plan to use SQLite, remove the line `mysqlclient==1.4.2` from requirements.txt and proceed with the installation.
@@ -58,7 +59,7 @@ These instructions are for quickly setting up a local server on your personal co
   # edit .env
   ```
 
-  If you wish to use anything other than the SQLite database, you first need to set up that database (e.g., MariaDB). See https://hybrid3-database.readthedocs.io/en/latest/setup.html for more details.
+  If you wish to use anything other than the SQLite database, you first need to set up that database (e.g., MariaDB). See https://hybrid3-database.readthedocs.io/en/latest/development.html for more details.
 
 * Initialize static files and perform database migrations
 
