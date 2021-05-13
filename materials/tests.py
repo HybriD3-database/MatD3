@@ -1,5 +1,7 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
 from selenium import webdriver
+from selenium.common.exceptions import NoAlertPresentException
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 import os
@@ -251,8 +253,11 @@ class SeleniumTestCase(LiveServerTestCase):
         S.execute_script(
             f"selectized['select_system'][0].selectize.setValue(1)")
         # General
-        S.find_element_by_id('id_origin_of_data_1').click()
-        S.find_element_by_id('id_sample_type_4').click()
+        element = S.find_element_by_id('id_origin_of_data_1')
+        S.execute_script("arguments[0].click();", element)
+
+        element = S.find_element_by_id('id_sample_type_4')
+        S.execute_script("arguments[0].click();", element)
         S.find_element_by_id('id_space_group').send_keys('F222')
         # Optional sections
         S.find_element_by_id('synthesis-button').click()
@@ -281,7 +286,8 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_id('id_computational_comment').send_keys(
             'comp comment')
         # Data
-        S.find_element_by_id('id_crystal_system_2_1').click()
+        element = S.find_element_by_id('id_crystal_system_2_1')
+        S.execute_script("arguments[0].click();", element)
         S.find_element_by_id('id_subset_datapoints_1').send_keys('''
         14.4 -3.7
         16.7(1.3) 10.4
@@ -299,7 +305,8 @@ class SeleniumTestCase(LiveServerTestCase):
         self.selectize_set('primary_property', 'dielectric constant')
         S.execute_script(
             f"selectized['primary_unit'][0].selectize.clear()")
-        S.find_element_by_id('id_is_figure').click()
+        element = S.find_element_by_id('id_is_figure')
+        S.execute_script("arguments[0].click();", element)
         S.find_element_by_id('id_origin_of_data_0').click()
         S.find_element_by_id('computational-button').click()
         S.find_element_by_id('id_subset_datapoints_1').send_keys('7.8')
@@ -413,7 +420,11 @@ class SeleniumTestCase(LiveServerTestCase):
             '//table[contains(@class, "table-atomic-coordinates")]/'
             'tr/td[contains(text(), "Ga")]')
         S.find_element_by_class_name('delete-button').click()
-        S.switch_to_alert().accept()
+        try:
+            S.switch_to_alert().accept()
+        except NoAlertPresentException:
+            S.find_element_by_class_name('delete-button').click()
+            S.switch_to_alert().accept()
         S.get(self.live_server_url + reverse('materials:add_data'))
         self.assertEqual(models.Dataset.objects.count(), 1)
 
