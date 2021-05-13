@@ -10,8 +10,14 @@ When this is set up, start the server with
 
   ./manage.py runserver
 
-and open ``localhost:8000`` in your web browser. You can browse the site just like the public one, but you will notice that there are no materials in the database. This is because the running instance is connected to an empty database, whether it's MySQL/MariaDB, SQLite, or some other flavor. This can be fixed by importing the database contents from the production server to the local database. Note that it is generally better to use the same database type in both development and production environments. This project is developed with MariaDB in mind and it is recommended for you to set it up on your own computer. In order to use MariaDB, make sure ``USE_SQLITE`` is set to ``False`` in ``.env`` or remove that variable altogether. Then perform the following steps:
+and open ``localhost:8000`` in your web browser. You can browse the site just like the public one, but you will notice that there are no materials in the database. This is because the running instance is connected to an empty database, whether it's MySQL/MariaDB, SQLite, or some other flavor. This can be fixed by importing the database contents from the production server to the local database. Note that it is generally better to use the same database type in both development and production environments. This project is developed with MariaDB in mind and it is recommended for you to set it up on your own computer. In order to use MariaDB, make sure ``USE_SQLITE`` is set to ``False`` in ``.env`` or remove that variable altogether.
 
+.. admonition:: Importing an existing database (optional)
+
+   When deploying a new MatD3 server, you can start with an empty database or import an existing one. Here we show the steps for copying the database over for the example of materials.hybrid3.duke.edu. 
+   
+   Note that the materials.hybrid3.duke.edu server address functions as a placeholder here - in general, the process is intended to work with any MatD3 materials database and is not contingent on the specific data stored at materials.hybrid3.duke.edu.
+   
   - Install and start the MariaDB server on your computer. Create a database called "materials" for the user "user" (you can change the latter).
   - Copy the database contents from the public server. First, log in to the server, e.g.
 
@@ -39,9 +45,15 @@ and open ``localhost:8000`` in your web browser. You can browse the site just li
 
   You may now delete the dump file on the server and on your computer.
 
-You might need to adjust some of these steps to reflect your environment. Now restart the development server and you should be able to browse all the materials currently present in the database.
+  - Finally, copy over the media files. Here we assume that the current directory is ``mainproject`` which is in the root MatD3 directory:
 
-If you want to go back to SQLite instead of MariaDB for development, you can migrate the database to SQLite using the following script:
+  .. code:: bash
+
+     scp -r <user>@materials.hybrid3.duke.edu:/var/www/hybrid3-database/mainproject/media .
+
+  You might need to adjust some of these steps to reflect your environment. Now restart the development server and you should be able to browse all the materials currently present in the database.
+
+  If you want to go back to SQLite instead of MariaDB for development, you can migrate the database to SQLite using the following script:
 
   https://github.com/dumblob/mysql2sqlite
 
@@ -51,9 +63,9 @@ Next, you should create a superuser:
 
   python manage.py createsuperuser
 
-In order to access the site with admin rights, add ``/admin`` to the url and login as the superuser. The admin page allows editing of all data stored in the database.
+In order to access the site with admin rights, use the ``/admin`` entrypoint and login as the superuser. The admin page allows editing of all data stored in the database.
 
-Typically, when making changes to the Python source code, the effects are immediately visible at the site. There is no need to even restart the server. New byte-code is automatically regenerated for modified files. However, if you are making changes to the models, it is necessary to ``migrate``. Migrations change the database structure, which depends on changes in the models. Unlike the byte-code, which regenerates itself on-the-fly as needed, any updates to the database need to be performed manually. Thus, if you change a model, things are unlikely to work until you migrate. To create the migration files, type
+Typically, when making changes to the Python source code, the effects are immediately visible at the site. There is no need to even restart the server. New byte-code is automatically regenerated for modified files. However, if you are making changes to the models, it is necessary to ``migrate``. Migrations change the database structure, which depends on changes in the models. Unlike the byte-code, which regenerates itself on-the-fly as needed, any updates to the database need to be performed manually. Thus, if you change a model, things are unlikely to work until you migrate. To create the migration files, issue
 
 .. code:: bash
 
