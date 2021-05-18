@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'MatD3'
-copyright = 'Mat3D team'
+copyright = 'MatD3 team'
 author = 'Raul Laasner, Xiaochen Du'
 
 
