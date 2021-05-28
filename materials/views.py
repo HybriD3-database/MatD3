@@ -353,6 +353,11 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False)
     def summary(self, request):
+        page = self.paginate_queryset(self.queryset)
+        if page is not None:
+            serializer = serializers.DatasetSerializerSummary(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = serializers.DatasetSerializerSummary(self.queryset,
                                                           many=True)
         return Response(serializer.data)
