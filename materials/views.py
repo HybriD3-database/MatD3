@@ -9,6 +9,7 @@ import re
 import requests
 import zipfile
 
+import django_filters.rest_framework
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -37,6 +38,7 @@ from django.views import generic
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import filters
 
 from . import forms
 from . import models
@@ -344,6 +346,15 @@ def dataset_to_zip(request, dataset):
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all()
     serializer_class = serializers.DatasetSerializer
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = {
+        'system': ['exact'], 
+        'primary_property__name': ['exact', 'contains'], 
+        'secondary_property__name': ['exact', 'contains'],
+        'reference': ['exact'],
+        'dimensionality': ['exact']
+        }
+    search_fields = filterset_fields
 
     @action(detail=True)
     def info(self, request, pk):
@@ -353,12 +364,13 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False)
     def summary(self, request):
-        page = self.paginate_queryset(self.queryset)
+        filtered_queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(filtered_queryset)
         if page is not None:
             serializer = serializers.DatasetSerializerSummary(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = serializers.DatasetSerializerSummary(self.queryset,
+        serializer = serializers.DatasetSerializerSummary(filtered_queryset,
                                                           many=True)
         return Response(serializer.data)
 
