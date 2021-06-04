@@ -27,6 +27,7 @@ from django.utils.safestring import mark_safe
 from django.views import generic
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from . import forms, models, permissions, qresp, serializers, utils
@@ -248,6 +249,18 @@ class ImportDataView(StaffStatusMixin, generic.TemplateView):
         })
 
 
+class LargeResultsSetPagination(PageNumberPagination):
+    """Override the default pagination behavior.
+
+    Use this for some of the lighter endpoints such as when fetching
+    for properties or units.
+
+    """
+    page_size = 100000
+    page_size_query_param = 'page_size'
+    max_page_size = 100000
+
+
 class ReferenceViewSet(viewsets.ModelViewSet):
     queryset = models.Reference.objects.all().order_by('-pk')
     serializer_class = serializers.ReferenceSerializer
@@ -288,12 +301,14 @@ class SystemViewSet(viewsets.ModelViewSet):
     queryset = models.System.objects.all().order_by('-pk')
     serializer_class = serializers.SystemSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = models.Property.objects.all().order_by('-pk')
     serializer_class = serializers.PropertySerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -303,6 +318,7 @@ class UnitViewSet(viewsets.ModelViewSet):
     queryset = models.Unit.objects.all().order_by('-pk')
     serializer_class = serializers.UnitSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)

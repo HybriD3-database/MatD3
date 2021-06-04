@@ -1,7 +1,6 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException
-from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 import os
@@ -17,6 +16,7 @@ from accounts.tests import USERNAME
 from accounts.tests import PASSWORD
 
 from mainproject import settings
+
 
 settings.MEDIA_ROOT += '_tests'
 
@@ -251,7 +251,7 @@ class SeleniumTestCase(LiveServerTestCase):
         self.selectize_set('secondary_unit', 'GPa')
         # Set system
         S.execute_script(
-            f"selectized['select_system'][0].selectize.setValue(1)")
+            "selectized['select_system'][0].selectize.setValue(1)")
         # General
         element = S.find_element_by_id('id_origin_of_data_1')
         S.execute_script("arguments[0].click();", element)
@@ -304,7 +304,7 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_id('id_related_data_sets').send_keys(last_pk)
         self.selectize_set('primary_property', 'dielectric constant')
         S.execute_script(
-            f"selectized['primary_unit'][0].selectize.clear()")
+            "selectized['primary_unit'][0].selectize.clear()")
         element = S.find_element_by_id('id_is_figure')
         S.execute_script("arguments[0].click();", element)
         S.find_element_by_id('id_origin_of_data_0').click()
@@ -341,8 +341,8 @@ class SeleniumTestCase(LiveServerTestCase):
                                     f'p/i[contains(text(), "{test_string}")]')
         S.find_element_by_link_text('Show table').click()
         S.find_element_by_xpath(
-            f'//div[contains(@class, "card-body")]/table/'
-            f'tbody/tr/td[contains(text(), "16.7 (±1.3)")]')
+            '//div[contains(@class, "card-body")]/table/'
+            'tbody/tr/td[contains(text(), "16.7 (±1.3)")]')
         # Test presence of all fields in computational details
         comp = models.ComputationalDetails.objects.first()
         self.assertEqual(comp.code, 'abinit')
@@ -365,7 +365,7 @@ class SeleniumTestCase(LiveServerTestCase):
         self.selectize_set('primary_unit', 'Å')
         # Set system
         S.execute_script(
-            f"selectized['select_system'][0].selectize.setValue(1)")
+            "selectized['select_system'][0].selectize.setValue(1)")
         # Input first atomic structure
         S.execute_script('window.scrollTo(0, document.body.scrollHeight)')
         S.find_element_by_id('id_lattice_constant_a_1').send_keys('9.64')
@@ -440,7 +440,7 @@ class SeleniumTestCase(LiveServerTestCase):
         self.selectize_set('primary_unit', 'K')
         # Set system
         S.execute_script(
-            f"selectized['select_system'][0].selectize.setValue(1)")
+            "selectized['select_system'][0].selectize.setValue(1)")
         # Input data
         S.find_element_by_id(
             'id_phase_transition_space_group_initial_1').send_keys('C1')

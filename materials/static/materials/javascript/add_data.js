@@ -129,7 +129,7 @@ axios
   .get('/materials/references/', {
     transformResponse: [function(data) {
       // Transform each article object into a string
-      let articles = JSON.parse(data);
+      let articles = JSON.parse(data).results;
       for (let article of articles) {
         article.text =
           `${article.year} - ${authors_as_string(article.authors)}, ` +
@@ -152,14 +152,16 @@ axios
   });
 axios.get('/materials/systems/').then(response => {
   selectize_wrapper(
-    'select_system', response.data, initial_system, 'compound_name');
+    'select_system', response.data.results, initial_system, 'compound_name');
   new_system_handler.toggle_visibility('id_select_system');
 });
 axios.get('/materials/properties/').then(response => {
   selectize_wrapper(
-    'primary_property', response.data, initial_primary_property, 'name');
+    'primary_property', response.data.results, initial_primary_property,
+    'name');
   selectize_wrapper(
-    'secondary_property', response.data, initial_secondary_property, 'name');
+    'secondary_property', response.data.results, initial_secondary_property,
+    'name');
   document
     .getElementById('id_primary_property')
     .dispatchEvent(new Event('change'));
@@ -177,9 +179,9 @@ axios.get('/materials/units/').then(response => {
     .getElementById('id_secondary_unit')
     .setAttribute('placeholder', '--select or add--');
   selectize_wrapper(
-    'primary_unit', response.data, initial_primary_unit, 'label');
+    'primary_unit', response.data.results, initial_primary_unit, 'label');
   selectize_wrapper(
-    'secondary_unit', response.data, initial_secondary_unit, 'label');
+    'secondary_unit', response.data.results, initial_secondary_unit, 'label');
   new_unit_handler.toggle_visibility('id_primary_unit');
   new_unit_handler.toggle_visibility('id_secondary_unit');
 });
@@ -310,13 +312,15 @@ const add_fixed_property =
     edit_id_and_name('property');
     const property_name = name;
     axios.get('/materials/properties/').then(response => {
-      selectize_wrapper(property_name, response.data, prop_initial, 'name');
+      selectize_wrapper(
+        property_name, response.data.results, prop_initial, 'name');
       new_property_handler.toggle_visibility('id_' + property_name);
     });
     edit_id_and_name('unit');
     const unit_name = name;
     axios.get('/materials/units/').then(response => {
-      selectize_wrapper(unit_name, response.data, unit_initial, 'label');
+      selectize_wrapper(
+        unit_name, response.data.results, unit_initial, 'label');
       new_unit_handler.toggle_visibility('id_' + unit_name);
     });
     edit_id_and_name('value');
