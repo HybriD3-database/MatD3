@@ -29,3 +29,4 @@ Contents
    other
    qresp
    example_server
+   tutorial
