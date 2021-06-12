@@ -45,6 +45,8 @@ A solid system is defined by the following properties.
     organic component
   **inorganic**
     inorganic component
+  **iupac**
+    IUPAC name
   **last_update**
     date the system was last modified
   **description**
