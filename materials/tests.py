@@ -229,6 +229,7 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_id('id_organic').send_keys('H')
         S.find_element_by_id('id_inorganic').send_keys('O')
         S.find_element_by_id('id_group').send_keys('OH2')
+        S.find_element_by_id('id_iupac').send_keys('dihydrogen monoxide')
         S.find_element_by_id('id_description').send_keys('description')
         S.find_element_by_xpath(
             '//div[@id="new-system-card"]//button[@type="submit"]').click()
