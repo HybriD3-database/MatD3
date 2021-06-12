@@ -76,21 +76,26 @@ class AddSystemForm(forms.Form):
         required=False,
         label='Alternate names',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        max_length=100,
+        max_length=1000,
         help_text=''
         'Please list all possible variations of this compound (besides '
         'those entered above), including different uses of parentheses - '
         'this makes the compound more easily searchable.')
     organic = forms.CharField(
-        label='organic component',
+        label='Organic component',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=100,
         help_text='Enter organic component')
     inorganic = forms.CharField(
-        label='inorganic component',
+        label='Inorganic component',
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=100,
         help_text='Enter inorganic component')
+    iupac = forms.CharField(
+        label='IUPAC Name',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Enter preffered IUPAC name (PIN)')
     description = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'}),

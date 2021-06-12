@@ -51,6 +51,7 @@ class SystemSerializer(serializers.ModelSerializer):
             'group',
             'organic',
             'inorganic',
+            'iupac',
             'last_update',
             'description',
         )

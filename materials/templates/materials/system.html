@@ -17,8 +17,10 @@ data sets corresponding to each property are shown.
         </a>
       {% endif %}
       <h3>{{ dataset_list.first.system.compound_name }}</h3>
-      Organic: {{ dataset_list.first.system.organic }}, inorganic: {{ dataset_list.first.system.inorganic }} <br />
-      Alternate Names: {{ dataset_list.first.system.group}}
+      <h5>IUPAC: {{ dataset_list.first.system.iupac}}</h5>
+      Alternate Names: {{ dataset_list.first.system.group}} <br /><br />
+      Organic: {{ dataset_list.first.system.organic }} <br />Inorganic: {{ dataset_list.first.system.inorganic }}
+
     </div>
 
     <div class="card-body">
