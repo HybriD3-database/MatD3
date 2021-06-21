@@ -1,49 +1,36 @@
 # This file is covered by the BSD license. See LICENSE in the root directory.
-from functools import reduce
 import io
 import json
 import logging
 import operator
 import os
 import re
-import requests
 import zipfile
+from functools import reduce
 
+import django_filters.rest_framework
+import requests
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.files.uploadedfile import UploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.core.mail import send_mail
 from django.db import transaction
-from django.db.models import BooleanField
-from django.db.models import Case
-from django.db.models import Q
-from django.db.models import Value
-from django.db.models import When
+from django.db.models import BooleanField, Case, Q, Value, When
 from django.db.models.fields import TextField
-from django.http import Http404
-from django.http import HttpResponse
-from django.http import HttpResponseForbidden
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.shortcuts import redirect
-from django.shortcuts import render
-from django.shortcuts import reverse
+from django.http import (Http404, HttpResponse, HttpResponseForbidden,
+                         JsonResponse)
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.views import generic
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from . import forms
-from . import models
-from . import permissions
-from . import qresp
-from . import serializers
-from . import utils
+from . import forms, models, permissions, qresp, serializers, utils
 
 logger = logging.getLogger(__name__)
 
@@ -262,8 +249,20 @@ class ImportDataView(StaffStatusMixin, generic.TemplateView):
         })
 
 
+class LargeResultsSetPagination(PageNumberPagination):
+    """Override the default pagination behavior.
+
+    Use this for some of the lighter endpoints such as when fetching
+    for properties or units.
+
+    """
+    page_size = 100000
+    page_size_query_param = 'page_size'
+    max_page_size = 100000
+
+
 class ReferenceViewSet(viewsets.ModelViewSet):
-    queryset = models.Reference.objects.all()
+    queryset = models.Reference.objects.all().order_by('-pk')
     serializer_class = serializers.ReferenceSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
 
@@ -299,24 +298,27 @@ class ReferenceViewSet(viewsets.ModelViewSet):
 
 
 class SystemViewSet(viewsets.ModelViewSet):
-    queryset = models.System.objects.all()
+    queryset = models.System.objects.all().order_by('-pk')
     serializer_class = serializers.SystemSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
-    queryset = models.Property.objects.all()
+    queryset = models.Property.objects.all().order_by('-pk')
     serializer_class = serializers.PropertySerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
 
 class UnitViewSet(viewsets.ModelViewSet):
-    queryset = models.Unit.objects.all()
+    queryset = models.Unit.objects.all().order_by('-pk')
     serializer_class = serializers.UnitSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -342,8 +344,17 @@ def dataset_to_zip(request, dataset):
 
 
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = models.Dataset.objects.all()
+    queryset = models.Dataset.objects.all().order_by('-pk')
     serializer_class = serializers.DatasetSerializer
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = {
+        'system': ['exact'], 
+        'primary_property__name': ['exact', 'contains'], 
+        'secondary_property__name': ['exact', 'contains'],
+        'reference': ['exact'],
+        'dimensionality': ['exact']
+        }
+    search_fields = filterset_fields
 
     @action(detail=True)
     def info(self, request, pk):
@@ -353,7 +364,13 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False)
     def summary(self, request):
-        serializer = serializers.DatasetSerializerSummary(self.queryset,
+        filtered_queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = serializers.DatasetSerializerSummary(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = serializers.DatasetSerializerSummary(filtered_queryset,
                                                           many=True)
         return Response(serializer.data)
 

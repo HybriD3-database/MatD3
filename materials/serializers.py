@@ -68,29 +68,6 @@ class UnitSerializer(serializers.ModelSerializer):
         model = models.Unit
         fields = ('pk', 'label')
 
-
-class DatasetSerializerInfo(serializers.ModelSerializer):
-    sample_type = serializers.CharField(source='get_sample_type_display')
-
-    class Meta:
-        model = models.Dataset
-        depth = 1
-        fields = (
-            'pk',
-            'caption',
-            'system',
-            'primary_property',
-            'primary_unit',
-            'secondary_property',
-            'secondary_unit',
-            'reference',
-            'is_experimental',
-            'dimensionality',
-            'sample_type',
-            'extraction_method',
-        )
-
-
 class ComputationalSerializer(BaseSerializer):
     comment = serializers.StringRelatedField()
 
@@ -217,6 +194,28 @@ class DatasetSerializer(BaseSerializer):
             'experimental',
             'subsets',
             'space_group',
+        )
+
+
+class DatasetSerializerInfo(serializers.ModelSerializer):
+    sample_type = serializers.CharField(source='get_sample_type_display')
+
+    class Meta:
+        model = models.Dataset
+        depth = 1
+        fields = (
+            'pk',
+            'caption',
+            'system',
+            'primary_property',
+            'primary_unit',
+            'secondary_property',
+            'secondary_unit',
+            'reference',
+            'is_experimental',
+            'dimensionality',
+            'sample_type',
+            'extraction_method',
         )
 
 
