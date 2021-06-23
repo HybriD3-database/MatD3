@@ -265,6 +265,7 @@ class ReferenceViewSet(viewsets.ModelViewSet):
     queryset = models.Reference.objects.all().order_by('-pk')
     serializer_class = serializers.ReferenceSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
+    pagination_class = LargeResultsSetPagination
 
     @transaction.atomic
     def perform_create(self, serializer):
@@ -346,10 +347,11 @@ def dataset_to_zip(request, dataset):
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all().order_by('-pk')
     serializer_class = serializers.DatasetSerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend,
+                       filters.SearchFilter]
     filterset_fields = {
-        'system': ['exact'], 
-        'primary_property__name': ['exact', 'contains'], 
+        'system': ['exact'],
+        'primary_property__name': ['exact', 'contains'],
         'secondary_property__name': ['exact', 'contains'],
         'reference': ['exact'],
         'dimensionality': ['exact']
