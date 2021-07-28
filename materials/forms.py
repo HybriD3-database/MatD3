@@ -139,8 +139,7 @@ class AddDataForm(forms.Form):
         required=True,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
-        'Select the reference that is associated with the inserted data. If '
-        'the data is unpublished or no reference is applicable, leave empty.')
+        'Select the reference that is associated with the inserted data.')
     # If set, the reference field becomes readonly.
     fixed_reference = forms.ModelChoiceField(
         queryset=models.Reference.objects.all(),
