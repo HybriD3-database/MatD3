@@ -274,7 +274,8 @@ class SeleniumTestCase(LiveServerTestCase):
             'description')
         S.find_element_by_id('id_experimental_comment').send_keys(
             'exp comment')
-        S.find_element_by_id('computational-button').click()
+        element = S.find_element_by_id('computational-button')
+        S.execute_script("arguments[0].click();", element)
         S.find_element_by_id('id_code').send_keys('abinit')
         S.find_element_by_id('id_level_of_theory').send_keys('DFT')
         S.find_element_by_id('id_xc_functional').send_keys('PBE')
