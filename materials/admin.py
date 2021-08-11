@@ -47,8 +47,11 @@ class BaseAdmin(BaseMixin, nested_admin.NestedModelAdmin):
             instance.save()
         formset.save_m2m()
 
+class SystemAdmin(nested_admin.NestedModelAdmin):
+    list_display = ('id', 'compound_name')
+    search_fields = ['compound_name']
 
-admin.site.register(models.System)
+admin.site.register(models.System, SystemAdmin)
 admin.site.register(models.Reference)
 admin.site.register(models.Author)
 
@@ -208,7 +211,6 @@ class DatasetAdmin(BaseAdmin):
     inlines = (SynthesisInline, ExperimentalInline, ComputationalInline,
                SubsetInline, FilesInline)
     filter_horizontal = ['linked_to']
-
     def view_on_site(self, obj):
         return reverse('materials:dataset', kwargs={'pk': obj.pk})
 
