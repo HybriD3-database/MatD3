@@ -173,10 +173,10 @@ class SearchFormView(generic.TemplateView):
                     dataset__primary_property__name__icontains=search_text)
             elif search_term == 'organic':
                 systems = models.System.objects.filter(
-                    organic__contains=search_text).order_by('organic')
+                    organic__icontains=search_text).order_by('organic')
             elif search_term == 'inorganic':
                 systems = models.System.objects.filter(
-                    inorganic__contains=search_text).order_by('inorganic')
+                    inorganic__icontains=search_text).order_by('inorganic')
             elif search_term == 'author':
                 keywords = search_text.split()
                 query = reduce(operator.or_, (
