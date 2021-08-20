@@ -132,6 +132,7 @@ class SearchFormView(generic.TemplateView):
     template_name = 'materials/search.html'
     search_terms = [
         ['formula', 'Formula'],
+        ['iupac', 'IUPAC'],
         ['physical_property', 'Physical property'],
         ['organic', 'Organic Component'],
         ['inorganic', 'Inorganic Component'],
@@ -166,6 +167,9 @@ class SearchFormView(generic.TemplateView):
                     Q(group__icontains=search_text) |
                     Q(compound_name__icontains=search_text)).order_by(
                         'formula')
+            elif search_term == 'iupac':
+                systems = models.System.objects.filter(
+                    iupac__icontains=search_text).order_by('iupac')
             elif search_term == 'physical_property':
                 physical_properties = models.Property.objects.filter(
                     name__icontains=search_text).values_list('name', flat=True)
