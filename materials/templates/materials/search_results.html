@@ -10,7 +10,6 @@
     <thead>
       <tr>
         <th>Compound Name</th>
-        <th>Formula</th>
         <th>IUPAC Name</th>
         <th>Alternate Names</th>
         <th>Organic</th>
@@ -21,7 +20,6 @@
       {% for system in systems %}
         <tr>
           <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.compound_name }}</a></td>
-          <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.formula }}</a></td>
           <td><a href="{% url 'materials:system' pk=system.pk %}">{{ system.iupac }}</a></td>
           <td>
             <ul style="padding: 0px; list-style-type: none" id="authors-list">
