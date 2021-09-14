@@ -33,6 +33,7 @@ def contributors(request):
             User.objects.get(username='smj64'),
             User.objects.get(username='matti'),
             User.objects.get(username='cbclayto'),
+            User.objects.get(username='eisenl10'),
         ]
     except User.DoesNotExist:
         designers = []
