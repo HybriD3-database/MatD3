@@ -204,6 +204,7 @@ class FilesInline(BaseMixin, nested_admin.NestedStackedInline):
 class DatasetAdmin(BaseAdmin):
     list_display = ('id', 'primary_property', 'caption', 'created_by',
                     'updated_by', 'updated')
+    search_fields = ['id',]
     list_filter = ('updated',)
     ordering = ('-updated',)
     fields = ([f.name for f in models.Dataset._meta.local_fields] +
