@@ -1,4 +1,4 @@
-Django==3.1.13
+Django==3.1.14
 matplotlib==3.0.2
 mysqlclient==1.4.2
 numpy==1.19.5
