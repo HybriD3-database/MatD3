@@ -344,12 +344,23 @@ def dataset_to_zip(request, dataset):
     zf.close()
     return in_memory_object
 
+class DatasetsPagination(PageNumberPagination):
+    """Override the default pagination behavior.
+
+    Use this for some of the lighter endpoints such as when fetching
+    for properties or units.
+
+    """
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 100000
 
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all().order_by('-pk')
     serializer_class = serializers.DatasetSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend,
                        filters.SearchFilter]
+    pagination_class = DatasetsPagination
     filterset_fields = {
         'system': ['exact'],
         'primary_property__name': ['exact', 'contains'],
