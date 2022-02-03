@@ -36,7 +36,7 @@ HTTPie is a command line tool for issuing HTTP requests. Here is example usage:
 
    http --verify=no https://materials.hybrid3.duke.edu/materials/datasets/317/
    
-Another usefull way to request datasets is through a python script using the requests library. The simplest way to request every dataset in the database (in Python 3.*) would be this:
+Another usefull way to request datasets/systems/references is through a python script using the requests library. The simplest way to request every dataset in the database (in Python 3.*) would be this:
 
 .. code:: bash
 
