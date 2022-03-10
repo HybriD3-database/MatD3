@@ -50,6 +50,7 @@ class BaseAdmin(BaseMixin, nested_admin.NestedModelAdmin):
 class SystemAdmin(nested_admin.NestedModelAdmin):
     list_display = ('id', 'compound_name')
     search_fields = ['compound_name']
+    filter_horizontal = ['derived_to_from']
 
 admin.site.register(models.System, SystemAdmin)
 admin.site.register(models.Reference)

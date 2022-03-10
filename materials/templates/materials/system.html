@@ -24,6 +24,33 @@ data sets corresponding to each property are shown.
 
     </div>
 
+    <!-- LINKED Systems -->
+    {% if dataset_list.first.system.derived_to_from.exists %}
+    <div class="card">
+      <button class="btn text-left expand-hide-button"
+              data-toggle="collapse"
+              data-target="#related-body-{{ dataset_list.first.system.pk }}">
+        Related Systems (click to expand)
+      </button>
+      <div class="collapse" id="related-body-{{ dataset_list.first.system.pk }}"">
+        <div class="card-body">
+          This system is directly derived from or derives other systems:
+          <ul>
+            {% for linked_sys in dataset_list.first.system.derived_to_from.all %}
+              <li>
+                <a href="{% url 'materials:system' pk=linked_sys.pk %}">
+                  system {{ linked_sys.pk }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          {% comment %}
+          <a href="{% url 'materials:linked_data' pk=dataset.pk %}">See all related data</a>
+          {% endcomment %}
+        </div>
+      </div>
+    {% endif %}
+
     <div class="card-body">
       <div class="row">
 

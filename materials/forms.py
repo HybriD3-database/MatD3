@@ -101,7 +101,13 @@ class AddSystemForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=1000,
         help_text='Description of the compound (optional)')
-
+    related_systems = forms.CharField(
+        label='Derived Systems',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text=''
+        'List of System IDs this system is directly derived from'
+    )
 
 class AddPropertyForm(forms.Form):
     name = forms.CharField(

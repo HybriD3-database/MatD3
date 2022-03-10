@@ -49,6 +49,8 @@ A solid system is defined by the following properties.
     IUPAC name
   **last_update**
     date the system was last modified
+  **derived_to_from**
+    a ManyToManyField, used if the system is somehow directly linked to another system
   **description**
     description of the compound
 

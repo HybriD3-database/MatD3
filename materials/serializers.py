@@ -53,6 +53,7 @@ class SystemSerializer(serializers.ModelSerializer):
             'inorganic',
             'iupac',
             'last_update',
+            'derived_to_from',
             'description',
         )
 
