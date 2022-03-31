@@ -41,23 +41,6 @@ class ReferenceSerializer(serializers.ModelSerializer):
         )
 
 
-class SystemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.System
-        fields = (
-            'pk',
-            'compound_name',
-            'formula',
-            'group',
-            'organic',
-            'inorganic',
-            'iupac',
-            'last_update',
-            'derived_to_from',
-            'description',
-        )
-
-
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Property
@@ -238,4 +221,25 @@ class DatasetSerializerSummary(serializers.ModelSerializer):
             'is_experimental',
             'dimensionality',
             'sample_type',
+        )
+
+
+class SystemSerializer(serializers.ModelSerializer):
+
+    datasets = DatasetSerializer(required = False, many=True)
+
+    class Meta:
+        model = models.System
+        fields = (
+            'pk',
+            'compound_name',
+            'formula',
+            'group',
+            'organic',
+            'inorganic',
+            'iupac',
+            'last_update',
+            'derived_to_from',
+            'description',
+            'datasets',
         )

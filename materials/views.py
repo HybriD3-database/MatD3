@@ -262,6 +262,17 @@ class LargeResultsSetPagination(PageNumberPagination):
     max_page_size = 100000
 
 
+class SmallResultsSetPagination(PageNumberPagination):
+    """Override the default pagination behavior.
+
+    Use this for some of the heavier endpoints such as when fetching
+    for systems or units.
+
+    """
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100000
+
 class ReferenceViewSet(viewsets.ModelViewSet):
     queryset = models.Reference.objects.all().order_by('-pk')
     serializer_class = serializers.ReferenceSerializer
@@ -303,7 +314,7 @@ class SystemViewSet(viewsets.ModelViewSet):
     queryset = models.System.objects.all().order_by('-pk')
     serializer_class = serializers.SystemSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
-    pagination_class = LargeResultsSetPagination
+    pagination_class = SmallResultsSetPagination
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -344,23 +355,13 @@ def dataset_to_zip(request, dataset):
     zf.close()
     return in_memory_object
 
-class DatasetsPagination(PageNumberPagination):
-    """Override the default pagination behavior.
-
-    Use this for some of the lighter endpoints such as when fetching
-    for properties or units.
-
-    """
-    page_size = 100
-    page_size_query_param = 'page_size'
-    max_page_size = 100000
 
 class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Dataset.objects.all().order_by('-pk')
     serializer_class = serializers.DatasetSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend,
                        filters.SearchFilter]
-    pagination_class = DatasetsPagination
+    pagination_class = SmallResultsSetPagination
     filterset_fields = {
         'system': ['exact'],
         'primary_property__name': ['exact', 'contains'],
