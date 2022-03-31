@@ -69,6 +69,7 @@ class UnitSerializer(serializers.ModelSerializer):
         model = models.Unit
         fields = ('pk', 'label')
 
+
 class ComputationalSerializer(BaseSerializer):
     comment = serializers.StringRelatedField()
 
