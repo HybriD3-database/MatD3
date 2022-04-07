@@ -49,16 +49,31 @@ class BaseAdmin(BaseMixin, nested_admin.NestedModelAdmin):
 
 class SystemAdmin(nested_admin.NestedModelAdmin):
     list_display = ('id', 'compound_name')
-    search_fields = ['compound_name']
+    search_fields = ['id', 'compound_name']
     filter_horizontal = ['derived_to_from']
 
+
 admin.site.register(models.System, SystemAdmin)
-admin.site.register(models.Reference)
-admin.site.register(models.Author)
+
+class AuthorAdmin(nested_admin.NestedModelAdmin):
+    list_display = ('id', 'first_name', 'last_name', 'institution',)
+    search_fields = ['id', 'first_name', 'last_name',]
+
+
+admin.site.register(models.Author, AuthorAdmin)
+
+class ReferenceAdmin(nested_admin.NestedModelAdmin):
+    list_display = ('id', 'title', 'journal', 'year',)
+    search_fields = ['id', 'title', 'journal',]
+
+
+admin.site.register(models.Reference, ReferenceAdmin)
+
 
 
 class PropertyAdmin(BaseAdmin):
     list_display = ('id', 'name', 'created_by', 'updated_by', 'updated')
+    search_fields = ['id','name',]
     fieldsets = (
         ('', {
             'fields': ('name',),
@@ -72,6 +87,7 @@ admin.site.register(models.Property, PropertyAdmin)
 
 class UnitAdmin(BaseAdmin):
     list_display = ('id', 'label', 'created_by', 'updated_by', 'updated')
+    search_fields = ['id','label',]
     fieldsets = (
         ('', {
             'fields': ('label',),
@@ -91,6 +107,7 @@ class CommentInline(BaseMixin, nested_admin.NestedStackedInline):
 
 class SynthesisAdmin(BaseAdmin):
     list_display = ('id', 'created_by', 'updated_by', 'updated')
+    search_fields = ['id',]
     fields = [f.name for f in models.SynthesisMethod._meta.local_fields]
     inlines = [CommentInline]
 
@@ -100,6 +117,7 @@ admin.site.register(models.SynthesisMethod, SynthesisAdmin)
 
 class ExperimentalAdmin(BaseAdmin):
     list_display = ('id', 'created_by', 'updated_by', 'updated')
+    search_fields = ['id',]
     fields = [f.name for f in models.ExperimentalDetails._meta.local_fields]
     inlines = [CommentInline]
 
@@ -109,6 +127,7 @@ admin.site.register(models.ExperimentalDetails, ExperimentalAdmin)
 
 class ComputationalAdmin(BaseAdmin):
     list_display = ('id', 'created_by', 'updated_by', 'updated')
+    search_fields = ['id',]
     fields = [f.name for f in models.ComputationalDetails._meta.local_fields]
     inlines = [CommentInline]
 
