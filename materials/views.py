@@ -314,7 +314,7 @@ class SystemViewSet(viewsets.ModelViewSet):
     queryset = models.System.objects.all().order_by('-pk')
     serializer_class = serializers.SystemSerializer
     permission_classes = (permissions.IsStaffOrReadOnly,)
-    pagination_class = SmallResultsSetPagination
+    pagination_class = LargeResultsSetPagination
 
 
 class PropertyViewSet(viewsets.ModelViewSet):

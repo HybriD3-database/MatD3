@@ -226,7 +226,7 @@ class DatasetSerializerSummary(serializers.ModelSerializer):
 
 class SystemSerializer(serializers.ModelSerializer):
 
-    datasets = DatasetSerializer(required = False, many=True)
+    #datasets = DatasetSerializer(required = False, many=True)
 
     class Meta:
         model = models.System
@@ -241,5 +241,5 @@ class SystemSerializer(serializers.ModelSerializer):
             'last_update',
             'derived_to_from',
             'description',
-            'datasets',
+            #'datasets',
         )
