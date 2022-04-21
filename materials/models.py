@@ -488,6 +488,11 @@ class Comment(Base):
     def __str__(self):
         return self.text
 
+class Note(Base):
+    dataset = models.ForeignKey(
+        Dataset, on_delete=models.CASCADE, related_name='note')
+    note = models.TextField()
+
 
 class Error(Base):
     """Store the error (or uncertainty) of each value separately."""

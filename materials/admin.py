@@ -221,6 +221,11 @@ class FilesInline(BaseMixin, nested_admin.NestedStackedInline):
     extra = 0
 
 
+class NotesInline(BaseMixin, nested_admin.NestedStackedInline):
+    model = models.Note
+    extra = 0
+
+
 class DatasetAdmin(BaseAdmin):
     list_display = ('id', 'primary_property', 'caption', 'created_by',
                     'updated_by', 'updated')
@@ -230,7 +235,7 @@ class DatasetAdmin(BaseAdmin):
     fields = ([f.name for f in models.Dataset._meta.local_fields] +
               ['linked_to'])
     inlines = (SynthesisInline, ExperimentalInline, ComputationalInline,
-               SubsetInline, FilesInline)
+               SubsetInline, FilesInline, NotesInline)
     filter_horizontal = ['linked_to']
     def view_on_site(self, obj):
         return reverse('materials:dataset', kwargs={'pk': obj.pk})
