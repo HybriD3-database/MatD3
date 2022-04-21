@@ -142,7 +142,7 @@ class SearchFormView(generic.TemplateView):
         material_ids = models.System.objects.all().values_list(
             'pk', 'compound_name')
         dataset_ids = models.Dataset.objects.all().values_list(
-            'pk', 'system__compound_name', 'primary_property__name')
+            'pk', 'system__compound_name', 'primary_property__name').order_by('pk')
         return render(request, self.template_name, {
             'search_terms': self.search_terms,
             'material_ids': material_ids,

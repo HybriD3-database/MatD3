@@ -39,7 +39,7 @@ data sets corresponding to each property are shown.
             {% for linked_sys in dataset_list.first.system.derived_to_from.all %}
               <li>
                 <a href="{% url 'materials:system' pk=linked_sys.pk %}">
-                  system {{ linked_sys.pk }}
+                  system {{ linked_sys.compound_name }}
                 </a>
               </li>
             {% endfor %}
