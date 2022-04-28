@@ -431,6 +431,24 @@ the "with ..." syntax to include certain parts.
   </div>
 </div>
 
+{% if user.is_superuser %}
+<!-- NOTES -->
+<div class="card">
+  <button class="btn text-left expand-hide-button" data-toggle="collapse"
+          data-target="#notes-body-{{ dataset.pk }}">
+    Notes (click to expand)
+  </button>
+  <div class="collapse" id="notes-body-{{ dataset.pk }}">
+    <div class="card-body">
+      {% for note in dataset.note.all %}
+        <li>
+          {{ note.note }}
+        </li>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
 <br>
 <!-- DATA AND UPLOADED FILES -->
 <a href="{% url "materials:dataset-files" pk=dataset.pk %}" class="btn btn-primary">
