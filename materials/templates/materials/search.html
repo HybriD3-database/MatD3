@@ -98,7 +98,7 @@
    let search_system = document.getElementById('search-system');
    search_system.addEventListener('submit', function(event) {
      event.preventDefault();
-     const form_data = new FormData(this);
+     const form_data = new FormData(search_system);
      axios.post('{% url 'materials:search' %}', form_data)
           .then(response => {
             document.getElementById('results').innerHTML = response['data'];

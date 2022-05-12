@@ -156,7 +156,7 @@ class Dataset(Base):
         (0, 0),
     )
     caption = models.TextField(blank=True, max_length=1000)
-    system = models.ForeignKey(System, on_delete=models.PROTECT, related_name='datasets')
+    system = models.ForeignKey(System, on_delete=models.PROTECT, related_name='dataset')
     #system = models.ForeignKey(System, on_delete=models.PROTECT)
     primary_property = models.ForeignKey(
         Property, on_delete=models.PROTECT, related_name='primary_property')
