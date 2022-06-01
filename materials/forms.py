@@ -106,8 +106,18 @@ class AddSystemForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
-        'List of System IDs this system is directly derived from'
-    )
+        'List of System IDs this system is directly derived from')
+    dimensionality = forms.CharField(
+        label='Dimensionality',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Enter the dimensionality of this system')
+    n = forms.CharField(
+        label='N',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Enter n value for the dimensionality of this system if it applies')
 
 class AddPropertyForm(forms.Form):
     name = forms.CharField(

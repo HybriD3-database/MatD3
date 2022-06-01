@@ -117,6 +117,8 @@ class System(models.Model):
     last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
     derived_to_from = models.ManyToManyField('self', blank=True)
+    dimensionality = models.CharField(max_length=100, blank=True)
+    n = models.CharField(max_length=50, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
