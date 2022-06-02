@@ -105,6 +105,11 @@ class Tag(models.Model):
     def __str__(self):
         return self.tag
 
+class SpaceGroup(Base):
+    """Table for all 230 space groups for consistency.
+
+    """
+    value = models.CharField(max_length=20)
 
 class System(models.Model):
     """Primary information about the physical system."""
@@ -185,6 +190,7 @@ class Dataset(Base):
     linked_to = models.ManyToManyField('self', blank=True)
     verified_by = models.ManyToManyField(get_user_model())
     doi = models.CharField(max_length=50, blank=True)
+    space_group_ID = models.ForeignKey(SpaceGroup, blank=True, null=True, on_delete=models.PROTECT)
     space_group = models.CharField(max_length=20, blank=True)
 
     class Meta:

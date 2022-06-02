@@ -134,6 +134,19 @@ class ComputationalAdmin(BaseAdmin):
 
 admin.site.register(models.ComputationalDetails, ComputationalAdmin)
 
+class SpaceGroupAdmin(BaseAdmin):
+    list_display = ('id', 'value')
+    search_fields = ['id',]
+    fields = [f.name for f in models.SpaceGroup._meta.local_fields]
+
+
+admin.site.register(models.SpaceGroup, SpaceGroupAdmin)
+
+class SpaceGroupInline(BaseMixin, nested_admin.NestedStackedInline):
+    model = models.SpaceGroup
+    extra = 0
+    verbose_name_plural = ''
+    fields = ['value']
 
 class SymbolInline(BaseMixin, nested_admin.NestedStackedInline):
     model = models.Symbol

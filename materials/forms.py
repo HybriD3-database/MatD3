@@ -285,7 +285,7 @@ class AddDataForm(forms.Form):
             'placeholder': 'Optional'
         }),
         help_text=''
-        'Space group symbol.')
+        'Space group id. Refer to documentation for complete list.')
 
     # Synthesis
     with_synthesis_details = forms.BooleanField(
