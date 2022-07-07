@@ -231,7 +231,7 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_id('id_group').send_keys('OH2')
         S.find_element_by_id('id_iupac').send_keys('dihydrogen monoxide')
         S.find_element_by_id('id_description').send_keys('description')
-        S.find_element_by_id('id_dimensionality').send_keys('1')
+        #S.find_element_by_id('id_dimensionality').send_keys('1')
         S.find_element_by_xpath(
             '//div[@id="new-system-card"]//button[@type="submit"]').click()
         S.find_element_by_xpath('//div[@id="dynamic-messages"]'
