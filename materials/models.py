@@ -112,6 +112,13 @@ class SpaceGroup(Base):
     value = models.CharField(max_length=20)
 
 class System(models.Model):
+    DIMENSIONALITIES = (
+        (4, 3),
+        (3, 2.5),
+        (2, 2),
+        (1, 1),
+        (0, 0),
+    )
     """Primary information about the physical system."""
     compound_name = models.CharField(max_length=1000)
     formula = models.CharField(max_length=200)
@@ -122,7 +129,7 @@ class System(models.Model):
     last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
     derived_to_from = models.ManyToManyField('self', blank=True)
-    dimensionality = models.CharField(max_length=100, blank=True)
+    dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
     n = models.CharField(max_length=50, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
 

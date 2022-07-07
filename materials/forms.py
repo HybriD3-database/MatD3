@@ -107,11 +107,12 @@ class AddSystemForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=''
         'List of System IDs this system is directly derived from')
-    dimensionality = forms.CharField(
-        label='Dimensionality',
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        max_length=100,
-        help_text='Enter the dimensionality of this system')
+    dimensionality = forms.ChoiceField(
+        initial=models.System.DIMENSIONALITIES[0],
+        choices=(models.System.DIMENSIONALITIES),
+        widget=forms.RadioSelect(),
+        help_text=''
+        'Enter the dimensionality of this system')
     n = forms.CharField(
         label='N',
         required=False,
