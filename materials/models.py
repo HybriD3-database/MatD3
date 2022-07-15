@@ -125,7 +125,7 @@ class System(models.Model):
     group = models.CharField(max_length=1000, blank=True)  # aka Alternate names
     organic = models.CharField(max_length=100, blank=True)
     inorganic = models.CharField(max_length=100, blank=True)
-    iupac = models.CharField(max_length=100, blank=True)
+    iupac = models.CharField(max_length=500, blank=True)
     last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
     derived_to_from = models.ManyToManyField('self', blank=True)
