@@ -308,7 +308,7 @@ class Subset(Base):
     label = models.CharField(max_length=100, blank=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE,
                                 related_name='subsets')
-    space_group = models.ForeignKey(SpaceGroup, blank=True, null=True, on_delete=models.PROTECT)
+    space_group_ID = models.ForeignKey(SpaceGroup, blank=True, null=True, on_delete=models.PROTECT)
     space_group = models.CharField(default="", max_length=20, blank=True)
     crystal_system = models.PositiveSmallIntegerField(choices=CRYSTAL_SYSTEMS)
 
