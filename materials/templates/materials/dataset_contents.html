@@ -24,7 +24,10 @@ the "with ..." syntax to include certain parts.
 <h5>Origin: {% if dataset.is_experimental %}experimental{% else %}computational{% endif %}
   {{ dataset.get_all_fixed_temperatures }}
 </h5>
-{% if dataset.space_group %}
+{% if subset.space_group %}
+  <h6><strong>Space group:</strong> {{ subset.space_group_ID.value }}</h6>
+{% endif %}
+{% elif dataset.space_group %}
   <h6><strong>Space group:</strong> {{ dataset.space_group }}</h6>
 {% endif %}
 {% if dataset.primary_property.name == 'atomic structure' %}
