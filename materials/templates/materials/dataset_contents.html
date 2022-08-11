@@ -25,9 +25,9 @@ the "with ..." syntax to include certain parts.
   {{ dataset.get_all_fixed_temperatures }}
 </h5>
 {% if dataset.subsets.first.space_group_ID %}
-  <h6><strong>Subset Space group:</strong> {{ dataset.subsets.first.space_group_ID.value }}</h6>
+  <h6><strong>Space group:</strong> {{ dataset.subsets.first.space_group_ID.value }}</h6>
 {% elif dataset.space_group %}
-  <h6><strong>Dataset Space group:</strong> {{ dataset.space_group }}</h6>
+  <h6><strong>Space group:</strong> {{ dataset.space_group }}</h6>
 {% endif %}
 {% if dataset.primary_property.name == 'atomic structure' %}
   {# Atomic structures require special treatment #}

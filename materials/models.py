@@ -478,6 +478,8 @@ class ExternalRepository(Base):
 class ExperimentalDetails(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='experimental')
+    system = models.ForeignKey(
+        System, on_delete=models.CASCADE, related_name='experimental', default=1)
     method = models.TextField()
     description = models.TextField(blank=True)
 
@@ -488,6 +490,8 @@ class ExperimentalDetails(Base):
 class SynthesisMethod(Base):
     dataset = models.ForeignKey(
         Dataset, on_delete=models.CASCADE, related_name='synthesis')
+    system = models.ForeignKey(
+        System, on_delete=models.CASCADE, related_name='synthesis', default=1)
     starting_materials = models.TextField(blank=True)
     product = models.TextField(blank=True)
     description = models.TextField(blank=True)
