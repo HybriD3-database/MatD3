@@ -19,7 +19,10 @@ def create_static_files(request, dataset):
         f'Generated from numerical data:\n{dataset.primary_property}')
     if dataset.primary_unit:
         qresp_plot_title += f', {dataset.primary_unit}'
-    os.makedirs(qresp_loc)
+    try:
+        os.makedirs(qresp_loc)
+    except FileExistsError:
+        print(f"Error: I am trying to create a directory called {qresp_loc} but this directory already exists.")
     if dataset.primary_property.name == 'atomic structure':
         value_sets = []
         for subset in dataset.subsets.all():

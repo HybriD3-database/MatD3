@@ -190,7 +190,7 @@ class Dataset(Base):
     visible = models.BooleanField()
     is_figure = models.BooleanField()
     is_experimental = models.BooleanField()  # theoretical if false
-    dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES)
+    dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES, default = 0)
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)
@@ -255,6 +255,11 @@ class Dataset(Base):
             Dataset.objects.filter(system=self.system).filter(
                 primary_property=self.primary_property).exclude(
                     pk=self.pk).update(representative=True)
+
+        qresp_loc = os.path.join(settings.MEDIA_ROOT, f'qresp/dataset_{self.pk}')
+        if os.path.exists(qresp_loc):
+            shutil.rmtree(qresp_loc)
+
         super().delete(*args, **kwargs)
 
     def num_all_entries(self):
