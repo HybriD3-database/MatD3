@@ -40,12 +40,17 @@ and open ``localhost:8000`` in your web browser. You can browse the site just li
   .. code:: bash
 
      scp <user>@materials.hybrid3.duke.edu:/home/<user>/dump.sql .
+  - Create a local database called materials:
 
+  .. code:: bash
+
+    mysql -u <db_user> -p<pwd> -Bse "DROP DATABASE IF EXISTS materials;CREATE DATABASE materials;"
+    
   - Read the contents into the local database:
 
   .. code:: bash
 
-    mysql -u user -p materials < dump.sql
+    mysql -u <db_user> -p materials < dump.sql
 
   You may now delete the dump file on the server and on your computer.
 
