@@ -7,6 +7,7 @@ data sets corresponding to each property are shown.
 
 {% block body %}
   {% load static %}
+  {%if dataset_list.first.system.message == "" %}
   <div class="card card-default">
     <div class="card-header">
       {% if user.is_superuser and dataset_list.first %}
@@ -108,6 +109,9 @@ data sets corresponding to each property are shown.
       </div>
     </div>
   </div>
+  {% else %}
+    <h3>{{ dataset_list.first.system.message}}</h3>
+  {% endif%}
 {% endblock %}
 
 {% block script %}

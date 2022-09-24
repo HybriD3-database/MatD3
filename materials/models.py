@@ -128,6 +128,7 @@ class System(models.Model):
     iupac = models.CharField(max_length=500, blank=True)
     last_update = models.DateField(auto_now=True)
     description = models.TextField(max_length=1000, blank=True)
+    message = models.TextField(max_length=1000, blank=True, default="")
     derived_to_from = models.ManyToManyField('self', blank=True)
     dimensionality = models.PositiveSmallIntegerField(choices=DIMENSIONALITIES, default=0 )
     n = models.CharField(max_length=50, blank=True)
@@ -199,6 +200,7 @@ class Dataset(Base):
     doi = models.CharField(max_length=50, blank=True)
     space_group_ID = models.ForeignKey(SpaceGroup, blank=True, null=True, on_delete=models.PROTECT)
     space_group = models.CharField(max_length=20, blank=True)
+    notice = models.CharField(max_length=1000, blank=True, default="")
 
     class Meta:
         verbose_name_plural = 'data sets'

@@ -429,6 +429,9 @@ the "with ..." syntax to include certain parts.
           {% endfor %}
         </ul>
       {% endif %}
+      {% if dataset.notice %}
+        <strong>Notice:</strong> {{ dataset.notice }}<br>
+      {% endif %}
     </div>
   </div>
 </div>
