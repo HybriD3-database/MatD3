@@ -110,7 +110,7 @@ data sets corresponding to each property are shown.
     </div>
   </div>
   {% else %}
-    <h3>{{ dataset_list.first.system.message}}</h3>
+    <h3>{{ dataset_list.first.system.message |safe }}</h3>
   {% endif%}
 {% endblock %}
 
