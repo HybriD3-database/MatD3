@@ -18,6 +18,7 @@ urlpatterns = [
     path('search', views.SearchFormView.as_view(), name='search'),
     path('<int:pk>', views.SystemView.as_view(), name='system'),
     path('dataset/<int:pk>', views.DatasetView.as_view(), name='dataset'),
+    path('dataset/compare/<int:pk1>&<int:pk2>', views.CompareView.as_view(), name='dataset'),
     path('dataset/<int:pk>/toggle-visibility/<str:view_name>',
          views.toggle_visibility, name='toggle_visibility'),
     path('dataset/<int:pk>/toggle-is-figure/<str:view_name>',

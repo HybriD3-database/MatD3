@@ -116,6 +116,19 @@ class DatasetView(generic.ListView):
     def get_queryset(self, **kwargs):
         return models.Dataset.objects.filter(pk=self.kwargs['pk'])
 
+class CompareView(generic.ListView):
+    """Display information about two datasets side by side.
+
+    This is defined as a ListView so that we can reuse the same
+    template as for PropertyAllEntriesView. Otherwise, this is really
+    a DetailView.
+
+    """
+    template_name = 'materials/property_all_entries.html'
+
+    def get_queryset(self, **kwargs):
+        return models.Dataset.objects.filter(pk__in=[self.kwargs['pk1'], self.kwargs['pk2']])
+
 
 class LinkedDataView(generic.ListView):
     """Returns data sets that are linked to each other."""
