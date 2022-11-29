@@ -74,12 +74,8 @@ admin.site.register(models.Reference, ReferenceAdmin)
 class PropertyAdmin(BaseAdmin):
     list_display = ('id', 'name', 'created_by', 'updated_by', 'updated')
     search_fields = ['id','name',]
-    fieldsets = (
-        ('', {
-            'fields': ('name',),
-        }),
-        ('Meta', {'fields': BaseAdmin.readonly_fields}),
-    )
+    ordering = ['name',]
+
 
 
 admin.site.register(models.Property, PropertyAdmin)

@@ -135,8 +135,11 @@
               <form id="property-form" method="post">
                 {{ property_form.name.label_tag }}
                 {{ property_form.name.help_text|tooltip }}
+                {{ property_form.method.label_tag }}
+                {{ property_form.method.help_text|tooltip }}
                 <div class="input-group">
                   {{ property_form.name }}
+                  {{ property_form.method }}
                   <div class="input-group-append">
                     <button class="btn btn-primary" type="submit">Add</button>
                   </div>

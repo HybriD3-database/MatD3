@@ -125,6 +125,11 @@ class AddPropertyForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=100,
         help_text='Name of the physical property')
+    method = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=100,
+        help_text='Name of the method if applicable (no parentheses needed)',
+        required=False,)
 
 
 class AddUnitForm(forms.Form):
@@ -182,7 +187,7 @@ class AddDataForm(forms.Form):
         'How was the current data obtained? For example, manually extracted '
         'from a publication, from author, from another database, ...')
     primary_property = forms.ModelChoiceField(
-        queryset=models.Property.objects.all(),
+        queryset=models.Property.objects.all().order_by('name'),
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text=''
         'Define the primary property of interest (in a figure, this typically '
@@ -208,7 +213,7 @@ class AddDataForm(forms.Form):
         'If present, this label is used on the y-axis of a figure. Default is '
         'to use the same name as the physical property.')
     secondary_property = forms.ModelChoiceField(
-        queryset=models.Property.objects.all(),
+        queryset=models.Property.objects.all().order_by('name'),
         required=False,
         label='Secondary property (x-axis)',
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -586,7 +591,7 @@ class AddDataForm(forms.Form):
                         widget=forms.RadioSelect())
                 elif key.startswith('fixed_property_'):
                     self.fields[key] = forms.ModelChoiceField(
-                        queryset=models.Property.objects.all(), initial=value)
+                        queryset=models.Property.objects.all().order_by('name'), initial=value)
                 elif key.startswith('fixed_unit_'):
                     self.fields[key] = forms.ModelChoiceField(
                         queryset=models.Unit.objects.all(),

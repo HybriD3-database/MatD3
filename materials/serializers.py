@@ -44,7 +44,7 @@ class ReferenceSerializer(serializers.ModelSerializer):
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Property
-        fields = ('pk', 'name')
+        fields = ('pk', 'name', 'method')
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -225,7 +225,6 @@ class DatasetSerializerSummary(serializers.ModelSerializer):
 
 
 class SystemSerializer(serializers.ModelSerializer):
-
     #datasets = DatasetSerializer(required = False, many=True)
 
     class Meta:

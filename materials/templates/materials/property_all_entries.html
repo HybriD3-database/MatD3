@@ -20,6 +20,9 @@
                 <div class="card-header">
                   <h5>
                     {{ dataset.primary_property.name|capfirst }}
+                    {% if dataset.primary_property.method != '' %}
+                      ({{ dataset.primary_property.method }})
+                    {% endif %}
                     {% if dataset.verified_by.exists %}
                       <span class="badge badge-success">Verified</span>
                     {% endif %}

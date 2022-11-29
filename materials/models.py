@@ -40,6 +40,7 @@ class Base(models.Model):
 
 class Property(Base):
     name = models.CharField(max_length=100, unique=True)
+    method = models.CharField(max_length=100, blank=True, default='')
 
     class Meta:
         verbose_name_plural = 'properties'
