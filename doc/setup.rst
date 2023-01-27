@@ -66,3 +66,32 @@ Before starting the server, it is necessary to configure it in order to reflect 
     Whether to use the SQLite database. If false or not present, mySQL is used instead.
   **DEBUG**
     Whether to run MatD\ :sup:`3` in debug mode. This is useful for quickly setting up and testing the website but should be removed when serving on a production server.
+    
+================
+Some troubleshooting notes
+================
+
+The packages listed in ``requirements.txt`` are a number and python does have the downside that different versions of different packages do not always play well together. While the ``pip`` command should handle this, such incompatibilities can still creep in
+
+One common consequence of such incompatbilities is that the web server does not start up properly and all you see from your browser is a "502 error" without any useful details.
+
+In this case, the next way forward is to manually log in to the server in question and attempt to understand errors that the different components of Django produce. 
+
+Specifically, Django can run based on a combination of servers called ``nginx`` and ``gunicorn``. The following blog post explains their interaction and, importantly, where the log files are and which commands can be used for troubleshooting:
+
+  https://www.datadoghq.com/blog/nginx-502-bad-gateway-errors-gunicorn/
+
+At this point, the exercise becomes one of Linux administration and starting and stopping services on the server that runs the database. For example, the ``sysctl`` command (which controls services running on a particular server) becomes involved.
+
+For instance, this command here, executed at the command line, will try to start a MatD3 service:
+
+sudo systemctl status (name).service -l
+
+where "(name)" needs to be replaced by the specific name chosen during the server setup of your particular MatD3 instance.
+
+The following command, executed in the directory ``/var/www/MatD3'', restarts the gunicorn service manually:
+
+sudo /var/www/MatD3/venv/bin/gunicorn -t 3600 --workers 2 --bind unix:/run/(name).sock mainproject.wsgi
+
+(Again, "(name)" needs to be replaced by the specific name chosen during the server setup.)
+
