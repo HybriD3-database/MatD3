@@ -85,13 +85,17 @@ At this point, the exercise becomes one of Linux administration and starting and
 
 For instance, this command here, executed at the command line, will try to start a MatD3 service:
 
-sudo systemctl status (name).service -l
+.. code:: bash
+
+  sudo systemctl status (name).service -l
 
 where "(name)" needs to be replaced by the specific name chosen during the server setup of your particular MatD3 instance.
 
 The following command, executed in the directory "/var/www/MatD3", restarts the gunicorn service manually:
 
-sudo /var/www/MatD3/venv/bin/gunicorn -t 3600 --workers 2 --bind unix:/run/(name).sock mainproject.wsgi
+.. code:: bash
+
+  sudo /var/www/MatD3/venv/bin/gunicorn -t 3600 --workers 2 --bind unix:/run/(name).sock mainproject.wsgi
 
 (Again, "(name)" needs to be replaced by the specific name chosen during the server setup.)
 
