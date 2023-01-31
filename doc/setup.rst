@@ -1,4 +1,18 @@
 ================
+Prerequisites
+================
+
+You will need some additional software installed on your computer before you can begin to install the MatD\ :sup:`3` software itself.
+
+1. You will need suitable database software. ``mysql`` is usually a good choice. You can install the full ``mysql`` software but you need at least a client to proceed. 
+
+For example, on MacOS, one way is to install ``mysql`` through the Homebrew distribution of free software. Once Homebrew is installed, the relevant command (at the command line, i.e., the Terminal) to install mysql may be
+
+.. code:: bash
+
+  brew install mysql
+
+================
 Access and setup
 ================
 
