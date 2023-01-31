@@ -18,7 +18,9 @@ It is sufficient to press enter at each query until the keys have been generated
 
   git clone https://github.com/HybriD3-database/MatD3.git
 
-The result of this command should be the creation of a directory "MatD3" that contains the software needed to operate the MatD3 database. Change to the directory "MatD3" by indicating
+The result of this command should be the creation of a directory ``MatD3`` that contains the software needed to operate the MatD3 database. Change to the directory ``MatD3`` by indicating
+
+.. code:: bash
 
   cd MatD3
 
