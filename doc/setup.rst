@@ -18,6 +18,10 @@ It is sufficient to press enter at each query until the keys have been generated
 
   git clone https://github.com/HybriD3-database/MatD3.git
 
+The result of this command should be the creation of a directory "MatD3" that contains the software needed to operate the MatD3 database. Change to the directory "MatD3" by indicating
+
+  cd MatD3
+
 In order to ensure compatibility with the correct Python packages, it is important to do any development in a Python virtual environment. You can create a virtual environment with
 
 .. code:: bash
@@ -30,7 +34,9 @@ and activate the environment with
 
   source venv/bin/activate
 
-You'll notice that the shell's prompt has changed to remind you that you are in a virtual environment. Any packages installed with Python's ``pip`` command are now part of the current project only. The correct versions of the packages that are required for developing the MatD\ :sup:`3` database are listed in requirements.txt. Install them all by issuing
+In some instances of python, the relevant command might be found in a directory called ``venv/Scripts/activate`` instead.
+
+You'll notice that the shell's prompt has changed to remind you that you are in a virtual environment. Any packages installed with Python's ``pip`` command are now part of the current project only. The correct versions of the packages that are required for developing the MatD\ :sup:`3` database are listed in ``requirements.txt``, which is a file located in the ``MatD3`` directory. From a command line prompt with the ``MatD3`` directory as the working directory, install the requirements by issuing
 
 .. code:: bash
 
