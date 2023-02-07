@@ -30,7 +30,24 @@ A detailed set of setup notes is included in the file ``Readme.md`` that is prov
 
 https://github.com/HybriD3-database/MatD3/blob/master/Readme.md
 
-Change to the directory ``MatD3`` by indicating
+Before proceeding, you will typically need a few other software packages to be installed. For instance, you will typically want to install a SQL database, program langage headers and a driver that provides a HTTP interface, needed in order to display the output of MatD3 in a browser.
+
+For example, on Ubuntu, you may need:
+
+.. code:: bash
+
+  sudo apt install libmysqlclient-dev
+  sudo apt install python3-dev
+  sudo apt install firefox-geckodriver
+
+On MacOS, open source software is provided by the Homebrew project, so you may need to install Homebrew and, once that is done, install
+
+.. code:: bash
+
+  brew install mariadb
+  brew install geckodriver
+
+With the prerequisites installed, change to the directory ``MatD3`` by indicating
 
 .. code:: bash
 
