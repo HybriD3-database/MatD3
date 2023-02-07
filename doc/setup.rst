@@ -1,19 +1,5 @@
 ================
-Prerequisites
-================
-
-You will need some additional software installed on your computer before you can begin to install the MatD\ :sup:`3` software itself.
-
-1. You will need suitable database software. ``mysql`` is usually a good choice. You can install the full ``mysql`` software but you need at least a client to proceed. 
-
-For example, on MacOS, one way is to install ``mysql`` through the Homebrew distribution of free software. Once Homebrew is installed, the relevant command (at the command line, i.e., the Terminal) to install mysql may be
-
-.. code:: bash
-
-  brew install mysql
-
-================
-Access and setup
+Access
 ================
 
 The repository of the MatD\ :sup:`3` database is hosted by GitHub:
@@ -26,13 +12,25 @@ It's a public project, so anybody is able to clone the source code and create is
 
   ssh-keygen
 
-It is sufficient to press enter at each query until the keys have been generated. However, protecting the key with a password would be a good idea if you intend to keep it on a public server. Then, at the GitLab website, go to your settings, find "SSH keys", and enter the public key. You can upload several keys in order to have pull/push access from more than one computer. You can now clone the Git repository with
+It is sufficient to press enter at each query until the keys have been generated. However, protecting the key with a password would be a good idea if you intend to keep it on a public server. Then, at the GitLab website, go to your settings, find "SSH keys", and enter the public key. You can upload several keys in order to have pull/push access from more than one computer. 
+
+You can now clone the Git repository with
 
 .. code:: bash
 
   git clone https://github.com/HybriD3-database/MatD3.git
 
-The result of this command should be the creation of a directory ``MatD3`` that contains the software needed to operate the MatD3 database. Change to the directory ``MatD3`` by indicating
+The result of this command should be the creation of a directory ``MatD3`` that contains the software needed to operate the MatD3 database. 
+
+================
+Setup
+================
+
+A detailed set of setup notes is included in the file ``Readme.md`` that is provided directly with the source code. You can access these instructions here:
+
+https://github.com/HybriD3-database/MatD3/blob/master/Readme.md
+
+Change to the directory ``MatD3`` by indicating
 
 .. code:: bash
 
