@@ -14,7 +14,7 @@ It's a public project, so anybody is able to clone the source code and create is
 
 It is sufficient to press enter at each query until the keys have been generated. However, protecting the key with a password would be a good idea if you intend to keep it on a public server. Then, at the GitLab website, go to your settings, find "SSH keys", and enter the public key. You can upload several keys in order to have pull/push access from more than one computer. 
 
-You can now clone the Git repository with
+From a command line (i.e., using a terminal application, which is usually provided along with any Unix/Linux distribution or with MacOS), you can now clone the Git repository with
 
 .. code:: bash
 
