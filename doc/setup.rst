@@ -50,7 +50,15 @@ and activate the environment with
 
 In some instances of python, the relevant command might be found in a directory called ``venv/Scripts/activate`` instead.
 
-You'll notice that the shell's prompt has changed to remind you that you are in a virtual environment. Any packages installed with Python's ``pip`` command are now part of the current project only. The correct versions of the packages that are required for developing the MatD\ :sup:`3` database are listed in ``requirements.txt``, which is a file located in the ``MatD3`` directory. From a command line prompt with the ``MatD3`` directory as the working directory, install the requirements by issuing
+You'll notice that the shell's prompt has changed to remind you that you are in a virtual environment. Any packages installed with Python's ``pip`` command are now part of the current project only. 
+
+Typically, you will also need to update the pip command to a current version:
+
+.. code:: bash
+
+  pip install --upgrade pip
+
+The correct versions of the packages that are required for developing the MatD\ :sup:`3` database are listed in ``requirements.txt``, which is a file located in the ``MatD3`` directory. From a command line prompt with the ``MatD3`` directory as the working directory, install the requirements by issuing
 
 .. code:: bash
 
