@@ -116,7 +116,7 @@ Before starting the server, it is necessary to configure it in order to reflect 
 Some troubleshooting notes
 ================
 
-The packages listed in ``requirements.txt`` are a number and python does have the downside that different versions of different packages do not always play well together. While the ``pip`` command should handle this, such incompatibilities can still creep in.
+The packages listed in ``requirements.txt`` are many. The ``pip`` command should handle incompatibilities, but it does not handle all of them and package incompatibilities can still creep in. If that happens, the output of ``pip`` can, unfortunately, be rather cryptic.
 
 One common consequence of such incompatbilities is that the web server does not start up properly and all you see from your browser is a "502 error" without any useful details.
 
