@@ -28,6 +28,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 MATD3_NAME = mark_safe(config('MATD3_NAME', default='MatD&#xb3;'))
 MATD3_URL = config('MATD3_URL', default='')
+# DEFAULT_AUTO_FIELD='django.db.models.AutoField' #Uncomment this line if using Django version 3.2 or higher
 
 # Application definition
 
