@@ -140,7 +140,12 @@ class System(models.Model):
 
     def listAlternateNames(self):
         return self.group.replace(',', ' ').split()
+    
+class stoichiometry(models.Model):
+     compound_name = models.CharField(max_length=1000)
 
+class stoichiometry_values(models.Model):
+    system_id = models.CharField(max_length=1000)
 
 class Dataset(Base):
     """Class for mainly tables and figures.
