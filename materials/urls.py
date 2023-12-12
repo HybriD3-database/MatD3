@@ -14,6 +14,7 @@ router.register('datasets', views.DatasetViewSet)
 
 app_name = 'materials'
 urlpatterns = [
+    path('system/<int:pk>/', views.SystemView.as_view(), name='system-view'),
     path('', include(router.urls)),
     path('search', views.SearchFormView.as_view(), name='search'),
     path('<int:pk>', views.SystemView.as_view(), name='system'),

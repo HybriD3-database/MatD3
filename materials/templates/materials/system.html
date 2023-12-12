@@ -6,6 +6,7 @@ data sets corresponding to each property are shown.
 {% endcomment %}
 
 {% block body %}
+  {% load materials_tags %}
   {% load static %}
   {%if dataset_list.first.system.message == "" %}
   <div class="card card-default">
@@ -22,11 +23,37 @@ data sets corresponding to each property are shown.
       <h5>IUPAC: {{ dataset_list.first.system.iupac}}</h5>
       Alternate Names: {{ dataset_list.first.system.group}} <br /><br />
       Organic: {{ dataset_list.first.system.organic }} <br />Inorganic: {{ dataset_list.first.system.inorganic }} <br />
-      Dimensionality: {{ dataset_list.first.system.get_dimensionality_display }}D
+      Dimensionality: {{ dataset_list.first.system.get_dimensionality_display }}D 
       {% if dataset_list.first.system.dimensionality == 2 or dataset_list.first.system.dimensionality == 3 %}
-       n: {{ dataset_list.first.system.n }}
+       n: {{ dataset_list.first.system.n }} 
       {% endif %}
+      <br />
+    
+        
+
+      Formal Stoichiometry:
+      {% for system_stoichiometry in dataset_list.first.system.system_stoichiometry_set.all %}
+        {% if system_stoichiometry.stoichiometry_elements_set.exists %}
+          {% with stoichiometry_elements=system_stoichiometry.stoichiometry_elements_set.all %}
+            {% with sorted_stoichiometry_elements=stoichiometry_elements|sort_stoichiometry_elements:element_dict %}
+              {% for stoichiometry_element in sorted_stoichiometry_elements %}
+                {% if stoichiometry_element.element and stoichiometry_element.string_value %}
+                  {{ stoichiometry_element.element }} : {{ stoichiometry_element.string_value }}   
+                  {% if not forloop.last %}, {% endif %}
+                {% endif %}
+              {% endfor %}
+            {% endwith %}
+          {% endwith %}
+        {% else %}
+          "No formal stoichiometry available"
+        {% endif %}
+        <br>
+      {% endfor %}
+                            
+              
+  
     </div>
+  
 
     <!-- LINKED Systems -->
     {% if dataset_list.first.system.derived_to_from.exists %}
@@ -39,7 +66,7 @@ data sets corresponding to each property are shown.
       <div class="collapse" id="related-body-{{ dataset_list.first.system.pk }}"">
         <div class="card-body">
           This system is directly derived from or derives other systems:
-          <ul>
+          <ul> 
             {% for linked_sys in dataset_list.first.system.derived_to_from.all %}
               <li>
                 <a href="{% url 'materials:system' pk=linked_sys.pk %}">
