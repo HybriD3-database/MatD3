@@ -623,7 +623,6 @@
    let initial_secondary_property = '{{ main_form.secondary_property.value }}';
    let initial_secondary_unit = '{{ main_form.secondary_unit.value }}';
   </script>
-
   <script src="{% static 'materials/javascript/add_data.js' %}"></script>
   <script>
    // Prefill the data subsets from a previous instance of the form
@@ -740,11 +739,9 @@
     
     function handleNewStoichiometry() {
       const newStoichiometryInput = document.getElementById('newStoichiometryInput');
-      const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');
       const newStoichiometrySection = document.getElementById('newStoichiometrySection');
       const stoichiometryOutput = document.getElementById('stoichiometryOutput').innerHTML;
 
-      stoichiometryTextBox.value = newStoichiometryInput.value;
       stoichiometryOutput.value = newStoichiometryInput.value;
 
       $('#stoichiometryModal').modal('hide');
