@@ -25,8 +25,13 @@ class AutoCharField(forms.CharField):
 
 
 class AddReferenceForm(forms.Form):
+    inputRISFile = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'onchange':'handleFileSelect();' }),
+        help_text='Upload RIS file reference'
+    )
     title = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id':'title'}),
         max_length=1000,
         help_text='Article title')
     journal = forms.CharField(

@@ -13,6 +13,10 @@
         <div class="card-header">
           Add new reference
         </div>
+        <div class="form-group">
+          <label for="{{ reference_form.inputRISFile.id_for_label }}">Upload RIS File:</label>
+          {{ reference_form.inputRISFile }}
+      </div>
         <div class="card-body">
           <form id="reference-form" method="post">
             <div class="card authors-card">
@@ -547,6 +551,7 @@
 {% block script %}
   {% load static %}
   <script src="{% static 'materials/javascript/selectize.js' %}"></script>
+  <script src="{% static 'materials/javascript/autoupdates.js' %}"></script>
   <script>
    // Initial values for selectize elements
    let initial_reference = '{{ main_form.select_reference.value }}';
