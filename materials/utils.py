@@ -8,6 +8,7 @@ import re
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from . import models
+from .models import System_Stoichiometry, Stoichiometry_Elements
 
 matplotlib.use('Agg')  # noqa
 

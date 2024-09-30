@@ -3,6 +3,7 @@
 {% load materials_tags %}
 
 {% block body %}
+<!--change-->
   <div class="card card-default">
     <div class="card-header">
       <h4>Add Data</h4>
@@ -97,7 +98,17 @@
               </div>
               <div class="form-group col-md-6">
                 {% input_field system_form.formula %}
-              </div>
+                <div class="input-group-append">
+                  <button class="btn btn-info" type="button" onclick="extractStoichiometry()">Extract Stoichiometry</button>
+                  {{"Stoichiometry extraction is case sensitive. For example, CsCl will read as Cs:1, Cl:1 as it needs to be distinguishable from CSCl, which will extract as C:1, S:1, Cl:1"|tooltip}}
+                </div>
+                <div id="stoichiometry-display"></div>
+              </div>  
+              <div class="form-group col-md-6">
+                {% comment %} THE stoichiometry INPUT WILL BE HERE {% endcomment %}
+                {% input_field main_form.stoichiometry %}
+                {% comment %}<input type="text" class="form-control" id="id_stoichiometry" name="stoichiometry" placeholder="Please provide the stoichiometry value in the format: C:6,H:12,O:1">{% endcomment %}
+              </div>      
               <div class="form-group col-md-6">
                 {% input_field system_form.organic %}
               </div>
@@ -127,6 +138,34 @@
           </form>
         </div>
       </div>
+
+      <!--Confirm Stoichiometry -->
+      <div class="modal fade" id="stoichiometryModal" tabindex="-1" role="dialog" aria-labelledby="stoichiometryModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="stoichiometryModalLabel">Is this the correct stoichiometry?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p id="stoichiometryOutput"></p>
+              <div id="newStoichiometrySection" style="display: none;">
+                <label for="newStoichiometryInput">Enter new stoichiometry in the correct format (ex. C3H6O should be entered as C:3, H:6, O:1)</label>
+                <input type="text" id="newStoichiometryInput" style="display: none;" placeholder="Enter stoichiometry here">
+                <button type="button" class="btn btn-primary" onclick="handleNewStoichiometry()">Enter</button>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="handleStoichiometryConfirmation('Yes')">Yes</button>
+              <button type="button" class="btn btn-secondary" onclick="handleStoichiometryConfirmation('No')">No</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
 
       <!-- ADD NEW PROPERTY -->
       <div id="new-property-card" class="card mt-3 new-entry-card new-entry-card2" hidden="true">
@@ -248,8 +287,50 @@
               </div>
               <div class="form-check form-check-inline">
                 {% input_field main_form.two_axes %}
+              </div> 
+            </div>
+          </div>
+
+          <br>
+          <!-- DATA -->
+          <div class="card card-item">
+            <div class="card-header">
+              Data
+            </div>
+            <div class="card-body card-add-data">
+              <div class="form-inline">
+                <div class="form-group">
+                  {{ main_form.number_of_subsets.label_tag }}
+                  <span class="ml-2">{{ main_form.number_of_subsets.help_text|tooltip }}</span>
+                  {{ main_form.number_of_subsets }}
+                </div>
+                <input type="file" id="import-all-data" class="inputfile">
+                <label for="import-all-data"><i class="fa fa-upload" aria-hidden="true"></i>
+                  Import all from file...</label>
+                <i class="fa fa-question-circle tooltip-container ml-2">
+                  <span class="tooltiptext">Select to import all data (all subsets) from a single file. Use the ampersand ("&") as a delimiter between different data subsets.</span>
+                </i>
               </div>
-              <hr>
+              <div id="data-subset"></div>
+            </div>
+          </div>
+
+          <br>
+
+          <!-- Origin of Data -->
+          <div class="card card-item">
+            <div class="card-header">
+              Origin of Data
+            </div>
+            <div class="card-body card-add-data">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <div class="input-group">
+                    <div class="mt-2 mr-2">
+                      </div>
+                  </div>
+                </div>
+              </div>
               <div class="form-row">
                 <div class="col-md-6">
                   {% input_field main_form.origin_of_data %}
@@ -364,31 +445,6 @@
                   {% input_field main_form.computational_comment %}
                 </div>
               </div>
-            </div>
-          </div>
-
-          <br>
-
-          <!-- DATA -->
-          <div class="card card-item">
-            <div class="card-header">
-              Data
-            </div>
-            <div class="card-body card-add-data">
-              <div class="form-inline">
-                <div class="form-group">
-                  {{ main_form.number_of_subsets.label_tag }}
-                  <span class="ml-2">{{ main_form.number_of_subsets.help_text|tooltip }}</span>
-                  {{ main_form.number_of_subsets }}
-                </div>
-                <input type="file" id="import-all-data" class="inputfile">
-                <label for="import-all-data"><i class="fa fa-upload" aria-hidden="true"></i>
-                  Import all from file...</label>
-                <i class="fa fa-question-circle tooltip-container ml-2">
-                  <span class="tooltiptext">Select to import all data (all subsets) from a single file. Use the ampersand ("&") as a delimiter between different data subsets.</span>
-                </i>
-              </div>
-              <div id="data-subset"></div>
             </div>
           </div>
 
@@ -546,6 +602,12 @@
     </div>
   </div>
   <!-- end template -->
+
+  
+
+  
+  <div class="card-body card-add-data">
+    {% input_field main_form.uploaded_files %}
 {% endblock %}
 
 {% block script %}
@@ -605,4 +667,89 @@
    $('#id_phase_transition_value_{{ subset_counter }}').val('{{ value|escapejs }}');
    {% endfor %}
   </script>
+  <script>
+    var elementsData = {{ elements_json|safe }};
+ </script> 
+  <script>
+    function extractStoichiometry() {
+      // Get the formula input value
+      const formulaInput = document.getElementById('id_formula');
+      
+      // Check if the formulaInput is found
+      if (!formulaInput) {
+        console.error("Formula input not found");
+        return;
+      }
+      const formula = formulaInput.value;
+      // Check if the formula is retrieved correctly
+      console.log("Formula:", formula);
+      console.log(newStoichiometryInput);
+      // Regular expression to match element and count
+      const regex = /([A-Z][a-z]*)(\d*)/g;
+      // Object to store element counts
+      const elementCounts = {};
+      // Match elements and counts in the formula
+      let match;
+      while ((match = regex.exec(formula)) !== null) {
+        const element = match[1];
+        const count = match[2] === '' ? 1 : parseInt(match[2], 10);
+  
+        // Update or add the element count
+        if (elementCounts[element]) {
+          elementCounts[element] += count;
+        } else {
+          elementCounts[element] = count;
+        }
+      }
+  
+      // Build the stoichiometry string
+      let stoichiometryString = '';
+      for (const element in elementCounts) {
+        stoichiometryString += `${element}:${elementCounts[element]}, `;
+      }
+  
+      // Remove the trailing comma and space
+      stoichiometryString = stoichiometryString.slice(0, -2);
+      console.log("Stoichiometry:", stoichiometryString);
+      // Display the stoichiometry in the modal
+      document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
+      //Show as modal
+      $('#stoichiometryModal').modal('show');
+  
+    }
+    function handleStoichiometryConfirmation(answer){
+      const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');
+      const newStoichiometrySection = document.getElementById('newStoichiometrySection');
+
+      if(answer == 'Yes'){
+        const stoichiometryOutput = document.getElementById('stoichiometryOutput').innerHTML;
+        console.log("Stoichiometry2:", stoichiometryOutput);
+        id_stoichiometry.value = stoichiometryOutput;
+      }
+      else if (answer == 'No') {
+        showNewStoichiometrySection();
+      }
+      $('#stoichiometryModal').modal('hide');
+    }
+    function showNewStoichiometrySection() {
+      document.getElementById('newStoichiometrySection').style.display = 'block';
+      document.getElementById('newStoichiometryInput').style.display = 'block';
+      document.getElementById('enterButton').style.display = 'block';
+    }
+    
+    function handleNewStoichiometry() {
+      const newStoichiometryInput = document.getElementById('newStoichiometryInput');
+      const newStoichiometrySection = document.getElementById('newStoichiometrySection');
+      const stoichiometryOutput = document.getElementById('stoichiometryOutput').innerHTML;
+
+      stoichiometryOutput.value = newStoichiometryInput.value;
+
+      $('#stoichiometryModal').modal('hide');
+    }
+ 
+  
+  </script>
+
+ 
+    
 {% endblock %}
