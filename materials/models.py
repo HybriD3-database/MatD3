@@ -148,8 +148,35 @@ class System(models.Model):
         return self.group.replace(",", " ").split()
 
 
-class stoichiometry_values(models.Model):
-    system_id = models.CharField(max_length=1000)
+# stoichiometry tables
+class System_Stoichiometry(models.Model):
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+
+    @property
+    def formula(self):
+        return self.system.formula
+
+    stored_formula = models.CharField(max_length=200, blank=True, null=True)
+    # system_id = models.AutoField(primary_key=True)
+    def __str__(self):
+        return self.system.compound_name
+
+    class Meta:
+        verbose_name = "System Stoichiometry"
+        verbose_name_plural = "System Stoichiometries"
+
+
+class Stoichiometry_Elements(models.Model):
+
+    system_stoichiometry = models.ForeignKey(
+        System_Stoichiometry, blank=True, null=True, on_delete=models.PROTECT
+    )  # , related_name='system_id', default=0)
+    element = models.CharField(max_length=1000)
+    string_value = models.CharField(max_length=1000, default="0")
+    float_value = models.FloatField(default=0.0)
+
+    def __str__(self):
+        return self.system_stoichiometry
 
 
 class Dataset(Base):

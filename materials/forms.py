@@ -125,6 +125,17 @@ class AddSystemForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=100,
         help_text='Enter n value for the dimensionality of this system if it applies')
+    
+from .models import System_Stoichiometry, Stoichiometry_Elements    
+class SystemStoichiometryForm(forms.ModelForm):
+    class Meta:
+        model = System_Stoichiometry
+        fields = ['system', 'stored_formula']
+
+class StoichiometryElementsForm(forms.ModelForm):
+    class Meta:
+        model = Stoichiometry_Elements
+        fields = ['system_stoichiometry', 'element', 'string_value', 'float_value']
 
 class AddPropertyForm(forms.Form):
     name = forms.CharField(
