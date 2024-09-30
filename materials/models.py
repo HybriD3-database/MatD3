@@ -163,16 +163,18 @@ class System_Stoichiometry(models.Model):
 
 
 class Stoichiometry_Elements(models.Model):
-
     system_stoichiometry = models.ForeignKey(
-        System_Stoichiometry, blank=True, null=True, on_delete=models.PROTECT
-    )  # , related_name='system_id', default=0)
+        "System_Stoichiometry",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,  # Use CASCADE to delete related elements when system_stoichiometry is deleted
+    )
     element = models.CharField(max_length=1000)
     string_value = models.CharField(max_length=1000, default="0")
     float_value = models.FloatField(default=0.0)
 
     def __str__(self):
-        return self.system_stoichiometry
+        return f"Element {self.element} in stoichiometry {self.system_stoichiometry}"
 
 
 class Dataset(Base):
