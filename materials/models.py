@@ -140,6 +140,7 @@ class System(models.Model):
     )
     n = models.CharField(max_length=50, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
+    # primary_stoichiometry = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return self.compound_name
@@ -151,19 +152,14 @@ class System(models.Model):
 # stoichiometry tables
 class System_Stoichiometry(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE)
+    stoichiometry = models.CharField(
+        max_length=255,
+        help_text="Please provide the stoichiometry value in the format: C:6,H:12,O:1",
+        default="N/A",
+    )
 
-    @property
-    def formula(self):
-        return self.system.formula
-
-    stored_formula = models.CharField(max_length=200, blank=True, null=True)
-    # system_id = models.AutoField(primary_key=True)
     def __str__(self):
-        return self.system.compound_name
-
-    class Meta:
-        verbose_name = "System Stoichiometry"
-        verbose_name_plural = "System Stoichiometries"
+        return f"Stoichiometry for {self.system.compound_name}"
 
 
 class Stoichiometry_Elements(models.Model):

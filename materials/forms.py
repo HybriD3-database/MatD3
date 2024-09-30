@@ -126,17 +126,6 @@ class AddSystemForm(forms.Form):
         max_length=100,
         help_text='Enter n value for the dimensionality of this system if it applies')
     
-from .models import System_Stoichiometry, Stoichiometry_Elements    
-class SystemStoichiometryForm(forms.ModelForm):
-    class Meta:
-        model = System_Stoichiometry
-        fields = ['system', 'stored_formula']
-
-class StoichiometryElementsForm(forms.ModelForm):
-    class Meta:
-        model = Stoichiometry_Elements
-        fields = ['system_stoichiometry', 'element', 'string_value', 'float_value']
-
 class AddPropertyForm(forms.Form):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -154,8 +143,19 @@ class AddUnitForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=100,
         help_text='Label of the unit')
-
-
+'''
+class SystemStoichiometryForm(forms.ModelForm):
+    class Meta:
+        model = models.System_Stoichiometry
+        fields = ['system', 'stoichiometry']
+        widgets = {
+            'system': forms.Select(attrs={'class': 'form-control'}),
+            'stoichiometry': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'C:6,H:12,O:1'})
+        }
+        help_texts = {
+            'stoichiometry': 'Please provide the stoichiometry value in the format: C:6,H:12,O:1',
+        }
+'''
 class AddDataForm(forms.Form):
     """Main form for submitting data."""
 
@@ -196,6 +196,11 @@ class AddDataForm(forms.Form):
         help_text=''
         'Main description of the data. This can include an explanation of the '
         'significance of the results.')
+    # stoichiometry FORM FILED WILL BE HERE
+    stoichiometry = forms.CharField(
+        label='Stoichiometry', 
+        widget=forms.TextInput(attrs={'class': 'form-control'}), 
+        max_length=2000, help_text="Please provide the stoichiometry value in the format: C:6,H:12,O:1")
     extraction_method = AutoCharField(
         label='Data extraction protocol',
         model=models.Dataset, field='extraction_method',

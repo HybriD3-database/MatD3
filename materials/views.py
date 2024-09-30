@@ -32,14 +32,8 @@ from rest_framework.response import Response
 
 from . import forms, models, permissions, qresp, serializers, utils
 from .models import System_Stoichiometry, Stoichiometry_Elements
-from .forms import SystemStoichiometryForm, StoichiometryElementsForm
 
 logger = logging.getLogger(__name__)
-
-
-
-from .elements import element_dict  # Import the dictionary from elements.py
-
 
 
 def dataset_author_check(view):
@@ -73,22 +67,6 @@ def staff_status_required(view):
     wrap.__name__ = view.__name__
     return wrap
 
-def add_stoichiometry(request):
-    if request.method == 'POST':
-        stoichiometry_form = SystemStoichiometryForm(request.POST)
-        elements_form = StoichiometryElementsForm(request.POST)
-
-        if stoichiometry_form.is_valid() and elements_form.is_valid():
-            stoichiometry_instance = stoichiometry_form.save()
-            elements_form.instance.system_stoichiometry = stoichiometry_instance
-            elements_form.save()
-
-            return redirect('success_url')  # Redirect to a success page
-    else:
-        stoichiometry_form = SystemStoichiometryForm()
-        elements_form = StoichiometryElementsForm()
-
-    return render(request, 'your_template.html', {'stoichiometry_form': stoichiometry_form, 'elements_form': elements_form})
 
 class StaffStatusMixin(LoginRequiredMixin):
     """Verify that the current user is at least staff."""
@@ -109,22 +87,6 @@ class SystemView(generic.ListView):
                      then=Value(True)),
                 default=Value(False), output_field=BooleanField())).order_by(
                     '-is_atomic_structure')
-        for dataset in datasets:
-            if dataset.system.system_stoichiometry_set.exists():
-                stoichiometry_elements = dataset.system.system_stoichiometry_set.first().stoichiometry_elements_set.all()
-                sorted_stoichiometry_elements = sorted(
-                    stoichiometry_elements,
-                    key=lambda elem: element_dict.get(elem.element, 0)
-                )
-                dataset.sorted_stoichiometry_elements = sorted_stoichiometry_elements
-            else:
-                dataset.sorted_stoichiometry_elements = None
-
-        return datasets
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['element_dict'] = element_dict  # Add element_dict to the context
-        return context
 
 
 class PropertyAllEntriesView(generic.ListView):
@@ -291,7 +253,41 @@ class AddDataView(StaffStatusMixin, generic.TemplateView):
             'base_template': base_template,
         })
 
+'''
+class SystemStoichiometryView(generic.TemplateView):
+    """View for submitting stoichiometry data.
+    
+    This view can prefill the stoichiometry form based on the provided query parameters.
+    """
+    template_name = 'materials/system_stoichiometry.html'
 
+    def get(self, request, *args, **kwargs):
+        stoichiometry_form = forms.SystemStoichiometryForm()
+        if request.GET.get('return-url'):
+            return_url = request.META['HTTP_REFERER'].replace('/qrespcurator',
+                                                              '')
+            return_url = return_url + request.GET.get('return-url')
+            base_template = 'mainproject/base.html'
+            stoichiometry_form.fields['return_url'].initial = return_url
+
+        # Example of handling a pre-fill for a specific stoichiometry, if passed via URL query
+        if request.GET.get('stoichiometry'):
+            stoichiometry_form.fields['stoichiometry'].initial = request.GET.get('stoichiometry')
+        
+        # Optionally, if you need to pre-select a system based on a query parameter
+        if request.GET.get('system_id'):
+            try:
+                system_instance = models.System_Stoichiometry.objects.get(pk=request.GET.get('system_id'))
+                stoichiometry_form.fields['system'].initial = system_instance
+            except models.System_Stoichiometry.DoesNotExist:
+                # Handle the case where the provided system_id does not exist
+                pass
+
+        return render(request, self.template_name, {
+            'stoichiometry_form': stoichiometry_form,
+            'base_template': base_template,
+        })
+'''
 class ImportDataView(StaffStatusMixin, generic.TemplateView):
     template_name = 'materials/import_data.html'
 
@@ -449,21 +445,7 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
                                 content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=files.zip'
         return response
-def extract_elements_from_stoichiometry(stoichiometry_input):
-    pattern = re.compile(r'([A-Z][a-z]*)(\d*)')
 
-    elements = []
-
-    # Iterate over matches in the stoichiometry input
-    for match in pattern.finditer(stoichiometry_input):
-        element = match.group(1)  # Element name
-        count_str = match.group(2) or '1'  # Default to 1 if count is not specified
-        count = float(count_str)  # Convert count to float
-
-        # Add tuple to the list
-        elements.append((element, count_str, count))
-
-    return elements
 
 @staff_status_required
 @transaction.atomic
@@ -724,6 +706,23 @@ def submit_data(request):
                     computational_details=computational,
                     created_by=request.user,
                     url=url)
+    # Stoichiometry Data Stores HERE:       
+    if form.cleaned_data['stoichiometry']:
+        stoichiometry_value = form.cleaned_data['stoichiometry']  
+        system_stoichiometry = System_Stoichiometry.objects.create(
+            system=dataset.system,
+            stoichiometry=stoichiometry_value
+        ).save()
+        elements_info = stoichiometry_value.split(',')  
+        for element_info in elements_info:
+            element, quantity = element_info.split(':')  
+            Stoichiometry_Elements.objects.create(
+                system_stoichiometry=system_stoichiometry,
+                element=element,
+                string_value=quantity,
+                float_value=float(quantity) 
+            ).save()
+            
     # For best performance, the main data should be inserted with
     # calls to bulk_create. The following work arrays are are
     # populated with data during the loop over subsets and then
@@ -733,7 +732,7 @@ def submit_data(request):
     numerical_values = []
     errors = []
     upper_bounds = []
-    multiple_subsets = int(form.cleaned_data['number_of_subsets']) > 1    
+    multiple_subsets = int(form.cleaned_data['number_of_subsets']) > 1
     for i_subset in range(1, int(form.cleaned_data['number_of_subsets']) + 1):
         # Create data subset
         subset = models.Subset(created_by=request.user, dataset=dataset)
@@ -743,30 +742,6 @@ def submit_data(request):
         subset.save()
         # Go through exceptional cases first. Some properties such as
         # "atomic structure" require special treatment.
-        # Extract stoichiometry string from the form
-        stoichiometry_input = form.cleaned_data[f'stoichiometry_{i_subset}']
-        
-        # Save stoichiometry string to System_Stoichiometry
-        system_stoichiometry, created = System_Stoichiometry.objects.get_or_create(
-            system=dataset.system,
-            defaults={'stored_formula': form.cleaned_data['formula']}
-        )
-        # Create Stoichiometry_Elements
-        elements_data = extract_elements_from_stoichiometry(stoichiometry_input)
-
-        print("System Stoichiometry:", system_stoichiometry)
-        print("Elements Data:", elements_data)
-
-        for element_data in elements_data:
-            element, string_value, float_value = element_data
-            Stoichiometry_Elements.objects.create(
-                system_stoichiometry=system_stoichiometry,
-                element=element,
-                string_value=string_value,
-                float_value=float_value
-            )
-
-
         if dataset.primary_property.name == 'atomic structure':
             create_input_file(
                 dataset,
@@ -1006,7 +981,7 @@ def submit_data(request):
     else:
         messages.success(request, message)
         return redirect(reverse('materials:add_data'))
-    
+
 def resolve_return_url(pk, view_name):
     """Determine URL from the view name and other arguments.
 

@@ -3,6 +3,7 @@
 {% load materials_tags %}
 
 {% block body %}
+<!--change-->
   <div class="card card-default">
     <div class="card-header">
       <h4>Add Data</h4>
@@ -102,11 +103,12 @@
                   {{"Stoichiometry extraction is case sensitive. For example, CsCl will read as Cs:1, Cl:1 as it needs to be distinguishable from CSCl, which will extract as C:1, S:1, Cl:1"|tooltip}}
                 </div>
                 <div id="stoichiometry-display"></div>
-              </div>
+              </div>  
               <div class="form-group col-md-6">
-                <label for="stoichiometry">Stoichiometry</label>
-                <input type="text" class="form-control" id="stoichiometry" name="stoichiometry">
-              </div>
+                {% comment %} THE stoichiometry INPUT WILL BE HERE {% endcomment %}
+                {% input_field main_form.stoichiometry %}
+                {% comment %}<input type="text" class="form-control" id="id_stoichiometry" name="stoichiometry" placeholder="Please provide the stoichiometry value in the format: C:6,H:12,O:1">{% endcomment %}
+              </div>      
               <div class="form-group col-md-6">
                 {% input_field system_form.organic %}
               </div>
@@ -153,9 +155,6 @@
                 <label for="newStoichiometryInput">Enter new stoichiometry in the correct format (ex. C3H6O should be entered as C:3, H:6, O:1)</label>
                 <input type="text" id="newStoichiometryInput" style="display: none;" placeholder="Enter stoichiometry here">
                 <button type="button" class="btn btn-primary" onclick="handleNewStoichiometry()">Enter</button>
-              </div>
-              <div id="stoichiometryWarning" style="display: none; color: red;">
-                Warning: Stoichiometry should not contain the letter 'V'.
               </div>
             </div>
             <div class="modal-footer">
@@ -624,6 +623,7 @@
    let initial_secondary_property = '{{ main_form.secondary_property.value }}';
    let initial_secondary_unit = '{{ main_form.secondary_unit.value }}';
   </script>
+
   <script src="{% static 'materials/javascript/add_data.js' %}"></script>
   <script>
    // Prefill the data subsets from a previous instance of the form
@@ -719,63 +719,40 @@
   
     }
     function handleStoichiometryConfirmation(answer){
-      const stoichiometryTextBox = document.getElementById('stoichiometry');
+      const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');
       const newStoichiometrySection = document.getElementById('newStoichiometrySection');
 
       if(answer == 'Yes'){
         const stoichiometryOutput = document.getElementById('stoichiometryOutput').innerHTML;
-        
-
-        //Validate
-        if (stoichiometryOutput.includes('V')) {
-          document.getElementById('stoichiometryWarning').style.display = 'block';
-          return;
-        }
-        if(stoichiometryTextBox){
-          stoichiometryTextBox.value = stoichiometryOutput;
-        }
+        console.log("Stoichiometry2:", stoichiometryOutput);
+        id_stoichiometry.value = stoichiometryOutput;
       }
       else if (answer == 'No') {
         showNewStoichiometrySection();
       }
-      document.getElementById('stoichiometryWarning').style.display = 'none';
       $('#stoichiometryModal').modal('hide');
     }
     function showNewStoichiometrySection() {
       document.getElementById('newStoichiometrySection').style.display = 'block';
       document.getElementById('newStoichiometryInput').style.display = 'block';
       document.getElementById('enterButton').style.display = 'block';
-      document.getElementById('stoichiometryWarning').style.display = 'none'; //Hidden Warning 
     }
     
     function handleNewStoichiometry() {
-      const stoichiometryTextBox = document.getElementById('stoichiometry');
+      const newStoichiometryInput = document.getElementById('newStoichiometryInput');
+      const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');
       const newStoichiometrySection = document.getElementById('newStoichiometrySection');
-      const newStoichiometryInput = document.getElementById('newStoichiometryInput').value;
+      const stoichiometryOutput = document.getElementById('stoichiometryOutput').innerHTML;
 
-      // Validate
-      if (newStoichiometryInput.includes('V')) {
-        document.getElementById('stoichiometryWarning').style.display = 'block';
-        return;
-      }
+      stoichiometryTextBox.value = newStoichiometryInput.value;
+      stoichiometryOutput.value = newStoichiometryInput.value;
 
-      // Set the value in the main stoichiometry text box
-      if (stoichiometryTextBox && newStoichiometryInput.trim() !== '') {
-        stoichiometryTextBox.value = newStoichiometryInput.trim();
-      }
-      // Hide the new text box and Enter button
-      newStoichiometrySection.style.display = 'none';
-      // Clear the new stoichiometry input
-      newStoichiometryInput.value = '';
-      // Hide the stoichiometry confirmation modal
-      document.getElementById('stoichiometryWarning').style.display = 'none';
       $('#stoichiometryModal').modal('hide');
     }
-    
-    
+ 
+  
   </script>
-  
-  
-    
+
+ 
     
 {% endblock %}
