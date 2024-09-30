@@ -148,6 +148,10 @@ class System(models.Model):
         return self.group.replace(",", " ").split()
 
 
+class stoichiometry_values(models.Model):
+    system_id = models.CharField(max_length=1000)
+
+
 class Dataset(Base):
     """Class for mainly tables and figures.
 
