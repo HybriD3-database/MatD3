@@ -194,49 +194,49 @@ class SeleniumTestCase(LiveServerTestCase):
         S.find_element_by_xpath(
             '//div[@id="new-unit-card"]//button[@type="submit"]').click()
 
-    #def test_publication_material(self):
-    #    self.login()
-    #    S = self.selenium
-    #    S.get(self.live_server_url + reverse('materials:add_data'))
-    #    # Wait for all dropdowns to finish loading
-    #    S.find_element_by_id('id_secondary_unit-selectized')
-    #    # New reference
-    #    self.selectize_set('select_reference')
-    #    S.find_element_by_id('first-name-1').send_keys('first 1')
-    #    S.find_element_by_id('last-name-1').send_keys('last 1')
-    #    S.find_element_by_xpath(
-    #        '//div[@id="institution-1"]//input').send_keys('institution 1')
-    #    S.find_element_by_id('add-more-authors-btn').click()
-    #    S.find_element_by_id('first-name-2').send_keys('First 2')
-    #    S.find_element_by_id('last-name-2').send_keys('last 2')
-    #    S.find_element_by_xpath(
-    #        '//div[@id="institution-2"]//input').send_keys('institution 2')
-    #    S.find_element_by_id('id_title').send_keys('article title')
-    #    S.find_element_by_id('id_journal').send_keys('journal name')
-    #    S.find_element_by_id('id_vol').send_keys('1')
-    #    S.find_element_by_id('id_pages_start').send_keys('1')
-    #    S.find_element_by_id('id_pages_end').send_keys('2')
-    #    S.find_element_by_id('id_year').send_keys('2000')
-    #    S.find_element_by_id('id_doi_isbn').send_keys('doi')
-    #    S.find_element_by_xpath(
-    #        '//div[@id="new-reference-card"]//button[@type="submit"]').click()
-    #    S.find_element_by_xpath('//div[@id="dynamic-messages"]//div')
-    #    self.assertEqual(models.Reference.objects.count(), 2)
-    #    # New system
-    #    self.selectize_set('select_system')
-    #    S.find_element_by_id('id_compound_name').send_keys('new compound')
-    #    S.find_element_by_id('id_formula').send_keys('H2O')
-    #    S.find_element_by_id('id_organic').send_keys('H')
-    #    S.find_element_by_id('id_inorganic').send_keys('O')
-    #    S.find_element_by_id('id_group').send_keys('OH2')
-    #    S.find_element_by_id('id_iupac').send_keys('dihydrogen monoxide')
-    #    S.find_element_by_id('id_description').send_keys('description')
-    #    #S.find_element_by_id('id_dimensionality').send_keys('1')
-    #    S.find_element_by_xpath(
-    #        '//div[@id="new-system-card"]//button[@type="submit"]').click()
-    #    S.find_element_by_xpath('//div[@id="dynamic-messages"]'
-    #                            '//div[contains(text(), "compound")]')
-    #    self.assertEqual(models.System.objects.count(), 2)
+    def test_publication_material(self):
+        self.login()
+        S = self.selenium
+        S.get(self.live_server_url + reverse('materials:add_data'))
+        # Wait for all dropdowns to finish loading
+        S.find_element_by_id('id_secondary_unit-selectized')
+        # New reference
+        self.selectize_set('select_reference')
+        S.find_element_by_id('first-name-1').send_keys('first 1')
+        S.find_element_by_id('last-name-1').send_keys('last 1')
+        S.find_element_by_xpath(
+            '//div[@id="institution-1"]//input').send_keys('institution 1')
+        S.find_element_by_id('add-more-authors-btn').click()
+        S.find_element_by_id('first-name-2').send_keys('First 2')
+        S.find_element_by_id('last-name-2').send_keys('last 2')
+        S.find_element_by_xpath(
+            '//div[@id="institution-2"]//input').send_keys('institution 2')
+        S.find_element_by_id('id_title').send_keys('article title')
+        S.find_element_by_id('id_journal').send_keys('journal name')
+        S.find_element_by_id('id_vol').send_keys('1')
+        S.find_element_by_id('id_pages_start').send_keys('1')
+        S.find_element_by_id('id_pages_end').send_keys('2')
+        S.find_element_by_id('id_year').send_keys('2000')
+        S.find_element_by_id('id_doi_isbn').send_keys('doi')
+        S.find_element_by_xpath(
+            '//div[@id="new-reference-card"]//button[@type="submit"]').click()
+        S.find_element_by_xpath('//div[@id="dynamic-messages"]//div')
+        self.assertEqual(models.Reference.objects.count(), 2)
+        # New system
+        self.selectize_set('select_system')
+        S.find_element_by_id('id_compound_name').send_keys('new compound')
+        S.find_element_by_id('id_formula').send_keys('H2O')
+        S.find_element_by_id('id_organic').send_keys('H')
+        S.find_element_by_id('id_inorganic').send_keys('O')
+        S.find_element_by_id('id_group').send_keys('OH2')
+        S.find_element_by_id('id_iupac').send_keys('dihydrogen monoxide')
+        S.find_element_by_id('id_description').send_keys('description')
+        #S.find_element_by_id('id_dimensionality').send_keys('1')
+        S.find_element_by_xpath(
+            '//div[@id="new-system-card"]//button[@type="submit"]').click()
+        S.find_element_by_xpath('//div[@id="dynamic-messages"]'
+                                '//div[contains(text(), "compound")]')
+        self.assertEqual(models.System.objects.count(), 2)
 
     def test_normal_property(self):
         self.login()
