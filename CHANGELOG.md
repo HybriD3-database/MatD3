@@ -1,5 +1,9 @@
 # MatD3 CHANGELOG
 
+## v.3.0.0 (September 2024)
+
+- Implemented feature to display stoichiometries of materials (Thanks to Reyna Vrbensky!).
+
 ## v.2.0.0 (September 2024)
 
 - Updated code to support latest Python libraries (as of September 2024).
