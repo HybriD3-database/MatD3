@@ -24,4 +24,6 @@ def get_element_dict_value(element_dict, key):
 
 @register.filter()
 def sort_stoichiometry_elements(elements, element_dict):
-    return sorted(elements, key=lambda x: element_dict[x.element])
+    # Use .get() safely and ensure that if element is missing, it defaults to 0
+    return sorted(elements, key=lambda x: element_dict.get(x.element, 0))  # Default to 0 if element is missing
+
