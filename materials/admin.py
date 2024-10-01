@@ -66,30 +66,21 @@ class SystemStoichiometryInline(nested_admin.NestedTabularInline):
     model = System_Stoichiometry
     extra = 0
     verbose_name_plural = "Stoichiometry"
-    inlines = [StoichiometryElementsInline]  # Add StoichiometryElementsInline here
+    inlines = [StoichiometryElementsInline]
 
     def save_model(self, request, obj, form, change):
-        # Save the System_Stoichiometry instance
         super().save_model(request, obj, form, change)
-
-        # Clear existing Stoichiometry_Elements for this stoichiometry
         Stoichiometry_Elements.objects.filter(system_stoichiometry=obj).delete()
-
-        # Parse the stoichiometry string (e.g., 'C:6,H:12,O:1')
+        # Updated regex pattern
         element_pattern = r"([A-Z][a-z]*):(\d+(?:\.\d+)?)"
         elements = re.findall(element_pattern, obj.stoichiometry)
-
-        # Create new Stoichiometry_Elements based on the parsed stoichiometry
         for element, count in elements:
             Stoichiometry_Elements.objects.create(
                 system_stoichiometry=obj,
                 element=element,
-                string_value=str(int(float(count)))
-                if float(count).is_integer()
-                else str(count),
+                string_value=str(count),
                 float_value=float(count),
             )
-
 
 # SystemAdmin to include the Stoichiometry inline
 class SystemAdmin(nested_admin.NestedModelAdmin):

@@ -671,58 +671,63 @@
     var elementsData = {{ elements_json|safe }};
  </script>
   <script>
-    function parseFormula(formula) {
-    const tokens = formula.match(/([A-Z][a-z]?|\(|\)|\d+)/g);
-    if (!tokens) return {};
-    const stack = [{}];
-    let i = 0;
-    while (i < tokens.length) {
-        const token = tokens[i];
-        if (token === '(') {
-            stack.push({});
-            i++;
-        } else if (token === ')') {
-            const top = stack.pop();
-            i++;
-            let multiplier = 1;
-            if (i < tokens.length && /^\d+$/.test(tokens[i])) {
-                multiplier = parseInt(tokens[i], 10);
+      function parseFormula(formula) {
+        // Updated regex to match decimal numbers
+        const tokens = formula.match(/([A-Z][a-z]?|\(|\)|\d+(\.\d+)?)/g);
+        if (!tokens) return {};
+        const stack = [{}];
+        let i = 0;
+        while (i < tokens.length) {
+            const token = tokens[i];
+            if (token === '(') {
+                stack.push({});
+                i++;
+            } else if (token === ')') {
+                const top = stack.pop();
+                i++;
+                let multiplier = 1;
+                // Updated to parse decimal multipliers
+                if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                    multiplier = parseFloat(tokens[i]);
+                    i++;
+                }
+                for (const [element, count] of Object.entries(top)) {
+                    stack[stack.length - 1][element] =
+                        (stack[stack.length - 1][element] || 0) + count * multiplier;
+                }
+            } else if (/^[A-Z][a-z]?$/.test(token)) {
+                const element = token;
+                i++;
+                let count = 1;
+                // Updated to parse decimal counts
+                if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                    count = parseFloat(tokens[i]);
+                    i++;
+                }
+                stack[stack.length - 1][element] =
+                    (stack[stack.length - 1][element] || 0) + count;
+            } else {
                 i++;
             }
-            for (const [element, count] of Object.entries(top)) {
-                stack[stack.length - 1][element] = (stack[stack.length - 1][element] || 0) + count * multiplier;
-            }
-        } else if (/^[A-Z][a-z]?$/.test(token)) {
-            const element = token;
-            i++;
-            let count = 1;
-            if (i < tokens.length && /^\d+$/.test(tokens[i])) {
-                count = parseInt(tokens[i], 10);
-                i++;
-            }
-            stack[stack.length - 1][element] = (stack[stack.length - 1][element] || 0) + count;
-        } else {
-            i++;
         }
-    }
-    return stack[0];
+        return stack[0];
     }
 
     function extractStoichiometry() {
-    const formulaInput = document.getElementById('id_formula');
-    if (!formulaInput) {
-        console.error("Formula input not found");
-        return;
-    }
-    const formula = formulaInput.value;
-    const elementCounts = parseFormula(formula);
-    let stoichiometryString = '';
-    for (const element in elementCounts) {
-        stoichiometryString += `${element}:${elementCounts[element]}, `;
-    }
-    stoichiometryString = stoichiometryString.slice(0, -2);
-    document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
-    $('#stoichiometryModal').modal('show');
+        const formulaInput = document.getElementById('id_formula');
+        if (!formulaInput) {
+            console.error("Formula input not found");
+            return;
+        }
+        const formula = formulaInput.value;
+        const elementCounts = parseFormula(formula);
+        let stoichiometryString = '';
+        for (const element in elementCounts) {
+            stoichiometryString += `${element}:${elementCounts[element]}, `;
+        }
+        stoichiometryString = stoichiometryString.slice(0, -2);
+        document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
+        $('#stoichiometryModal').modal('show');
     }
 
     function handleStoichiometryConfirmation(answer){
