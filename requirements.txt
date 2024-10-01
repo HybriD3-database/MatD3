@@ -16,3 +16,4 @@ Sphinx
 gunicorn
 sphinx_rtd_theme
 django-filter
+pymysql
