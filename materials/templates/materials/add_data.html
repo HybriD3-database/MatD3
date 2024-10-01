@@ -103,12 +103,12 @@
                   {{"Stoichiometry extraction is case sensitive. For example, CsCl will read as Cs:1, Cl:1 as it needs to be distinguishable from CSCl, which will extract as C:1, S:1, Cl:1"|tooltip}}
                 </div>
                 <div id="stoichiometry-display"></div>
-              </div>  
+              </div>
               <div class="form-group col-md-6">
                 {% comment %} THE stoichiometry INPUT WILL BE HERE {% endcomment %}
                 {% input_field main_form.stoichiometry %}
                 {% comment %}<input type="text" class="form-control" id="id_stoichiometry" name="stoichiometry" placeholder="Please provide the stoichiometry value in the format: C:6,H:12,O:1">{% endcomment %}
-              </div>      
+              </div>
               <div class="form-group col-md-6">
                 {% input_field system_form.organic %}
               </div>
@@ -165,7 +165,7 @@
           </div>
         </div>
       </div>
-      
+
 
       <!-- ADD NEW PROPERTY -->
       <div id="new-property-card" class="card mt-3 new-entry-card new-entry-card2" hidden="true">
@@ -287,7 +287,7 @@
               </div>
               <div class="form-check form-check-inline">
                 {% input_field main_form.two_axes %}
-              </div> 
+              </div>
             </div>
           </div>
 
@@ -603,9 +603,9 @@
   </div>
   <!-- end template -->
 
-  
 
-  
+
+
   <div class="card-body card-add-data">
     {% input_field main_form.uploaded_files %}
 {% endblock %}
@@ -669,54 +669,62 @@
   </script>
   <script>
     var elementsData = {{ elements_json|safe }};
- </script> 
+ </script>
   <script>
+    function parseFormula(formula) {
+    const tokens = formula.match(/([A-Z][a-z]?|\(|\)|\d+)/g);
+    if (!tokens) return {};
+    const stack = [{}];
+    let i = 0;
+    while (i < tokens.length) {
+        const token = tokens[i];
+        if (token === '(') {
+            stack.push({});
+            i++;
+        } else if (token === ')') {
+            const top = stack.pop();
+            i++;
+            let multiplier = 1;
+            if (i < tokens.length && /^\d+$/.test(tokens[i])) {
+                multiplier = parseInt(tokens[i], 10);
+                i++;
+            }
+            for (const [element, count] of Object.entries(top)) {
+                stack[stack.length - 1][element] = (stack[stack.length - 1][element] || 0) + count * multiplier;
+            }
+        } else if (/^[A-Z][a-z]?$/.test(token)) {
+            const element = token;
+            i++;
+            let count = 1;
+            if (i < tokens.length && /^\d+$/.test(tokens[i])) {
+                count = parseInt(tokens[i], 10);
+                i++;
+            }
+            stack[stack.length - 1][element] = (stack[stack.length - 1][element] || 0) + count;
+        } else {
+            i++;
+        }
+    }
+    return stack[0];
+    }
+
     function extractStoichiometry() {
-      // Get the formula input value
-      const formulaInput = document.getElementById('id_formula');
-      
-      // Check if the formulaInput is found
-      if (!formulaInput) {
+    const formulaInput = document.getElementById('id_formula');
+    if (!formulaInput) {
         console.error("Formula input not found");
         return;
-      }
-      const formula = formulaInput.value;
-      // Check if the formula is retrieved correctly
-      console.log("Formula:", formula);
-      console.log(newStoichiometryInput);
-      // Regular expression to match element and count
-      const regex = /([A-Z][a-z]*)(\d*)/g;
-      // Object to store element counts
-      const elementCounts = {};
-      // Match elements and counts in the formula
-      let match;
-      while ((match = regex.exec(formula)) !== null) {
-        const element = match[1];
-        const count = match[2] === '' ? 1 : parseInt(match[2], 10);
-  
-        // Update or add the element count
-        if (elementCounts[element]) {
-          elementCounts[element] += count;
-        } else {
-          elementCounts[element] = count;
-        }
-      }
-  
-      // Build the stoichiometry string
-      let stoichiometryString = '';
-      for (const element in elementCounts) {
-        stoichiometryString += `${element}:${elementCounts[element]}, `;
-      }
-  
-      // Remove the trailing comma and space
-      stoichiometryString = stoichiometryString.slice(0, -2);
-      console.log("Stoichiometry:", stoichiometryString);
-      // Display the stoichiometry in the modal
-      document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
-      //Show as modal
-      $('#stoichiometryModal').modal('show');
-  
     }
+    const formula = formulaInput.value;
+    const elementCounts = parseFormula(formula);
+    let stoichiometryString = '';
+    for (const element in elementCounts) {
+        stoichiometryString += `${element}:${elementCounts[element]}, `;
+    }
+    stoichiometryString = stoichiometryString.slice(0, -2);
+    document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
+    $('#stoichiometryModal').modal('show');
+    }
+
     function handleStoichiometryConfirmation(answer){
       const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');
       const newStoichiometrySection = document.getElementById('newStoichiometrySection');
@@ -736,7 +744,7 @@
       document.getElementById('newStoichiometryInput').style.display = 'block';
       document.getElementById('enterButton').style.display = 'block';
     }
-    
+
     function handleNewStoichiometry() {
       const newStoichiometryInput = document.getElementById('newStoichiometryInput');
       const newStoichiometrySection = document.getElementById('newStoichiometrySection');
@@ -746,10 +754,10 @@
 
       $('#stoichiometryModal').modal('hide');
     }
- 
-  
+
+
   </script>
 
- 
-    
+
+
 {% endblock %}
