@@ -8,34 +8,54 @@ from django.db.models.signals import post_save
 from .models import System, System_Stoichiometry, Stoichiometry_Elements
 import re
 
+def parse_formula(formula):
+    tokens = re.findall(r'([A-Z][a-z]?|\(|\)|\d+)', formula)
+    stack = [{}]
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if token == '(':
+            stack.append({})
+            i += 1
+        elif token == ')':
+            top = stack.pop()
+            i += 1
+            # Check if there is a multiplier
+            if i < len(tokens) and tokens[i].isdigit():
+                multiplier = int(tokens[i])
+                i += 1
+            else:
+                multiplier = 1
+            for element, count in top.items():
+                stack[-1][element] = stack[-1].get(element, 0) + count * multiplier
+        elif re.match(r'[A-Z][a-z]?$', token):
+            element = token
+            i += 1
+            if i < len(tokens) and tokens[i].isdigit():
+                count = int(tokens[i])
+                i += 1
+            else:
+                count = 1
+            stack[-1][element] = stack[-1].get(element, 0) + count
+        else:
+            i += 1
+    return stack[0]
 
 @receiver(post_save, sender=System)
 def create_stoichiometry_entries(sender, instance, created, **kwargs):
     if created:
-        # Example: assuming the system's formula is provided in the form 'C6H12O6'
-        formula = (
-            instance.formula
-        )  # Use the system's formula field for stoichiometry parsing
-
-        # Regular expression to extract elements and their counts (e.g., C6, H12, O6 from 'C6H12O6')
-        element_pattern = r"([A-Z][a-z]*)(\d*)"
-        elements = re.findall(element_pattern, formula)
-
-        # Create the stoichiometry string in the format "C:6,H:12,O:6"
-        stoichiometry_str = ",".join([f"{el}:{count or 1}" for el, count in elements])
-
-        # Create System_Stoichiometry entry
+        formula = instance.formula
+        elements_dict = parse_formula(formula)
+        stoichiometry_str = ",".join([f"{el}:{int(count)}" for el, count in elements_dict.items()])
         stoichiometry = System_Stoichiometry.objects.create(
             system=instance, stoichiometry=stoichiometry_str
         )
-
-        # Create Stoichiometry_Elements entries
-        for el, count in elements:
+        for el, count in elements_dict.items():
             Stoichiometry_Elements.objects.create(
                 system_stoichiometry=stoichiometry,
                 element=el,
-                string_value=count or "1",
-                float_value=float(count) if count else 1.0,
+                string_value=str(int(count)),
+                float_value=float(count),
             )
 
 
