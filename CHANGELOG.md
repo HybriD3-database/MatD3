@@ -2,9 +2,9 @@
 
 ## v.3.1.0 (October 2024)
 
-- Implemented feature to obtain reference information from .bib files.
+- Implemented a feature to obtain reference information from .bib files.
 - RIS reference parser now reads in more fields beyond the title.
-- Stoichiometry representation supports formulas with paranthesis.
+- Stoichiometry representation supports formulas with parenthesis.
 
 ## v.3.0.0 (September 2024)
 
