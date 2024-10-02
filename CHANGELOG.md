@@ -1,5 +1,11 @@
 # MatD3 CHANGELOG
 
+## v.3.1.0 (October 2024)
+
+- Implemented feature to obtain reference information from .bib files.
+- RIS reference parser now reads in more fields beyond the title.
+- Stoichiometry representation supports formulas with paranthesis.
+
 ## v.3.0.0 (September 2024)
 
 - Implemented feature to display stoichiometries of materials (Thanks to Reyna Vrbensky!).
