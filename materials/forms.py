@@ -33,6 +33,13 @@ class AddReferenceForm(forms.Form):
         # widget=forms.ClearableFileInput(attrs={'multiple': True, 'onchange':'handleFileSelect();' }),
         help_text="Upload RIS file reference",
     )
+    inputBIBFile = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={"allow_multiple_selected": True, "onchange": "handleFileSelect();"}
+        ),
+        help_text="Upload BIB file reference",
+    )
     title = forms.CharField(
         widget=forms.TextInput(attrs={"class": "form-control", "id": "title"}),
         max_length=1000,
