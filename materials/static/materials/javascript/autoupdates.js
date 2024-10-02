@@ -20,6 +20,7 @@ function handleFileSelect() {
             let year = '';
             let doi = '';
             let isbn = '';
+            let authors = [];
 
             // Iterate over lines and extract data
             lines.forEach(line => {
@@ -48,7 +49,9 @@ function handleFileSelect() {
                 else if (line.startsWith('SN  -')) {
                     isbn += line.replace(/^SN\s*-\s*/, '').trim();
                 }
-                // Add more fields as needed
+                else if (line.startsWith('AU  -')) {
+                    authors.push(line.replace(/^AU\s*-\s*/, '').trim()); // Collect all authors
+                }
             });
 
             // Now set the values of the form inputs
@@ -77,7 +80,6 @@ function handleFileSelect() {
                 yearInput.value = year.trim();
             }
 
-            // Set the DOI and ISBN with a comma and space separator if both are present
             const doiIsbnInput = document.querySelector('[name="doi_isbn"]');
             if (doiIsbnInput) {
                 if (doi && isbn) {
@@ -87,8 +89,33 @@ function handleFileSelect() {
                 }
             }
 
+            const addAuthorButton = document.querySelector('#add-more-authors-btn'); // Button to add more authors
+
+            // Fill authors one by one
+            authors.forEach((author, index) => {
+                if (index > 0) {
+                    // Click the "Add more authors" button for additional authors
+                    addAuthorButton.click();
+                }
+
+                const authorParts = author.split(', ');
+                const lastName = authorParts[0];
+                const firstName = authorParts.length > 1 ? authorParts[1] : '';
+
+                // Populate the respective author fields dynamically
+                const firstNameField = document.querySelector(`[name="first-name-${index + 1}"]`);
+                const lastNameField = document.querySelector(`[name="last-name-${index + 1}"]`);
+
+                if (firstNameField && lastNameField) {
+                    firstNameField.value = firstName;
+                    lastNameField.value = lastName;
+                }
+            });
         };
 
         reader.readAsText(file); // Read the file as text
     }
 }
+
+// Attach the function to the input file change event
+document.querySelector('[name="inputRISFile"]').addEventListener('change', handleFileSelect);
