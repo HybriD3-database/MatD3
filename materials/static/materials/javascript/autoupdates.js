@@ -99,6 +99,7 @@ function handleBIBFileSelect() {
             let pages_end = '';
             let year = '';
             let doi = '';
+            let issn = '';
             let authors = [];
 
             // Iterate over lines and extract data from the .bib file
@@ -125,6 +126,9 @@ function handleBIBFileSelect() {
                 else if (line.startsWith('doi =')) {
                     doi = line.replace(/doi\s*=\s*[{"]/i, '').replace(/[",}]/g, '').trim();
                 }
+                else if (line.startsWith('issn =')) {
+                    issn = line.replace(/issn\s*=\s*[{"]/i, '').replace(/[",}]/g, '').trim();
+                }
                 else if (line.startsWith('author =')) {
                     const authorString = line.replace(/author\s*=\s*[{"]/i, '').replace(/[",}]/g, '').trim();
                     authors = authorString.split(' and ').map(author => author.trim());
@@ -138,11 +142,7 @@ function handleBIBFileSelect() {
             document.querySelector('[name="pages_start"]').value = pages_start.trim();
             document.querySelector('[name="pages_end"]').value = pages_end.trim();
             document.querySelector('[name="year"]').value = year.trim();
-
-            const doiIsbnInput = document.querySelector('[name="doi_isbn"]');
-            if (doiIsbnInput) {
-                doiIsbnInput.value = doi.trim();
-            }
+            document.querySelector('[name="doi_isbn"]').value = doi && issn ? doi + ', ' + issn : doi || issn;
 
             const addAuthorButton = document.querySelector('#add-more-authors-btn');
 
