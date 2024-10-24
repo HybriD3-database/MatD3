@@ -6,11 +6,33 @@ from materials import models
 
 
 class SearchForm(forms.Form):
-    search_text = forms.CharField(label="Search term", max_length=100)
+    BAND_GAP_TYPES = [
+        ("fundamental", "band gap (fundamental)"),
+        ("optical_diffuse_reflectance", "band gap (optical, diffuse reflectance)"),
+        ("optical_transmission", "band gap (optical, transmission)"),
+        ("optical_theory", "band gap (optical, theory)"),
+        ("optical_integrating_sphere", "band gap (optical, integrating sphere)"),
+        ("band_edge_difference", "band gap (band edge difference)"),
+        (
+            "fundamental_calculated",
+            "Band gap (fundamental, calculated) (DFT-HSE06+SOC)",
+        ),
+    ]
+
+    search_text = forms.CharField(
+        label="Search term", max_length=100, required=False
+    )  # Make search_text optional
+
+    band_gap_min = forms.FloatField(required=False)
+    band_gap_max = forms.FloatField(required=False)
+    band_gap_type = forms.ChoiceField(choices=BAND_GAP_TYPES, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["search_text"].widget.attrs["class"] = "form-control"
+        self.fields["band_gap_min"].widget.attrs["class"] = "form-control"
+        self.fields["band_gap_max"].widget.attrs["class"] = "form-control"
+        self.fields["band_gap_type"].widget.attrs["class"] = "form-control"
 
 
 class AutoCharField(forms.CharField):

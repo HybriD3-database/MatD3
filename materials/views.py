@@ -190,6 +190,7 @@ class SearchFormView(generic.TemplateView):
         ["organic", "Organic Component"],
         ["inorganic", "Inorganic Component"],
         ["author", "Author"],
+        ["band_gap", "Band gap"],
     ]
 
     def get(self, request):
@@ -212,15 +213,62 @@ class SearchFormView(generic.TemplateView):
     def post(self, request):
         template_name = "materials/search_results.html"
         form = forms.SearchForm(request.POST)
-        search_text = ""
-        # default search_term
-        search_term = "formula"
         physical_properties = []
+        systems_info = []
+        systems = []
+
         if form.is_valid():
-            search_text = form.cleaned_data["search_text"]
-            search_term = request.POST.get("search_term")
-            systems_info = []
-            if search_term == "formula":
+            search_text = form.cleaned_data.get("search_text", "")
+            band_gap_min = form.cleaned_data.get("band_gap_min")
+            band_gap_max = form.cleaned_data.get("band_gap_max")
+            search_term = request.POST.get("search_term", "formula")
+            band_gap_type = request.POST.get(
+                "band_gap_type", "fundamental"
+            )  # Capturing the selected band gap type
+
+            # Define a mapping of band gap types to their corresponding property names
+            band_gap_property_map = {
+                "fundamental": "band gap (fundamental)",
+                "optical_diffuse_reflectance": "band gap (optical, diffuse reflectance)",
+                "optical_transmission": "band gap (optical, transmission)",
+                "optical_theory": "band gap (optical, theory)",
+                "optical_integrating_sphere": "band gap (optical, integrating sphere)",
+                "band_edge_difference": "band gap (band edge difference)",
+                "fundamental_calculated": "Band gap (fundamental, calculated) (DFT-HSE06+SOC)",
+            }
+
+            # Handle Band Gap Search independently of search_text
+            if search_term == "band_gap":
+                if band_gap_min is not None and band_gap_max is not None:
+
+                    # Use the band_gap_type to select the correct property name
+                    band_gap_property_name = band_gap_property_map.get(
+                        band_gap_type, "band gap (fundamental)"
+                    )
+
+                    # Step 1: Filter NumericalValues based on the band gap range and selected band gap type
+                    numerical_values = models.NumericalValue.objects.filter(
+                        value__gte=band_gap_min,
+                        value__lte=band_gap_max,
+                        datapoint__subset__dataset__primary_property__name=band_gap_property_name,
+                    ).distinct()
+
+                    # Step 2: Find datapoints corresponding to those numerical values
+                    datapoints = models.Datapoint.objects.filter(
+                        values__in=numerical_values
+                    ).distinct()
+
+                    # Step 3: Find datasets corresponding to those datapoints
+                    datasets_with_band_gap = models.Dataset.objects.filter(
+                        subsets__datapoints__in=datapoints
+                    ).distinct()
+
+                    # Step 4: Finally, filter systems based on those datasets
+                    systems = models.System.objects.filter(
+                        dataset__in=datasets_with_band_gap
+                    ).distinct()
+
+            elif search_term == "formula":
                 systems = models.System.objects.filter(
                     Q(formula__icontains=search_text)
                     | Q(group__icontains=search_text)
