@@ -9,53 +9,51 @@
     <div class="card-body">
       <form id="search-system" method="post">
         {% csrf_token %}
-          <div class="form-group">
-        <label for="search_term">Search term: </label>
-        <div class="input-group">
-          <div class="input-group-prepend">
-            <select id="search_term" name="search_term" class="selectpicker">
-              {% for search_term in search_terms %}
-                <option value="{{ search_term.0 }}">{{ search_term.1 }}</option>
-              {% endfor %}
-            </select>
+
+        <!-- Search Term Selection -->
+        <div class="form-group">
+          <label for="search_term">Search term: </label>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <select id="search_term" name="search_term" class="selectpicker">
+                {% for search_term in search_terms %}
+                  <option value="{{ search_term.0 }}">{{ search_term.1 }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
         </div>
-      </div>
 
-       <!-- Regular Search Fields (Visible by default) -->
-      <div id="search_text_group" class="form-group">
-        <input id="search_text" class="form-control" type="text" name="search_text" placeholder="Enter search term" required>
-      </div>
+        <!-- Regular Search Fields (Visible by default) -->
+        <div id="search_text_group" class="form-group">
+          <input id="search_text" class="form-control" type="text" name="search_text" placeholder="Enter search term" required>
+        </div>
 
-          <!-- Band Gap Fields (Hidden by default) -->
-    <div id="band_gap_fields" class="form-group" style="display: none;">
-        <label for="band_gap_min">Band gap Min (eV):</label>
-        <input type="number" step="0.01" class="form-control" name="band_gap_min" id="band_gap_min" placeholder="Min band gap">
+        <!-- Band Gap Search Fields (Hidden by default) -->
+        <div id="band_gap_fields" class="form-group" style="display: none;">
+          <!-- Band Gap Min -->
+          <label for="band_gap_min">Band gap Min (eV):</label>
+          <input type="number" step="0.01" class="form-control" name="band_gap_min" id="band_gap_min" placeholder="Min band gap">
 
-        <label for="band_gap_max">Band gap Max (eV):</label>
-        <input type="number" step="0.01" class="form-control" name="band_gap_max" id="band_gap_max" placeholder="Max band gap">
+          <!-- Band Gap Max -->
+          <label for="band_gap_max">Band gap Max (eV):</label>
+          <input type="number" step="0.01" class="form-control" name="band_gap_max" id="band_gap_max" placeholder="Max band gap">
 
-        <!-- Add Band Gap Type Dropdown -->
-        <label for="band_gap_type">Band gap type:</label>
-        <select name="band_gap_type" id="band_gap_type" class="form-control">
-            <option value="fundamental">band gap (fundamental)</option>
-            <option value="optical_diffuse_reflectance">band gap (optical, diffuse reflectance)</option>
-            <option value="optical_transmission">band gap (optical, transmission)</option>
-            <option value="optical_theory">band gap (optical, theory)</option>
-            <option value="optical_integrating_sphere">band gap (optical, integrating sphere)</option>
-            <option value="band_edge_difference">band gap (band edge difference)</option>
-            <option value="fundamental_calculated">Band gap (fundamental, calculated) (DFT-HSE06+SOC)</option>
-        </select>
-    </div>
+          <!-- Experimental or Theoretical Dropdown -->
+          <label for="is_experimental">Type:</label>
+          <select name="is_experimental" id="is_experimental" class="form-control">
+            <option value="any">Any</option>
+            <option value="True">Experimental</option>
+            <option value="False">Computational</option>
+          </select>
+        </div>
 
-
-      <!-- Submit Button (Single submit button for both cases) -->
-      <button type="submit" class="btn btn-primary">Submit</button>
+        <!-- Submit Button (Single submit button for both cases) -->
+        <button type="submit" class="btn btn-primary">Submit</button>
 
       </form>
-      <!-- <div class="alert alert-info" id="explanatory_text"> -->
-      <!--   Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3 -->
-      <!-- </div> -->
+
+      <!-- Material and Dataset ID Selection (As it is in your current form) -->
       <div class="input-group mt-3">
         <div class="input-group-prepend">
           <span id="material_id_label" class="input-group-text">Material ID</span>
@@ -82,8 +80,7 @@
           <button id="dataset_id_submit" class="btn btn-primary">Submit</button>
         </div>
       </div>
-      <ul id="results" class="list-group">
-      </ul>
+      <ul id="results" class="list-group"></ul>
     </div>
   </div>
 {% endblock %}
