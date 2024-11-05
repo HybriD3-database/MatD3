@@ -6,11 +6,26 @@ from materials import models
 
 
 class SearchForm(forms.Form):
-    search_text = forms.CharField(label="Search term", max_length=100)
+    IS_EXPERIMENTAL_CHOICES = [
+        ("any", "Any"),
+        (True, "Experimental"),
+        (False, "Computational"),
+    ]
+
+    search_text = forms.CharField(
+        label="Search term", max_length=100, required=False
+    )  # Make search_text optional
+
+    band_gap_min = forms.FloatField(required=False)
+    band_gap_max = forms.FloatField(required=False)
+    is_experimental = forms.ChoiceField(choices=IS_EXPERIMENTAL_CHOICES, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["search_text"].widget.attrs["class"] = "form-control"
+        self.fields["band_gap_min"].widget.attrs["class"] = "form-control"
+        self.fields["band_gap_max"].widget.attrs["class"] = "form-control"
+        self.fields["is_experimental"].widget.attrs["class"] = "form-control"
 
 
 class AutoCharField(forms.CharField):

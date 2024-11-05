@@ -9,8 +9,10 @@
     <div class="card-body">
       <form id="search-system" method="post">
         {% csrf_token %}
+
+        <!-- Search Term Selection -->
         <div class="form-group">
-          <label for="search_text">Search term: </label>
+          <label for="search_term">Search term: </label>
           <div class="input-group">
             <div class="input-group-prepend">
               <select id="search_term" name="search_term" class="selectpicker">
@@ -19,17 +21,40 @@
                 {% endfor %}
               </select>
             </div>
-            <input id="search_text" class="form-control" type="text" name="search_text" required>
-            <div class="input-group-append">
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
           </div>
         </div>
+
+        <!-- Regular Search Fields (Visible by default) -->
+        <div id="search_text_group" class="form-group">
+          <input id="search_text" class="form-control" type="text" name="search_text" placeholder="Enter search term" required>
+        </div>
+
+        <!-- Band Gap Search Fields (Hidden by default) -->
+        <div id="band_gap_fields" class="form-group" style="display: none;">
+          <!-- Band Gap Min -->
+          <label for="band_gap_min">Band gap Min (eV):</label>
+          <input type="number" step="0.01" class="form-control" name="band_gap_min" id="band_gap_min" placeholder="Min band gap">
+
+          <!-- Band Gap Max -->
+          <label for="band_gap_max">Band gap Max (eV):</label>
+          <input type="number" step="0.01" class="form-control" name="band_gap_max" id="band_gap_max" placeholder="Max band gap">
+
+          <!-- Experimental or Theoretical Dropdown -->
+          <label for="is_experimental">Type:</label>
+          <select name="is_experimental" id="is_experimental" class="form-control">
+            <option value="any">Any</option>
+            <option value="True">Experimental</option>
+            <option value="False">Computational</option>
+          </select>
+        </div>
+
+        <!-- Submit Button (Single submit button for both cases) -->
+        <button type="submit" class="btn btn-primary">Submit</button>
+
       </form>
-      <div class="alert alert-info" id="explanatory_text">
-        Search for all or part of a chemical formula, e.g. CH3NH3PbI3 or MAPbI3
-      </div>
-      <div class="input-group">
+
+      <!-- Material and Dataset ID Selection (As it is in your current form) -->
+      <div class="input-group mt-3">
         <div class="input-group-prepend">
           <span id="material_id_label" class="input-group-text">Material ID</span>
         </div>
@@ -55,8 +80,7 @@
           <button id="dataset_id_submit" class="btn btn-primary">Submit</button>
         </div>
       </div>
-      <ul id="results" class="list-group">
-      </ul>
+      <ul id="results" class="list-group"></ul>
     </div>
   </div>
 {% endblock %}
@@ -116,5 +140,25 @@
      window.location.href = `dataset/${document.getElementById('dataset_ids').value}`;
    });
   </script>
+
+<script>
+  document.getElementById('search_term').addEventListener('change', function() {
+    const bandGapFields = document.getElementById('band_gap_fields');
+    const searchTextGroup = document.getElementById('search_text_group');
+    const selectedValue = this.value;
+
+    // If "Band Gap" is selected, show the band gap fields and hide the regular search text field
+    if (selectedValue === 'band_gap') {
+      bandGapFields.style.display = 'block';      // Show band gap fields (including band_gap_type dropdown)
+      searchTextGroup.style.display = 'none';     // Hide regular search fields
+      document.getElementById('search_text').removeAttribute('required');  // Remove required attribute
+    } else {
+      // Otherwise, show the regular search text field and hide the band gap fields
+      bandGapFields.style.display = 'none';       // Hide band gap fields
+      searchTextGroup.style.display = 'block';    // Show regular search fields
+      document.getElementById('search_text').setAttribute('required', 'required'); // Set required attribute
+    }
+  });
+</script>
 
 {% endblock %}
