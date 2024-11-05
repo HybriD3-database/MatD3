@@ -19,26 +19,25 @@ data sets corresponding to each property are shown.
         </a>
       {% endif %}
       <h3>{{ dataset_list.first.system.compound_name }}</h3>
-      <h5>Chemical Formula: {{ dataset_list.first.system.formula}}</h5>
-      <h5>IUPAC: {{ dataset_list.first.system.iupac}}</h5>
-      Alternate Names: {{ dataset_list.first.system.group}} <br /><br />
-      Organic: {{ dataset_list.first.system.organic }} <br />Inorganic: {{ dataset_list.first.system.inorganic }} <br />
-      Dimensionality: {{ dataset_list.first.system.get_dimensionality_display }}D 
+      <h6>Chemical Formula: {{ dataset_list.first.system.formula}}</h6>
+      <h6>IUPAC: {{ dataset_list.first.system.iupac}}</h6>
+      <h6>Alternate Names: {{ dataset_list.first.system.group}} </h6>
+      <h6>Organic: {{ dataset_list.first.system.organic }}</h6>
+      <h6>Inorganic: {{ dataset_list.first.system.inorganic }} </h6>
+      <h6>Dimensionality: {{ dataset_list.first.system.get_dimensionality_display }}D
       {% if dataset_list.first.system.dimensionality == 2 or dataset_list.first.system.dimensionality == 3 %}
-       n: {{ dataset_list.first.system.n }} 
+       n: {{ dataset_list.first.system.n }}
       {% endif %}
-      <br />
-    
-        
+      </h6>
 
-      Formal Stoichiometry:
+      <h6>Formal Stoichiometry:
       {% for system_stoichiometry in dataset_list.first.system.system_stoichiometry_set.all %}
         {% if system_stoichiometry.stoichiometry_elements_set.exists %}
           {% with stoichiometry_elements=system_stoichiometry.stoichiometry_elements_set.all %}
             {% with sorted_stoichiometry_elements=stoichiometry_elements|sort_stoichiometry_elements:element_dict %}
               {% for stoichiometry_element in sorted_stoichiometry_elements %}
                 {% if stoichiometry_element.element and stoichiometry_element.string_value %}
-                  {{ stoichiometry_element.element }} : {{ stoichiometry_element.string_value }}   
+                  {{ stoichiometry_element.element }} : {{ stoichiometry_element.string_value }}
                   {% if not forloop.last %}, {% endif %}
                 {% endif %}
               {% endfor %}
@@ -49,11 +48,9 @@ data sets corresponding to each property are shown.
         {% endif %}
         <br>
       {% endfor %}
-                            
-              
-  
+      </h6>
+
     </div>
-  
 
     <!-- LINKED Systems -->
     {% if dataset_list.first.system.derived_to_from.exists %}
@@ -66,7 +63,7 @@ data sets corresponding to each property are shown.
       <div class="collapse" id="related-body-{{ dataset_list.first.system.pk }}"">
         <div class="card-body">
           This system is directly derived from or derives other systems:
-          <ul> 
+          <ul>
             {% for linked_sys in dataset_list.first.system.derived_to_from.all %}
               <li>
                 <a href="{% url 'materials:system' pk=linked_sys.pk %}">
