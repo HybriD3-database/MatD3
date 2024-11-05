@@ -222,6 +222,15 @@ class DatasetSerializerSummary(serializers.ModelSerializer):
         )
 
 
+# Define the DIMENSIONALITIES mapping
+DIMENSIONALITIES = {
+    4: 3,
+    3: 2.5,
+    2: 2,
+    1: 1,
+    0: 0,
+}
+
 # Serializer for System_Stoichiometry (single field for stoichiometry)
 class SystemStoichiometrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -232,6 +241,7 @@ class SystemStoichiometrySerializer(serializers.ModelSerializer):
 # SystemSerializer with a custom field for stoichiometry
 class SystemSerializer(serializers.ModelSerializer):
     stoichiometry = serializers.SerializerMethodField()
+    dimensionality = serializers.SerializerMethodField()
 
     class Meta:
         model = models.System
@@ -258,3 +268,9 @@ class SystemSerializer(serializers.ModelSerializer):
             return stoichiometry_set.stoichiometry
         else:
             return None  # or a default message if no stoichiometry is found
+
+    def get_dimensionality(self, obj):
+        # Map the dimensionality value based on the defined DIMENSIONALITIES mapping
+        return DIMENSIONALITIES.get(
+            obj.dimensionality, None
+        )  # Returns None if not in mapping
