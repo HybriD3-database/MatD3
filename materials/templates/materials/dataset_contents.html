@@ -241,7 +241,11 @@ the "with ..." syntax to include certain parts.
     System description
   </div>
   <div class="card-body">
-    <strong>Dimensionality:</strong> {{ dataset.dimensionality }}D<br>
+    <strong>Dimensionality:</strong> {{ dataset_list.first.system.get_dimensionality_display }}D
+      {% if dataset_list.first.system.dimensionality == 2 or dataset_list.first.system.dimensionality == 3 %}
+       n: {{ dataset_list.first.system.n }}
+      {% endif %}
+      <br>
     <strong>Sample type:</strong> {{ dataset.get_sample_type_display }}<br>
   </div>
 </div>
