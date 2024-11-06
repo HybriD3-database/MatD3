@@ -1,5 +1,14 @@
 # MatD3 CHANGELOG
 
+## v.3.2.0 (November 2024)
+
+- Added a function to filter results based on minimum and maximum band gap.
+- Included dimensionality and stoichiometry in systems API results.
+- Reformatted view of systems panel information.
+- Fixed mapping of dimensionality for systems information.
+- Removed dimensionality display for datasets.
+- Removed dimensionality entry for datasets.
+
 ## v.3.1.0 (October 2024)
 
 - Implemented a feature to obtain reference information from .bib files.
