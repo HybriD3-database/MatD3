@@ -6,40 +6,85 @@ from . import models
 
 from django.db.models.signals import post_save
 from .models import System, System_Stoichiometry, Stoichiometry_Elements
+from fractions import Fraction
+from decimal import Decimal, ROUND_HALF_UP
 import re
 
 
 def parse_formula(formula):
-    tokens = re.findall(r"([A-Z][a-z]?|\(|\)|\d+)", formula)
+    # Updated regex to include decimal numbers and fractions inside brackets
+    token_pattern = r"([A-Z][a-z]?|\d+(\.\d+)?|\([\d\.]+(\/[\d\.]+)?\)|\{[\d\.]+(\/[\d\.]+)?\}|\[[\d\.]+(\/[\d\.]+)?\]|[\(\)\[\]\{\}])"
+    tokens = re.findall(token_pattern, formula)
+    # Flatten the tokens list
+    tokens = [token[0] for token in tokens]
+    if not tokens:
+        return {}
     stack = [{}]
+    bracket_stack = []
     i = 0
     while i < len(tokens):
         token = tokens[i]
-        if token == "(":
+        if token in "([{":
             stack.append({})
+            bracket_stack.append(token)
             i += 1
-        elif token == ")":
+        elif token in ")]}":
+            if not bracket_stack:
+                raise ValueError("Unmatched closing bracket in formula")
+            opening = bracket_stack.pop()
+            expected_closing = {"(": ")", "[": "]", "{": "}"}[opening]
+            if token != expected_closing:
+                raise ValueError("Mismatched brackets in formula")
             top = stack.pop()
             i += 1
-            # Check if there is a multiplier
-            if i < len(tokens) and tokens[i].isdigit():
-                multiplier = int(tokens[i])
+            multiplier = Decimal("1")
+            if i < len(tokens) and (
+                re.match(r"^\d+(\.\d+)?$", tokens[i])
+                or re.match(r"^[\(\[\{][\d\.]+(\/[\d\.]+)?[\)\]\}]$", tokens[i])
+            ):
+                if re.match(r"^[\(\[\{][\d\.]+\/[\d\.]+[\)\]\}]$", tokens[i]):
+                    # Handle fractions inside brackets
+                    fraction = tokens[i][1:-1].split("/")
+                    numerator = Decimal(fraction[0])
+                    denominator = Decimal(fraction[1])
+                    multiplier = numerator / denominator
+                elif re.match(r"^[\(\[\{][\d\.]+[\)\]\}]$", tokens[i]):
+                    # Handle decimal numbers inside brackets
+                    multiplier = Decimal(tokens[i][1:-1])
+                else:
+                    # Handle plain numbers
+                    multiplier = Decimal(tokens[i])
                 i += 1
-            else:
-                multiplier = 1
             for element, count in top.items():
-                stack[-1][element] = stack[-1].get(element, 0) + count * multiplier
-        elif re.match(r"[A-Z][a-z]?$", token):
+                stack[-1][element] = (
+                    stack[-1].get(element, Decimal("0")) + count * multiplier
+                )
+        elif re.match(r"^[A-Z][a-z]?$", token):
             element = token
             i += 1
-            if i < len(tokens) and tokens[i].isdigit():
-                count = int(tokens[i])
+            count = Decimal("1")
+            if i < len(tokens) and (
+                re.match(r"^\d+(\.\d+)?$", tokens[i])
+                or re.match(r"^[\(\[\{][\d\.]+(\/[\d\.]+)?[\)\]\}]$", tokens[i])
+            ):
+                if re.match(r"^[\(\[\{][\d\.]+\/[\d\.]+[\)\]\}]$", tokens[i]):
+                    # Handle fractions inside brackets
+                    fraction = tokens[i][1:-1].split("/")
+                    numerator = Decimal(fraction[0])
+                    denominator = Decimal(fraction[1])
+                    count = numerator / denominator
+                elif re.match(r"^[\(\[\{][\d\.]+[\)\]\}]$", tokens[i]):
+                    # Handle decimal numbers inside brackets
+                    count = Decimal(tokens[i][1:-1])
+                else:
+                    # Handle plain numbers
+                    count = Decimal(tokens[i])
                 i += 1
-            else:
-                count = 1
-            stack[-1][element] = stack[-1].get(element, 0) + count
+            stack[-1][element] = stack[-1].get(element, Decimal("0")) + count
         else:
             i += 1
+    if bracket_stack:
+        raise ValueError("Unmatched opening bracket in formula")
     return stack[0]
 
 
@@ -47,19 +92,39 @@ def parse_formula(formula):
 def create_stoichiometry_entries(sender, instance, created, **kwargs):
     if created:
         formula = instance.formula
-        # Updated regex pattern to match decimals
-        element_pattern = r"([A-Z][a-z]*)(\d*(?:\.\d+)?)"
-        elements = re.findall(element_pattern, formula)
-        stoichiometry_str = ",".join([f"{el}:{count or 1}" for el, count in elements])
+        try:
+            element_counts = parse_formula(formula)
+        except Exception as e:
+            # Handle parsing errors if necessary
+            return
+
+        # Create stoichiometry string with formatted counts
+        stoichiometry_list = []
+        for el, count in element_counts.items():
+            if count == count.to_integral():
+                count_str = str(count.to_integral())
+            else:
+                count_str = str(
+                    count.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP).normalize()
+                )
+            stoichiometry_list.append(f"{el}:{count_str}")
+        stoichiometry_str = ",".join(stoichiometry_list)
+
         stoichiometry = System_Stoichiometry.objects.create(
             system=instance, stoichiometry=stoichiometry_str
         )
-        for el, count in elements:
+        for el, count in element_counts.items():
+            if count == count.to_integral():
+                count_str = str(count.to_integral())
+            else:
+                count_str = str(
+                    count.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP).normalize()
+                )
             Stoichiometry_Elements.objects.create(
                 system_stoichiometry=stoichiometry,
                 element=el,
-                string_value=str(count or "1"),
-                float_value=float(count) if count else 1.0,
+                string_value=count_str,
+                float_value=float(count),
             )
 
 
