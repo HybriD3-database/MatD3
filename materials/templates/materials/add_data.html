@@ -675,24 +675,48 @@
     var elementsData = {{ elements_json|safe }};
  </script>
   <script>
-      function parseFormula(formula) {
-        // Updated regex to match decimal numbers
-        const tokens = formula.match(/([A-Z][a-z]?|\(|\)|\d+(\.\d+)?)/g);
+
+    function parseFormula(formula) {
+        const tokens = formula.match(/([A-Z][a-z]?|\d+(\.\d+)?|\([\d\.]+(\/[\d\.]+)?\)|\{[\d\.]+(\/[\d\.]+)?\}|\[[\d\.]+(\/[\d\.]+)?\]|[\(\)\[\]\{\}])/g);
         if (!tokens) return {};
         const stack = [{}];
+        const bracketStack = [];
         let i = 0;
         while (i < tokens.length) {
             const token = tokens[i];
-            if (token === '(') {
+            if ('([{'.includes(token)) {
                 stack.push({});
+                bracketStack.push(token);
                 i++;
-            } else if (token === ')') {
+            } else if (')]}'.includes(token)) {
+                if (!bracketStack.length) {
+                    console.error('Unmatched closing bracket in formula');
+                    return {};
+                }
+                const opening = bracketStack.pop();
+                const expectedClosing = { '(': ')', '[': ']', '{': '}' }[opening];
+                if (token !== expectedClosing) {
+                    console.error('Mismatched brackets in formula');
+                    return {};
+                }
                 const top = stack.pop();
                 i++;
                 let multiplier = 1;
-                // Updated to parse decimal multipliers
-                if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
-                    multiplier = parseFloat(tokens[i]);
+                if (i < tokens.length && (
+                    /^\d+(\.\d+)?$/.test(tokens[i]) ||
+                    /^[\(\[\{][\d\.]+(\/[\d\.]+)?[\)\]\}]$/.test(tokens[i])
+                )) {
+                    if (/^[\(\[\{][\d\.]+\/[\d\.]+[\)\]\}]$/.test(tokens[i])) {
+                        // Handle fractions inside brackets
+                        const fraction = tokens[i].slice(1, -1).split('/');
+                        multiplier = parseFloat(fraction[0]) / parseFloat(fraction[1]);
+                    } else if (/^[\(\[\{][\d\.]+[\)\]\}]$/.test(tokens[i])) {
+                        // Handle decimal numbers inside brackets
+                        multiplier = parseFloat(tokens[i].slice(1, -1));
+                    } else {
+                        // Handle plain numbers
+                        multiplier = parseFloat(tokens[i]);
+                    }
                     i++;
                 }
                 for (const [element, count] of Object.entries(top)) {
@@ -703,9 +727,21 @@
                 const element = token;
                 i++;
                 let count = 1;
-                // Updated to parse decimal counts
-                if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
-                    count = parseFloat(tokens[i]);
+                if (i < tokens.length && (
+                    /^\d+(\.\d+)?$/.test(tokens[i]) ||
+                    /^[\(\[\{][\d\.]+(\/[\d\.]+)?[\)\]\}]$/.test(tokens[i])
+                )) {
+                    if (/^[\(\[\{][\d\.]+\/[\d\.]+[\)\]\}]$/.test(tokens[i])) {
+                        // Handle fractions inside brackets
+                        const fraction = tokens[i].slice(1, -1).split('/');
+                        count = parseFloat(fraction[0]) / parseFloat(fraction[1]);
+                    } else if (/^[\(\[\{][\d\.]+[\)\]\}]$/.test(tokens[i])) {
+                        // Handle decimal numbers inside brackets
+                        count = parseFloat(tokens[i].slice(1, -1));
+                    } else {
+                        // Handle plain numbers
+                        count = parseFloat(tokens[i]);
+                    }
                     i++;
                 }
                 stack[stack.length - 1][element] =
@@ -713,6 +749,10 @@
             } else {
                 i++;
             }
+        }
+        if (bracketStack.length > 0) {
+            console.error('Unmatched opening bracket in formula');
+            return {};
         }
         return stack[0];
     }
@@ -725,14 +765,23 @@
         }
         const formula = formulaInput.value;
         const elementCounts = parseFormula(formula);
+
         let stoichiometryString = '';
         for (const element in elementCounts) {
-            stoichiometryString += `${element}:${elementCounts[element]}, `;
+            let count = elementCounts[element];
+            if (Number.isInteger(count)) {
+                count = count.toString();
+            } else {
+                count = parseFloat(count.toFixed(3)).toString();
+            }
+            stoichiometryString += `${element}:${count}, `;
         }
         stoichiometryString = stoichiometryString.slice(0, -2);
         document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
         $('#stoichiometryModal').modal('show');
     }
+
+
 
     function handleStoichiometryConfirmation(answer){
       const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');

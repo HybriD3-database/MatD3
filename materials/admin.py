@@ -11,6 +11,8 @@ from . import models
 from mainproject.settings import MATD3_NAME
 
 from .models import System, System_Stoichiometry, Stoichiometry_Elements
+from fractions import Fraction
+from decimal import Decimal, ROUND_HALF_UP
 import re
 
 admin.site.site_header = mark_safe(f"{MATD3_NAME} database")
@@ -71,16 +73,28 @@ class SystemStoichiometryInline(nested_admin.NestedTabularInline):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         Stoichiometry_Elements.objects.filter(system_stoichiometry=obj).delete()
-        # Updated regex pattern
-        element_pattern = r"([A-Z][a-z]*):(\d+(?:\.\d+)?)"
+        element_pattern = r"([A-Z][a-z]*):(\d+(?:\.\d+)?|\d+(?:\.\d+)?/\d+(?:\.\d+)?)"
         elements = re.findall(element_pattern, obj.stoichiometry)
-        for element, count in elements:
+        for element, count_str in elements:
+            if "/" in count_str:
+                numerator, denominator = count_str.split("/")
+                count = Decimal(numerator) / Decimal(denominator)
+            else:
+                count = Decimal(count_str)
+            # Format counts
+            if count == count.to_integral():
+                count_formatted = str(count.to_integral())
+            else:
+                count_formatted = str(
+                    count.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP).normalize()
+                )
             Stoichiometry_Elements.objects.create(
                 system_stoichiometry=obj,
                 element=element,
-                string_value=str(count),
+                string_value=count_formatted,
                 float_value=float(count),
             )
+
 
 # SystemAdmin to include the Stoichiometry inline
 class SystemAdmin(nested_admin.NestedModelAdmin):
