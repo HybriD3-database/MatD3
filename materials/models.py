@@ -242,9 +242,9 @@ class Dataset(Base):
     visible = models.BooleanField()
     is_figure = models.BooleanField()
     is_experimental = models.BooleanField()  # theoretical if false
-    dimensionality = models.PositiveSmallIntegerField(
-        choices=DIMENSIONALITIES, default=0
-    )
+    # dimensionality = models.PositiveSmallIntegerField(
+    #     choices=DIMENSIONALITIES, default=0
+    # )
     sample_type = models.PositiveSmallIntegerField(choices=SAMPLE_TYPES)
     extraction_method = models.CharField(max_length=300, blank=True)
     representative = models.BooleanField(default=False)

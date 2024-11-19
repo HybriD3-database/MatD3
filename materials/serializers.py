@@ -166,7 +166,7 @@ class DatasetSerializer(BaseSerializer):
             "reference",
             "visible",
             "is_experimental",
-            "dimensionality",
+            # "dimensionality",
             "sample_type",
             "extraction_method",
             "representative",
@@ -196,7 +196,7 @@ class DatasetSerializerInfo(serializers.ModelSerializer):
             "secondary_unit",
             "reference",
             "is_experimental",
-            "dimensionality",
+            # "dimensionality",
             "sample_type",
             "extraction_method",
         )
@@ -217,7 +217,7 @@ class DatasetSerializerSummary(serializers.ModelSerializer):
             "secondary_unit",
             "reference",
             "is_experimental",
-            "dimensionality",
+            # "dimensionality",
             "sample_type",
         )
 
@@ -241,7 +241,7 @@ class SystemStoichiometrySerializer(serializers.ModelSerializer):
 # SystemSerializer with a custom field for stoichiometry
 class SystemSerializer(serializers.ModelSerializer):
     stoichiometry = serializers.SerializerMethodField()
-    dimensionality = serializers.SerializerMethodField()
+    # dimensionality = serializers.SerializerMethodField()
 
     class Meta:
         model = models.System
@@ -257,8 +257,16 @@ class SystemSerializer(serializers.ModelSerializer):
             "derived_to_from",
             "description",
             "dimensionality",
+            "n",
             "stoichiometry",
         )
+
+        def to_representation(self, instance):
+            representation = super().to_representation(instance)
+            representation["dimensionality"] = DIMENSIONALITIES.get(
+                instance.dimensionality, None
+            )
+            return representation
 
     def get_stoichiometry(self, obj):
         # Retrieve the first related System_Stoichiometry instance

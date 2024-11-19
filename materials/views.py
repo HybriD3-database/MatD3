@@ -549,7 +549,7 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
         "primary_property__name": ["exact", "contains"],
         "secondary_property__name": ["exact", "contains"],
         "reference": ["exact"],
-        "dimensionality": ["exact"],
+        #"dimensionality": ["exact"],
     }
     search_fields = filterset_fields
 
@@ -780,9 +780,9 @@ def submit_data(request):
     dataset.visible = form.cleaned_data["visible_to_public"]
     dataset.is_figure = form.cleaned_data["is_figure"]
     dataset.is_experimental = form.cleaned_data["origin_of_data"] == "is_experimental"
-    dataset.dimensionality = form.cleaned_data[
-        "dimensionality_of_the_inorganic_component"
-    ]
+    # dataset.dimensionality = form.cleaned_data[
+    #     "dimensionality_of_the_inorganic_component"
+    # ]
     dataset.sample_type = form.cleaned_data["sample_type"]
     dataset.space_group = form.cleaned_data["space_group"]
     dataset.extraction_method = form.cleaned_data["extraction_method"]
@@ -1442,7 +1442,7 @@ def prefilled_form(request, pk):
                 "is_experimental" if dataset.is_experimental else "is_theoretical"
             ),
             "sample_type": dataset.sample_type,
-            "dimensionality_of_the_inorganic_component": (dataset.dimensionality),
+            # "dimensionality_of_the_inorganic_component": (dataset.dimensionality),
             "with_synthesis_details": bool_to_text(dataset.synthesis.exists()),
             "with_experimental_details": bool_to_text(dataset.experimental.exists()),
             "with_computational_details": bool_to_text(dataset.computational.exists()),
