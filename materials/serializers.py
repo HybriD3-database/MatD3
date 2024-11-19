@@ -261,12 +261,12 @@ class SystemSerializer(serializers.ModelSerializer):
             "stoichiometry",
         )
 
-        def to_representation(self, instance):
-            representation = super().to_representation(instance)
-            representation["dimensionality"] = DIMENSIONALITIES.get(
-                instance.dimensionality, None
-            )
-            return representation
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["dimensionality"] = DIMENSIONALITIES.get(
+            instance.dimensionality, None
+        )
+        return representation
 
     def get_stoichiometry(self, obj):
         # Retrieve the first related System_Stoichiometry instance
