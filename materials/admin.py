@@ -14,6 +14,7 @@ from .models import System, System_Stoichiometry, Stoichiometry_Elements
 from fractions import Fraction
 from decimal import Decimal, ROUND_HALF_UP
 import re
+from .utils import parse_formula
 
 admin.site.site_header = mark_safe(f"{MATD3_NAME} database")
 
@@ -73,15 +74,15 @@ class SystemStoichiometryInline(nested_admin.NestedTabularInline):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         Stoichiometry_Elements.objects.filter(system_stoichiometry=obj).delete()
-        element_pattern = r"([A-Z][a-z]*):(\d+(?:\.\d+)?|\d+(?:\.\d+)?/\d+(?:\.\d+)?)"
-        elements = re.findall(element_pattern, obj.stoichiometry)
-        for element, count_str in elements:
-            if "/" in count_str:
-                numerator, denominator = count_str.split("/")
-                count = Decimal(numerator) / Decimal(denominator)
-            else:
-                count = Decimal(count_str)
-            # Format counts
+        # Remove chiral prefixes
+        formula = re.sub(r"(\(R/S\)-|\b[SR]-)", "", obj.stoichiometry)
+        # Parse the formula using the same logic
+        try:
+            element_counts = parse_formula(formula)
+        except Exception as e:
+            # Handle parsing errors if necessary
+            return
+        for element, count in element_counts.items():
             if count == count.to_integral():
                 count_formatted = str(count.to_integral())
             else:

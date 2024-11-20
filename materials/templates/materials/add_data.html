@@ -676,112 +676,217 @@
  </script>
   <script>
 
+      <script>
+function parseFormula(formula) {
+    // Remove chiral prefixes (S-, R-, (R/S)-)
+    formula = formula.replace(/(\(R\/S\)-|\b[SR]-)/g, '');
+
+    // Define separators (excluding '.')
+    const separators = /[\•\-\:]/; // Include other separators if needed
+
+    // Tokenize the formula
+    const tokenPattern = /(\d+(\.\d+)?|[A-Z][a-z]?|[\(\)\[\]\{\}]|[\•\-\:]|[^\w\s])/g;
+    const tokens = formula.match(tokenPattern);
+    if (!tokens) return {};
+
+    const stack = [{ elementCounts: {}, multiplier: 1 }];
+    let i = 0;
+    let currentMultiplier = 1;
+
+    while (i < tokens.length) {
+        const token = tokens[i];
+
+        if (/^[A-Z][a-z]?$/.test(token)) {
+            const element = token;
+            i++;
+            let count = 1;
+            if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                count = parseFloat(tokens[i]);
+                i++;
+            }
+            count *= currentMultiplier;
+            currentMultiplier = 1;
+            stack[stack.length - 1].elementCounts[element] = (stack[stack.length -1].elementCounts[element] || 0) + count;
+        } else if (/^\d+(\.\d+)?$/.test(token)) {
+            currentMultiplier = parseFloat(token);
+            i++;
+        } else if ('([{'.includes(token)) {
+            // Push new frame onto the stack
+            stack.push({ elementCounts: {}, multiplier: currentMultiplier });
+            currentMultiplier = 1;
+            i++;
+        } else if (')]}'.includes(token)) {
+            if (stack.length < 2) {
+                console.error('Unmatched closing bracket in formula');
+                return {};
+            }
+            // Pop the top frame
+            const { elementCounts: groupCounts, multiplier: groupMultiplier } = stack.pop();
+            i++;
+            let multiplierAfterBracket = 1;
+            if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                multiplierAfterBracket = parseFloat(tokens[i]);
+                i++;
+            }
+            const totalMultiplier = groupMultiplier * multiplierAfterBracket;
+            for (const element in groupCounts) {
+                const count = groupCounts[element] * totalMultiplier;
+                stack[stack.length - 1].elementCounts[element] = (stack[stack.length -1].elementCounts[element] || 0) + count;
+            }
+        } else if (separators.test(token)) {
+            currentMultiplier = 1;
+            i++;
+        } else {
+            // Ignore any other tokens
+            i++;
+        }
+    }
+
+    if (stack.length !== 1) {
+        console.error('Unmatched opening bracket in formula');
+        return {};
+    }
+
+    return stack[0].elementCounts;
+}
+
+function extractStoichiometry() {
+    const formulaInput = document.getElementById('id_formula');
+    if (!formulaInput) {
+        console.error("Formula input not found");
+        return;
+    }
+    const formula = formulaInput.value;
+    const elementCounts = parseFormula(formula);
+
+    let stoichiometryString = '';
+    for (const element in elementCounts) {
+        let count = elementCounts[element];
+        if (Number.isInteger(count)) {
+            count = count.toString();
+        } else {
+            count = parseFloat(count.toFixed(3)).toString();
+        }
+        stoichiometryString += `${element}:${count}, `;
+    }
+    stoichiometryString = stoichiometryString.slice(0, -2);
+    document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
+    $('#stoichiometryModal').modal('show');
+}
+</script>
+
+<script>
     function parseFormula(formula) {
-        const tokens = formula.match(/([A-Z][a-z]?|\d+(\.\d+)?|\([\d\.]+(\/[\d\.]+)?\)|\{[\d\.]+(\/[\d\.]+)?\}|\[[\d\.]+(\/[\d\.]+)?\]|[\(\)\[\]\{\}])/g);
-        if (!tokens) return {};
-        const stack = [{}];
-        const bracketStack = [];
-        let i = 0;
-        while (i < tokens.length) {
-            const token = tokens[i];
-            if ('([{'.includes(token)) {
-                stack.push({});
-                bracketStack.push(token);
-                i++;
-            } else if (')]}'.includes(token)) {
-                if (!bracketStack.length) {
-                    console.error('Unmatched closing bracket in formula');
-                    return {};
-                }
-                const opening = bracketStack.pop();
-                const expectedClosing = { '(': ')', '[': ']', '{': '}' }[opening];
-                if (token !== expectedClosing) {
-                    console.error('Mismatched brackets in formula');
-                    return {};
-                }
-                const top = stack.pop();
-                i++;
-                let multiplier = 1;
-                if (i < tokens.length && (
-                    /^\d+(\.\d+)?$/.test(tokens[i]) ||
-                    /^[\(\[\{][\d\.]+(\/[\d\.]+)?[\)\]\}]$/.test(tokens[i])
-                )) {
-                    if (/^[\(\[\{][\d\.]+\/[\d\.]+[\)\]\}]$/.test(tokens[i])) {
-                        // Handle fractions inside brackets
-                        const fraction = tokens[i].slice(1, -1).split('/');
-                        multiplier = parseFloat(fraction[0]) / parseFloat(fraction[1]);
-                    } else if (/^[\(\[\{][\d\.]+[\)\]\}]$/.test(tokens[i])) {
-                        // Handle decimal numbers inside brackets
-                        multiplier = parseFloat(tokens[i].slice(1, -1));
-                    } else {
-                        // Handle plain numbers
-                        multiplier = parseFloat(tokens[i]);
-                    }
-                    i++;
-                }
-                for (const [element, count] of Object.entries(top)) {
-                    stack[stack.length - 1][element] =
-                        (stack[stack.length - 1][element] || 0) + count * multiplier;
-                }
-            } else if (/^[A-Z][a-z]?$/.test(token)) {
-                const element = token;
-                i++;
-                let count = 1;
-                if (i < tokens.length && (
-                    /^\d+(\.\d+)?$/.test(tokens[i]) ||
-                    /^[\(\[\{][\d\.]+(\/[\d\.]+)?[\)\]\}]$/.test(tokens[i])
-                )) {
-                    if (/^[\(\[\{][\d\.]+\/[\d\.]+[\)\]\}]$/.test(tokens[i])) {
-                        // Handle fractions inside brackets
-                        const fraction = tokens[i].slice(1, -1).split('/');
-                        count = parseFloat(fraction[0]) / parseFloat(fraction[1]);
-                    } else if (/^[\(\[\{][\d\.]+[\)\]\}]$/.test(tokens[i])) {
-                        // Handle decimal numbers inside brackets
-                        count = parseFloat(tokens[i].slice(1, -1));
-                    } else {
-                        // Handle plain numbers
-                        count = parseFloat(tokens[i]);
-                    }
-                    i++;
-                }
-                stack[stack.length - 1][element] =
-                    (stack[stack.length - 1][element] || 0) + count;
-            } else {
+    // Remove chiral prefixes (S-, R-, (R/S)-)
+    formula = formula.replace(/(\(R\/S\)-|\b[SR]-)/g, '');
+
+    // Define separators (excluding '.')
+    const separators = /[\u2022\-:]/; // Use Unicode escape for •
+
+    // Tokenize the formula
+    const tokenPattern = /(\d+(\.\d+)?|[A-Z][a-z]?|[\(\)\[\]\{\}]|[\u2022\-:])/g;
+    const tokens = formula.match(tokenPattern);
+    if (!tokens) return {};
+
+    const stack = [{}];
+    const multiplierStack = [1];
+    let i = 0;
+    let currentMultiplier = 1;
+
+    while (i < tokens.length) {
+        const token = tokens[i];
+
+        if (separators.test(token)) {
+            // Reset currentMultiplier
+            currentMultiplier = 1;
+            i++;
+            // Check for multiplier after separator
+            if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                currentMultiplier = parseFloat(tokens[i]);
                 i++;
             }
-        }
-        if (bracketStack.length > 0) {
-            console.error('Unmatched opening bracket in formula');
-            return {};
-        }
-        return stack[0];
-    }
-
-    function extractStoichiometry() {
-        const formulaInput = document.getElementById('id_formula');
-        if (!formulaInput) {
-            console.error("Formula input not found");
-            return;
-        }
-        const formula = formulaInput.value;
-        const elementCounts = parseFormula(formula);
-
-        let stoichiometryString = '';
-        for (const element in elementCounts) {
-            let count = elementCounts[element];
-            if (Number.isInteger(count)) {
-                count = count.toString();
-            } else {
-                count = parseFloat(count.toFixed(3)).toString();
+        } else if (/^\d+(\.\d+)?$/.test(token)) {
+            // Multiplier before a bracket or element
+            currentMultiplier *= parseFloat(token);
+            i++;
+        } else if ('([{'.includes(token)) {
+            // Start of a new group
+            stack.push({});
+            // Push currentMultiplier onto multiplierStack
+            multiplierStack.push(currentMultiplier);
+            currentMultiplier = 1;
+            i++;
+        } else if (')]}'.includes(token)) {
+            if (stack.length === 1) {
+                console.error('Unmatched closing bracket in formula');
+                return {};
             }
-            stoichiometryString += `${element}:${count}, `;
+            const group = stack.pop();
+            const groupMultiplier = multiplierStack.pop();
+            i++;
+            // Check for multiplier after closing bracket
+            let multiplierAfterBracket = 1;
+            if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                multiplierAfterBracket = parseFloat(tokens[i]);
+                i++;
+            }
+            const totalMultiplier = groupMultiplier * multiplierAfterBracket;
+            const currentGroup = stack[stack.length -1];
+            for (const element in group) {
+                const count = group[element] * totalMultiplier;
+                currentGroup[element] = (currentGroup[element] || 0) + count;
+            }
+        } else if (/^[A-Z][a-z]?$/.test(token)) {
+            const element = token;
+            i++;
+            let count = 1;
+            // Check if the next token is a number (count)
+            if (i < tokens.length && /^\d+(\.\d+)?$/.test(tokens[i])) {
+                count = parseFloat(tokens[i]);
+                i++;
+            }
+            // Multiply count by currentMultiplier
+            count *= currentMultiplier;
+            currentMultiplier = 1;
+            const currentGroup = stack[stack.length -1];
+            currentGroup[element] = (currentGroup[element] || 0) + count;
+        } else {
+            // Ignore any other tokens
+            i++;
         }
-        stoichiometryString = stoichiometryString.slice(0, -2);
-        document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
-        $('#stoichiometryModal').modal('show');
     }
 
+    if (stack.length !== 1) {
+        console.error('Unmatched opening bracket in formula');
+        return {};
+    }
 
+    return stack[0];
+}
+
+function extractStoichiometry() {
+    const formulaInput = document.getElementById('id_formula');
+    if (!formulaInput) {
+        console.error("Formula input not found");
+        return;
+    }
+    const formula = formulaInput.value;
+    const elementCounts = parseFormula(formula);
+
+    let stoichiometryString = '';
+    for (const element in elementCounts) {
+        let count = elementCounts[element];
+        if (Number.isInteger(count)) {
+            count = count.toString();
+        } else {
+            count = parseFloat(count.toFixed(3)).toString();
+        }
+        stoichiometryString += `${element}:${count}, `;
+    }
+    stoichiometryString = stoichiometryString.slice(0, -2);
+    document.getElementById('stoichiometryOutput').innerText = `${stoichiometryString}`;
+    $('#stoichiometryModal').modal('show');
+}
 
     function handleStoichiometryConfirmation(answer){
       const stoichiometryTextBox = document.getElementById('system-stoichiometry-input');
