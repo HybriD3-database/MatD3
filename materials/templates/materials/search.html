@@ -113,6 +113,10 @@
        text = "Search by author's name";
        $('#search_text').attr('placeholder', text);
        $('#explanatory_text').text(text);
+     } else if (this.value == 'doi') {
+       text = "Search by DOI, e.g. 10.1515/ncrs-1999-0320";
+       $('#search_text').attr('placeholder', text);
+       $('#explanatory_text').text(text);
      } else {
        text = '';
        $('#search_text').attr('placeholder', text);
