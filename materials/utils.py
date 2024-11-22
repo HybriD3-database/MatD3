@@ -294,7 +294,7 @@ def dataset_info(dataset, server):
     data.write(
         "Origin: " f'{"experimental" if dataset.experimental else "theoretical"}\n'
     )
-    data.write(f"Dimensionality: {dataset.dimensionality}D\n")
+    # data.write(f"Dimensionality: {dataset.dimensionality}D\n")
     sample = models.Dataset.SAMPLE_TYPES[dataset.sample_type][1]
     data.write(f"Sample type: {sample}\n")
     data.write("\n")
