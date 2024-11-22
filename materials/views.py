@@ -191,6 +191,7 @@ class SearchFormView(generic.TemplateView):
         ["inorganic", "Inorganic Component"],
         ["author", "Author"],
         ["band_gap", "Band gap"],
+        ["doi", "DOI"],
     ]
 
     def get(self, request):
@@ -240,8 +241,14 @@ class SearchFormView(generic.TemplateView):
                 "is_experimental"
             )  # Get the is_experimental value
 
+            # If DOI search
+            if search_term == "doi":
+                systems = models.System.objects.filter(
+                    dataset__reference__doi_isbn__icontains=search_text
+                ).distinct()
+
             # If band gap search
-            if (
+            elif (
                 search_term == "band_gap"
                 and band_gap_min is not None
                 and band_gap_max is not None
@@ -549,7 +556,7 @@ class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
         "primary_property__name": ["exact", "contains"],
         "secondary_property__name": ["exact", "contains"],
         "reference": ["exact"],
-        #"dimensionality": ["exact"],
+        # "dimensionality": ["exact"],
     }
     search_fields = filterset_fields
 
