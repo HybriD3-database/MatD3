@@ -27,6 +27,7 @@ We provide a REST API for downloading the contents of the database in a machine 
   - /materials/properties/
   - /materials/units/
   - /materials/datasets/
+  - /materials/datasets/<dataset_number>/files/
 
 The endpoints are appended to the URL of a live instance of MatD\ :sup:`3`. For example, in order to fetch all references hosted at https://materials.hybrid3.duke.edu/, issue a GET request to https://materials.hybrid3.duke.edu/materials/references/. In order to fetch data for a single model instance (specific reference, system, ...), append the endpoint with ``<id>/``, where ``<id>`` is the ID (primary key) of the corresponding model. As an example, the URL for fetching the contents of data set 317 is https://materials.hybrid3.duke.edu/materials/datasets/317/. The ID is the one seen at the bottom of the data set (see https://materials.hybrid3.duke.edu/materials/dataset/317).
 
@@ -35,11 +36,11 @@ HTTPie is a command line tool for issuing HTTP requests. Here is example usage:
 .. code:: bash
 
    http --verify=no https://materials.hybrid3.duke.edu/materials/datasets/317/
-   
+
 Another usefull way to request datasets/systems/references is through a python script using the requests library. The simplest way to request every dataset in the database (in Python 3.*) would be this:
 
 .. code:: bash
 
   import requests
-  
+
   test = requests.get("https://materials.hybrid3.duke.edu/materials/datasets/?page=1&page_size={1500}")
