@@ -1533,7 +1533,7 @@ def figshare_callback(request):
         "title": title if title else f"Data set {dataset.pk}",
         "description": f"Data location: {data_location}",
         "keywords": [dataset.primary_property.name],
-        "categories": [110],
+        "categories": [26719],
         "defined_type": "dataset",
     }
     result = requests.post(
