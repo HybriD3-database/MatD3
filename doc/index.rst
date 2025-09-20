@@ -2,7 +2,7 @@
 Welcome to the MatD\ :sup:`3` documentation!
 ============================================
 
-The MatD\ :sup:`3` database is designed to store and curate materials data for solid materials. It is supported by two NSF-DMREF-funded projects (initially DMR-1729297, then DMR-2323803). This document provides details on the database structure, how to set up a web interface for interacting with the database, and some details on the usage of the website. At the time of this update (September 2025), there are two live instances of the database software known to us:
+The MatD\ :sup:`3` database is designed to store and curate materials data for solid materials. It is supported by two NSF-DMREF-funded projects (initially DMR-1729297, then DMR-2323803). This document provides details on the database structure, how to set up a web interface for interacting with the database, and some details on the usage of the website. At the time of this update (September 2025), there are at least two live instances of the database software:
 
 https://materials.hybrid3.duke.edu/ (for hybrid organic-inorganic semiconductors)
 
