@@ -4,5 +4,5 @@ sphinx:
   configuration: doc/conf.py
 
 build:
-      os: ubuntu-latest
+      os: ubuntu-lts-latest
       
