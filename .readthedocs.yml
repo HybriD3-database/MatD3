@@ -4,6 +4,6 @@ sphinx:
   configuration: doc/conf.py
 
 build:
-      os: ubuntu-lts-latest
-      tools:
-      python: "3.10"
+  os: ubuntu-lts-latest
+  tools:
+    python: "3.10"
