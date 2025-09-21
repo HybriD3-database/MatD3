@@ -6,4 +6,4 @@ sphinx:
 build:
   os: ubuntu-lts-latest
   tools:
-    python: "3.9.23"
+    python: "3.9"
