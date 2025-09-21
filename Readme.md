@@ -12,7 +12,7 @@ Installation
 
 **From source code**
 
-These instructions are for quickly setting up a local server on your personal computer. For setting up a real server, see the full documentation at https://hybrid3-database.readthedocs.io/en/latest/.
+These instructions are for quickly setting up a local server on your personal computer. For setting up a real server, see the full documentation at https://matd3.readthedocs.io/en/latest/.
 
 * Clone the project
 
@@ -67,7 +67,7 @@ Importantly, the the access permissions for the .env file on the server MUST be 
 
 i.e., owner- and group readable but NOT world readable (otherwise, the .env file will be downloadable by anyone along with the remainder of the database). Use the `chmod` command to set the permissions correctly.
 
-  If you wish to use anything other than the SQLite database, you first need to set up that database (e.g., MariaDB). See https://hybrid3-database.readthedocs.io/en/latest/development.html for more details.
+  If you wish to use anything other than the SQLite database, you first need to set up that database (e.g., MariaDB). See https://matd3.readthedocs.io/en/latest/development.html for more details.
 
 * Initialize static files and perform database migrations
 
