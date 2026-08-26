@@ -76,8 +76,14 @@ class Reference(models.Model):
         return text
 
     def getAuthorsAsString(self):
+        def format_author(author):
+            first = author.first_name.strip()
+            last = author.last_name.strip()
+            initial = f"{first[0]}. " if first else ""
+            return f"{initial}{last}".strip()
+
         names = ", ".join(
-            [f"{x.first_name[0]}. {x.last_name}" for x in self.authors.all()]
+            filter(None, [format_author(x) for x in self.authors.all()])
         )
         if names:
             names += ","

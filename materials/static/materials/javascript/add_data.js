@@ -26,7 +26,10 @@ const delete_all_messages = () => {
 const authors_as_string = (authors) => {
   let authors_formatted = [];
   for (let author of authors) {
-    authors_formatted.push(`${author.first_name[0]}. ${author.last_name}`);
+    const first = (author.first_name || '').trim();
+    const last = (author.last_name || '').trim();
+    const formatted = `${first ? first[0] + '. ' : ''}${last}`.trim();
+    if (formatted) authors_formatted.push(formatted);
   }
   return authors_formatted.join(', ');
 }
