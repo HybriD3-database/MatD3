@@ -165,6 +165,8 @@ class AddSystemForm(forms.Form):
         help_text="Enter n value for the dimensionality of this system if it applies",
     )
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
 
 class AddPropertyForm(forms.Form):
     name = forms.CharField(
@@ -688,8 +690,8 @@ class AddDataForm(forms.Form):
     # Uploads
     uploaded_files = forms.FileField(
         required=False,
-        widget=forms.ClearableFileInput(attrs={"allow_multiple_selected": True}),
-        # widget=forms.ClearableFileInput(attrs={'allow_multiple_selected': True}),
+        widget=MultipleFileInput(),
+        #widget=forms.ClearableFileInput(attrs={'allow_multiple_selected': True}),
         help_text=""
         "Upload files containing anything that is relevant to the current "
         "data (input files to a calculation, image of the sample, ...). "
